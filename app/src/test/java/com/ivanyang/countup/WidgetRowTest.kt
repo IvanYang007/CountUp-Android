@@ -15,7 +15,7 @@ class WidgetRowTest {
     }
 
     @Test
-    fun rowsCarryNameCountAndEpochDay() {
+    fun rowsCarryIdNameAndCount() {
         val items = listOf(
             CountUpItem(id = "a", name = "Haircut", epochDay = 20667), // 2026-08-02, 17 days
             CountUpItem(id = "b", name = "Today", epochDay = 20684),   // today, 0 days
@@ -25,7 +25,6 @@ class WidgetRowTest {
         assertEquals("a", rows[0].id)
         assertEquals("Haircut", rows[0].name)
         assertEquals(17, rows[0].count)
-        assertEquals(20667, rows[0].epochDay)
         assertEquals("b", rows[1].id)
         assertEquals("Today", rows[1].name)
         assertEquals(0, rows[1].count)

@@ -7,7 +7,7 @@
     android:targetCellWidth="6"
     android:targetCellHeight="1"
     android:updatePeriodMillis="1800000"
-    android:initialLayout="@layout/glance_default_loading_layout"
+    android:initialLayout="@layout/countup_widget"
     android:previewImage="@drawable/haircut_widget_preview"
     android:description="@string/widget_description"
     android:widgetCategory="home_screen"

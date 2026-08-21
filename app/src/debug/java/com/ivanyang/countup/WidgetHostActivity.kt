@@ -10,9 +10,9 @@ import android.view.Gravity
 import android.widget.FrameLayout
 
 /**
- * Debug-only activity (never in release builds) that renders the real
- * [CountUpWidget] RemoteViews inside an AppWidgetHost so the widget can be
- * captured as a screenshot representing exactly what the launcher displays.
+ * Debug-only activity (never in release builds) that renders the widget's real
+ * RemoteViews inside an AppWidgetHost so it can be captured as a screenshot
+ * representing exactly what the launcher displays.
  *
  * Launch: adb shell am start -n com.ivanyang.countup/.WidgetHostActivity
  */

@@ -27,7 +27,7 @@ Versions live in `gradle/libs.versions.toml`.
 | JDK | `17` | Temurin; `JAVA_HOME` set |
 | Kotlin | `2.3.21` | Provided via `buildscript` classpath in root `build.gradle.kts` (above AGP's bundled KGP 2.2.10) |
 | Compose BOM | `2026.06.00` | |
-| Glance AppWidget | `1.1.1` | Home-screen widget |
+| RemoteViews (platform) | — | Home-screen widget; Glance dependency removed in the instant-refresh rewrite |
 | compileSdk / targetSdk / minSdk | 37 / 37 / 26 | |
 
 **Key build gotcha:** AGP 9 has built-in Kotlin — do not re-add `kotlin-android`. The `kotlin { compilerOptions {} }` block was also removed; `compileOptions` JDK 17 covers the JVM target.
@@ -48,14 +48,14 @@ Production Kotlin is flat under `app/src/main/java/com/ivanyang/countup/`:
 | `DaysSince.kt` | Pure `daysSince(last, today)` using `ChronoUnit.DAYS` clamped ≥ 0 |
 | `DateConversion.kt` | UTC-safe picker millis → `LocalDate`; localized date formatter |
 | `ItemIcons.kt` | The 20-icon registry; `iconRes(name)` map + `SOCIAL_ICON_NAMES` + `DEFAULT_ICON` |
-| `HaircutWidget.kt` | Glance widget: toolbar, 3-column `LazyVerticalGrid`, per-cell tap-to-reset (`ResetCountAction`), theme-aware colors |
+| `CountUpWidget.kt` | Classic RemoteViews widget: `CountUpWidgetReceiver` (provider), `CountUpWidgetService` + factory (grid cells from `CountUpStore`), `ResetCountReceiver` (per-cell tap-to-reset), `pushWidgetUpdate()` imperative refresh |
 | (debug) `WidgetHostActivity.kt` | Debug-only activity to render the widget for screenshots (not in release) |
 
 Tests:
 - `app/src/test/...` (JVM): `CountUpItemTest` (8), `DaysSinceTest` (6), `WidgetRowTest` (3) → **17 unit tests**
 - `app/src/androidTest/...` (device): `CountUpStoreInstrumentedTest` (16) — CRUD, migration, recovery, icon assignment
 
-Resources: `res/values/strings.xml`, `plurals.xml` (`days`, `days_unit`), `themes.xml`, `colors.xml`; `res/drawable/ic_*.xml` (20 Material icons + `ic_zen_enso` + `ic_solid_circle` + `ic_launcher_foreground`); `res/xml/haircut_widget_info.xml`, `data_extraction_rules.xml`, `backup_rules.xml`.
+Resources: `res/values/strings.xml`, `plurals.xml` (`days_unit`), `themes.xml`, `colors.xml`; `res/drawable/ic_*.xml` (20 Material icons + `ic_zen_enso` + `ic_solid_circle` + `ic_launcher_foreground`); `res/xml/haircut_widget_info.xml`, `data_extraction_rules.xml`, `backup_rules.xml`.
 
 ---
 
@@ -79,13 +79,12 @@ One value per item, stored as a JSON array string under key `items_v1` in privat
 
 - **Zen-paper theme** (from `minimalist-ui` + a parchment/serif take): warm paper background `#F7F6F3`, cards white with `1px #EAEAEA` border, radius 12, ink `#2F3437`, muted `#787774`; serif for headings/counts, sans for labels, monospace for meta. No gradients, no heavy shadows. Dark scheme variants defined in `MainActivity`.
 - **Scale-on-press** (`0.96` buttons / `0.99` cards) via `pressScale()`; list add/remove uses `Modifier.animateItem()`, disabled under system reduce-motion.
-- **Widget:** 3-column `LazyVerticalGrid`; cells show name (top) + a light circle (`ic_solid_circle`, faint ink rim) with a dark number. Tapping a cell runs `ResetCountAction` which resets only **that** item (per-id `ActionParameters`) and refreshes the widget. The circle number stays dark ink even in dark mode because the circle fill is fixed light.
+- **Widget:** classic RemoteViews 3-column `GridView` (`countup_widget.xml`); cells show name (top) + a light circle (`ic_solid_circle`, faint ink rim) with a dark number. Tapping a cell fires the grid's mutable template `PendingIntent` with a per-id fill-in intent to `ResetCountReceiver`, which resets only **that** item and calls `pushWidgetUpdate()` synchronously. After every app-side store write, `MainActivity` pushes new `RemoteViews` + `notifyAppWidgetViewDataChanged()` — Gmail-style immediate update, no composition pass. The circle number stays dark ink even in dark mode because the circle fill is fixed light.
 
-### Known Glance 1.1.1 limitations (important)
-- **No shape/rounded background** — the "circle" is a vector drawable; the shadow/radius for the widget can't be rounded; chips are square-ish.
-- **No `weight`, no `align`, no `SpaceBetween`** in layouts — centering is done via `horizontalAlignment`/`contentAlignment`, and "push to the right" via `Modifier.weight(1f)` on names.
-- **`ColorProvider` exists in `androidx.glance.unit`** (type) and the **day/night factory is `androidx.glance.color.ColorProvider(day: Color, night: Color)`** (aliased as `dayNightColorProvider`).
-- `actionRunCallback` schedules via an async broadcast — reset is ~0.4 s, not instant (verified by timestamps).
+### Widget architecture notes (post-Glance rewrite)
+- **No widget library dependency** — plain `AppWidgetProvider` + `RemoteViewsService`; the release APK shrank ~2.4 MB when Glance was removed.
+- **Template PendingIntent must be `FLAG_MUTABLE`** — immutable templates silently drop fill-in intents, so cell taps would reset nothing.
+- The collection service runs bound to the launcher and re-reads `CountUpStore` on every data-change notification.
 
 ---
 

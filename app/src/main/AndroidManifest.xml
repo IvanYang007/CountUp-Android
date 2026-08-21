@@ -3,10 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!--
-      The required Glance/WorkManager library merges optional permissions into
-      the manifest. This app has no network, boot, or background-work feature,
-      so each is explicitly removed before merge to satisfy the zero-permission
-      requirement of the plan.
+      Defensive zero-permission guard: widget/UI support libraries may merge
+      optional permissions into the manifest. This app has no network, boot, or
+      background-work feature, so each is explicitly removed before merge to
+      satisfy the zero-permission requirement of the plan.
     -->
     <uses-permission android:name="android.permission.WAKE_LOCK" tools:node="remove" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" tools:node="remove" />
@@ -43,6 +43,18 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/haircut_widget_info" />
         </receiver>
+
+        <!-- Serves the widget grid's cell views to the launcher. Exported=false
+             is safe: only the system can hold BIND_REMOTEVIEWS. -->
+        <service
+            android:name=".CountUpWidgetService"
+            android:exported="false"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+
+        <!-- Handles per-cell reset taps from the widget grid (fill-in intents). -->
+        <receiver
+            android:name=".ResetCountReceiver"
+            android:exported="false" />
     </application>
 
 </manifest>

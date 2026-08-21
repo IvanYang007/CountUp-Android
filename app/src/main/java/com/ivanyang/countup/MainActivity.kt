@@ -1,7 +1,6 @@
 package com.ivanyang.countup
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
 import androidx.compose.animation.core.animateFloatAsState
@@ -73,12 +72,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.glance.appwidget.updateAll
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneOffset
 
@@ -104,7 +101,6 @@ class MainActivity : ComponentActivity() {
         items = store.items()
         restoreDialogState(savedInstanceState)
         enableEdgeToEdge()
-        handleWidgetIntent(intent)
 
         setContent {
             CountUpTheme {
@@ -157,11 +153,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        handleWidgetIntent(intent)
-    }
-
     /**
      * Keeps the open dialog's identity across configuration change / process
      * death: editor, delete-confirm and reset-confirm state is saved as item ids
@@ -202,18 +193,6 @@ class MainActivity : ComponentActivity() {
         // not spam Android's widget throttler.
         if (!store.widgetRefreshedOn(LocalDate.now().toEpochDay())) {
             refreshWidget()
-        }
-    }
-
-    /**
-     * Consumes the widget launch extra exactly once. In the multi-item model the
-     * extra no longer targets a single haircut; it is drained so it cannot
-     * reopen a dialog after rotation/recents/process death.
-     */
-    private fun handleWidgetIntent(intent: Intent) {
-        if (intent.hasExtra(EXTRA_RECORD_TODAY)) {
-            intent.removeExtra(EXTRA_RECORD_TODAY)
-            setIntent(intent)
         }
     }
 
@@ -258,15 +237,14 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun refreshWidget() {
-        lifecycleScope.launch {
-            runCatching {
-                CountUpWidget().updateAll(this@MainActivity)
-            }.onSuccess {
-                // Mark only after the system was asked to rebuild, so a dropped
-                // launch does not hide a stale widget from the next resume gate.
+        // Classic RemoteViews push: synchronous IPC to the launcher, so an app-side
+        // data change lands on the widget immediately (no composition pipeline).
+        runCatching { pushWidgetUpdate(this) }
+            .onSuccess {
+                // Mark only after the update was sent, so a dropped push does not
+                // hide a stale widget from the next resume gate.
                 store.markWidgetRefreshed(LocalDate.now().toEpochDay())
             }
-        }
     }
     private companion object {
         private const val STATE_EDITOR_TARGET_ID = "state_editor_target_id"
@@ -666,8 +644,21 @@ private fun DatePickerDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        // Full available dialog width: the picker's 7-column calendar needs every
+        // dp it can get on narrow screens, or the Sat/Sun header columns overlap.
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+        modifier = Modifier.fillMaxWidth(),
         title = { Text(stringResource(R.string.pick_date_title)) },
-        text = { DatePicker(state = state) },
+        text = {
+            DatePicker(
+                state = state,
+                // Compact the picker: drop the redundant title row and give the
+                // grid the full width with a minimal inset.
+                title = null,
+                headline = null,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        },
         confirmButton = {
             TextButton(
                 enabled = state.selectedDateMillis != null,

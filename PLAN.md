@@ -1,5 +1,12 @@
 # REVISED_PLAN.md
 
+> **Superseded (2026-08-21).** This is the v1 single-haircut plan. The app is now the
+> multi-item tracker described in GOAL.md. Sections below describing the launch intent
+> extra and its drain-once handling no longer apply: that extra belonged to the old
+> Glance widget and was removed together with it in the RemoteViews rewrite — tapping
+> a cell now resets that item directly, and tapping the background opens the app with
+> no extra.
+
 ## 1. Objective
 
 Build a small, offline Android app and home-screen widget that display the number of calendar days since the user’s last haircut.
