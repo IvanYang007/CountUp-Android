@@ -67,4 +67,31 @@ class CountUpItemTest {
         val decoded = decodeItems("[{\"id\":\"a\",\"name\":\"Old\",\"epochDay\":5}]")
         assertEquals("", decoded!![0].icon)
     }
+
+    @Test
+    fun oneMalformedElementDoesNotDestroyTheRest() {
+        // A single corrupt element is dropped; parseable siblings survive.
+        val raw = "[{\"id\":\"a\",\"name\":\"Good\",\"epochDay\":5},{\"id\":123},{\"id\":\"b\",\"name\":\"Also good\",\"epochDay\":9}]"
+        val decoded = decodeItems(raw)!!
+        assertEquals(listOf("Good", "Also good"), decoded.map { it.name })
+    }
+
+    @Test
+    fun arrayWhereEveryElementIsMalformedDecodesToNull() {
+        // Total corruption must not be masked as a valid empty list; null routes
+        // the store to recovery (which quarantines the payload).
+        assertNull(decodeItems("[1,2,3]"))
+        assertNull(decodeItems("[{\"id\":\"a\"}]"))
+    }
+
+    @Test
+    fun outOfRangeEpochDayElementIsDropped() {
+        // An epochDay outside LocalDate's range would crash LocalDate.ofEpochDay
+        // at render time; decode drops it while keeping valid siblings.
+        val raw =
+            "[{\"id\":\"a\",\"name\":\"Valid\",\"epochDay\":5},{\"id\":\"b\",\"name\":\"Insane\",\"epochDay\":9223372036854775807}]"
+        val decoded = decodeItems(raw)!!
+        assertEquals(listOf("Valid"), decoded.map { it.name })
+        assertEquals(5L, decoded[0].epochDay)
+    }
 }

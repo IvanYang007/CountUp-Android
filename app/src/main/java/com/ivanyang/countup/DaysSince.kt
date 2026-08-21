@@ -10,9 +10,9 @@ import java.time.temporal.ChronoUnit
  * days are handled by [LocalDate] and never affect the day count.
  * Reading the count never mutates the stored date.
  *
- * @return whole days from [lastHaircut] to [today], clamped to >= 0 so a
+ * @return whole days from [anchorDate] to [today], clamped to >= 0 so a
  *         future anchor displays 0.
  */
-fun daysSince(lastHaircut: LocalDate, today: LocalDate): Long {
-    return ChronoUnit.DAYS.between(lastHaircut, today).coerceAtLeast(0)
+fun daysSince(anchorDate: LocalDate, today: LocalDate): Long {
+    return ChronoUnit.DAYS.between(anchorDate, today).coerceAtLeast(0)
 }

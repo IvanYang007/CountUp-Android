@@ -12,3 +12,6 @@ captures/
 # IDE
 .idea/
 *.iml
+
+# Signing — never commit key material
+keystore/

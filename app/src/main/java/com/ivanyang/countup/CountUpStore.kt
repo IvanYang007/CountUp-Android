@@ -25,13 +25,18 @@ class CountUpStore(context: Context) {
     private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     private val legacyPrefs = context.getSharedPreferences(LEGACY_PREFS_NAME, Context.MODE_PRIVATE)
 
+    /** Serializes read-modify-write mutations so concurrent writers cannot lose updates. */
+    private val lock = Any()
+
     /** Current items, never null; recovers to migrated-or-empty on missing/corrupt data. */
     fun items(): List<CountUpItem> {
-        prefs.getString(KEY_ITEMS, null)?.let { raw ->
+        val raw = prefs.getString(KEY_ITEMS, null)
+        if (raw != null) {
             decodeItems(raw)?.let { return it }
-            // malformed: fall through to recovery
+            // malformed: fall through to recovery (which quarantines the payload)
+            return recover(raw)
         }
-        return recover()
+        return recover(null)
     }
 
     /**
@@ -46,8 +51,10 @@ class CountUpStore(context: Context) {
             epochDay = epochDay,
             icon = SOCIAL_ICON_NAMES.random(),
         )
-        val updated = items() + item
-        return if (persist(updated)) item else null
+        return synchronized(lock) {
+            val updated = items() + item
+            if (persist(updated)) item else null
+        }
     }
 
     /**
@@ -56,18 +63,22 @@ class CountUpStore(context: Context) {
      */
     fun updateItem(id: String, name: String, epochDay: Long): Boolean {
         val trimmed = name.trim()
-        val list = items().toMutableList()
-        val index = list.indexOfFirst { it.id == id }
-        if (index < 0) return false
-        list[index] = list[index].copy(name = trimmed.ifEmpty { list[index].name }, epochDay = epochDay)
-        return persist(list)
+        return synchronized(lock) {
+            val list = items().toMutableList()
+            val index = list.indexOfFirst { it.id == id }
+            if (index < 0) return false
+            list[index] = list[index].copy(name = trimmed.ifEmpty { DEFAULT_ITEM_NAME }, epochDay = epochDay)
+            persist(list)
+        }
     }
 
     /** Removes the item with [id]. @return false if not found or the write failed. */
     fun deleteItem(id: String): Boolean {
-        val list = items()
-        if (list.none { it.id == id }) return false
-        return persist(list.filterNot { it.id == id })
+        return synchronized(lock) {
+            val list = items()
+            if (list.none { it.id == id }) return false
+            persist(list.filterNot { it.id == id })
+        }
     }
 
     /**
@@ -75,20 +86,29 @@ class CountUpStore(context: Context) {
      * its name and id. @return false if not found or the write failed.
      */
     fun resetTo(id: String, epochDay: Long): Boolean {
-        val list = items().toMutableList()
-        val index = list.indexOfFirst { it.id == id }
-        if (index < 0) return false
-        if (list[index].epochDay == epochDay) return true // no change needed
-        list[index] = list[index].copy(epochDay = epochDay)
-        return persist(list)
+        return synchronized(lock) {
+            val list = items().toMutableList()
+            val index = list.indexOfFirst { it.id == id }
+            if (index < 0) return false
+            if (list[index].epochDay == epochDay) return true // no change needed
+            list[index] = list[index].copy(epochDay = epochDay)
+            persist(list)
+        }
     }
 
-    private fun recover(): List<CountUpItem> {
-        tryMigrateFromLegacy()?.let { return it }
-        // Nothing to migrate (or already migrated): persist an explicit empty list
-        // so this string is never misread as a pending migration.
-        prefs.edit().putString(KEY_ITEMS, encodeItems(emptyList())).putBoolean(KEY_MIGRATED, true).commit()
-        return emptyList()
+    private fun recover(undecodableRaw: String?): List<CountUpItem> {
+        if (!undecodableRaw.isNullOrBlank()) {
+            // Quarantine the undecodable payload before any overwrite so it stays
+            // recoverable; a silent empty-list overwrite would destroy it.
+            prefs.edit().putString(KEY_ITEMS_QUARANTINE, undecodableRaw).commit()
+        }
+        return synchronized(lock) { tryMigrateFromLegacy() }
+            ?: run {
+                // Nothing to migrate (or already migrated): persist an explicit empty
+                // list so this string is never misread as a pending migration.
+                prefs.edit().putString(KEY_ITEMS, encodeItems(emptyList())).putBoolean(KEY_MIGRATED, true).commit()
+                emptyList()
+            }
     }
 
     /**
@@ -108,6 +128,9 @@ class CountUpStore(context: Context) {
             null
         }
         if (date == null) {
+            // Preserve the unusable legacy value for manual recovery instead of
+            // discarding it silently, then mark the migration done.
+            prefs.edit().putLong(KEY_LEGACY_DAY_QUARANTINE, rawDay).commit()
             prefs.edit().putBoolean(KEY_MIGRATED, true).commit()
             return null
         }
@@ -145,6 +168,8 @@ class CountUpStore(context: Context) {
     companion object {
         private const val PREFS_NAME = "countup_prefs"
         private const val KEY_ITEMS = "items_v1"
+        private const val KEY_ITEMS_QUARANTINE = "items_v1_quarantine"
+        private const val KEY_LEGACY_DAY_QUARANTINE = "legacy_day_quarantine"
         private const val KEY_MIGRATED = "migrated_v1"
         private const val KEY_LAST_WIDGET_REFRESH_DAY = "widget_last_refresh_day"
         private const val NO_REFRESH_DAY = -1L

@@ -11,7 +11,7 @@ import android.widget.FrameLayout
 
 /**
  * Debug-only activity (never in release builds) that renders the real
- * [HaircutWidget] RemoteViews inside an AppWidgetHost so the widget can be
+ * [CountUpWidget] RemoteViews inside an AppWidgetHost so the widget can be
  * captured as a screenshot representing exactly what the launcher displays.
  *
  * Launch: adb shell am start -n com.ivanyang.countup/.WidgetHostActivity
@@ -22,7 +22,7 @@ class WidgetHostActivity : Activity() {
         super.onCreate(savedInstanceState)
 
         val manager = AppWidgetManager.getInstance(this)
-        val provider = ComponentName(this, HaircutWidgetReceiver::class.java)
+        val provider = ComponentName(this, CountUpWidgetReceiver::class.java)
         val host = AppWidgetHost(this, HOST_ID)
 
         val root = FrameLayout(this)

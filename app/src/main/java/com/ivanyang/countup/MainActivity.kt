@@ -102,6 +102,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         store = CountUpStore(this)
         items = store.items()
+        restoreDialogState(savedInstanceState)
         enableEdgeToEdge()
         handleWidgetIntent(intent)
 
@@ -159,6 +160,37 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleWidgetIntent(intent)
+    }
+
+    /**
+     * Keeps the open dialog's identity across configuration change / process
+     * death: editor, delete-confirm and reset-confirm state is saved as item ids
+     * and re-resolved against the store on restore. Ids that no longer resolve
+     * (item deleted meanwhile) drop their dialog. Typed-but-unsaved draft text is
+     * not preserved.
+     */
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        if (showEditor) {
+            outState.putString(STATE_EDITOR_TARGET_ID, editorTarget?.id)
+        }
+        pendingDelete?.let { outState.putString(STATE_PENDING_DELETE_ID, it.id) }
+        pendingReset?.let { outState.putString(STATE_PENDING_RESET_ID, it.id) }
+    }
+
+    private fun restoreDialogState(saved: Bundle?) {
+        if (saved == null) return
+        if (saved.containsKey(STATE_EDITOR_TARGET_ID)) {
+            editorTarget = saved.getString(STATE_EDITOR_TARGET_ID)
+                ?.let { id -> items.firstOrNull { it.id == id } }
+            showEditor = true
+        }
+        saved.getString(STATE_PENDING_DELETE_ID)
+            ?.let { id -> items.firstOrNull { it.id == id } }
+            ?.let { pendingDelete = it }
+        saved.getString(STATE_PENDING_RESET_ID)
+            ?.let { id -> items.firstOrNull { it.id == id } }
+            ?.let { pendingReset = it }
     }
 
     override fun onResume() {
@@ -227,11 +259,19 @@ class MainActivity : ComponentActivity() {
 
     private fun refreshWidget() {
         lifecycleScope.launch {
-            HaircutWidget().updateAll(this@MainActivity)
-            // Mark only after the system was asked to rebuild, so a dropped
-            // launch does not hide a stale widget from the next resume gate.
-            store.markWidgetRefreshed(LocalDate.now().toEpochDay())
+            runCatching {
+                CountUpWidget().updateAll(this@MainActivity)
+            }.onSuccess {
+                // Mark only after the system was asked to rebuild, so a dropped
+                // launch does not hide a stale widget from the next resume gate.
+                store.markWidgetRefreshed(LocalDate.now().toEpochDay())
+            }
         }
+    }
+    private companion object {
+        private const val STATE_EDITOR_TARGET_ID = "state_editor_target_id"
+        private const val STATE_PENDING_DELETE_ID = "state_pending_delete_id"
+        private const val STATE_PENDING_RESET_ID = "state_pending_reset_id"
     }
 }
 
@@ -242,32 +282,51 @@ private fun CountUpTheme(content: @Composable () -> Unit) {
     MaterialTheme(colorScheme = colors, content = content)
 }
 
+// Zen-paper palette: warm monochrome, named so theme edits stay consistent.
+private val ZenInk = Color(0xFF2F3437)
+private val ZenWhite = Color(0xFFFFFFFF)
+private val ZenPaperBackground = Color(0xFFF7F6F3)
+private val ZenPaperSurface = Color(0xFFF1EFEA)
+private val ZenPaperCard = Color(0xFFFFFFFF)
+private val ZenMuted = Color(0xFF787774)
+private val ZenRule = Color(0xFFEAEAEA)
+private val ZenRuleVariant = Color(0xFFE3E1DC)
+private val ZenError = Color(0xFF9F2F2D)
+private val ZenNightEmphasis = Color(0xFFEDEBE6)
+private val ZenNightBackground = Color(0xFF1B1B19)
+private val ZenNightSurface = Color(0xFF242422)
+private val ZenNightSurfaceVariant = Color(0xFF2C2C29)
+private val ZenNightMuted = Color(0xFFA8A8A3)
+private val ZenNightRule = Color(0xFF3A3A37)
+private val ZenNightRuleVariant = Color(0xFF333330)
+private val ZenNightError = Color(0xFFF0A6A3)
+
 private fun lightZenColors() = lightColorScheme(
-    primary = Color(0xFF2F3437),
-    onPrimary = Color(0xFFFFFFFF),
-    background = Color(0xFFF7F6F3),
-    onBackground = Color(0xFF2F3437),
-    surface = Color(0xFFFFFFFF),
-    onSurface = Color(0xFF2F3437),
-    surfaceVariant = Color(0xFFF1EFEA),
-    onSurfaceVariant = Color(0xFF787774),
-    outline = Color(0xFFEAEAEA),
-    outlineVariant = Color(0xFFE3E1DC),
-    error = Color(0xFF9F2F2D),
+    primary = ZenInk,
+    onPrimary = ZenWhite,
+    background = ZenPaperBackground,
+    onBackground = ZenInk,
+    surface = ZenPaperCard,
+    onSurface = ZenInk,
+    surfaceVariant = ZenPaperSurface,
+    onSurfaceVariant = ZenMuted,
+    outline = ZenRule,
+    outlineVariant = ZenRuleVariant,
+    error = ZenError,
 )
 
 private fun darkZenColors() = darkColorScheme(
-    primary = Color(0xFFEDEBE6),
-    onPrimary = Color(0xFF1B1B19),
-    background = Color(0xFF1B1B19),
-    onBackground = Color(0xFFEDEBE6),
-    surface = Color(0xFF242422),
-    onSurface = Color(0xFFEDEBE6),
-    surfaceVariant = Color(0xFF2C2C29),
-    onSurfaceVariant = Color(0xFFA8A8A3),
-    outline = Color(0xFF3A3A37),
-    outlineVariant = Color(0xFF333330),
-    error = Color(0xFFF0A6A3),
+    primary = ZenNightEmphasis,
+    onPrimary = ZenNightBackground,
+    background = ZenNightBackground,
+    onBackground = ZenNightEmphasis,
+    surface = ZenNightSurface,
+    onSurface = ZenNightEmphasis,
+    surfaceVariant = ZenNightSurfaceVariant,
+    onSurfaceVariant = ZenNightMuted,
+    outline = ZenNightRule,
+    outlineVariant = ZenNightRuleVariant,
+    error = ZenNightError,
 )
 
 @Composable

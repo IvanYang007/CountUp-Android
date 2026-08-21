@@ -2,6 +2,7 @@ package com.ivanyang.countup
 
 import org.json.JSONArray
 import org.json.JSONObject
+import java.time.LocalDate
 
 /**
  * A single count-up item: a human-readable [name] anchored to a calendar day
@@ -16,6 +17,10 @@ data class CountUpItem(
 
 /** Default name used when a name is left blank. */
 const val DEFAULT_ITEM_NAME: String = "Item"
+
+/** Inclusive epoch-day bounds of [LocalDate]; values outside this range crash render. */
+private val EPOCH_DAY_MIN: Long = LocalDate.MIN.toEpochDay()
+private val EPOCH_DAY_MAX: Long = LocalDate.MAX.toEpochDay()
 
 /**
  * Encode a list of items to a compact JSON array string for storage.
@@ -36,8 +41,11 @@ internal fun encodeItems(items: List<CountUpItem>): String {
 }
 
 /**
- * Decode a previously-encoded JSON array. Returns null for null input or for
- * malformed/structurally-wrong data; callers treat null as "recover".
+ * Decode a previously-encoded JSON array. Returns null for null input, for
+ * non-array data, or for an array whose every element is malformed (callers
+ * treat null as "recover"). Elements that are individually malformed or carry
+ * an out-of-range epochDay are dropped, keeping the remaining parseable items
+ * so one bad element never destroys the whole list.
  */
 internal fun decodeItems(raw: String?): List<CountUpItem>? {
     if (raw.isNullOrBlank()) return null
@@ -45,17 +53,29 @@ internal fun decodeItems(raw: String?): List<CountUpItem>? {
         val arr = JSONArray(raw)
         val out = ArrayList<CountUpItem>(arr.length())
         for (i in 0 until arr.length()) {
-            val o = arr.getJSONObject(i)
-            out.add(
-                CountUpItem(
-                    id = o.getString("id"),
-                    name = o.getString("name"),
-                    epochDay = o.getLong("epochDay"),
-                    icon = o.optString("icon", ""),
-                ),
-            )
+            decodeElement(arr.optJSONObject(i))?.let { out.add(it) }
         }
+        // Every element failed to decode: treat the whole payload as corrupt so
+        // the store can quarantine it instead of masking it as "no items".
+        if (out.isEmpty() && arr.length() > 0) return null
         out
+    } catch (_: Exception) {
+        null
+    }
+}
+
+/** Decodes one array element, or null when the element is malformed or its epochDay is out of range. */
+private fun decodeElement(o: JSONObject?): CountUpItem? {
+    if (o == null) return null
+    return try {
+        val epochDay = o.getLong("epochDay")
+        if (epochDay < EPOCH_DAY_MIN || epochDay > EPOCH_DAY_MAX) return null
+        CountUpItem(
+            id = o.getString("id"),
+            name = o.getString("name"),
+            epochDay = epochDay,
+            icon = o.optString("icon", ""),
+        )
     } catch (_: Exception) {
         null
     }

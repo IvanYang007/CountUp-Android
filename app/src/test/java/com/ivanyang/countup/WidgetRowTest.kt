@@ -40,4 +40,43 @@ class WidgetRowTest {
         )
         assertEquals(listOf("One", "Two", "Three"), widgetRows(items, today).map { it.name })
     }
+
+    @Test
+    fun widgetRowsWith20PlusItemsPreservesCountAndOrder() {
+        val items = (1..25).map { index ->
+            CountUpItem(id = "id$index", name = "Item$index", epochDay = today.toEpochDay() - index)
+        }
+        val rows = widgetRows(items, today)
+        assertEquals(25, rows.size)
+        // Verify order is preserved
+        rows.forEachIndexed { index, row ->
+            assertEquals("Item${index + 1}", row.name)
+            assertEquals(index + 1L, row.count) // days since = index + 1
+        }
+    }
+
+    @Test
+    fun veryLongItemNamesPreservedIntact() {
+        val longName = "This is a very long item name that might be truncated in some UI but should be preserved intact in the widget row data structure for proper display"
+        val items = listOf(
+            CountUpItem(id = "long", name = longName, epochDay = today.toEpochDay() - 5)
+        )
+        val rows = widgetRows(items, today)
+        assertEquals(1, rows.size)
+        assertEquals(longName, rows[0].name)
+        assertEquals(5, rows[0].count)
+    }
+
+    @Test
+    fun dayCountsGreaterThan9999() {
+        // Test with a date over 9999 days ago (~27+ years)
+        val veryOldDate = today.minusDays(12000)
+        val items = listOf(
+            CountUpItem(id = "old", name = "Very Old", epochDay = veryOldDate.toEpochDay())
+        )
+        val rows = widgetRows(items, today)
+        assertEquals(1, rows.size)
+        assertEquals("Very Old", rows[0].name)
+        assertEquals(12000, rows[0].count)
+    }
 }

@@ -66,20 +66,20 @@ internal fun widgetRows(items: List<CountUpItem>, today: LocalDate): List<Widget
  * on every render and lays them out as a 2-column compact grid. Uses a warm
  * paper background and theme-adaptive text.
  */
-class HaircutWidget : GlanceAppWidget() {
+class CountUpWidget : GlanceAppWidget() {
 
     override val sizeMode: SizeMode = SizeMode.Single
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val items = CountUpStore(context).items()
         provideContent {
-            HaircutWidgetContent(items = items)
+            CountUpWidgetContent(items = items)
         }
     }
 }
 
-class HaircutWidgetReceiver : GlanceAppWidgetReceiver() {
-    override val glanceAppWidget: GlanceAppWidget = HaircutWidget()
+class CountUpWidgetReceiver : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = CountUpWidget()
 }
 
 /** Resets one item's anchor date to today directly from the widget. */
@@ -92,8 +92,8 @@ class ResetCountAction : ActionCallback {
             // is authoritative and needs no GlanceAppWidgetManager lookup, so it cannot
             // silently no-op when an enumeration returns empty. Then sweep all placed
             // widgets as a safety net. (Expert review: artifacts/expert-review.md, A1)
-            HaircutWidget().update(context, glanceId)
-            HaircutWidget().updateAll(context)
+            CountUpWidget().update(context, glanceId)
+            CountUpWidget().updateAll(context)
             // Keep the app's resume-time refresh gate accurate: the widget is now
             // up to date for today.
             store.markWidgetRefreshed(LocalDate.now().toEpochDay())
@@ -105,8 +105,8 @@ class ResetCountAction : ActionCallback {
 class RefreshWidgetAction : ActionCallback {
     override suspend fun onAction(context: Context, glanceId: GlanceId, parameters: ActionParameters) {
         // Target the tapped widget by its authoritative id, then sweep all placements.
-        HaircutWidget().update(context, glanceId)
-        HaircutWidget().updateAll(context)
+        CountUpWidget().update(context, glanceId)
+        CountUpWidget().updateAll(context)
         CountUpStore(context).markWidgetRefreshed(LocalDate.now().toEpochDay())
     }
 }
@@ -118,7 +118,7 @@ private fun isNightMode(context: Context): Boolean =
     (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
 
 @Composable
-private fun HaircutWidgetContent(items: List<CountUpItem>) {
+private fun CountUpWidgetContent(items: List<CountUpItem>) {
     val context = LocalContext.current
     val rows = widgetRows(items, LocalDate.now())
 
