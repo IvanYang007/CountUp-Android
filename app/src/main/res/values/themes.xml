@@ -1,0 +1,4 @@
+<resources>
+    <!-- Compose renders its own colors (light/dark via MaterialTheme); the activity theme only needs NoActionBar. -->
+    <style name="Theme.CountUp" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>

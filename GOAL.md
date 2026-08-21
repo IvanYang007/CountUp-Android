@@ -1,0 +1,25 @@
+# Goal (v2)
+
+Paste the following as one `/goal` command (or `/goal --tokens 50k ...`):
+
+```
+Convert CountUp (D:\Github\countUp) from a single "days since last haircut" counter into an offline multi-item counter: the user can create, rename, and delete any number of count-up items (each a name + anchor date), the app shows them in a zen-paper style list with smooth add/edit/delete animations, and the home-screen widget lists multiple items each showing its name and day count. Verified by: a clean `./gradlew clean assembleDebug assembleRelease` build; all existing JVM + instrumented tests still passing plus new tests for multi-item create/read/update/delete, migration of the old single `last_haircut_epoch_day` value into one item, and the day-count and UTC conversion logic; `lintDebug` with zero errors (remaining warnings listed, not dismissed); zero `<uses-permission>` in the merged debug and release manifests (Glance/WorkManager transitive permissions remain stripped via tools:node="remove"); backup still disabled; a migration test proving a pre-existing single-value install upgrades without data loss; and device verification on both the API 26 and API 36 emulators — add two or more items in the app, confirm each count is correct, place the larger multi-item widget on the home screen and screenshot it showing all items with counts (artifacts/widget.png), and confirm data survives force-stop and reboot. Preserve the pinned build baseline (AGP 9.3.0, Gradle 9.5.0, JDK 17, Kotlin 2.3.21, Compose BOM 2026.06.00, Glance 1.1.1, compile/target 37, min 26, no dependency upgrades), offline-only behavior, the zero-permission and no-backup posture, and keep the codebase small (extend the existing flat Kotlin files; do not add a database, repository abstraction layer, dependency-injection framework, navigation library, services, AlarmManager, WorkManager, accounts, or analytics). Load the minimalist-ui skill (and kami for its parchment/serif paper typography) to design the zen-paper interface, adapting its web-oriented guidance to Jetpack Compose: warm monochrome palette, strong typographic hierarchy, generous whitespace, no heavy shadows or gradients, and Compose animations (animate* APIs, LazyColumn item enter/exit transitions) for a calm paper-like motion language. For the multi-item widget, use Glance's list support if available in 1.1.1, otherwise a vertically scrollable set of item rows, and size the provider XML tall enough (targetCellHeight) to show several items. Between iterations, implement in small verifiable increments — (1) data model + migration + tests, (2) app list + CRUD + tests, (3) multi-item widget + tests, (4) design/animation polish, (5) full verification + screenshots — running the relevant build and tests and re-checking the merged manifest stays permission-free after each step before moving on. If blocked — migration cannot preserve existing data, Glance 1.1.1 cannot render multiple items in the widget, the design skill's guidance cannot be expressed in Compose features available in the pinned baseline, or widget placement fails on the emulators — stop with the exact failure, what was tried, and the specific decision needed (e.g. whether to add a minimal serializer or allow a single needed dependency, or to reduce widget item count).
+```
+
+## Evaluation note
+- Design: `minimalist-ui` (zen editorial, warm monochrome) + `kami` (paper/parchment/serif) — both web-oriented, must be adapted to Compose.
+- Open risk: Glance 1.1.1 multi-item list rendering; fallback = scrollable rows (allowed, not scope creep).
+- Both emulators (countUp_api26 / countUp_api36) are up for verification.
+
+
+## Execution status (v2 multi-item goal)
+
+- [x] Inc 1 — data model + migration + tests: `CountUpItem` (JSON encode/decode), `CountUpStore` (CRUD + one-time migration of legacy single value). 6 JVM serialization tests + 12 device tests pass; migration proven end-to-end on-device.
+- [x] Inc 2 — app list + CRUD + zen-paper base: multi-item list, add/edit/delete dialogs, warm monochrome theme, serif/sans/mono typography, 1px borders, no heavy shadows. Add flow verified via the UI.
+- [x] Inc 3 — multi-item widget: Glance `LazyColumn` listing all items with counts, taller provider, warm paper background. `widgetRows` unit-tested; provider registers + handles updates without crash; widget placed on the API 36 home screen.
+- [x] Inc 4 — design/animation polish: `Modifier.animateItem()` smooth add/remove/reorder; tightened editorial letter-spacing.
+- [x] Inc 5 — full verification: clean builds (debug+release), 15 unit + 12 connected tests green, lint 0 errors / 21 intentional warnings, 0 permissions (debug+release), migration+CRUD verified on API 26 & 36, data survives force-stop and reboot, multi-item widget screenshot at artifacts/widget.png.
+- Removed dead `HaircutStore` after rewiring both surfaces to `CountUpStore`.
+
+### Files (main, flat)
+CountUpItem.kt, CountUpStore.kt, DaysSince.kt, DateConversion.kt, HaircutWidget.kt, MainActivity.kt (+ debug-only WidgetHostActivity, not in release).

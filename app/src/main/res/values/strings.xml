@@ -1,0 +1,44 @@
+<resources>
+    <string name="app_name">CountUp</string>
+
+    <!-- App screen -->
+    <string name="cancel">Cancel</string>
+
+    <!-- Date picker dialog -->
+    <string name="pick_date_title">Choose a date</string>
+    <string name="pick_date_confirm">Set date</string>
+
+    <!-- Errors -->
+    <string name="error_save_failed">Could not save. Please try again.</string>
+
+    <!-- Multi-item list -->
+    <string name="app_subtitle">Count-up trackers</string>
+    <string name="new_item">New item</string>
+    <string name="empty_heading">Nothing here yet</string>
+    <string name="empty_body">Add your first count-up to start tracking days.</string>
+    <string name="since_label">since %1$s</string>
+    <string name="delete">Delete</string>
+    <string name="reset">Reset</string>
+
+    <!-- Reset confirm -->
+    <string name="reset_title">Reset to today?</string>
+    <string name="reset_message">Set “%1$s” to today so its count returns to 0.</string>
+
+    <!-- Item editor -->
+    <string name="add_title">New item</string>
+    <string name="edit_title">Edit item</string>
+    <string name="item_name">Name</string>
+    <string name="name_placeholder">e.g. Last haircut</string>
+    <string name="anchor_date">Anchor date</string>
+    <string name="save">Save</string>
+
+    <!-- Delete confirm -->
+    <string name="delete_title">Delete item?</string>
+    <string name="delete_message">Remove “%1$s”? This cannot be undone.</string>
+
+    <!-- Widget -->
+    <string name="widget_label">Count-ups</string>
+    <string name="widget_description">Days since each count-up anchor</string>
+    <string name="widget_empty">Add items in the app to see your count-ups.</string>
+    <string name="widget_refresh">Refresh counts</string>
+</resources>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Static widget picker preview (older launchers / pre-generation fallback). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="240dp"
+    android:height="80dp"
+    android:viewportWidth="240"
+    android:viewportHeight="80">
+    <path
+        android:fillColor="#E8F5E9"
+        android:pathData="M8,4 h224 a4,4 0 0 1 4,4 v64 a4,4 0 0 1 -4,4 h-224 a4,4 0 0 1 -4,-4 v-64 a4,4 0 0 1 4,-4 z" />
+    <path
+        android:fillColor="#1B5E20"
+        android:pathData="M24,22 h60 v26 h-60 z" />
+    <path
+        android:fillColor="#2E7D32"
+        android:pathData="M24,58 h92 v8 h-92 z" />
+</vector>
