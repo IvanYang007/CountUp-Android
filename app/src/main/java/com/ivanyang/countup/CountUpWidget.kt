@@ -12,6 +12,7 @@ import android.graphics.Typeface
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.StyleSpan
+import android.os.SystemClock
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import android.widget.Toast
@@ -115,32 +116,61 @@ private fun buildBaseViews(context: Context): RemoteViews {
     return views
 }
 
-/** Resets one item's anchor date to today directly from the widget and shows a Toast. */
+/** Resets one item's anchor date to today via a double-tap in-place confirmation. */
 class ResetCountReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val id = intent.getStringExtra(EXTRA_ITEM_ID) ?: return
         val store = CountUpStore(context)
-        val item = store.items().firstOrNull { it.id == id }
-        val name = item?.name ?: DEFAULT_ITEM_NAME
-        val today = LocalDate.now().toEpochDay()
-        if (store.resetTo(id, today)) {
-            // Push synchronously from the app process: the launcher redraws
-            // immediately, no composition pipeline in between.
+        val item = store.items().firstOrNull { it.id == id } ?: return
+
+        if (isArmed(id)) {
+            // Second tap confirmed: disarm and reset to today
+            disarm()
+            val today = LocalDate.now().toEpochDay()
+            if (store.resetTo(id, today)) {
+                // Push synchronously from the app process: the launcher redraws
+                // immediately, no composition pipeline in between.
+                pushWidgetUpdate(context)
+                // Keep the app's resume-time refresh gate accurate for today.
+                store.markWidgetRefreshed(today)
+                // In-place instant feedback: toast notification if supported by launcher
+                Toast.makeText(
+                    context.applicationContext,
+                    context.getString(R.string.widget_reset_toast, item.name),
+                    Toast.LENGTH_SHORT,
+                ).show()
+            }
+        } else {
+            // First tap: arm this cell and re-render widget to show "Tap again" / "0?"
+            arm(id)
             pushWidgetUpdate(context)
-            // Keep the app's resume-time refresh gate accurate for today.
-            store.markWidgetRefreshed(today)
-            // In-place instant feedback: show confirmation toast on the home screen.
-            Toast.makeText(
-                context.applicationContext,
-                context.getString(R.string.widget_reset_toast, name),
-                Toast.LENGTH_SHORT,
-            ).show()
         }
     }
 
     companion object {
         const val EXTRA_ITEM_ID = "com.ivanyang.countup.extra.ITEM_ID"
+        private const val ARMED_TIMEOUT_MS = 4000L
+
+        @Volatile
+        private var armedItemId: String? = null
+        @Volatile
+        private var armedTimestamp: Long = 0L
+
+        fun isArmed(id: String): Boolean {
+            val now = SystemClock.elapsedRealtime()
+            return armedItemId == id && (now - armedTimestamp) < ARMED_TIMEOUT_MS
+        }
+
+        fun arm(id: String) {
+            armedItemId = id
+            armedTimestamp = SystemClock.elapsedRealtime()
+        }
+
+        fun disarm() {
+            armedItemId = null
+            armedTimestamp = 0L
+        }
     }
 }
 
@@ -210,25 +240,35 @@ private class WidgetViewsFactory(private val context: Context) : RemoteViewsServ
         val row = rows[position]
         val views = RemoteViews(context.packageName, R.layout.countup_widget_cell)
 
-        views.setTextViewText(R.id.cell_name, row.name)
-        views.setTextColor(R.id.cell_name, if (night) NIGHT_MUTED else MUTED)
-        val arrived = arrivedFuture(row)
-        views.setTextViewText(R.id.cell_count, widgetCountText(row.count, arrived))
-        if (arrived) {
-            // A future-dated item whose date has now arrived: solid green plate,
-            // dark-red bold count, on both night and day plates.
-            views.setTextColor(R.id.cell_count, ARRIVED_NUMBER)
-            views.setImageViewResource(R.id.cell_circle, R.drawable.ic_circle_green)
-        } else if (night) {
-            // Dark ink on the warm dark plate at night, so the number stands out.
-            views.setTextColor(R.id.cell_count, NIGHT_NUMBER)
-            views.setImageViewResource(R.id.cell_circle, R.drawable.ic_solid_circle_dark)
+        val armed = ResetCountReceiver.isArmed(row.id)
+        if (armed) {
+            // Confirmation state: visual double-tap prompt directly on the widget
+            views.setTextViewText(R.id.cell_name, context.getString(R.string.widget_reset_prompt))
+            views.setTextColor(R.id.cell_name, if (night) NIGHT_MUTED else MUTED)
+            views.setTextViewText(R.id.cell_count, "0?")
+            views.setTextColor(R.id.cell_count, Color.WHITE)
+            views.setImageViewResource(R.id.cell_circle, R.drawable.ic_circle_orange)
         } else {
-            // Day plates rotate through matte MCM accents (olive, orange, mustard);
-            // the number ink flips to deep brown on the light mustard plate.
-            val slot = position % DAY_CIRCLES.size
-            views.setTextColor(R.id.cell_count, DAY_NUMBER_INKS[slot])
-            views.setImageViewResource(R.id.cell_circle, DAY_CIRCLES[slot])
+            views.setTextViewText(R.id.cell_name, row.name)
+            views.setTextColor(R.id.cell_name, if (night) NIGHT_MUTED else MUTED)
+            val arrived = arrivedFuture(row)
+            views.setTextViewText(R.id.cell_count, widgetCountText(row.count, arrived))
+            if (arrived) {
+                // A future-dated item whose date has now arrived: solid green plate,
+                // dark-red bold count, on both night and day plates.
+                views.setTextColor(R.id.cell_count, ARRIVED_NUMBER)
+                views.setImageViewResource(R.id.cell_circle, R.drawable.ic_circle_green)
+            } else if (night) {
+                // Dark ink on the warm dark plate at night, so the number stands out.
+                views.setTextColor(R.id.cell_count, NIGHT_NUMBER)
+                views.setImageViewResource(R.id.cell_circle, R.drawable.ic_solid_circle_dark)
+            } else {
+                // Day plates rotate through matte MCM accents (olive, orange, mustard);
+                // the number ink flips to deep brown on the light mustard plate.
+                val slot = position % DAY_CIRCLES.size
+                views.setTextColor(R.id.cell_count, DAY_NUMBER_INKS[slot])
+                views.setImageViewResource(R.id.cell_circle, DAY_CIRCLES[slot])
+            }
         }
 
         // Tapping this cell resets ONLY this item to today; the item id rides
