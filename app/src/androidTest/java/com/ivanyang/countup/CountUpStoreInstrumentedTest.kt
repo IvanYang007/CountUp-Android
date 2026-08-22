@@ -209,7 +209,7 @@ class CountUpStoreInstrumentedTest {
     @Test
     fun legacyPrefsWithInvalidEpochDayFailsLocalDateOfEpochDay() {
         // Test with Long.MAX_VALUE / 10000000000L which will fail LocalDate.ofEpochDay
-        val invalidEpochDay = Long.MAX_VALUE / 10000000000L
+        val invalidEpochDay = Long.MAX_VALUE
         legacyPrefs().edit().putLong("last_haircut_epoch_day", invalidEpochDay).commit()
         
         val store = CountUpStore(context)
@@ -282,7 +282,7 @@ class CountUpStoreInstrumentedTest {
 
     @Test
     fun invalidLegacyDayIsQuarantinedNotDiscarded() {
-        val invalidEpochDay = Long.MAX_VALUE / 10000000000L
+        val invalidEpochDay = Long.MAX_VALUE
         legacyPrefs().edit().putLong("last_haircut_epoch_day", invalidEpochDay).commit()
         val store = CountUpStore(context)
         assertTrue(store.items().isEmpty())

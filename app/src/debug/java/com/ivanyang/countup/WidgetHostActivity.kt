@@ -37,6 +37,9 @@ class WidgetHostActivity : Activity() {
 
         val appWidgetId = host.allocateAppWidgetId()
         val bound = manager.bindAppWidgetIdIfAllowed(appWidgetId, provider)
+        if (!bound && manager.isRequestPinAppWidgetSupported) {
+            manager.requestPinAppWidget(provider, null, null)
+        }
         // startListening() is required for the host to receive widget updates;
         // without it the host view stays in its error state ("Couldn't add").
         host.startListening()

@@ -47,6 +47,8 @@ class CountUpWidgetReceiver : AppWidgetProvider() {
     companion object {
         /** Broadcast action sent by the widget's refresh button. */
         const val ACTION_REFRESH = "com.ivanyang.countup.action.WIDGET_REFRESH"
+        /** Activity action: widget cell tap requests a confirmed reset via the app's dialog. */
+        const val ACTION_CONFIRM_RESET = "com.ivanyang.countup.action.CONFIRM_RESET"
     }
 }
 
@@ -91,18 +93,18 @@ private fun buildBaseViews(context: Context): RemoteViews {
         if (night) R.drawable.ic_refresh_dark else R.drawable.ic_refresh,
     )
 
-    // Cell taps: template broadcast to the reset receiver; each cell fills in
-    // the tapped item's id (see the factory's setOnClickFillInIntent).
-    // FLAG_MUTABLE is REQUIRED: the launcher merges the fill-in intent (item id)
-    // into this template at tap time; an immutable PendingIntent silently drops
-    // the extras and every tap resets nothing.
-    val reset = PendingIntent.getBroadcast(
+    // SECURITY: FLAG_MUTABLE is required here — this is a RemoteViews collection
+    // template PendingIntent. The launcher merges each cell's fill-in intent (item
+    // id) into this template at tap time. An immutable template silently drops the
+    // fill-in extras, breaking all cell taps. The only extra is a UUID item id;
+    // the activity validates it against the store before showing a confirmation.
+    val resetViaApp = PendingIntent.getActivity(
         context,
         REQUEST_RESET,
-        Intent(context, ResetCountReceiver::class.java),
+        Intent(context, MainActivity::class.java).setAction(CountUpWidgetReceiver.ACTION_CONFIRM_RESET),
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE,
     )
-    views.setPendingIntentTemplate(R.id.widget_grid, reset)
+    views.setPendingIntentTemplate(R.id.widget_grid, resetViaApp)
 
     // Bind the collection and designate the empty view the launcher shows when
     // there is nothing to list.
@@ -147,7 +149,7 @@ internal data class WidgetRowData(
 
 /** Pure derivation shared by the widget (and unit-tested on the JVM). */
 internal fun widgetRows(items: List<CountUpItem>, today: LocalDate): List<WidgetRowData> =
-    items.map { item ->
+    items.filter { it.showInWidget }.map { item ->
         WidgetRowData(
             id = item.id,
             name = item.name,
@@ -239,8 +241,11 @@ private class WidgetViewsFactory(private val context: Context) : RemoteViewsServ
 }
 
 /** Whether the device is in dark (night) mode. */
-/** Light palette only (design decision): dark text mode is removed, so this is false. */
-private fun isNightMode(context: Context): Boolean = false
+private fun isNightMode(context: Context): Boolean {
+    val uiMode = context.resources.configuration.uiMode and
+        android.content.res.Configuration.UI_MODE_NIGHT_MASK
+    return uiMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
+}
 
 // Mid-century-modern palette (mirrors MainActivity's named constants).
 private val PAPER: Int = 0xFFF5E6D3.toInt()

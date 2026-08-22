@@ -84,6 +84,20 @@ class CountUpItemTest {
     }
 
     @Test
+    fun showInWidgetSurvivesRoundTrip() {
+        val visible = CountUpItem(id = "v", name = "Visible", epochDay = 100, showInWidget = true)
+        val hidden = CountUpItem(id = "h", name = "Hidden", epochDay = 200, showInWidget = false)
+        assertEquals(listOf(visible, hidden), decodeItems(encodeItems(listOf(visible, hidden))))
+    }
+
+    @Test
+    fun missingShowInWidgetFieldDecodesToVisible() {
+        // Legacy items stored before the eye toggle existed stay in the widget.
+        val decoded = decodeItems("[{\"id\":\"a\",\"name\":\"Old\",\"epochDay\":5}]")
+        assertEquals(true, decoded!![0].showInWidget)
+    }
+
+    @Test
     fun oneMalformedElementDoesNotDestroyTheRest() {
         // A single corrupt element is dropped; parseable siblings survive.
         val raw = "[{\"id\":\"a\",\"name\":\"Good\",\"epochDay\":5},{\"id\":123},{\"id\":\"b\",\"name\":\"Also good\",\"epochDay\":9}]"

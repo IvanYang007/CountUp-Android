@@ -95,4 +95,24 @@ class WidgetRowTest {
         assertTrue(arrivedFuture(rows[1]))
         assertTrue(!arrivedFuture(rows[2]))
     }
+
+    @Test
+    fun hiddenItemsAreExcludedAndVisibleKeepOrder() {
+        val items = listOf(
+            CountUpItem(id = "1", name = "One", epochDay = today.toEpochDay() - 1, showInWidget = true),
+            CountUpItem(id = "2", name = "Two", epochDay = today.toEpochDay() - 2, showInWidget = false),
+            CountUpItem(id = "3", name = "Three", epochDay = today.toEpochDay() - 3, showInWidget = true),
+        )
+        val rows = widgetRows(items, today)
+        assertEquals(listOf("One", "Three"), rows.map { it.name })
+    }
+
+    @Test
+    fun defaultItemsAllVisibleWhenNoFlagSet() {
+        val items = listOf(
+            CountUpItem(id = "a", name = "A", epochDay = today.toEpochDay() - 1),
+            CountUpItem(id = "b", name = "B", epochDay = today.toEpochDay() - 2),
+        )
+        assertEquals(listOf("A", "B"), widgetRows(items, today).map { it.name })
+    }
 }

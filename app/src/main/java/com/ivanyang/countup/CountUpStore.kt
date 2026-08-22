@@ -106,6 +106,23 @@ class CountUpStore(context: Context) {
         }
     }
 
+    /**
+     * Toggles whether the item with [id] appears in the home-screen widget,
+     * keeping every other field. No-op when the flag already matches.
+     * @return false if [id] was not found or the write failed.
+     */
+    fun setWidgetVisibility(id: String, visible: Boolean): Boolean {
+        return synchronized(lock) {
+            val list = items().toMutableList()
+            val index = list.indexOfFirst { it.id == id }
+            if (index < 0) return false
+            val current = list[index]
+            if (current.showInWidget == visible) return true // no change needed
+            list[index] = current.copy(showInWidget = visible)
+            persist(list)
+        }
+    }
+
     private fun recover(undecodableRaw: String?): List<CountUpItem> {
         if (!undecodableRaw.isNullOrBlank()) {
             // Quarantine the undecodable payload before any overwrite so it stays

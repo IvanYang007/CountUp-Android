@@ -1,6 +1,7 @@
 package com.ivanyang.countup
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.provider.Settings
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -103,6 +105,7 @@ class MainActivity : ComponentActivity() {
         store = CountUpStore(this)
         items = store.items()
         restoreDialogState(savedInstanceState)
+        handleWidgetResetIntent(intent)
         enableEdgeToEdge()
 
         setContent {
@@ -126,6 +129,7 @@ class MainActivity : ComponentActivity() {
                         onNewItem = { editorTarget = null; showEditor = true },
                         onDeleteRequest = { pendingDelete = it },
                         onResetRequest = { pendingReset = it },
+                        onToggleWidgetVisibility = { toggleWidgetVisibility(it.id) },
                     )
                 }
             }
@@ -199,6 +203,24 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleWidgetResetIntent(intent)
+    }
+
+    /**
+     * If the activity was launched from a widget cell tap (ACTION_CONFIRM_RESET),
+     * resolve the item id and show the existing reset confirmation dialog.
+     * The action is consumed to prevent re-triggering on config change.
+     */
+    private fun handleWidgetResetIntent(intent: Intent?) {
+        if (intent?.action == CountUpWidgetReceiver.ACTION_CONFIRM_RESET) {
+            val id = intent.getStringExtra(ResetCountReceiver.EXTRA_ITEM_ID) ?: return
+            pendingReset = items.firstOrNull { it.id == id }
+            intent.action = null // consume so rotation doesn't re-trigger
+        }
+    }
+
     private fun addItem(name: String, epochDay: Long) {
         if (store.addItem(name, epochDay) != null) {
             items = store.items()
@@ -237,6 +259,16 @@ class MainActivity : ComponentActivity() {
             errorMessage = getString(R.string.error_save_failed)
         }
         pendingReset = null
+    }
+
+    private fun toggleWidgetVisibility(id: String) {
+        val target = items.firstOrNull { it.id == id } ?: return
+        if (store.setWidgetVisibility(id, !target.showInWidget)) {
+            items = store.items()
+            refreshWidget()
+        } else {
+            errorMessage = getString(R.string.error_save_failed)
+        }
     }
 
     private fun refreshWidget() {
@@ -359,6 +391,7 @@ private fun CountUpList(
     onNewItem: () -> Unit,
     onDeleteRequest: (CountUpItem) -> Unit,
     onResetRequest: (CountUpItem) -> Unit,
+    onToggleWidgetVisibility: (CountUpItem) -> Unit,
 ) {
     val localContext = LocalContext.current
     val reduceMotion = remember(localContext) { isReducedMotion(localContext) }
@@ -436,6 +469,7 @@ private fun CountUpList(
                             onClick = { onItemTap(item) },
                             onDelete = { onDeleteRequest(item) },
                             onReset = { onResetRequest(item) },
+                            onToggleWidget = { onToggleWidgetVisibility(item) },
                             modifier = if (reduceMotion) Modifier else Modifier.animateItem(),
                         )
                     }
@@ -482,6 +516,7 @@ fun ItemCard(
     onClick: () -> Unit,
     onDelete: () -> Unit,
     onReset: () -> Unit,
+    onToggleWidget: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val count = daysSince(LocalDate.ofEpochDay(item.epochDay), LocalDate.now())
@@ -502,7 +537,8 @@ fun ItemCard(
 
     // Number + "days" share one baseline (rendered as a single annotated string),
     // so they align optically and scale together regardless of font size.
-    val unitLabel = pluralStringResource(R.plurals.days_unit, count.toInt(), count.toInt())
+    val pluralSelector = kotlin.math.abs(count).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+    val unitLabel = pluralStringResource(R.plurals.days_unit, pluralSelector, count)
     val countLabel = buildAnnotatedString {
         withStyle(
             SpanStyle(
@@ -565,12 +601,33 @@ fun ItemCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f),
             )
+            // Widget-visibility eye: open = shown in the widget (default),
+            // closed = excluded. Sits before Reset and Delete, top-right.
+            val eyeInteraction = rememberPressSource()
+            val eyeVisible = item.showInWidget
+            val eyeDesc = stringResource(if (eyeVisible) R.string.widget_hide else R.string.widget_show)
+            Icon(
+                painter = painterResource(if (eyeVisible) R.drawable.ic_eye_open else R.drawable.ic_eye_closed),
+                contentDescription = eyeDesc,
+                tint = if (eyeVisible) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier
+                    .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+                    .clickable(
+                        interactionSource = eyeInteraction,
+                        indication = LocalIndication.current,
+                        onClick = onToggleWidget,
+                    )
+                    .pressScale(eyeInteraction)
+                    .padding(15.dp),
+            )
+            Spacer(Modifier.width(6.dp))
             // Reset and Delete symbols, top-right of the card.
             Text(
                 text = "↺",
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
+                    .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
                     .clickable(
                         interactionSource = resetInteraction,
                         indication = LocalIndication.current,
@@ -586,6 +643,7 @@ fun ItemCard(
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier
+                    .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
                     .clickable(
                         interactionSource = deleteInteraction,
                         indication = LocalIndication.current,

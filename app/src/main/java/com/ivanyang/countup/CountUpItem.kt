@@ -15,6 +15,8 @@ data class CountUpItem(
     val icon: String = "",
     /** True when this item was created or last updated with a future date. */
     val futureFlag: Boolean = false,
+    /** True when this item appears in the home-screen widget. Defaults to open eye. */
+    val showInWidget: Boolean = true,
 )
 
 /** Default name used when a name is left blank. */
@@ -37,7 +39,8 @@ internal fun encodeItems(items: List<CountUpItem>): String {
                 .put("name", item.name)
                 .put("epochDay", item.epochDay)
                 .put("icon", item.icon)
-                .put("futureFlag", item.futureFlag),
+                .put("futureFlag", item.futureFlag)
+                .put("showInWidget", item.showInWidget),
         )
     }
     return arr.toString()
@@ -79,6 +82,8 @@ private fun decodeElement(o: JSONObject?): CountUpItem? {
             epochDay = epochDay,
             icon = o.optString("icon", ""),
             futureFlag = o.optBoolean("futureFlag", false),
+            // Legacy items stored before this field existed stay visible.
+            showInWidget = o.optBoolean("showInWidget", true),
         )
     } catch (_: Exception) {
         null

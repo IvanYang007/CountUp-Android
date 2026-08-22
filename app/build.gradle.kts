@@ -19,9 +19,12 @@ android {
     signingConfigs {
         create("release") {
             storeFile = file("../keystore/countup-release.jks")
-            storePassword = file("../keystore/keystore-pass.txt").readText().trim()
+            val pass = System.getenv("COUNTUP_KEYSTORE_PASS")
+                ?: file("../keystore/keystore-pass.txt").takeIf { it.exists() }?.readText()?.trim()
+                ?: ""
+            storePassword = pass
             keyAlias = "countup"
-            keyPassword = file("../keystore/keystore-pass.txt").readText().trim()
+            keyPassword = pass
         }
     }
 
@@ -64,4 +67,7 @@ dependencies {
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.androidx.test.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

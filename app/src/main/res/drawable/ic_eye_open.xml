@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Open eye: almond outline with a pupil. Item is included in the widget.
+     Single black ink so Icon() tint recolours the whole mark. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- almond outline -->
+    <path
+        android:strokeColor="#FF000000"
+        android:strokeWidth="2"
+        android:fillColor="#00000000"
+        android:pathData="M3,12 C7,6.5 17,6.5 21,12 C17,17.5 7,17.5 3,12 Z" />
+    <!-- pupil -->
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M12,12 m-2.4,0 a2.4,2.4 0 1 1 4.8,0 a2.4,2.4 0 1 1 -4.8,0" />
+</vector>

@@ -19,6 +19,8 @@
     <string name="since_label">since %1$s</string>
     <string name="delete">Delete</string>
     <string name="reset">Reset</string>
+    <string name="widget_hide">Hide from widget</string>
+    <string name="widget_show">Show in widget</string>
 
     <!-- Reset confirm -->
     <string name="reset_title">Reset to today?</string>
