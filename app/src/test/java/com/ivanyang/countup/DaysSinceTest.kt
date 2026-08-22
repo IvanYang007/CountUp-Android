@@ -21,10 +21,9 @@ class DaysSinceTest {
     }
 
     @Test
-    fun `future date produces zero`() {
-        val future = LocalDate.of(2030, 1, 1)
+    fun `future date produces negative countdown`() {
         val today = LocalDate.of(2026, 7, 21)
-        assertEquals(0, daysSince(future, today))
+        assertEquals(-5, daysSince(today.plusDays(5), today))
     }
 
     @Test

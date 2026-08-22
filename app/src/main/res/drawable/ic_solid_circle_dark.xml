@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Zen-paper count circle for night mode: warm dark plate with a faint light
-     rim, pairing with the light-warm count number so it stands out. -->
+<!-- MCM count circle for night mode: warm dark espresso plate with a faint
+     beige rim, pairing with the warm beige count number so it stands out. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="48dp"
     android:height="48dp"
     android:viewportWidth="48"
     android:viewportHeight="48">
-    <!-- faint light rim (20% opacity) -->
+    <!-- faint beige rim (20% opacity) -->
     <path
-        android:fillColor="#33EDEBE6"
+        android:fillColor="#33F5E6D3"
         android:pathData="M24,2 A22,22 0 1 1 23.99,2 Z" />
     <!-- warm dark centre plate -->
     <path
-        android:fillColor="#3B3A36"
+        android:fillColor="#3A3124"
         android:pathData="M24,4 A20,20 0 1 0 23.99,4 Z" />
 </vector>

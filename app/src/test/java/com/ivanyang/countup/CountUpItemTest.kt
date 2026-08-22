@@ -69,6 +69,21 @@ class CountUpItemTest {
     }
 
     @Test
+    fun futureFlagSurvivesRoundTrip() {
+        val flagged = CountUpItem(id = "f", name = "Trip", epochDay = 30000, futureFlag = true)
+        val unflagged = CountUpItem(id = "u", name = "Past", epochDay = 100, futureFlag = false)
+        assertEquals(listOf(flagged, unflagged), decodeItems(encodeItems(listOf(flagged, unflagged))))
+    }
+
+    @Test
+    fun missingFutureFlagFieldDecodesToFalse() {
+        // Legacy items stored before the future flag existed decode with the
+        // flag off, so existing installs keep their current styling.
+        val decoded = decodeItems("[{\"id\":\"a\",\"name\":\"Old\",\"epochDay\":5}]")
+        assertEquals(false, decoded!![0].futureFlag)
+    }
+
+    @Test
     fun oneMalformedElementDoesNotDestroyTheRest() {
         // A single corrupt element is dropped; parseable siblings survive.
         val raw = "[{\"id\":\"a\",\"name\":\"Good\",\"epochDay\":5},{\"id\":123},{\"id\":\"b\",\"name\":\"Also good\",\"epochDay\":9}]"

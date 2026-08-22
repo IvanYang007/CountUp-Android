@@ -13,6 +13,8 @@ data class CountUpItem(
     val name: String,
     val epochDay: Long,
     val icon: String = "",
+    /** True when this item was created or last updated with a future date. */
+    val futureFlag: Boolean = false,
 )
 
 /** Default name used when a name is left blank. */
@@ -34,7 +36,8 @@ internal fun encodeItems(items: List<CountUpItem>): String {
                 .put("id", item.id)
                 .put("name", item.name)
                 .put("epochDay", item.epochDay)
-                .put("icon", item.icon),
+                .put("icon", item.icon)
+                .put("futureFlag", item.futureFlag),
         )
     }
     return arr.toString()
@@ -75,6 +78,7 @@ private fun decodeElement(o: JSONObject?): CountUpItem? {
             name = o.getString("name"),
             epochDay = epochDay,
             icon = o.optString("icon", ""),
+            futureFlag = o.optBoolean("futureFlag", false),
         )
     } catch (_: Exception) {
         null

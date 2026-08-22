@@ -40,8 +40,9 @@ class CountUpStore(context: Context) {
     }
 
     /**
-     * Adds an [item] and confirms the write.
-     * @return true only if the item was persisted.
+     * Adds an [item] and confirms the write. The future flag is set when the
+     * chosen anchor day is after today.
+     * @return the persisted item, or null if the write failed.
      */
     fun addItem(name: String, epochDay: Long): CountUpItem? {
         val trimmed = name.trim()
@@ -50,6 +51,7 @@ class CountUpStore(context: Context) {
             name = trimmed.ifEmpty { DEFAULT_ITEM_NAME },
             epochDay = epochDay,
             icon = SOCIAL_ICON_NAMES.random(),
+            futureFlag = epochDay > LocalDate.now().toEpochDay(),
         )
         return synchronized(lock) {
             val updated = items() + item
@@ -59,6 +61,8 @@ class CountUpStore(context: Context) {
 
     /**
      * Updates the name and/or anchor day of the item with [id], keeping its id.
+     * The future flag is recomputed from the new anchor day, so saving a past
+     * date clears it and saving a future date sets it.
      * @return false if [id] was not found or the write failed.
      */
     fun updateItem(id: String, name: String, epochDay: Long): Boolean {
@@ -67,7 +71,11 @@ class CountUpStore(context: Context) {
             val list = items().toMutableList()
             val index = list.indexOfFirst { it.id == id }
             if (index < 0) return false
-            list[index] = list[index].copy(name = trimmed.ifEmpty { DEFAULT_ITEM_NAME }, epochDay = epochDay)
+            list[index] = list[index].copy(
+                name = trimmed.ifEmpty { DEFAULT_ITEM_NAME },
+                epochDay = epochDay,
+                futureFlag = epochDay > LocalDate.now().toEpochDay(),
+            )
             persist(list)
         }
     }
@@ -83,15 +91,17 @@ class CountUpStore(context: Context) {
 
     /**
      * Resets the item with [id] to a new anchor [epochDay] (e.g. today), keeping
-     * its name and id. @return false if not found or the write failed.
+     * its name and id. Resetting is not a future-date edit, so the future flag
+     * clears. @return false if not found or the write failed.
      */
     fun resetTo(id: String, epochDay: Long): Boolean {
         return synchronized(lock) {
             val list = items().toMutableList()
             val index = list.indexOfFirst { it.id == id }
             if (index < 0) return false
-            if (list[index].epochDay == epochDay) return true // no change needed
-            list[index] = list[index].copy(epochDay = epochDay)
+            val current = list[index]
+            if (current.epochDay == epochDay && !current.futureFlag) return true // no change needed
+            list[index] = current.copy(epochDay = epochDay, futureFlag = false)
             persist(list)
         }
     }

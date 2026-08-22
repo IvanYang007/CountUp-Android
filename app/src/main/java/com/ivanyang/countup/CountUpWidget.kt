@@ -7,8 +7,11 @@ import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.graphics.Color
+import android.graphics.Typeface
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.StyleSpan
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import java.time.LocalDate
@@ -61,7 +64,7 @@ private fun buildBaseViews(context: Context): RemoteViews {
     val night = isNightMode(context)
     val views = RemoteViews(context.packageName, R.layout.countup_widget)
 
-    // Zen paper background, matching the app theme.
+    // Warm beige paper background, matching the app theme.
     views.setInt(R.id.widget_root, "setBackgroundColor", if (night) NIGHT_PAPER else PAPER)
 
     // Tap anywhere outside a cell (and on the empty state) -> open the app.
@@ -139,12 +142,34 @@ internal data class WidgetRowData(
     val id: String,
     val name: String,
     val count: Long,
+    val futureFlag: Boolean,
 )
 
 /** Pure derivation shared by the widget (and unit-tested on the JVM). */
 internal fun widgetRows(items: List<CountUpItem>, today: LocalDate): List<WidgetRowData> =
     items.map { item ->
-        WidgetRowData(id = item.id, name = item.name, count = daysSince(LocalDate.ofEpochDay(item.epochDay), today))
+        WidgetRowData(
+            id = item.id,
+            name = item.name,
+            count = daysSince(LocalDate.ofEpochDay(item.epochDay), today),
+            futureFlag = item.futureFlag,
+        )
+    }
+
+/** True when an item was created/updated with a future date that has now arrived. */
+internal fun arrivedFuture(row: WidgetRowData): Boolean = row.futureFlag && row.count >= 0
+
+/**
+ * Count label for the widget cell. RemoteViews has no typeface API, so bold is
+ * applied as a character style on the text itself.
+ */
+internal fun widgetCountText(count: Long, arrived: Boolean): CharSequence =
+    if (arrived) {
+        val s = SpannableString(count.toString())
+        s.setSpan(StyleSpan(Typeface.BOLD), 0, s.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        s
+    } else {
+        count.toString()
     }
 
 private class WidgetViewsFactory(private val context: Context) : RemoteViewsService.RemoteViewsFactory {
@@ -175,14 +200,24 @@ private class WidgetViewsFactory(private val context: Context) : RemoteViewsServ
 
         views.setTextViewText(R.id.cell_name, row.name)
         views.setTextColor(R.id.cell_name, if (night) NIGHT_MUTED else MUTED)
-        views.setTextViewText(R.id.cell_count, row.count.toString())
-        // Dark ink on the light circle by day; light warm on the dark circle at
-        // night so the number always stands out from the plate and the paper.
-        views.setTextColor(R.id.cell_count, if (night) NIGHT_NUMBER else NUMBER)
-        views.setImageViewResource(
-            R.id.cell_circle,
-            if (night) R.drawable.ic_solid_circle_dark else R.drawable.ic_solid_circle,
-        )
+        val arrived = arrivedFuture(row)
+        views.setTextViewText(R.id.cell_count, widgetCountText(row.count, arrived))
+        if (arrived) {
+            // A future-dated item whose date has now arrived: solid green plate,
+            // dark-red bold count, on both night and day plates.
+            views.setTextColor(R.id.cell_count, ARRIVED_NUMBER)
+            views.setImageViewResource(R.id.cell_circle, R.drawable.ic_circle_green)
+        } else if (night) {
+            // Dark ink on the warm dark plate at night, so the number stands out.
+            views.setTextColor(R.id.cell_count, NIGHT_NUMBER)
+            views.setImageViewResource(R.id.cell_circle, R.drawable.ic_solid_circle_dark)
+        } else {
+            // Day plates rotate through matte MCM accents (olive, orange, mustard);
+            // the number ink flips to deep brown on the light mustard plate.
+            val slot = position % DAY_CIRCLES.size
+            views.setTextColor(R.id.cell_count, DAY_NUMBER_INKS[slot])
+            views.setImageViewResource(R.id.cell_circle, DAY_CIRCLES[slot])
+        }
 
         // Tapping this cell resets ONLY this item to today; the item id rides
         // the fill-in intent onto the grid's template PendingIntent.
@@ -204,16 +239,28 @@ private class WidgetViewsFactory(private val context: Context) : RemoteViewsServ
 }
 
 /** Whether the device is in dark (night) mode. */
-private fun isNightMode(context: Context): Boolean =
-    (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+/** Light palette only (design decision): dark text mode is removed, so this is false. */
+private fun isNightMode(context: Context): Boolean = false
 
-// Zen-paper palette (mirrors MainActivity's named constants).
-private val PAPER: Int = 0xFFF7F6F3.toInt()
-private val NIGHT_PAPER: Int = 0xFF242422.toInt()
-private val MUTED: Int = 0xFF787774.toInt()
-private val NIGHT_MUTED: Int = 0xFFA8A8A3.toInt()
-private val NUMBER: Int = 0xFF2F3437.toInt()
-private val NIGHT_NUMBER: Int = 0xFFF2EEE4.toInt()
+// Mid-century-modern palette (mirrors MainActivity's named constants).
+private val PAPER: Int = 0xFFF5E6D3.toInt()
+private val NIGHT_PAPER: Int = 0xFF241D12.toInt()
+private val MUTED: Int = 0xFF6B5D4F.toInt()
+private val NIGHT_MUTED: Int = 0xFFC4B291.toInt()
+private val NUMBER: Int = 0xFF2C2416.toInt()
+private val NIGHT_NUMBER: Int = 0xFFF5E6D3.toInt()
+private val WHITE: Int = 0xFFFFFFFF.toInt()
+
+// Day-mode count plates rotate through matte MCM accents; number ink follows contrast.
+private val DAY_CIRCLES = intArrayOf(
+    R.drawable.ic_circle_olive,
+    R.drawable.ic_circle_orange,
+    R.drawable.ic_circle_mustard,
+)
+private val DAY_NUMBER_INKS = intArrayOf(WHITE, WHITE, NUMBER)
+
+// Arrived-future styling: solid green plate with a dark red bold count.
+private val ARRIVED_NUMBER: Int = 0xFFB71C1C.toInt()
 
 private const val REQUEST_LAUNCH = 1
 private const val REQUEST_REFRESH = 2

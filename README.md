@@ -7,7 +7,7 @@ the **days since a set of anchor dates** (e.g. last haircut, a habit, an anniver
 
 - Create, rename, and delete any number of count-up items; each has a name, a randomly
   assigned icon from the Material "Social" category, and one anchor date.
-- A zen-paper styled list shows each item's day count with calm add/edit/delete animations.
+- A mid-century-modern styled list shows each item's day count with calm add/edit/delete animations.
 - A home-screen widget shows all items in a **compact 2-per-row grid**, each with a quantity-aware day count and its anchor date.
 - No accounts, no network, no analytics, no database, no background scheduler.
 

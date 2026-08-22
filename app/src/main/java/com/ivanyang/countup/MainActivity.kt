@@ -1,15 +1,14 @@
 package com.ivanyang.countup
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.provider.Settings
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalIndication
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -20,6 +19,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -33,17 +33,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
@@ -55,8 +52,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
@@ -80,9 +83,9 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 
 /**
- * Zen-paper multi-item screen. Displays every count-up item, lets the user add,
- * edit (name + anchor date) and delete items, and refreshes the widget after any
- * confirmed write. No navigation framework, no DI, no repository layer.
+ * Mid-century-modern multi-item screen. Displays every count-up item, lets the
+ * user add, edit (name + anchor date) and delete items, and refreshes the widget
+ * after any confirmed write. No navigation framework, no DI, no repository layer.
  */
 class MainActivity : ComponentActivity() {
 
@@ -253,58 +256,51 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-/** Warm monochrome zen-paper theme. Serif for emphasis, sans for body. */
+/** Mid-century-modern theme: warm beige paper, deep-brown ink, sans-serif type. */
 @Composable
 private fun CountUpTheme(content: @Composable () -> Unit) {
-    val colors = if (isSystemInDarkTheme()) darkZenColors() else lightZenColors()
-    MaterialTheme(colorScheme = colors, content = content)
+    // Light theme only (design decision): the system dark mode is ignored.
+    MaterialTheme(colorScheme = lightMcmColors(), content = content)
 }
 
-// Zen-paper palette: warm monochrome, named so theme edits stay consistent.
-private val ZenInk = Color(0xFF2F3437)
-private val ZenWhite = Color(0xFFFFFFFF)
-private val ZenPaperBackground = Color(0xFFF7F6F3)
-private val ZenPaperSurface = Color(0xFFF1EFEA)
-private val ZenPaperCard = Color(0xFFFFFFFF)
-private val ZenMuted = Color(0xFF787774)
-private val ZenRule = Color(0xFFEAEAEA)
-private val ZenRuleVariant = Color(0xFFE3E1DC)
-private val ZenError = Color(0xFF9F2F2D)
-private val ZenNightEmphasis = Color(0xFFEDEBE6)
-private val ZenNightBackground = Color(0xFF1B1B19)
-private val ZenNightSurface = Color(0xFF242422)
-private val ZenNightSurfaceVariant = Color(0xFF2C2C29)
-private val ZenNightMuted = Color(0xFFA8A8A3)
-private val ZenNightRule = Color(0xFF3A3A37)
-private val ZenNightRuleVariant = Color(0xFF333330)
-private val ZenNightError = Color(0xFFF0A6A3)
+// Mid-century-modern palette: warm beige paper (#F5E6D3), deep-brown ink
+// (#2C2416), matte accent pops, walnut for secondary text. Named so theme edits
+// stay consistent.
+private val McmInk = Color(0xFF2C2416)
+private val McmWhite = Color(0xFFFFFFFF)
+private val ArrivedFutureGreen = Color(0xFF66BB6A)
+private val ArrivedFutureRed = Color(0xFFB71C1C)
+private val McmPaperBackground = Color(0xFFF5E6D3)
+private val McmPaperSurface = Color(0xFFEBDCC3)
+private val McmPaperCard = Color(0xFFFFFFFF)
+private val McmMuted = Color(0xFF6B5D4F)
+private val McmRule = Color(0xFFE3D3B8)
+private val McmRuleVariant = Color(0xFFD9C6A6)
+private val McmOrange = Color(0xFFD97642)
+private val McmOlive = Color(0xFF4A7C59)
+private val McmError = Color(0xFFA64942)
 
-private fun lightZenColors() = lightColorScheme(
-    primary = ZenInk,
-    onPrimary = ZenWhite,
-    background = ZenPaperBackground,
-    onBackground = ZenInk,
-    surface = ZenPaperCard,
-    onSurface = ZenInk,
-    surfaceVariant = ZenPaperSurface,
-    onSurfaceVariant = ZenMuted,
-    outline = ZenRule,
-    outlineVariant = ZenRuleVariant,
-    error = ZenError,
+// Item accent chips: orange, mustard, olive, dusty blue, coral, teak — picked
+// deterministically by id hash so an item keeps its colour across launches.
+private val McmDayAccents = listOf(
+    Color(0xFFD97642), Color(0xFFD4A574), Color(0xFF4A7C59),
+    Color(0xFF7D9BA8), Color(0xFFE57A77), Color(0xFF8B7355),
 )
 
-private fun darkZenColors() = darkColorScheme(
-    primary = ZenNightEmphasis,
-    onPrimary = ZenNightBackground,
-    background = ZenNightBackground,
-    onBackground = ZenNightEmphasis,
-    surface = ZenNightSurface,
-    onSurface = ZenNightEmphasis,
-    surfaceVariant = ZenNightSurfaceVariant,
-    onSurfaceVariant = ZenNightMuted,
-    outline = ZenNightRule,
-    outlineVariant = ZenNightRuleVariant,
-    error = ZenNightError,
+private fun lightMcmColors() = lightColorScheme(
+    primary = McmOrange,
+    onPrimary = McmWhite,
+    tertiary = McmOlive,
+    onTertiary = McmWhite,
+    background = McmPaperBackground,
+    onBackground = McmInk,
+    surface = McmPaperCard,
+    onSurface = McmInk,
+    surfaceVariant = McmPaperSurface,
+    onSurfaceVariant = McmMuted,
+    outline = McmRule,
+    outlineVariant = McmRuleVariant,
+    error = McmError,
 )
 
 @Composable
@@ -329,6 +325,32 @@ private fun Modifier.pressScale(
 private fun isReducedMotion(context: Context): Boolean =
     Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
 
+/**
+ * Seeded cardstock tile baked once into a bitmap and stretched to fill: an even,
+ * fine, low-amplitude warm grain — the soft tooth of 100 lb light card stock.
+ * No blobs, no directional fibers (those read as "dirty"). Cached by [remember],
+ * so a redraw costs one scaled drawImage. Fixed seed keeps it stable.
+ */
+@Composable
+private fun rememberPaperTexture(): ImageBitmap =
+    remember {
+        val w = 220
+        val h = 480
+        val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        val rng = kotlin.random.Random(2048L)
+        val px = IntArray(w * h)
+        for (i in px.indices) {
+            val n = rng.nextInt(13) - 5     // -5 .. +7 luminance drift
+            val rj = rng.nextInt(3) - 1     // -1 .. +1 warm jitter
+            val r = (0xF5 + n + rj).coerceIn(0, 255)
+            val g = (0xE6 + n).coerceIn(0, 255)
+            val b = (0xD3 + n - rj).coerceIn(0, 255)
+            px[i] = (0xFF shl 24) or (r shl 16) or (g shl 8) or b
+        }
+        bmp.setPixels(px, 0, w, 0, 0, w, h)
+        bmp.asImageBitmap()
+    }
+
 @Composable
 private fun CountUpList(
     items: List<CountUpItem>,
@@ -340,64 +362,83 @@ private fun CountUpList(
 ) {
     val localContext = LocalContext.current
     val reduceMotion = remember(localContext) { isReducedMotion(localContext) }
-    Column(modifier = modifier.fillMaxSize().padding(horizontal = 20.dp)) {
-        Spacer(Modifier.padding(top = 16.dp))
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            Image(
-                painter = painterResource(R.drawable.ic_zen_enso),
-                contentDescription = null,
-                modifier = Modifier.size(34.dp),
-            )
-            Spacer(Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.app_name),
-                    style = MaterialTheme.typography.headlineMedium.copy(letterSpacing = (-0.5).sp),
-                    fontFamily = FontFamily.Serif,
-                    color = MaterialTheme.colorScheme.onBackground,
+    val paper = rememberPaperTexture()
+    Box(modifier = modifier.fillMaxSize()) {
+        // Cardstock texture layer: one cached low-res bitmap stretched to fill;
+        // per-frame cost is a single drawImage. Delete this Image to disable.
+        Image(
+            bitmap = paper,
+            contentDescription = null,
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier.matchParentSize(),
+        )
+        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
+            Spacer(Modifier.padding(top = 16.dp))
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                Image(
+                    painter = painterResource(R.drawable.ic_zen_enso),
+                    contentDescription = null,
+                    modifier = Modifier.size(44.dp),
                 )
-                Text(
-                    text = stringResource(R.string.app_subtitle),
-                    style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.2.sp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            // New-item control: a clean bordered "+" button in the top-right corner.
-            val plusInteraction = rememberPressSource()
-            val newItemLabel = stringResource(R.string.new_item)
-            IconButton(
-                onClick = onNewItem,
-                interactionSource = plusInteraction,
-                modifier = Modifier
-                    .size(40.dp)
-                    .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
-                    .pressScale(plusInteraction)
-                    .semantics { contentDescription = newItemLabel },
-            ) {
-                Text(
-                    text = "+",
-                    fontSize = 22.sp,
-                    fontFamily = FontFamily.Serif,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                )
-            }
-        }
-        Spacer(Modifier.padding(top = 20.dp))
-
-        if (items.isEmpty()) {
-            EmptyState(onNewItem = onNewItem, modifier = Modifier.fillMaxWidth().padding(top = 48.dp))
-        } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(items, key = { it.id }) { item ->
-                    ItemCard(
-                        item = item,
-                        onClick = { onItemTap(item) },
-                        onDelete = { onDeleteRequest(item) },
-                        onReset = { onResetRequest(item) },
-                        modifier = if (reduceMotion) Modifier else Modifier.animateItem(),
+                Spacer(Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.app_name),
+                        style = MaterialTheme.typography.headlineLarge.copy(letterSpacing = (-0.5).sp),
+                        fontFamily = FontFamily.SansSerif,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground,
                     )
+                    Text(
+                        text = stringResource(R.string.app_subtitle).uppercase(),
+                        style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.6.sp, fontSize = 14.sp),
+                        fontFamily = FontFamily.SansSerif,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                // New-item control: filled olive circle with a white "+" in the
+                // top-right corner — the MCM accent pop.
+                val plusInteraction = rememberPressSource()
+                val newItemLabel = stringResource(R.string.new_item)
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.tertiary)
+                        .clickable(
+                            interactionSource = plusInteraction,
+                            indication = LocalIndication.current,
+                            onClick = onNewItem,
+                        )
+                        .pressScale(plusInteraction)
+                        .semantics { contentDescription = newItemLabel },
+                ) {
+                    Text(
+                        text = "+",
+                        fontSize = 22.sp,
+                        fontFamily = FontFamily.SansSerif,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onTertiary,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    )
+                }
+            }
+            Spacer(Modifier.padding(top = 20.dp))
+
+            if (items.isEmpty()) {
+                EmptyState(onNewItem = onNewItem, modifier = Modifier.fillMaxWidth().padding(top = 48.dp))
+            } else {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    items(items, key = { it.id }) { item ->
+                        ItemCard(
+                            item = item,
+                            onClick = { onItemTap(item) },
+                            onDelete = { onDeleteRequest(item) },
+                            onReset = { onResetRequest(item) },
+                            modifier = if (reduceMotion) Modifier else Modifier.animateItem(),
+                        )
+                    }
                 }
             }
         }
@@ -407,7 +448,13 @@ private fun CountUpList(
 @Composable
 private fun EmptyState(onNewItem: () -> Unit, modifier: Modifier = Modifier) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(stringResource(R.string.empty_heading), style = MaterialTheme.typography.titleMedium, fontFamily = FontFamily.Serif)
+        Spacer(Modifier.padding(top = 8.dp))
+        Text(
+            stringResource(R.string.empty_heading),
+            style = MaterialTheme.typography.titleMedium,
+            fontFamily = FontFamily.SansSerif,
+            fontWeight = FontWeight.SemiBold,
+        )
         Spacer(Modifier.padding(top = 6.dp))
         Text(
             stringResource(R.string.empty_body),
@@ -416,9 +463,14 @@ private fun EmptyState(onNewItem: () -> Unit, modifier: Modifier = Modifier) {
         )
         Spacer(Modifier.padding(top = 20.dp))
         val emptyInteraction = rememberPressSource()
-        TextButton(
+        Button(
             onClick = onNewItem,
             interactionSource = emptyInteraction,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.tertiary,
+                contentColor = MaterialTheme.colorScheme.onTertiary,
+            ),
+            shape = RoundedCornerShape(percent = 50),
             modifier = Modifier.pressScale(emptyInteraction),
         ) { Text(stringResource(R.string.new_item)) }
     }
@@ -439,6 +491,15 @@ fun ItemCard(
     val resetDesc = stringResource(R.string.reset)
     val deleteDesc = stringResource(R.string.delete)
 
+    // Deterministic MCM accent chip for this item's icon; the glyph ink follows
+    // the chip's luminance so it stays readable on every accent.
+    val accents = McmDayAccents
+    // An item created/updated with a future date, once its day has arrived:
+    // solid green circle and a red bold count instead of the MCM accent chip.
+    val arrivedFuture = item.futureFlag && count >= 0
+    val accent = if (arrivedFuture) ArrivedFutureGreen else accents[(item.id.hashCode() % accents.size + accents.size) % accents.size]
+    val onAccent = if (accent.luminance() > 0.35f) McmInk else McmWhite
+
     // Number + "days" share one baseline (rendered as a single annotated string),
     // so they align optically and scale together regardless of font size.
     val unitLabel = pluralStringResource(R.plurals.days_unit, count.toInt(), count.toInt())
@@ -446,9 +507,9 @@ fun ItemCard(
         withStyle(
             SpanStyle(
                 fontSize = 44.sp,
-                fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface,
+                fontFamily = FontFamily.SansSerif,
+                fontWeight = FontWeight.Bold,
+                color = if (arrivedFuture) ArrivedFutureRed else MaterialTheme.colorScheme.onSurface,
             ),
         ) {
             append(count.toString())
@@ -456,8 +517,8 @@ fun ItemCard(
         append(" ")
         withStyle(
             SpanStyle(
-                fontSize = 18.sp,
-                fontFamily = FontFamily.Serif,
+                fontSize = 16.sp,
+                fontFamily = FontFamily.SansSerif,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             ),
         ) {
@@ -468,7 +529,14 @@ fun ItemCard(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outline), RoundedCornerShape(12.dp))
+            // Soft warm shadow instead of a hairline border: matte card, MCM style.
+            .shadow(
+                elevation = 3.dp,
+                shape = RoundedCornerShape(20.dp),
+                ambientColor = McmInk.copy(alpha = 0.10f),
+                spotColor = McmInk.copy(alpha = 0.14f),
+            )
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(20.dp))
             .clickable(
                 interactionSource = cardInteraction,
                 indication = LocalIndication.current,
@@ -478,16 +546,22 @@ fun ItemCard(
             .padding(horizontal = 16.dp, vertical = 14.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                painter = painterResource(iconRes(item.icon.ifEmpty { DEFAULT_ICON })),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(18.dp),
-            )
-            Spacer(Modifier.width(8.dp))
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.size(30.dp).background(accent, CircleShape),
+            ) {
+                Icon(
+                    painter = painterResource(iconRes(item.icon.ifEmpty { DEFAULT_ICON })),
+                    contentDescription = null,
+                    tint = onAccent,
+                    modifier = Modifier.size(16.dp),
+                )
+            }
+            Spacer(Modifier.width(10.dp))
             Text(
-                text = item.name,
-                style = MaterialTheme.typography.labelLarge,
+                text = item.name.uppercase(),
+                style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 1.sp),
+                fontFamily = FontFamily.SansSerif,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f),
             )
@@ -528,8 +602,8 @@ fun ItemCard(
             overflow = TextOverflow.Ellipsis,
         )
         Text(
-            text = stringResource(R.string.since_label, formatLocalized(LocalDate.ofEpochDay(item.epochDay))),
-            style = MaterialTheme.typography.labelSmall,
+            text = stringResource(R.string.since_label, formatLocalized(LocalDate.ofEpochDay(item.epochDay))).uppercase(),
+            style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
@@ -629,17 +703,10 @@ private fun DatePickerDialog(
     onDismiss: () -> Unit,
     onDatePicked: (LocalDate) -> Unit,
 ) {
-    val today = LocalDate.now()
-    val selectableDates = remember(today) {
-        val todayUtcNoon = today.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli() + 12 * 3600_000L
-        object : SelectableDates {
-            override fun isSelectableDate(utcTimeMillis: Long): Boolean = utcTimeMillis <= todayUtcNoon
-            override fun isSelectableYear(year: Int): Boolean = year <= today.year
-        }
-    }
+    // No SelectableDates restriction: future dates are allowed so an item can
+    // count down to its anchor day.
     val state = rememberDatePickerState(
         initialSelectedDateMillis = initialDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),
-        selectableDates = selectableDates,
     )
 
     AlertDialog(

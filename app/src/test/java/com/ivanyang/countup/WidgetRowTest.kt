@@ -78,4 +78,21 @@ class WidgetRowTest {
         assertEquals("Very Old", rows[0].name)
         assertEquals(12000, rows[0].count)
     }
+
+    @Test
+    fun futureAnchorProducesNegativeCountAndCarriesFlag() {
+        val items = listOf(
+            CountUpItem(id = "f", name = "Trip", epochDay = today.toEpochDay() + 3, futureFlag = true),
+            CountUpItem(id = "p", name = "Past", epochDay = today.toEpochDay() - 2, futureFlag = true),
+            CountUpItem(id = "n", name = "Normal", epochDay = today.toEpochDay() - 1, futureFlag = false),
+        )
+        val rows = widgetRows(items, today)
+        assertEquals(-3, rows[0].count)
+        assertTrue(rows[0].futureFlag)
+        // Arrived-future styling applies only when the flag is set AND the
+        // anchor day has arrived or passed.
+        assertTrue(!arrivedFuture(rows[0]))
+        assertTrue(arrivedFuture(rows[1]))
+        assertTrue(!arrivedFuture(rows[2]))
+    }
 }

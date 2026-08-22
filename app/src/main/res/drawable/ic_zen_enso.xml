@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Zen circle mark: ink ring + paper gap + focus dot. Warm monochrome, no gradient. -->
+<!-- Mid-century ensō mark: an orange ring in the accent colour with a genuinely
+     transparent centre so the paper texture shows through. The focus dot sits
+     off-centre, on the upper part of the ring (the original position). -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="64dp"
     android:height="64dp"
     android:viewportWidth="64"
     android:viewportHeight="64">
-    <!-- outer ink disc -->
+    <!-- ring (stroke; the middle stays transparent) -->
     <path
-        android:fillColor="#2F3437"
-        android:pathData="M32,2 A30,30 0 1 1 31.99,2 Z" />
-    <!-- paper centre cut-out (makes the ring) -->
+        android:strokeColor="#D97642"
+        android:strokeWidth="8"
+        android:fillColor="#00000000"
+        android:pathData="M32,32 m-24,0 a24,24 0 1 1 48,0 a24,24 0 1 1 -48,0" />
+    <!-- centre dot: off-centre at the top, not dead centre -->
     <path
-        android:fillColor="#F7F6F3"
-        android:pathData="M32,12 A20,20 0 1 1 31.99,12 Z" />
-    <!-- ink focus dot -->
-    <path
-        android:fillColor="#2F3437"
+        android:fillColor="#D97642"
         android:pathData="M32,26 m-6,0 a6,6 0 1 1 12,0 a6,6 0 1 1 -12,0" />
 </vector>

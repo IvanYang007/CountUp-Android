@@ -10,9 +10,9 @@ import java.time.temporal.ChronoUnit
  * days are handled by [LocalDate] and never affect the day count.
  * Reading the count never mutates the stored date.
  *
- * @return whole days from [anchorDate] to [today], clamped to >= 0 so a
- *         future anchor displays 0.
+ * @return whole days from [anchorDate] to [today]; negative when [anchorDate]
+ *         is in the future, so a future anchor counts down (e.g. -5).
  */
 fun daysSince(anchorDate: LocalDate, today: LocalDate): Long {
-    return ChronoUnit.DAYS.between(anchorDate, today).coerceAtLeast(0)
+    return ChronoUnit.DAYS.between(anchorDate, today)
 }

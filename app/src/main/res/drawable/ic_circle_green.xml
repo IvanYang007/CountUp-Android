@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Arrived-future count plate: flat solid green, no rim, no gradient.
+     Used for items created or updated with a future date once their day arrives. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <path
+        android:fillColor="#66BB6A"
+        android:pathData="M24,2 A22,22 0 1 1 23.99,2 Z" />
+</vector>
