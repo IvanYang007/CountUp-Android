@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.provider.Settings
+import android.widget.Toast
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -243,9 +244,18 @@ class MainActivity : ComponentActivity() {
 
     private fun toggleWidgetVisibility(id: String) {
         val target = items.firstOrNull { it.id == id } ?: return
-        if (store.setWidgetVisibility(id, !target.showInWidget)) {
+        val newVisibility = !target.showInWidget
+        if (store.setWidgetVisibility(id, newVisibility)) {
             items = store.items()
             refreshWidget()
+            Toast.makeText(
+                this,
+                getString(
+                    if (newVisibility) R.string.toast_shown_in_widget else R.string.toast_hidden_from_widget,
+                    target.name,
+                ),
+                Toast.LENGTH_SHORT,
+            ).show()
         } else {
             errorMessage = getString(R.string.error_save_failed)
         }
