@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -611,14 +610,14 @@ fun ItemCard(
                 contentDescription = eyeDesc,
                 tint = if (eyeVisible) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier
-                    .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+                    .size(18.dp)
                     .clickable(
                         interactionSource = eyeInteraction,
                         indication = LocalIndication.current,
                         onClick = onToggleWidget,
                     )
                     .pressScale(eyeInteraction)
-                    .padding(15.dp),
+                    .padding(4.dp),
             )
             Spacer(Modifier.width(6.dp))
             // Reset and Delete symbols, top-right of the card.
@@ -627,7 +626,6 @@ fun ItemCard(
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
-                    .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
                     .clickable(
                         interactionSource = resetInteraction,
                         indication = LocalIndication.current,
@@ -643,7 +641,6 @@ fun ItemCard(
                 fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier
-                    .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
                     .clickable(
                         interactionSource = deleteInteraction,
                         indication = LocalIndication.current,

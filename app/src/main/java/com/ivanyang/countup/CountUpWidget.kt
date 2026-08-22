@@ -241,11 +241,8 @@ private class WidgetViewsFactory(private val context: Context) : RemoteViewsServ
 }
 
 /** Whether the device is in dark (night) mode. */
-private fun isNightMode(context: Context): Boolean {
-    val uiMode = context.resources.configuration.uiMode and
-        android.content.res.Configuration.UI_MODE_NIGHT_MASK
-    return uiMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
-}
+/** Light palette only (design decision): dark text mode is removed, so this is false. */
+private fun isNightMode(context: Context): Boolean = false
 
 // Mid-century-modern palette (mirrors MainActivity's named constants).
 private val PAPER: Int = 0xFFF5E6D3.toInt()
