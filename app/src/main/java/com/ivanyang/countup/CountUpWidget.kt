@@ -132,7 +132,7 @@ class ResetCountReceiver : BroadcastReceiver() {
             store.markWidgetRefreshed(today)
             // In-place instant feedback: show confirmation toast on the home screen.
             Toast.makeText(
-                context,
+                context.applicationContext,
                 context.getString(R.string.widget_reset_toast, name),
                 Toast.LENGTH_SHORT,
             ).show()
