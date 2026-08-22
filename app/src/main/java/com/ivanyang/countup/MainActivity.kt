@@ -104,7 +104,6 @@ class MainActivity : ComponentActivity() {
         store = CountUpStore(this)
         items = store.items()
         restoreDialogState(savedInstanceState)
-        handleWidgetResetIntent(intent)
         enableEdgeToEdge()
 
         setContent {
@@ -199,24 +198,6 @@ class MainActivity : ComponentActivity() {
         // not spam Android's widget throttler.
         if (!store.widgetRefreshedOn(LocalDate.now().toEpochDay())) {
             refreshWidget()
-        }
-    }
-
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        handleWidgetResetIntent(intent)
-    }
-
-    /**
-     * If the activity was launched from a widget cell tap (ACTION_CONFIRM_RESET),
-     * resolve the item id and show the existing reset confirmation dialog.
-     * The action is consumed to prevent re-triggering on config change.
-     */
-    private fun handleWidgetResetIntent(intent: Intent?) {
-        if (intent?.action == CountUpWidgetReceiver.ACTION_CONFIRM_RESET) {
-            val id = intent.getStringExtra(ResetCountReceiver.EXTRA_ITEM_ID) ?: return
-            pendingReset = items.firstOrNull { it.id == id }
-            intent.action = null // consume so rotation doesn't re-trigger
         }
     }
 

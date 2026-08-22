@@ -14,6 +14,7 @@ import android.text.Spanned
 import android.text.style.StyleSpan
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
+import android.widget.Toast
 import java.time.LocalDate
 
 /**
@@ -47,8 +48,6 @@ class CountUpWidgetReceiver : AppWidgetProvider() {
     companion object {
         /** Broadcast action sent by the widget's refresh button. */
         const val ACTION_REFRESH = "com.ivanyang.countup.action.WIDGET_REFRESH"
-        /** Activity action: widget cell tap requests a confirmed reset via the app's dialog. */
-        const val ACTION_CONFIRM_RESET = "com.ivanyang.countup.action.CONFIRM_RESET"
     }
 }
 
@@ -93,18 +92,20 @@ private fun buildBaseViews(context: Context): RemoteViews {
         if (night) R.drawable.ic_refresh_dark else R.drawable.ic_refresh,
     )
 
+    // Cell taps: template broadcast to the reset receiver; each cell fills in
+    // the tapped item's id (see the factory's setOnClickFillInIntent).
     // SECURITY: FLAG_MUTABLE is required here — this is a RemoteViews collection
     // template PendingIntent. The launcher merges each cell's fill-in intent (item
     // id) into this template at tap time. An immutable template silently drops the
     // fill-in extras, breaking all cell taps. The only extra is a UUID item id;
-    // the activity validates it against the store before showing a confirmation.
-    val resetViaApp = PendingIntent.getActivity(
+    // the receiver validates it against the store before acting.
+    val reset = PendingIntent.getBroadcast(
         context,
         REQUEST_RESET,
-        Intent(context, MainActivity::class.java).setAction(CountUpWidgetReceiver.ACTION_CONFIRM_RESET),
+        Intent(context, ResetCountReceiver::class.java),
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE,
     )
-    views.setPendingIntentTemplate(R.id.widget_grid, resetViaApp)
+    views.setPendingIntentTemplate(R.id.widget_grid, reset)
 
     // Bind the collection and designate the empty view the launcher shows when
     // there is nothing to list.
@@ -114,18 +115,27 @@ private fun buildBaseViews(context: Context): RemoteViews {
     return views
 }
 
-/** Resets one item's anchor date to today directly from the widget. */
+/** Resets one item's anchor date to today directly from the widget and shows a Toast. */
 class ResetCountReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val id = intent.getStringExtra(EXTRA_ITEM_ID) ?: return
         val store = CountUpStore(context)
-        if (store.resetTo(id, LocalDate.now().toEpochDay())) {
+        val item = store.items().firstOrNull { it.id == id }
+        val name = item?.name ?: DEFAULT_ITEM_NAME
+        val today = LocalDate.now().toEpochDay()
+        if (store.resetTo(id, today)) {
             // Push synchronously from the app process: the launcher redraws
             // immediately, no composition pipeline in between.
             pushWidgetUpdate(context)
             // Keep the app's resume-time refresh gate accurate for today.
-            store.markWidgetRefreshed(LocalDate.now().toEpochDay())
+            store.markWidgetRefreshed(today)
+            // In-place instant feedback: show confirmation toast on the home screen.
+            Toast.makeText(
+                context,
+                context.getString(R.string.widget_reset_toast, name),
+                Toast.LENGTH_SHORT,
+            ).show()
         }
     }
 

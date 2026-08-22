@@ -43,4 +43,5 @@
     <string name="widget_description">Days since each count-up anchor</string>
     <string name="widget_empty">Add items in the app to see your count-ups.</string>
     <string name="widget_refresh">Refresh counts</string>
+    <string name="widget_reset_toast">Reset “%1$s” to today</string>
 </resources>
