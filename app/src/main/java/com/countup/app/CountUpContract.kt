@@ -58,6 +58,7 @@ sealed interface CountUpUiEffect {
     data class ShowSnackbar(
         @get:StringRes val messageRes: Int,
         val formatArg: String? = null,
+        @get:StringRes val formatArgRes: Int? = null,
     ) : CountUpUiEffect
 
     data object RefreshWidget : CountUpUiEffect

@@ -41,10 +41,10 @@ class MainActivity : ComponentActivity() {
                     viewModel.effects.collect { effect ->
                         when (effect) {
                             is CountUpUiEffect.ShowSnackbar -> {
-                                val message = if (effect.formatArg != null) {
-                                    getString(effect.messageRes, effect.formatArg)
-                                } else {
-                                    getString(effect.messageRes)
+                                val message = when {
+                                    effect.formatArgRes != null -> getString(effect.messageRes, getString(effect.formatArgRes))
+                                    effect.formatArg != null -> getString(effect.messageRes, effect.formatArg)
+                                    else -> getString(effect.messageRes)
                                 }
                                 snackbarHostState.showSnackbar(message)
                             }

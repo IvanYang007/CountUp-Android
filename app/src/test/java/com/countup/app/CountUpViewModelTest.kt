@@ -96,6 +96,7 @@ class CountUpViewModelTest {
             val snackbarEffect = awaitItem()
             assertTrue(snackbarEffect is CountUpUiEffect.ShowSnackbar)
             assertEquals(R.string.bg_switched_toast, (snackbarEffect as CountUpUiEffect.ShowSnackbar).messageRes)
+            assertEquals(BackgroundTheme.MOUNTAIN.next().labelRes, snackbarEffect.formatArgRes)
 
             val refreshEffect = awaitItem()
             assertTrue(refreshEffect is CountUpUiEffect.RefreshWidget)

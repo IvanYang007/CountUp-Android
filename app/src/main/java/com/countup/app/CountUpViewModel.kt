@@ -53,7 +53,12 @@ class CountUpViewModel(
                 val next = _state.value.backgroundTheme.next()
                 repository.setBackgroundTheme(next)
                 _state.update { it.copy(backgroundTheme = next) }
-                emitEffect(CountUpUiEffect.ShowSnackbar(R.string.bg_switched_toast))
+                emitEffect(
+                    CountUpUiEffect.ShowSnackbar(
+                        messageRes = R.string.bg_switched_toast,
+                        formatArgRes = next.labelRes,
+                    )
+                )
                 emitEffect(CountUpUiEffect.RefreshWidget)
             }
             is CountUpUiEvent.OpenEditor -> {
