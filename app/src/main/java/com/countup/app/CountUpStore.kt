@@ -33,7 +33,11 @@ class CountUpStore(context: Context) {
     fun items(): List<CountUpItem> {
         return synchronized(lock) {
             // Tier 1: Primary SharedPreferences read
-            val raw = prefs.getString(KEY_ITEMS, null)
+            val raw = try {
+                prefs.getString(KEY_ITEMS, null)
+            } catch (_: ClassCastException) {
+                null
+            }
             if (!raw.isNullOrBlank()) {
                 val decoded = decodeItems(raw)
                 if (decoded != null) {

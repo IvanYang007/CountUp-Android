@@ -157,7 +157,7 @@ internal fun decodeElement(o: JSONObject?): CountUpItem? {
     return try {
         val epochDay = when (val rawVal = o.opt("epochDay")) {
             is Number -> rawVal.toLong()
-            is String -> rawVal.toLongOrNull()
+            is String -> rawVal.toLongOrNull() ?: rawVal.toDoubleOrNull()?.toLong()
             else -> null
         } ?: return null
 

@@ -157,14 +157,16 @@ class ResetCountReceiver : BroadcastReceiver() {
         @Volatile
         private var armedTimestamp: Long = 0L
 
+        internal var clock: () -> Long = { SystemClock.elapsedRealtime() }
+
         fun isArmed(id: String): Boolean {
-            val now = SystemClock.elapsedRealtime()
+            val now = try { clock() } catch (_: Exception) { System.currentTimeMillis() }
             return armedItemId == id && (now - armedTimestamp) < ARMED_TIMEOUT_MS
         }
 
         fun arm(id: String) {
             armedItemId = id
-            armedTimestamp = SystemClock.elapsedRealtime()
+            armedTimestamp = try { clock() } catch (_: Exception) { System.currentTimeMillis() }
         }
 
         fun disarm() {
