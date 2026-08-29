@@ -690,7 +690,12 @@ fun ItemCard(
                     overflow = TextOverflow.Ellipsis,
                 )
                 Text(
-                    text = stringResource(R.string.since_label, formatLocalized(LocalDate.ofEpochDay(item.epochDay))).uppercase(),
+                    text = formatAnchorDateSubLabel(
+                        count = count,
+                        date = LocalDate.ofEpochDay(item.epochDay),
+                        sinceTemplate = stringResource(R.string.since_label),
+                        untilTemplate = stringResource(R.string.until_label),
+                    ),
                     style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

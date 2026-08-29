@@ -23,3 +23,19 @@ fun datePickerMillisToLocalDate(value: Long): LocalDate {
 fun formatLocalized(date: LocalDate): String {
     return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(date)
 }
+
+/**
+ * Derives the uppercase date sub-label for a count-up card.
+ * - When [count] < 0 (future anchor date): returns "UNTIL <date>"
+ * - When [count] >= 0 (today or past date): returns "SINCE <date>"
+ */
+fun formatAnchorDateSubLabel(
+    count: Long,
+    date: LocalDate,
+    sinceTemplate: String,
+    untilTemplate: String,
+): String {
+    val formattedDate = formatLocalized(date)
+    val template = if (count < 0) untilTemplate else sinceTemplate
+    return String.format(template, formattedDate).uppercase()
+}

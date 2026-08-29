@@ -17,6 +17,7 @@
     <string name="empty_heading">Nothing here yet</string>
     <string name="empty_body">Add your first count-up to start tracking days.</string>
     <string name="since_label">since %1$s</string>
+    <string name="until_label">until %1$s</string>
     <string name="delete">Delete</string>
     <string name="reset">Reset</string>
     <string name="widget_hide">Hide from widget</string>
