@@ -10,6 +10,12 @@ class AbstractBackgroundTest {
     @Test
     fun fromId_resolvesValidAndFallbackIds() {
         assertEquals(BackgroundTheme.AUTO_DAILY, BackgroundTheme.fromId("auto_daily"))
+        assertEquals(BackgroundTheme.MOUNTAIN, BackgroundTheme.fromId("mountain"))
+        assertEquals(BackgroundTheme.SAND_DUNES, BackgroundTheme.fromId("sand_dunes"))
+        assertEquals(BackgroundTheme.SEA_HORIZON, BackgroundTheme.fromId("sea_horizon"))
+        assertEquals(BackgroundTheme.SOLITARY_ISLE, BackgroundTheme.fromId("solitary_isle"))
+        assertEquals(BackgroundTheme.WILLOW_LEAVES, BackgroundTheme.fromId("willow_leaves"))
+        assertEquals(BackgroundTheme.ZEN_BAMBOO, BackgroundTheme.fromId("zen_bamboo"))
         assertEquals(BackgroundTheme.DREAM_BOAT, BackgroundTheme.fromId("dream_boat"))
         assertEquals(BackgroundTheme.CLEAR_SPRING, BackgroundTheme.fromId("clear_spring"))
         assertEquals(BackgroundTheme.DESERT_SUNSET, BackgroundTheme.fromId("desert_sunset"))
@@ -18,14 +24,9 @@ class AbstractBackgroundTest {
         assertEquals(BackgroundTheme.ANCIENT_ROAD, BackgroundTheme.fromId("ancient_road"))
         assertEquals(BackgroundTheme.SPRING_RAIN, BackgroundTheme.fromId("spring_rain"))
 
-        // Backward compatibility aliases
-        assertEquals(BackgroundTheme.DREAM_BOAT, BackgroundTheme.fromId("sea_horizon"))
-        assertEquals(BackgroundTheme.CLEAR_SPRING, BackgroundTheme.fromId("solitary_isle"))
-        assertEquals(BackgroundTheme.DESERT_SUNSET, BackgroundTheme.fromId("sand_dunes"))
-        assertEquals(BackgroundTheme.ANCIENT_ROAD, BackgroundTheme.fromId("mountain"))
-        assertEquals(BackgroundTheme.SPRING_RAIN, BackgroundTheme.fromId("willow_leaves"))
-        assertEquals(BackgroundTheme.SPRING_RAIN, BackgroundTheme.fromId("cold_river_snow"))
-        assertEquals(BackgroundTheme.SPRING_RAIN, BackgroundTheme.fromId("misty_grove"))
+        // Legacy fallbacks
+        assertEquals(BackgroundTheme.WILLOW_LEAVES, BackgroundTheme.fromId("cold_river_snow"))
+        assertEquals(BackgroundTheme.ZEN_BAMBOO, BackgroundTheme.fromId("misty_grove"))
 
         // Fallbacks
         assertEquals(BackgroundTheme.AUTO_DAILY, BackgroundTheme.fromId(null))
@@ -34,7 +35,7 @@ class AbstractBackgroundTest {
     }
 
     @Test
-    fun next_cyclesThroughAllThemesInOrder() {
+    fun next_cyclesThroughAll14EntriesInOrder() {
         var current = BackgroundTheme.AUTO_DAILY
         val sequence = mutableListOf<BackgroundTheme>()
         repeat(BackgroundTheme.entries.size) {
@@ -44,6 +45,12 @@ class AbstractBackgroundTest {
 
         assertEquals(
             listOf(
+                BackgroundTheme.MOUNTAIN,
+                BackgroundTheme.SAND_DUNES,
+                BackgroundTheme.SEA_HORIZON,
+                BackgroundTheme.SOLITARY_ISLE,
+                BackgroundTheme.WILLOW_LEAVES,
+                BackgroundTheme.ZEN_BAMBOO,
                 BackgroundTheme.DREAM_BOAT,
                 BackgroundTheme.CLEAR_SPRING,
                 BackgroundTheme.DESERT_SUNSET,
@@ -60,6 +67,12 @@ class AbstractBackgroundTest {
     @Test
     fun resolveActiveTheme_returnsExactThemeWhenNotAutoDaily() {
         val nonAutoThemes = listOf(
+            BackgroundTheme.MOUNTAIN,
+            BackgroundTheme.SAND_DUNES,
+            BackgroundTheme.SEA_HORIZON,
+            BackgroundTheme.SOLITARY_ISLE,
+            BackgroundTheme.WILLOW_LEAVES,
+            BackgroundTheme.ZEN_BAMBOO,
             BackgroundTheme.DREAM_BOAT,
             BackgroundTheme.CLEAR_SPRING,
             BackgroundTheme.DESERT_SUNSET,
@@ -75,8 +88,14 @@ class AbstractBackgroundTest {
     }
 
     @Test
-    fun resolveActiveTheme_cycles7ThemesForAutoDaily() {
+    fun resolveActiveTheme_cyclesAll13ThemesForAutoDaily() {
         val expectedSequence = listOf(
+            BackgroundTheme.MOUNTAIN,
+            BackgroundTheme.SAND_DUNES,
+            BackgroundTheme.SEA_HORIZON,
+            BackgroundTheme.SOLITARY_ISLE,
+            BackgroundTheme.WILLOW_LEAVES,
+            BackgroundTheme.ZEN_BAMBOO,
             BackgroundTheme.DREAM_BOAT,
             BackgroundTheme.CLEAR_SPRING,
             BackgroundTheme.DESERT_SUNSET,
@@ -86,9 +105,9 @@ class AbstractBackgroundTest {
             BackgroundTheme.SPRING_RAIN,
         )
 
-        for (i in 0..27) {
+        for (i in 0..39) {
             val resolved = resolveActiveTheme(BackgroundTheme.AUTO_DAILY, epochDay = i.toLong())
-            assertEquals(expectedSequence[i % 7], resolved)
+            assertEquals(expectedSequence[i % 13], resolved)
         }
     }
 
@@ -99,7 +118,7 @@ class AbstractBackgroundTest {
     }
 
     @Test
-    fun allThemesHaveValidStringResources() {
+    fun all13ThemesHaveValidStringResources() {
         for (theme in BackgroundTheme.entries) {
             assertNotEquals(0, theme.labelRes)
             assertTrue(theme.id.isNotBlank())

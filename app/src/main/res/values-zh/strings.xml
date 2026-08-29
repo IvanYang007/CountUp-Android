@@ -51,8 +51,14 @@
     <string name="toast_hidden_from_widget">已在微件中隐藏“%1$s”</string>
     <string name="toast_shown_in_widget">已在微件中显示“%1$s”</string>
 
-    <!-- Background Themes (国画诗词意境) -->
+    <!-- Background Themes (13大古典诗意与水墨意境) -->
     <string name="bg_auto_daily">每日意境</string>
+    <string name="bg_mountain">远山含黛</string>
+    <string name="bg_sand_dunes">平沙落雁</string>
+    <string name="bg_sea_horizon">烟波浩渺</string>
+    <string name="bg_solitary_isle">太湖石秀</string>
+    <string name="bg_willow_leaves">柳浪闻莺</string>
+    <string name="bg_zen_bamboo">幽竹虚心</string>
     <string name="bg_dream_boat">满船清梦压星河</string>
     <string name="bg_clear_spring">清泉石上流</string>
     <string name="bg_desert_sunset">长河落日圆</string>
