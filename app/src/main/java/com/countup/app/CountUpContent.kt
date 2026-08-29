@@ -598,8 +598,7 @@ fun ItemCard(
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .minimumInteractiveComponentSize()
-                    .size(32.dp)
+                    .size(24.dp)
                     .clickable(
                         interactionSource = widgetInteraction,
                         indication = LocalIndication.current,
@@ -615,12 +614,11 @@ fun ItemCard(
                     modifier = Modifier.size(14.dp),
                 )
             }
-            Spacer(Modifier.width(2.dp))
+            Spacer(Modifier.width(4.dp))
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .minimumInteractiveComponentSize()
-                    .size(32.dp)
+                    .size(24.dp)
                     .clickable(
                         interactionSource = resetInteraction,
                         indication = LocalIndication.current,
@@ -636,12 +634,11 @@ fun ItemCard(
                     modifier = Modifier.size(15.dp),
                 )
             }
-            Spacer(Modifier.width(2.dp))
+            Spacer(Modifier.width(4.dp))
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .minimumInteractiveComponentSize()
-                    .size(32.dp)
+                    .size(24.dp)
                     .clickable(
                         interactionSource = deleteInteraction,
                         indication = LocalIndication.current,
