@@ -233,6 +233,23 @@ class CountUpStore(context: Context) {
             .commit()
     }
 
+    /**
+     * Retrieves the saved [SortOrder], defaulting to [SortOrder.DAYS_DESC].
+     */
+    fun getSortOrder(): SortOrder {
+        val raw = prefs.getString(KEY_SORT_ORDER, null)
+        return SortOrder.fromId(raw)
+    }
+
+    /**
+     * Persists the user's selected [SortOrder].
+     */
+    fun setSortOrder(sortOrder: SortOrder): Boolean {
+        return prefs.edit()
+            .putString(KEY_SORT_ORDER, sortOrder.id)
+            .commit()
+    }
+
     private fun persist(items: List<CountUpItem>): Boolean {
         val encoded = encodeItems(items)
         writeBackup(encoded)
@@ -296,6 +313,7 @@ class CountUpStore(context: Context) {
         private const val KEY_LEGACY_DAY_QUARANTINE = "legacy_day_quarantine"
         private const val KEY_MIGRATED = "migrated_v1"
         private const val KEY_BACKGROUND_THEME = "background_theme_v1"
+        private const val KEY_SORT_ORDER = "sort_order_v1"
         private const val LEGACY_PREFS_NAME = "haircut_prefs"
         private const val LEGACY_KEY_EPOCH_DAY = "last_haircut_epoch_day"
         private const val BACKUP_FILE_NAME = "countup_backup.json"

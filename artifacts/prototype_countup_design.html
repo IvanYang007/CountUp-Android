@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CountUp — Design Debate & Interactive Feature Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-canvas: #0d1117;
+      --bg-surface: #161b22;
+      --bg-card: #21262d;
+      --bg-card-hover: #29303a;
+      --border-subtle: rgba(255, 255, 255, 0.1);
+      --border-accent: rgba(217, 118, 66, 0.35);
+      
+      --text-main: #f0f6fc;
+      --text-muted: #8b949e;
+      --text-bright: #ffffff;
+      
+      /* CountUp Mid-Century Zen Palette */
+      --zen-paper: #F5E6D3;
+      --zen-paper-surface: #EBDCC3;
+      --zen-card: #FFFFFF;
+      --zen-ink: #2C2416;
+      --zen-muted: #6B5D4F;
+      --zen-rule: #E3D3B8;
+      --zen-orange: #D97642;
+      --zen-olive: #4A7C59;
+      --zen-coral: #E57A77;
+      --zen-blue: #7D9BA8;
+      --zen-error: #A64942;
+      
+      --accent-green: #3fb950;
+      --accent-amber: #d29922;
+      --accent-red: #f85149;
+      --accent-purple: #bc8cff;
+      --accent-blue: #58a6ff;
+
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-xl: 28px;
+      --shadow-subtle: 0 4px 20px rgba(0,0,0,0.35);
+      --shadow-elevation: 0 12px 36px rgba(0,0,0,0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-canvas);
+      color: var(--text-main);
+      line-height: 1.6;
+      padding: 2rem 1.5rem 6rem;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1340px;
+      margin: 0 auto;
+    }
+
+    header.main-header {
+      margin-bottom: 2.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 1.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .header-titles h1 {
+      font-size: 2.25rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #fff 30%, #D97642 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.4rem;
+    }
+
+    .header-titles p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 780px;
+    }
+
+    .header-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(217, 118, 66, 0.12);
+      border: 1px solid var(--border-accent);
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #f7a379;
+    }
+
+    .header-badge span.pulse {
+      width: 8px;
+      height: 8px;
+      background-color: #D97642;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #D97642;
+    }
+
+    /* Tab navigation */
+    .nav-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      background: var(--bg-surface);
+      padding: 0.4rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      width: fit-content;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.65rem 1.35rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .tab-btn.active {
+      background: var(--bg-card);
+      color: var(--text-bright);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Expert debate section */
+    .experts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .expert-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      transition: transform 0.2s, border-color 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .expert-card:hover {
+      border-color: rgba(255,255,255,0.25);
+      transform: translateY(-2px);
+    }
+
+    .expert-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+
+    .expert-card.rams::before { background: #D97642; }
+    .expert-card.behavior::before { background: #3fb950; }
+    .expert-card.ux::before { background: #58a6ff; }
+    .expert-card.architect::before { background: #bc8cff; }
+
+    .expert-header {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .expert-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      flex-shrink: 0;
+    }
+
+    .expert-info h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-bright);
+    }
+
+    .expert-info p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .expert-verdict-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      margin-bottom: 0.75rem;
+    }
+
+    .tag-reject { background: rgba(248, 81, 73, 0.15); color: #ff7b72; border: 1px solid rgba(248, 81, 73, 0.3); }
+    .tag-approve { background: rgba(63, 185, 80, 0.15); color: #7ee787; border: 1px solid rgba(63, 185, 80, 0.3); }
+    .tag-refined { background: rgba(88, 166, 255, 0.15); color: #a5d6ff; border: 1px solid rgba(88, 166, 255, 0.3); }
+
+    .expert-quote {
+      font-size: 0.92rem;
+      color: #c9d1d9;
+      line-height: 1.5;
+      font-style: italic;
+      border-left: 2px solid var(--border-subtle);
+      padding-left: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    /* Feature comparison deep dive */
+    .debate-stream {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .debate-topic {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .topic-header {
+      padding: 1.25rem 1.5rem;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .topic-header h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .topic-consensus {
+      font-size: 0.88rem;
+      font-weight: 700;
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .consensus-kill { background: rgba(248, 81, 73, 0.2); color: #ff7b72; border: 1px solid #f85149; }
+    .consensus-win { background: rgba(63, 185, 80, 0.2); color: #7ee787; border: 1px solid #3fb950; }
+    .consensus-lean { background: rgba(210, 153, 34, 0.2); color: #f2cc60; border: 1px solid #d29922; }
+
+    .topic-body {
+      padding: 1.5rem;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 960px) {
+      .topic-body { grid-template-columns: 1fr; }
+    }
+
+    .topic-arguments {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .speech-bubble {
+      background: var(--bg-card);
+      padding: 1rem 1.2rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      position: relative;
+    }
+
+    .speaker-name {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .speech-bubble p {
+      font-size: 0.92rem;
+      color: #c9d1d9;
+    }
+
+    .topic-conclusion {
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .topic-conclusion h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .topic-conclusion ul {
+      list-style: none;
+      padding-left: 0;
+      margin-bottom: 1rem;
+    }
+
+    .topic-conclusion li {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-bottom: 0.45rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .topic-conclusion li::before {
+      content: '→';
+      color: #D97642;
+      font-weight: bold;
+    }
+
+    /* Live interactive sandbox */
+    .sandbox-container {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    @media (max-width: 1080px) {
+      .sandbox-container { grid-template-columns: 1fr; }
+    }
+
+    /* Phone Mockup Canvas */
+    .phone-frame {
+      width: 100%;
+      max-width: 360px;
+      background: #000000;
+      border: 10px solid #2d333b;
+      border-radius: 44px;
+      padding: 12px 10px 16px;
+      box-shadow: var(--shadow-elevation), 0 0 0 1px rgba(255,255,255,0.1);
+      margin: 0 auto;
+      position: sticky;
+      top: 1.5rem;
+    }
+
+    .phone-screen {
+      background-color: var(--zen-paper);
+      border-radius: 32px;
+      overflow: hidden;
+      min-height: 640px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--zen-ink);
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+    }
+
+    .phone-statusbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 1.25rem 0.2rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--zen-ink);
+      opacity: 0.7;
+    }
+
+    .screen-header {
+      padding: 0.75rem 1.25rem 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .screen-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--zen-ink);
+      letter-spacing: -0.02em;
+    }
+
+    .screen-subtitle {
+      font-size: 0.75rem;
+      font-style: italic;
+      color: var(--zen-muted);
+      font-family: 'Playfair Display', serif;
+    }
+
+    .app-cards-list {
+      padding: 0.75rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      flex: 1;
+      overflow-y: auto;
+      max-height: 520px;
+    }
+
+    .phone-card {
+      background: var(--zen-card);
+      border: 1px solid var(--zen-rule);
+      border-radius: 14px;
+      padding: 0.85rem 1rem;
+      box-shadow: 0 2px 6px rgba(44, 36, 22, 0.05);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .phone-card:hover {
+      transform: scale(0.985);
+      border-color: var(--zen-orange);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.25rem;
+    }
+
+    .card-label {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--zen-ink);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .card-days {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: var(--zen-ink);
+      line-height: 1;
+    }
+
+    .card-days span.unit {
+      font-size: 0.85rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 600;
+      color: var(--zen-muted);
+      margin-left: 2px;
+    }
+
+    .card-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.72rem;
+      color: var(--zen-muted);
+      margin-top: 0.25rem;
+      border-top: 1px dashed var(--zen-rule);
+      padding-top: 0.35rem;
+    }
+
+    .card-streak-history {
+      display: flex;
+      gap: 0.35rem;
+      align-items: center;
+      margin-top: 0.45rem;
+      padding-top: 0.4rem;
+      border-top: 1px solid rgba(0,0,0,0.04);
+      overflow-x: auto;
+    }
+
+    .streak-chip {
+      background: var(--zen-paper-surface);
+      border: 1px solid var(--zen-rule);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      color: var(--zen-ink);
+      white-space: nowrap;
+    }
+
+    .streak-chip.current {
+      background: rgba(217, 118, 66, 0.12);
+      border-color: var(--zen-orange);
+      color: var(--zen-orange);
+      font-weight: 700;
+    }
+
+    /* Widget Preview Box */
+    .widget-preview-box {
+      background: var(--zen-paper);
+      border: 1px solid var(--zen-rule);
+      border-radius: 16px;
+      padding: 0.85rem;
+      margin: 0.5rem 1rem 1rem;
+      box-shadow: 0 4px 12px rgba(44, 36, 22, 0.08);
+      position: relative;
+    }
+
+    .widget-header {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--zen-muted);
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .widget-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.4rem;
+    }
+
+    .widget-cell {
+      background: var(--zen-card);
+      border: 1px solid var(--zen-rule);
+      border-radius: 10px;
+      padding: 0.5rem 0.25rem;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+
+    .widget-cell:active {
+      transform: scale(0.92);
+    }
+
+    .widget-cell-name {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--zen-ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 0.2rem;
+    }
+
+    .widget-cell-circle {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--zen-paper);
+      border: 1px solid var(--zen-rule);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--zen-ink);
+    }
+
+    /* Sandbox controls and dashboard */
+    .sandbox-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+    }
+
+    .panel-section {
+      margin-bottom: 2rem;
+    }
+
+    .panel-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .panel-section h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--text-bright);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .control-row {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .action-btn {
+      background: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+      padding: 0.6rem 1.1rem;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .action-btn:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(255,255,255,0.2);
+      color: #fff;
+    }
+
+    .action-btn.primary {
+      background: #D97642;
+      border-color: #D97642;
+      color: #fff;
+    }
+
+    .action-btn.primary:hover {
+      background: #e88652;
+    }
+
+    .action-btn.danger {
+      background: rgba(248, 81, 73, 0.15);
+      border-color: rgba(248, 81, 73, 0.3);
+      color: #ff7b72;
+    }
+
+    .action-btn.danger:hover {
+      background: rgba(248, 81, 73, 0.25);
+    }
+
+    .sort-pills {
+      display: flex;
+      gap: 0.4rem;
+      background: var(--bg-card);
+      padding: 0.3rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      width: fit-content;
+    }
+
+    .sort-pill {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .sort-pill.active {
+      background: var(--bg-surface);
+      color: var(--text-bright);
+      border: 1px solid var(--border-subtle);
+    }
+
+    /* Live State Inspector */
+    .state-inspector {
+      background: #090d13;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: #7ee787;
+      max-height: 220px;
+      overflow: auto;
+    }
+
+    /* Summary Recommendation Matrix */
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .matrix-table th, .matrix-table td {
+      padding: 1rem 1.25rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .matrix-table th {
+      background: var(--bg-card);
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .matrix-table td {
+      font-size: 0.9rem;
+      color: #c9d1d9;
+    }
+
+    .matrix-badge {
+      display: inline-block;
+      padding: 0.25rem 0.65rem;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge-no { background: rgba(248, 81, 73, 0.15); color: #ff7b72; }
+    .badge-yes { background: rgba(63, 185, 80, 0.15); color: #7ee787; }
+    .badge-zen { background: rgba(217, 118, 66, 0.15); color: #f7a379; }
+
+    /* Alert Banner */
+    .callout-box {
+      background: rgba(217, 118, 66, 0.08);
+      border: 1px solid var(--border-accent);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+
+    .callout-icon {
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+
+    .callout-content h4 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #f7a379;
+      margin-bottom: 0.35rem;
+    }
+
+    .callout-content p {
+      font-size: 0.92rem;
+      color: #c9d1d9;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <header class="main-header">
+      <div class="header-titles">
+        <h1>CountUp Design Strategy & Feature Prototype</h1>
+        <p>Architectural and behavioral evaluation of Reminders vs Ambient Widgets, Smart Sorting, and Streak Reset Pattern History for a Zen offline day tracker.</p>
+      </div>
+      <div class="header-badge">
+        <span class="pulse"></span>
+        <span>Goal: Do One Thing to the Max</span>
+      </div>
+    </header>
+
+    <div class="callout-box">
+      <div class="callout-icon">💡</div>
+      <div class="callout-content">
+        <h4>The Creator's Core Dilemma</h4>
+        <p><em>"I was not doing reminders initially because I want users to use the widget. Reminders are overused by all apps—annoying and ineffective. I also thought about sorting by dates and capturing days cumulated in the last reset to see patterns. But I worry about bloat. I'd rather do one thing to the max."</em></p>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+      <button class="tab-btn active" onclick="switchTab('tab-debate')">
+        <span>💬</span> Expert Panel Debate
+      </button>
+      <button class="tab-btn" onclick="switchTab('tab-prototype')">
+        <span>📱</span> Live Interactive Prototype
+      </button>
+      <button class="tab-btn" onclick="switchTab('tab-recommendations')">
+        <span>🎯</span> Final Architectural Recommendation
+      </button>
+    </div>
+
+    <!-- TAB 1: EXPERT DEBATE -->
+    <div id="tab-debate" class="tab-content active">
+      
+      <div class="experts-grid">
+        <!-- Expert 1: Dieter Rams / Zen Philosopher -->
+        <div class="expert-card rams">
+          <div class="expert-header">
+            <div class="expert-avatar">🏛️</div>
+            <div class="expert-info">
+              <h3>Dieter Rams</h3>
+              <p>Minimalist Product Philosophy</p>
+            </div>
+          </div>
+          <span class="expert-verdict-tag tag-reject">Anti-Bloat Crusader</span>
+          <p class="expert-quote">"Weniger, aber besser (Less, but better). The moment you add alarms and settings menus, you stop being a calm Zen paper tracker and become another noisy task manager."</p>
+        </div>
+
+        <!-- Expert 2: Behavioral Psychologist -->
+        <div class="expert-card behavior">
+          <div class="expert-header">
+            <div class="expert-avatar">🧠</div>
+            <div class="expert-info">
+              <h3>Dr. B.J. Fogg</h3>
+              <p>Behavioral & Habit Scientist</p>
+            </div>
+          </div>
+          <span class="expert-verdict-tag tag-approve">Ambient Over Push</span>
+          <p class="expert-quote">"Push notifications create a guilt-and-dismissal reflex. Ambient widgets create subconscious habit awareness. But saving past reset duration prevents the 'demoralization cliff' of resetting to zero."</p>
+        </div>
+
+        <!-- Expert 3: Lead Android UX Designer -->
+        <div class="expert-card ux">
+          <div class="expert-header">
+            <div class="expert-avatar">🎨</div>
+            <div class="expert-info">
+              <h3>Danielle Vance</h3>
+              <p>Staff Android UI/UX Designer</p>
+            </div>
+          </div>
+          <span class="expert-verdict-tag tag-refined">Glanceable Calm UX</span>
+          <p class="expert-quote">"Home-screen widgets are the purest Android surface. Push notifications require permissions and irritate users. Sorting should be invisible or 1-tap, and streak history should be a whisper, not a dashboard."</p>
+        </div>
+
+        <!-- Expert 4: Principal Android Systems Architect -->
+        <div class="expert-card architect">
+          <div class="expert-header">
+            <div class="expert-avatar">⚡</div>
+            <div class="expert-info">
+              <h3>Kenji Takahashi</h3>
+              <p>Principal Systems Architect</p>
+            </div>
+          </div>
+          <span class="expert-verdict-tag tag-approve">Zero-Permission Purity</span>
+          <p class="expert-quote">"Push alerts destroy our 0-permission posture and require AlarmManager/POST_NOTIFICATIONS. In contrast, storing `lastRunDays: Long?` costs 16 bytes in JSON and requires zero background daemons."</p>
+        </div>
+      </div>
+
+      <!-- Debate Streams -->
+      <div class="debate-stream">
+        
+        <!-- TOPIC 1: REMINDERS -->
+        <div class="debate-topic">
+          <div class="topic-header">
+            <h2><span>🔔</span> Feature 1: Push Reminders vs. Ambient Widget</h2>
+            <div class="topic-consensus consensus-kill">❌ Unanimous Verdict: REJECT PUSH REMINDERS</div>
+          </div>
+          <div class="topic-body">
+            <div class="topic-arguments">
+              <div class="speech-bubble">
+                <div class="speaker-name" style="color:#f7a379;">🏛️ Dieter Rams:</div>
+                <p>"Why does a day tracker need to scream at the user? A haircut or a sober streak is not a fire alarm. The widget is quiet, elegant, and always present. Push notifications are digital pollution."</p>
+              </div>
+              <div class="speech-bubble">
+                <div class="speaker-name" style="color:#7ee787;">🧠 Dr. B.J. Fogg:</div>
+                <p>"The user is 100% correct: push notifications fail because of <em>notification fatigue</em>. When an app sends 'Hey, it has been 14 days since your haircut!', 85% of users swipe it away immediately and feel resentment. The home screen widget is <em>Ambient Pull</em>—they see it 50 times a day naturally."</p>
+              </div>
+              <div class="speech-bubble">
+                <div class="speaker-name" style="color:#bc8cff;">⚡ Kenji Takahashi:</div>
+                <p>"From a technical standpoint, notifications destroy CountUp's #1 competitive advantage: <strong>Zero Permissions & Zero Battery Drain</strong>. You would need `POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM`, `RECEIVE_BOOT_COMPLETED`, and background service hooks. Keep it 100% permission-free."</p>
+              </div>
+            </div>
+            <div class="topic-conclusion">
+              <div>
+                <h4>Strategic Conclusion</h4>
+                <ul>
+                  <li><strong>Stay 100% notification-free.</strong> Do not ask for notification permissions.</li>
+                  <li><strong>Double down on Widget excellence.</strong> The widget is the hero feature of CountUp.</li>
+                  <li><strong>Ambient Milestones instead:</strong> When an item reaches 30, 100, or 365 days, render a subtle golden enso ring on the widget or card—no noisy push banner.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TOPIC 2: SORTING -->
+        <div class="debate-topic">
+          <div class="topic-header">
+            <h2><span>🗂️</span> Feature 2: Sorting by Dates & Urgency</h2>
+            <div class="topic-consensus consensus-win">✅ Unanimous Verdict: ADOPT (Minimalist 1-Tap)</div>
+          </div>
+          <div class="topic-body">
+            <div class="topic-arguments">
+              <div class="speech-bubble">
+                <div class="speaker-name" style="color:#a5d6ff;">🎨 Danielle Vance:</div>
+                <p>"When a user has 2 items, sorting is pointless. When a user has 8 items (Haircut, Plant, Air Filter, Passports, Anniversary), human eyes crave visual order. Without sorting, the list feels random and neglected."</p>
+              </div>
+              <div class="speech-bubble">
+                <div class="speaker-name" style="color:#f7a379;">🏛️ Dieter Rams:</div>
+                <p>"I accept sorting ONLY if it does not introduce a nested settings screen or complex dropdown menus. A single subtle pill or tap on the header that cycles [Days Elapsed ↓ | Anchor Date ↓] with Compose's calm paper animations is pure perfection."</p>
+              </div>
+            </div>
+            <div class="topic-conclusion">
+              <div>
+                <h4>Strategic Conclusion</h4>
+                <ul>
+                  <li><strong>Zero settings clutter:</strong> No settings page required.</li>
+                  <li><strong>Micro-toggle:</strong> A tiny subtle pill or header action that cycles: <em>Most Days</em> (default) ➔ <em>Newest Anchor</em> ➔ <em>Alphabetical</em>.</li>
+                  <li><strong>Compose Motion:</strong> Use <code>Modifier.animateItem()</code> so cards smoothly glide into position without jump cuts.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TOPIC 3: RESET HISTORY / STREAK PATTERN -->
+        <div class="debate-topic">
+          <div class="topic-header">
+            <h2><span>📈</span> Feature 3: Capture Days Cumulated in Last Reset (Streak History)</h2>
+            <div class="topic-consensus consensus-win">⭐ Unanimous Verdict: ADOPT AS "GHOST STREAK" (Killer Feature)</div>
+          </div>
+          <div class="topic-body">
+            <div class="topic-arguments">
+              <div class="speech-bubble">
+                <div class="speaker-name" style="color:#7ee787;">🧠 Dr. B.J. Fogg:</div>
+                <p>"This is psychologically transformative. If I have a 'Days without Sugar' tracker at 45 days, and I reset it, erasing the 45 days causes despair ('I lost everything!'). If the app gently shows <em>'Last: 45d · Best: 45d'</em>, the reset feels like a continuation of learning, not a catastrophic wipeout."</p>
+              </div>
+              <div class="speech-bubble">
+                <div class="speaker-name" style="color:#bc8cff;">⚡ Kenji Takahashi:</div>
+                <p>"Data-wise, this is virtually free. In `CountUpItem`, we simply add `lastRunDays: Long? = null` and a compact `history: List<Int> = emptyList()`. It serializes to standard JSON in 30 bytes, requires NO SQLite database, and preserves 100% offline fail-safe backups."</p>
+              </div>
+              <div class="speech-bubble">
+                <div class="speaker-name" style="color:#a5d6ff;">🎨 Danielle Vance:</div>
+                <p>"Avoid full-blown analytics charts or graphing libraries—that is what bloatware does. Instead, render a calm, understated Zen whisper: <em>'last: 42d'</em> or tiny stepping-stone chips under the card. It looks gorgeous on Zen paper."</p>
+              </div>
+            </div>
+            <div class="topic-conclusion">
+              <div>
+                <h4>Strategic Conclusion</h4>
+                <ul>
+                  <li><strong>High emotional value, zero bloat:</strong> Solves the 'reset grief' problem.</li>
+                  <li><strong>Maintenance awareness:</strong> For haircuts or oil changes, seeing 'last: 38d' instantly tells you if you're due without mental math.</li>
+                  <li><strong>Understated UI:</strong> No bulky graph screens. Just a discreet badge or stepping-stone chips.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- TAB 2: INTERACTIVE PROTOTYPE -->
+    <div id="tab-prototype" class="tab-content">
+      
+      <div class="sandbox-container">
+        
+        <!-- Live Simulated Phone Screen -->
+        <div class="phone-frame">
+          <div class="phone-screen">
+            <div class="phone-statusbar">
+              <span>9:41</span>
+              <span>📶 100%</span>
+            </div>
+
+            <!-- Zen App Screen Header -->
+            <div class="screen-header">
+              <div>
+                <div class="screen-title">CountUp</div>
+                <div class="screen-subtitle">days since & until</div>
+              </div>
+              <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--zen-olive); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer;" onclick="promptNewItem()">+</div>
+            </div>
+
+            <!-- Live Sort Toggle Inside App -->
+            <div style="padding: 0.2rem 1.25rem 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+              <span id="app-item-count" style="font-size: 0.72rem; color: var(--zen-muted); font-weight: 600;">4 items</span>
+              <div id="app-sort-badge" style="font-size: 0.7rem; font-weight: 700; color: var(--zen-orange); background: var(--zen-paper-surface); padding: 0.15rem 0.55rem; border-radius: 999px; cursor: pointer; border: 1px solid var(--zen-rule);" onclick="cycleSort()">
+                Sorted by: <span id="current-sort-label">Days ↓</span>
+              </div>
+            </div>
+
+            <!-- App Cards List -->
+            <div class="app-cards-list" id="app-cards-container">
+              <!-- Rendered via JS -->
+            </div>
+
+            <!-- Simulated Zen Home Screen Widget -->
+            <div class="widget-preview-box">
+              <div class="widget-header">
+                <span>Zen Home Widget (3-col)</span>
+                <span>Double-tap to reset</span>
+              </div>
+              <div class="widget-grid" id="widget-grid-container">
+                <!-- Rendered via JS -->
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Interactive Testing Dashboard -->
+        <div class="sandbox-panel">
+          
+          <div class="panel-section">
+            <h3><span>🎮</span> Interactive Test Controls</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
+              Test the proposed features in real-time. Notice how the streak pattern history preserves context upon reset, and how the sorting maintains calm visual hierarchy.
+            </p>
+
+            <div class="control-row">
+              <button class="action-btn primary" onclick="simulateReset('item-1')">
+                <span>🔄</span> Reset "Haircut" (Today)
+              </button>
+              <button class="action-btn" onclick="simulateReset('item-2')">
+                <span>🌱</span> Reset "Water Plants"
+              </button>
+              <button class="action-btn" onclick="simulateReset('item-3')">
+                <span>🧘</span> Reset "Meditation Streak"
+              </button>
+              <button class="action-btn" onclick="resetAllDemoData()">
+                <span>↩️</span> Reload Demo State
+              </button>
+            </div>
+          </div>
+
+          <div class="panel-section">
+            <h3><span>🗂️</span> Sort Modes (Zero-Bloat Implementation)</h3>
+            <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 0.75rem;">
+              Click below to switch the sorting algorithm and observe the item re-ordering:
+            </p>
+            <div class="sort-pills">
+              <button class="sort-pill active" id="sort-btn-days" onclick="setSortMode('days')">Days (Highest First)</button>
+              <button class="sort-pill" id="sort-btn-date" onclick="setSortMode('date')">Anchor Date (Newest)</button>
+              <button class="sort-pill" id="sort-btn-name" onclick="setSortMode('name')">Alphabetical</button>
+            </div>
+          </div>
+
+          <div class="panel-section">
+            <h3><span>🔬</span> Under-The-Hood State Inspector</h3>
+            <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 0.5rem;">
+              Pure in-memory JSON payload demonstrating zero data bloat (< 1 KB total):
+            </p>
+            <pre class="state-inspector" id="state-inspector-output"></pre>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- TAB 3: RECOMMENDATIONS & MATRIX -->
+    <div id="tab-recommendations" class="tab-content">
+      
+      <div class="sandbox-panel" style="margin-bottom: 2rem;">
+        <h2 style="font-size: 1.4rem; color: #fff; margin-bottom: 1rem;">Feature Evaluation & Recommendation Matrix</h2>
+        
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th>Feature Candidate</th>
+              <th>Verdict</th>
+              <th>User Delight</th>
+              <th>Bloat Risk</th>
+              <th>Technical Cost</th>
+              <th>Architectural Rationale</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>1. Push Notification Reminders</strong></td>
+              <td><span class="matrix-badge badge-no">REJECT (Kill)</span></td>
+              <td>Low (Annoying)</td>
+              <td>🔴 High (Destroys Zen)</td>
+              <td>High (POST_NOTIFICATIONS, Alarms)</td>
+              <td>Breaks 0-permission guarantee. Causes notification fatigue. The home screen widget already delivers superior ambient awareness.</td>
+            </tr>
+            <tr>
+              <td><strong>2. Dynamic Date / Days Sorting</strong></td>
+              <td><span class="matrix-badge badge-yes">ADOPT (1-Tap)</span></td>
+              <td>High (Clarity)</td>
+              <td>🟢 Low (Zero menus)</td>
+              <td>Minimal (Kotlin <code>sortedWith</code>)</td>
+              <td>Vital when list grows beyond 4 items. Implement as a tiny 1-tap pill on the list header with smooth Compose animations.</td>
+            </tr>
+            <tr>
+              <td><strong>3. Last Run / Streak History</strong></td>
+              <td><span class="matrix-badge badge-zen">ADOPT (Zen Whisper)</span></td>
+              <td>⭐⭐⭐ Highest</td>
+              <td>🟢 Low (Invisible unless needed)</td>
+              <td>Negligible (+16 bytes per item)</td>
+              <td>Eliminates the psychological pain of resetting to zero. Provides instant maintenance context ("last haircut was 38d ago").</td>
+            </tr>
+            <tr>
+              <td><strong>4. Milestone Visuals (Ambient)</strong></td>
+              <td><span class="matrix-badge badge-yes">ADOPT (Subtle)</span></td>
+              <td>High (Joy)</td>
+              <td>🟢 Zero Bloat</td>
+              <td>Pure UI (Canvas / Enso ring)</td>
+              <td>Replaces loud push notifications with quiet visual celebrations (e.g. golden ring at 30d/100d/365d).</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="debate-topic" style="margin-bottom: 2rem;">
+        <div class="topic-header">
+          <h2><span>📐</span> Recommended Kotlin Data Model (`CountUpItem.kt`)</h2>
+        </div>
+        <div style="padding: 1.5rem; background: #090d13;">
+<pre style="color: #f0f6fc; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; line-height: 1.5;">
+<span style="color: #ff7b72;">data class</span> <span style="color: #79c0ff;">CountUpItem</span>(
+    <span style="color: #ff7b72;">val</span> id: <span style="color: #79c0ff;">String</span>,
+    <span style="color: #ff7b72;">val</span> name: <span style="color: #79c0ff;">String</span>,
+    <span style="color: #ff7b72;">val</span> epochDay: <span style="color: #79c0ff;">Long</span>,
+    <span style="color: #ff7b72;">val</span> comment: <span style="color: #79c0ff;">String</span> = <span style="color: #a5d6ff;">""</span>,
+    <span style="color: #ff7b72;">val</span> icon: <span style="color: #79c0ff;">String</span> = <span style="color: #a5d6ff;">""</span>,
+    <span style="color: #ff7b72;">val</span> futureFlag: <span style="color: #79c0ff;">Boolean</span> = <span style="color: #79c0ff;">false</span>,
+    <span style="color: #ff7b72;">val</span> showInWidget: <span style="color: #79c0ff;">Boolean</span> = <span style="color: #79c0ff;">true</span>,
+    
+    <span style="color: #8b949e;">// NEW ZERO-BLOAT FIELDS:</span>
+    <span style="color: #8b949e;">/** Days accumulated on the immediate previous run before last reset. */</span>
+    <span style="color: #ff7b72;">val</span> lastRunDays: <span style="color: #79c0ff;">Long</span>? = <span style="color: #79c0ff;">null</span>,
+    <span style="color: #8b949e;">/** Compact list of last 5 reset run lengths for subtle pattern stepping-stones. */</span>
+    <span style="color: #ff7b72;">val</span> historyRuns: <span style="color: #79c0ff;">List</span>&lt;<span style="color: #79c0ff;">Int</span>&gt; = <span style="color: #79c0ff;">emptyList</span>()
+)
+</pre>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // In-memory demo state
+    let demoItems = [
+      {
+        id: 'item-1',
+        name: 'Haircut',
+        epochDay: 20650, // 34 days ago
+        days: 34,
+        anchorStr: 'Jan 26, 2026',
+        comment: 'Barber in downtown',
+        icon: '💇',
+        lastRunDays: 38,
+        historyRuns: [42, 35, 38],
+        showInWidget: true
+      },
+      {
+        id: 'item-2',
+        name: 'Water Plants',
+        epochDay: 20677, // 7 days ago
+        days: 7,
+        anchorStr: 'Feb 22, 2026',
+        comment: 'Monstera & Bonsai',
+        icon: '🌿',
+        lastRunDays: 6,
+        historyRuns: [7, 7, 6],
+        showInWidget: true
+      },
+      {
+        id: 'item-3',
+        name: 'Meditation Streak',
+        epochDay: 20636, // 48 days ago
+        days: 48,
+        anchorStr: 'Jan 12, 2026',
+        comment: 'Daily 15min breathwork',
+        icon: '🧘',
+        lastRunDays: 21,
+        historyRuns: [14, 21],
+        showInWidget: true
+      },
+      {
+        id: 'item-4',
+        name: 'Air Filter Change',
+        epochDay: 20594, // 90 days ago
+        days: 90,
+        anchorStr: 'Nov 30, 2025',
+        comment: 'HEPA living room',
+        icon: '💨',
+        lastRunDays: 85,
+        historyRuns: [92, 85],
+        showInWidget: true
+      }
+    ];
+
+    let currentSort = 'days'; // 'days' | 'date' | 'name'
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      
+      document.getElementById(tabId).classList.add('active');
+      event.currentTarget.classList.add('active');
+    }
+
+    function setSortMode(mode) {
+      currentSort = mode;
+      document.querySelectorAll('.sort-pill').forEach(el => el.classList.remove('active'));
+      document.getElementById(`sort-btn-${mode}`).classList.add('active');
+      
+      const labelMap = { days: 'Days ↓', date: 'Date ↓', name: 'Name A-Z' };
+      document.getElementById('current-sort-label').textContent = labelMap[mode];
+      
+      renderDemo();
+    }
+
+    function cycleSort() {
+      const modes = ['days', 'date', 'name'];
+      const next = modes[(modes.indexOf(currentSort) + 1) % modes.length];
+      setSortMode(next);
+    }
+
+    function getSortedItems() {
+      const copy = [...demoItems];
+      if (currentSort === 'days') {
+        return copy.sort((a, b) => b.days - a.days);
+      } else if (currentSort === 'date') {
+        return copy.sort((a, b) => b.epochDay - a.epochDay);
+      } else if (currentSort === 'name') {
+        return copy.sort((a, b) => a.name.localeCompare(b.name));
+      }
+      return copy;
+    }
+
+    function simulateReset(id) {
+      const item = demoItems.find(i => i.id === id);
+      if (!item) return;
+
+      const previousRun = item.days;
+      if (previousRun > 0) {
+        item.lastRunDays = previousRun;
+        item.historyRuns = [...(item.historyRuns || []), previousRun].slice(-5);
+      }
+      item.days = 0;
+      item.anchorStr = 'Today';
+      item.epochDay = 20684;
+
+      renderDemo();
+    }
+
+    function resetAllDemoData() {
+      demoItems = [
+        {
+          id: 'item-1',
+          name: 'Haircut',
+          epochDay: 20650,
+          days: 34,
+          anchorStr: 'Jan 26, 2026',
+          comment: 'Barber in downtown',
+          icon: '💇',
+          lastRunDays: 38,
+          historyRuns: [42, 35, 38],
+          showInWidget: true
+        },
+        {
+          id: 'item-2',
+          name: 'Water Plants',
+          epochDay: 20677,
+          days: 7,
+          anchorStr: 'Feb 22, 2026',
+          comment: 'Monstera & Bonsai',
+          icon: '🌿',
+          lastRunDays: 6,
+          historyRuns: [7, 7, 6],
+          showInWidget: true
+        },
+        {
+          id: 'item-3',
+          name: 'Meditation Streak',
+          epochDay: 20636,
+          days: 48,
+          anchorStr: 'Jan 12, 2026',
+          comment: 'Daily 15min breathwork',
+          icon: '🧘',
+          lastRunDays: 21,
+          historyRuns: [14, 21],
+          showInWidget: true
+        },
+        {
+          id: 'item-4',
+          name: 'Air Filter Change',
+          epochDay: 20594,
+          days: 90,
+          anchorStr: 'Nov 30, 2025',
+          comment: 'HEPA living room',
+          icon: '💨',
+          lastRunDays: 85,
+          historyRuns: [92, 85],
+          showInWidget: true
+        }
+      ];
+      renderDemo();
+    }
+
+    function promptNewItem() {
+      const name = prompt("Enter new Count-up name:", "Coffee Break");
+      if (!name) return;
+      demoItems.push({
+        id: 'item-' + Date.now(),
+        name: name.trim(),
+        epochDay: 20684,
+        days: 0,
+        anchorStr: 'Today',
+        comment: 'Fresh count',
+        icon: '☕',
+        lastRunDays: null,
+        historyRuns: [],
+        showInWidget: true
+      });
+      renderDemo();
+    }
+
+    function renderDemo() {
+      const sorted = getSortedItems();
+      const container = document.getElementById('app-cards-container');
+      const widgetContainer = document.getElementById('widget-grid-container');
+      
+      document.getElementById('app-item-count').textContent = `${sorted.length} items`;
+
+      // Render Phone App Cards
+      container.innerHTML = sorted.map(item => `
+        <div class="phone-card" onclick="simulateReset('${item.id}')" title="Tap to reset to 0">
+          <div class="card-top">
+            <div class="card-label">
+              <span>${item.icon}</span>
+              <span>${item.name}</span>
+            </div>
+            <div class="card-days">
+              ${item.days}<span class="unit">d</span>
+            </div>
+          </div>
+          
+          <div class="card-meta">
+            <span>SINCE ${item.anchorStr}</span>
+            ${item.lastRunDays !== null && item.lastRunDays !== undefined ? `<span style="font-weight:600; color: #D97642;">last: ${item.lastRunDays}d</span>` : '<span>brand new</span>'}
+          </div>
+
+          ${item.historyRuns && item.historyRuns.length > 0 ? `
+            <div class="card-streak-history" title="Past runs before reset">
+              <span style="font-size:0.65rem; color: #6B5D4F; margin-right:2px;">Runs:</span>
+              ${item.historyRuns.map(r => `<span class="streak-chip">${r}d</span>`).join('')}
+              <span class="streak-chip current">now: ${item.days}d</span>
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+
+      // Render Widget Grid Cells
+      widgetContainer.innerHTML = sorted.slice(0, 3).map(item => `
+        <div class="widget-cell" onclick="simulateReset('${item.id}')" title="Tap in widget to reset">
+          <div class="widget-cell-name">${item.name}</div>
+          <div class="widget-cell-circle">${item.days}</div>
+        </div>
+      `).join('');
+
+      // Update State Inspector
+      document.getElementById('state-inspector-output').textContent = JSON.stringify(demoItems, null, 2);
+    }
+
+    // Initial render on load
+    renderDemo();
+  </script>
+</body>
+</html>

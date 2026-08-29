@@ -157,6 +157,31 @@ class CountUpStoreTest {
         assertTrue("Expected <= 3 timestamped quarantine keys, found ${quarantineKeys.size}", quarantineKeys.size <= 3)
     }
 
+    @Test
+    fun sortOrderDefaultsToDaysDescAndPersistsSelection() {
+        val store = CountUpStore(fakeContext)
+        assertEquals(SortOrder.DAYS_DESC, store.getSortOrder())
+
+        assertTrue(store.setSortOrder(SortOrder.DATE_DESC))
+        assertEquals(SortOrder.DATE_DESC, store.getSortOrder())
+
+        // Read back from a new instance
+        val store2 = CountUpStore(fakeContext)
+        assertEquals(SortOrder.DATE_DESC, store2.getSortOrder())
+
+        assertTrue(store2.setSortOrder(SortOrder.NAME_ASC))
+        assertEquals(SortOrder.NAME_ASC, store2.getSortOrder())
+    }
+
+    @Test
+    fun sortOrderFallsBackGracefullyOnCorruptValue() {
+        val prefs = fakeContext.getSharedPreferences("countup_prefs", Context.MODE_PRIVATE)
+        prefs.edit().putString("sort_order_v1", "unrecognized_mode_xyz").commit()
+
+        val store = CountUpStore(fakeContext)
+        assertEquals(SortOrder.DAYS_DESC, store.getSortOrder())
+    }
+
     // --- In-Memory Test Harness for Android Context & SharedPreferences ---
 
     private class FakeContext(private val baseFilesDir: File) : android.content.ContextWrapper(null) {

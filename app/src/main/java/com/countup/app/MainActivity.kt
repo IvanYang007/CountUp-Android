@@ -10,6 +10,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -100,6 +101,7 @@ class MainActivity : ComponentActivity() {
 
     private var items by mutableStateOf<List<CountUpItem>>(emptyList())
     private var backgroundTheme by mutableStateOf(BackgroundTheme.AUTO_DAILY)
+    private var sortOrder by mutableStateOf(SortOrder.DAYS_DESC)
     private var editorTarget by mutableStateOf<CountUpItem?>(null)
     private var showEditor by mutableStateOf(false)
     private var pendingDelete by mutableStateOf<CountUpItem?>(null)
@@ -112,6 +114,7 @@ class MainActivity : ComponentActivity() {
         store = CountUpStore(this)
         items = store.items()
         backgroundTheme = store.getBackgroundTheme()
+        sortOrder = store.getSortOrder()
         restoreDialogState(savedInstanceState)
         enableEdgeToEdge()
 
@@ -146,6 +149,7 @@ class MainActivity : ComponentActivity() {
                 ) { innerPadding ->
                     CountUpList(
                         items = items,
+                        sortOrder = sortOrder,
                         backgroundTheme = backgroundTheme,
                         modifier = Modifier.padding(innerPadding),
                         onItemTap = { editorTarget = it; showEditor = true },
@@ -154,6 +158,7 @@ class MainActivity : ComponentActivity() {
                         onResetRequest = { pendingReset = it },
                         onToggleWidgetVisibility = { toggleWidgetVisibility(it.id) },
                         onCycleBackground = { cycleBackground() },
+                        onCycleSortOrder = { cycleSortOrder() },
                     )
                 }
                 if (showEditor) {
@@ -221,6 +226,7 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         items = store.items()
         backgroundTheme = store.getBackgroundTheme()
+        sortOrder = store.getSortOrder()
         refreshWidget()
     }
 
@@ -284,6 +290,13 @@ class MainActivity : ComponentActivity() {
         backgroundTheme = next
         store.setBackgroundTheme(next)
         feedbackMessage = getString(R.string.bg_switched_toast, getString(next.labelRes))
+        refreshWidget()
+    }
+
+    private fun cycleSortOrder() {
+        val next = sortOrder.next()
+        sortOrder = next
+        store.setSortOrder(next)
         refreshWidget()
     }
 
@@ -371,6 +384,7 @@ private fun isReducedMotion(context: Context): Boolean =
 @Composable
 private fun CountUpList(
     items: List<CountUpItem>,
+    sortOrder: SortOrder,
     backgroundTheme: BackgroundTheme,
     modifier: Modifier = Modifier,
     onItemTap: (CountUpItem) -> Unit,
@@ -379,11 +393,13 @@ private fun CountUpList(
     onResetRequest: (CountUpItem) -> Unit,
     onToggleWidgetVisibility: (CountUpItem) -> Unit,
     onCycleBackground: () -> Unit,
+    onCycleSortOrder: () -> Unit,
 ) {
     val localContext = LocalContext.current
     val reduceMotion = remember(localContext) { isReducedMotion(localContext) }
     val ensoInteraction = rememberPressSource()
     val themeLabel = stringResource(backgroundTheme.labelRes)
+    val sortedItems = remember(items, sortOrder) { sortItems(items, sortOrder) }
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -454,16 +470,79 @@ private fun CountUpList(
                     )
                 }
             }
-            Spacer(Modifier.padding(top = 20.dp))
+            Spacer(Modifier.padding(top = 16.dp))
 
             if (items.isEmpty()) {
                 EmptyState(onNewItem = onNewItem, modifier = Modifier.fillMaxWidth().padding(top = 48.dp))
             } else {
+                // Secondary sub-header: item count on the left, tactile 1-tap sort pill on the right
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp, vertical = 2.dp),
+                ) {
+                    Text(
+                        text = if (items.size == 1) {
+                            stringResource(R.string.items_count_one)
+                        } else {
+                            stringResource(R.string.items_count, items.size)
+                        },
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontSize = 12.5.sp,
+                            letterSpacing = 0.2.sp,
+                            fontWeight = FontWeight.Medium,
+                        ),
+                        fontFamily = FontFamily.SansSerif,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    val sortInteraction = rememberPressSource()
+                    val sortDescription = stringResource(sortOrder.descriptionRes)
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
+                            .clickable(
+                                interactionSource = sortInteraction,
+                                indication = LocalIndication.current,
+                                onClick = onCycleSortOrder,
+                            )
+                            .pressScale(sortInteraction)
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                            .semantics { contentDescription = sortDescription },
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = stringResource(R.string.sort_prefix),
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Normal,
+                                ),
+                                fontFamily = FontFamily.SansSerif,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                text = stringResource(sortOrder.labelRes),
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                ),
+                                fontFamily = FontFamily.SansSerif,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    }
+                }
+                Spacer(Modifier.padding(top = 8.dp))
+
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(14.dp),
                     contentPadding = androidx.compose.foundation.layout.PaddingValues(vertical = 4.dp, horizontal = 2.dp),
                 ) {
-                    items(items, key = { it.id }) { item ->
+                    items(sortedItems, key = { it.id }) { item ->
                         ItemCard(
                             item = item,
                             onClick = { onItemTap(item) },

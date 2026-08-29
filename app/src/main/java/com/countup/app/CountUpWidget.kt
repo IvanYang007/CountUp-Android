@@ -206,7 +206,10 @@ private class WidgetViewsFactory(private val context: Context) : RemoteViewsServ
         // Re-read the store: triggered by pushWidgetUpdate's
         // notifyAppWidgetViewDataChanged after every app-side write.
         night = isNightMode(context)
-        rows = widgetRows(CountUpStore(context).items(), LocalDate.now())
+        val store = CountUpStore(context)
+        val today = LocalDate.now()
+        val sorted = sortItems(store.items(), store.getSortOrder(), today)
+        rows = widgetRows(sorted, today)
     }
 
     override fun onDestroy() {
