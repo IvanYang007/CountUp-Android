@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CountUp — Apple-Style Tactile 3D Card Elevation Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0b0f17;
+      --bg-surface: #141b26;
+      --bg-card: #1c2433;
+      --border-dark: rgba(255, 255, 255, 0.1);
+      --text-main: #f0f6fc;
+      --text-muted: #8b949e;
+      --accent-orange: #d97642;
+      --accent-olive: #4a7c59;
+      --accent-blue: #58a6ff;
+      --accent-green: #3fb950;
+      
+      /* Zen Color Tokens */
+      --zen-paper: #F5E6D3;
+      --zen-paper-surface: #EBDCC3;
+      --zen-card-top: #FFFFFF;
+      --zen-card-bottom: #FBF6EE;
+      --zen-ink: #2C2416;
+      --zen-ink-muted: #6B5D4F;
+      --zen-rule: #E3D3B8;
+      --zen-vermilion: #D97642;
+      --zen-sage: #4A7C59;
+      --zen-ochre: #D4A574;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      padding: 2rem 1.5rem 8rem;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border-dark);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      background: rgba(217, 118, 66, 0.15);
+      color: var(--accent-orange);
+      border: 1px solid rgba(217, 118, 66, 0.3);
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 2.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 1024px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Emulator Preview Frame */
+    .phone-wrapper {
+      position: sticky;
+      top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .phone-frame {
+      width: 380px;
+      height: 780px;
+      background: var(--zen-paper);
+      border-radius: 40px;
+      border: 8px solid #2d3748;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.6), inset 0 0 0 2px rgba(255,255,255,0.1);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    .status-bar {
+      height: 38px;
+      padding: 0 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--zen-ink);
+      z-index: 10;
+    }
+
+    .phone-content {
+      flex: 1;
+      padding: 0.5rem 1.25rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Background Vector Canvas */
+    .ink-bg-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      transition: opacity 0.4s ease;
+    }
+
+    /* Header */
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .enso-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .enso-btn:active { transform: scale(0.92); }
+
+    .header-title h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--zen-ink);
+      line-height: 1.1;
+    }
+    .header-title p {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 13px;
+      color: var(--zen-ink-muted);
+    }
+
+    .add-btn {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--zen-sage);
+      color: white;
+      border: none;
+      font-size: 22px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .add-btn:active { transform: scale(0.92); }
+
+    /* Subheader Row */
+    .subheader-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    .item-count-text {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--zen-ink-muted);
+    }
+    .sort-pill {
+      background: var(--zen-paper-surface);
+      border: 1px solid var(--zen-rule);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 11.5px;
+      color: var(--zen-ink-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: transform 0.15s ease;
+    }
+    .sort-pill:active { transform: scale(0.96); }
+    .sort-pill strong { color: var(--zen-vermilion); font-weight: 600; }
+
+    /* Item Card Component */
+    .card-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 4px 2px 20px;
+    }
+
+    .zen-card {
+      border-radius: 20px;
+      padding: 16px 16px 14px;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+    }
+
+    .zen-card:active {
+      transform: translateY(2px) scale(0.985);
+    }
+
+    /* Card Internal Header */
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2px;
+    }
+
+    .card-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .icon-chip {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: white;
+    }
+
+    .card-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: var(--zen-ink);
+      text-transform: uppercase;
+    }
+
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .action-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--zen-vermilion);
+      transition: background 0.15s, transform 0.15s;
+    }
+    .action-btn:hover { background: rgba(0,0,0,0.04); }
+    .action-btn:active { transform: scale(0.9); }
+
+    /* Card Middle */
+    .card-middle {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin: 4px 0 2px;
+    }
+
+    .count-number {
+      font-size: 44px;
+      font-weight: 700;
+      color: var(--zen-ink);
+      line-height: 1;
+    }
+
+    .count-unit {
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--zen-ink-muted);
+      margin-left: 4px;
+    }
+
+    .comment-chip {
+      background: var(--zen-paper-surface);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 11.5px;
+      color: var(--zen-ink-muted);
+      max-width: 140px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Card Bottom */
+    .card-bottom {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      color: var(--zen-ink-muted);
+      text-transform: uppercase;
+    }
+
+    /* ============================================================
+       APPLE-STYLE 3D TACTILE VARIANTS (Strong Depth, Minimal Shadow)
+       ============================================================ */
+
+    /* 1. Apple Tactile Paper (Recommended)
+       - Subtle top-to-bottom surface sheen (white to warm satin)
+       - 1.5px top specular reflection ridge (inset)
+       - Multi-stop crisp gradient border (bright on top, subtle at bottom)
+       - Micro contact occlusion shadow (zero smudge / zero bleach)
+    */
+    .elevation-apple-tactile {
+      background: linear-gradient(180deg, #FFFFFF 0%, #FAF6EE 100%);
+      box-shadow: 
+        inset 0 1.5px 0.5px rgba(255, 255, 255, 0.95), /* Top specular light rim */
+        inset 0 -1px 1px rgba(44, 36, 22, 0.03),        /* Bottom subtle bevel lip */
+        0 1px 2px rgba(44, 36, 22, 0.08),              /* Sharp contact base */
+        0 4px 8px -2px rgba(44, 36, 22, 0.08);          /* Micro lift */
+      border: 1px solid;
+      border-color: rgba(255, 255, 255, 0.8) rgba(227, 211, 184, 0.6) rgba(200, 180, 150, 0.7) rgba(227, 211, 184, 0.6);
+    }
+    .elevation-apple-tactile:active {
+      box-shadow: 
+        inset 0 1px 0.5px rgba(255, 255, 255, 0.8),
+        0 1px 2px rgba(44, 36, 22, 0.06);
+    }
+
+    /* 2. Apple Ceramic 3D
+       - Solid white face with dual physical chamfer border
+       - Top highlight + bottom tactile shelf
+    */
+    .elevation-apple-ceramic {
+      background: #FFFFFF;
+      box-shadow: 
+        inset 0 2px 0 rgba(255, 255, 255, 1.0),
+        inset 0 -1.5px 0 rgba(212, 190, 160, 0.4),
+        0 1px 3px rgba(44, 36, 22, 0.09),
+        0 3px 6px -1px rgba(44, 36, 22, 0.06);
+      border: 1px solid rgba(227, 211, 184, 0.75);
+    }
+    .elevation-apple-ceramic:active {
+      box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        0 1px 2px rgba(44, 36, 22, 0.05);
+    }
+
+    /* 3. Apple Embossed Parchment
+       - Double-ridge border (light exterior + inner ridge)
+       - Very tight 2dp contact shadow
+    */
+    .elevation-apple-emboss {
+      background: linear-gradient(175deg, #FFFFFF 20%, #F8F3EA 100%);
+      box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 1.0),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.6),
+        0 1.5px 3px rgba(44, 36, 22, 0.09);
+      border: 1px solid rgba(215, 195, 165, 0.85);
+    }
+    .elevation-apple-emboss:active {
+      box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.7),
+        0 1px 1.5px rgba(44, 36, 22, 0.06);
+    }
+
+    /* 4. Previous Diffuse Shadow (For Comparison) */
+    .elevation-diffuse {
+      background: #FFFFFF;
+      box-shadow: 
+        0 2px 4px rgba(44, 36, 22, 0.04),
+        0 8px 20px -2px rgba(44, 36, 22, 0.13),
+        0 14px 28px -6px rgba(44, 36, 22, 0.08);
+      border: 1px solid rgba(227, 211, 184, 0.45);
+    }
+
+    /* Interactive Comparison Panel */
+    .panel-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-dark);
+      border-radius: 20px;
+      padding: 1.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .panel-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .variant-selector-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .variant-btn {
+      background: var(--bg-card);
+      border: 2px solid transparent;
+      border-radius: 14px;
+      padding: 1rem;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s ease;
+      color: var(--text-main);
+    }
+
+    .variant-btn:hover {
+      border-color: rgba(217, 118, 66, 0.4);
+      background: #232d3f;
+    }
+
+    .variant-btn.active {
+      border-color: var(--accent-orange);
+      background: rgba(217, 118, 66, 0.12);
+    }
+
+    .variant-btn-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.4rem;
+    }
+
+    .variant-name {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .variant-tag {
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.1);
+    }
+
+    .variant-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Theme selector bar */
+    .theme-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    .theme-chip {
+      background: var(--bg-card);
+      border: 1px solid var(--border-dark);
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .theme-chip:hover { border-color: var(--accent-orange); }
+    .theme-chip.active { background: var(--accent-orange); color: white; border-color: var(--accent-orange); }
+
+    /* Code block */
+    pre.code-box {
+      background: #0d121a;
+      border: 1px solid var(--border-dark);
+      border-radius: 12px;
+      padding: 1.1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: #79c0ff;
+      overflow-x: auto;
+      line-height: 1.5;
+    }
+
+    /* Anatomy Breakdown */
+    .anatomy-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .anatomy-box {
+      background: rgba(0,0,0,0.25);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+    .anatomy-box h4 {
+      font-size: 0.85rem;
+      color: var(--accent-orange);
+      margin-bottom: 0.4rem;
+    }
+    .anatomy-box p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div>
+      <div class="badge">APPLE-STYLE 3D TACTILE PROTOTYPE</div>
+      <h1 style="font-size: 1.75rem; font-weight: 700; margin-top: 0.4rem;">Tactile 3D Physical Cards (Specular Rim + Minimal Shadow)</h1>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem;">Achieving a crisp 3D physical object feeling via surface gradients, top specular highlights, and micro contact shadows.</p>
+    </div>
+    <div style="text-align: right;">
+      <span style="font-size: 0.8rem; color: var(--text-muted);">Depth Mechanism:</span>
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--accent-orange);">Surface Curvature + Top Bevel Light</div>
+    </div>
+  </header>
+
+  <div class="main-grid">
+    <!-- Left: Phone Simulator -->
+    <div class="phone-wrapper">
+      <div class="phone-frame" id="phoneCanvas">
+        <!-- Background Canvas SVG -->
+        <svg class="ink-bg-canvas" id="bgSvg" viewBox="0 0 380 780" preserveAspectRatio="none">
+          <path d="M-20,780 C60,680 180,660 380,720 L380,780 Z" fill="#D4A574" opacity="0.18"/>
+          <path d="M120,780 C200,640 280,610 400,660 L400,780 Z" fill="#4A7C59" opacity="0.14"/>
+          <path d="M380,240 C320,380 260,520 200,680" stroke="#4A7C59" stroke-width="1.2" fill="none" opacity="0.3"/>
+          <path d="M380,300 C340,420 300,540 240,660" stroke="#4A7C59" stroke-width="0.8" fill="none" opacity="0.2"/>
+        </svg>
+
+        <div class="status-bar">
+          <span>9:41</span>
+          <span>5G  100%</span>
+        </div>
+
+        <div class="phone-content">
+          <div class="app-header">
+            <div class="enso-btn" onclick="cycleTheme()" title="Switch Background Art">
+              <svg width="34" height="34" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill="none" stroke="#D97642" stroke-width="10" stroke-linecap="round" stroke-dasharray="210 40"/>
+                <circle cx="50" cy="50" r="24" fill="none" stroke="#2C2416" stroke-width="7" stroke-linecap="round" stroke-dasharray="120 30"/>
+              </svg>
+            </div>
+            <div class="header-title">
+              <h1>CountUp</h1>
+              <p>Mindful Days Tracker</p>
+            </div>
+            <button class="add-btn">+</button>
+          </div>
+
+          <div class="subheader-row">
+            <span class="item-count-text">3 items</span>
+            <div class="sort-pill">
+              Sort: <strong>Days ↓</strong> ▾ 🔍
+            </div>
+          </div>
+
+          <div class="card-list" id="cardList">
+            <!-- Card 1 -->
+            <div class="zen-card elevation-apple-tactile" onclick="pulseCard(this)">
+              <div class="card-top">
+                <div class="card-title-group">
+                  <div class="icon-chip" style="background: #D97642;">★</div>
+                  <span class="card-name">Dentist Visit</span>
+                </div>
+                <div class="card-actions">
+                  <button class="action-btn">⊞</button>
+                  <button class="action-btn">↻</button>
+                  <button class="action-btn" style="color: #A64942;">—</button>
+                </div>
+              </div>
+              <div class="card-middle">
+                <div>
+                  <span class="count-number">194</span>
+                  <span class="count-unit">days</span>
+                </div>
+                <div class="comment-chip">Routine cleaning</div>
+              </div>
+              <div class="card-bottom">SINCE FEB 16, 2026</div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="zen-card elevation-apple-tactile" onclick="pulseCard(this)">
+              <div class="card-top">
+                <div class="card-title-group">
+                  <div class="icon-chip" style="background: #4A7C59;">👤</div>
+                  <span class="card-name">Haircut</span>
+                </div>
+                <div class="card-actions">
+                  <button class="action-btn">⊞</button>
+                  <button class="action-btn">↻</button>
+                  <button class="action-btn" style="color: #A64942;">—</button>
+                </div>
+              </div>
+              <div class="card-middle">
+                <div>
+                  <span class="count-number">44</span>
+                  <span class="count-unit">days</span>
+                </div>
+                <div class="comment-chip">Downtown barber</div>
+              </div>
+              <div class="card-bottom">SINCE JUL 16, 2026</div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="zen-card elevation-apple-tactile" onclick="pulseCard(this)">
+              <div class="card-top">
+                <div class="card-title-group">
+                  <div class="icon-chip" style="background: #7D9BA8;">🌿</div>
+                  <span class="card-name">Water Bonsai</span>
+                </div>
+                <div class="card-actions">
+                  <button class="action-btn">⊞</button>
+                  <button class="action-btn">↻</button>
+                  <button class="action-btn" style="color: #A64942;">—</button>
+                </div>
+              </div>
+              <div class="card-middle">
+                <div>
+                  <span class="count-number">14</span>
+                  <span class="count-unit">days</span>
+                </div>
+                <div class="comment-chip">Misting and nutrients</div>
+              </div>
+              <div class="card-bottom">SINCE AUG 15, 2026</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.75rem;">
+        💡 Click on any card in the emulator to trigger spring press-down physics.
+      </div>
+    </div>
+
+    <!-- Right: Variant Selection & Diagnostics -->
+    <div class="controls-column">
+      <!-- Section 1: Variant Selector -->
+      <div class="panel-card">
+        <div class="panel-title">
+          <span>🍎 Select 3D Tactile Variant</span>
+        </div>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.25rem;">
+          How Apple creates powerful 3D physical depth without relying on big blurry shadows:
+        </p>
+
+        <div class="variant-selector-grid">
+          <div class="variant-btn active" onclick="setVariant('apple-tactile')">
+            <div class="variant-btn-header">
+              <span class="variant-name">1. Apple Tactile ★</span>
+              <span class="variant-tag">Recommended</span>
+            </div>
+            <p class="variant-desc">Top specular highlight + subtle satin surface gradient + micro contact shadow. Tangible physical tile feel.</p>
+          </div>
+
+          <div class="variant-btn" onclick="setVariant('apple-ceramic')">
+            <div class="variant-btn-header">
+              <span class="variant-name">2. Ceramic Bevel</span>
+              <span class="variant-tag">Pure White</span>
+            </div>
+            <p class="variant-desc">Solid white card with dual top/bottom physical chamfer ridges + crisp 2dp base shadow.</p>
+          </div>
+
+          <div class="variant-btn" onclick="setVariant('apple-emboss')">
+            <div class="variant-btn-header">
+              <span class="variant-name">3. Embossed Paper</span>
+              <span class="variant-tag">Crisp Rim</span>
+            </div>
+            <p class="variant-desc">Double-ridge paper border with high-contrast hairline perimeter. Zero diffuse blur.</p>
+          </div>
+
+          <div class="variant-btn" onclick="setVariant('diffuse')">
+            <div class="variant-btn-header">
+              <span class="variant-name">4. Diffuse Float</span>
+              <span class="variant-tag">Legacy Shadow</span>
+            </div>
+            <p class="variant-desc">Larger 6dp drop shadow without surface specular gradient. (Notice the difference in 3D solidity).</p>
+          </div>
+        </div>
+
+        <!-- Theme Selector -->
+        <div style="margin-top: 1rem;">
+          <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 0.5rem;">
+            Test on Background Art:
+          </label>
+          <div class="theme-bar">
+            <button class="theme-chip active" onclick="setTheme('willow')">🌿 Willow Leaves</button>
+            <button class="theme-chip" onclick="setTheme('mountain')">⛰️ Mountain Peaks</button>
+            <button class="theme-chip" onclick="setTheme('dunes')">🏜️ Sand Dunes</button>
+            <button class="theme-chip" onclick="setTheme('sea')">🌊 Calm Horizon</button>
+            <button class="theme-chip" onclick="setTheme('isle')">🏯 Solitary Isle</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: 3D Anatomy Breakdown -->
+      <div class="panel-card">
+        <div class="panel-title">
+          <span>📐 The 3 Anatomy Pillars of Apple 3D Tactility</span>
+        </div>
+        <div class="anatomy-grid">
+          <div class="anatomy-box">
+            <h4>1. Top Specular Sheen</h4>
+            <p>A crisp 1px pure-white reflection along the top edge simulates overhead ambient lighting striking a physical rounded bevel.</p>
+          </div>
+          <div class="anatomy-box">
+            <h4>2. Convex Surface Gradient</h4>
+            <p>Transitioning from pure white <code>#FFFFFF</code> (top) to warm satin <code>#FAF6EE</code> (bottom) creates optical curvature across the face.</p>
+          </div>
+          <div class="anatomy-box">
+            <h4>3. Sharp Contact Occlusion</h4>
+            <p>Instead of a fuzzy 14dp blur, a tight 2dp–3dp shadow with 8% ink opacity defines the card's physical ground contact without edge smudging.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Jetpack Compose Production Code -->
+      <div class="panel-card">
+        <div class="panel-title">
+          <span>⚡ Jetpack Compose Implementation</span>
+        </div>
+        <pre class="code-box"><code>// In CountUpContent.kt -> ItemCard()
+val cardShape = RoundedCornerShape(20.dp)
+val surfaceBrush = remember {
+    Brush.verticalGradient(
+        colors = listOf(
+            Color.White,            // Top specular shine
+            Color(0xFFFAF5EE),      // Bottom warm satin paper
+        )
+    )
+}
+val borderBrush = remember {
+    Brush.verticalGradient(
+        colors = listOf(
+            Color.White.copy(alpha = 0.90f), // Top crisp highlight
+            Color(0xFFD8C7B0).copy(alpha = 0.65f), // Bottom physical contour
+        )
+    )
+}
+
+Column(
+    modifier = modifier
+        .fillMaxWidth()
+        // 1. Crisp, short micro-shadow (2dp contact, zero smudge)
+        .shadow(
+            elevation = 2.5.dp,
+            shape = cardShape,
+            clip = false,
+            ambientColor = Color(0x182C2416),
+            spotColor = Color(0x222C2416),
+        )
+        // 2. Multi-directional Specular Bevel Border
+        .border(
+            width = 1.dp,
+            brush = borderBrush,
+            shape = cardShape,
+        )
+        // 3. Convex Satin Gradient Face
+        .background(
+            brush = surfaceBrush,
+            shape = cardShape,
+        )
+        .clickable(
+            interactionSource = cardInteraction,
+            indication = LocalIndication.current,
+            onClick = onClick,
+        )
+        .pressScale(cardInteraction, 0.985f)
+        .padding(horizontal = 16.dp, vertical = 14.dp)
+)</code></pre>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentThemeIdx = 0;
+  const themes = ['willow', 'mountain', 'dunes', 'sea', 'isle'];
+
+  function setVariant(variant) {
+    document.querySelectorAll('.variant-btn').forEach(btn => btn.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+
+    const cards = document.querySelectorAll('.zen-card');
+    cards.forEach(card => {
+      card.className = 'zen-card elevation-' + variant;
+    });
+  }
+
+  function pulseCard(card) {
+    card.style.transform = 'translateY(2px) scale(0.985)';
+    setTimeout(() => {
+      card.style.transform = '';
+    }, 180);
+  }
+
+  const bgSvgs = {
+    willow: `
+      <path d="M-20,780 C60,680 180,660 380,720 L380,780 Z" fill="#D4A574" opacity="0.18"/>
+      <path d="M120,780 C200,640 280,610 400,660 L400,780 Z" fill="#4A7C59" opacity="0.14"/>
+      <path d="M380,240 C320,380 260,520 200,680" stroke="#4A7C59" stroke-width="1.2" fill="none" opacity="0.3"/>
+      <path d="M380,300 C340,420 300,540 240,660" stroke="#4A7C59" stroke-width="0.8" fill="none" opacity="0.2"/>
+    `,
+    mountain: `
+      <polygon points="-40,780 120,480 260,780" fill="#2C2416" opacity="0.08"/>
+      <polygon points="100,780 260,420 420,780" fill="#2C2416" opacity="0.12"/>
+      <polygon points="200,780 320,540 440,780" fill="#2C2416" opacity="0.06"/>
+    `,
+    dunes: `
+      <path d="M-40,780 Q100,580 300,700 T440,780 Z" fill="#D4A574" opacity="0.22"/>
+      <path d="M60,780 Q240,520 420,780 Z" fill="#D97642" opacity="0.15"/>
+    `,
+    sea: `
+      <line x1="0" y1="560" x2="380" y2="560" stroke="#7D9BA8" stroke-width="2" opacity="0.4"/>
+      <path d="M0,600 Q95,590 190,600 T380,600" stroke="#7D9BA8" stroke-width="1.5" fill="none" opacity="0.3"/>
+      <path d="M0,640 Q95,630 190,640 T380,640" stroke="#7D9BA8" stroke-width="1.2" fill="none" opacity="0.25"/>
+    `,
+    isle: `
+      <ellipse cx="200" cy="620" rx="140" ry="30" fill="#4A7C59" opacity="0.18"/>
+      <path d="M160,620 Q190,460 210,620 Z" fill="#2C2416" opacity="0.14"/>
+    `
+  };
+
+  function setTheme(themeKey) {
+    document.querySelectorAll('.theme-chip').forEach(chip => {
+      chip.classList.toggle('active', chip.textContent.toLowerCase().includes(themeKey));
+    });
+    document.getElementById('bgSvg').innerHTML = bgSvgs[themeKey];
+  }
+
+  function cycleTheme() {
+    currentThemeIdx = (currentThemeIdx + 1) % themes.length;
+    setTheme(themes[currentThemeIdx]);
+  }
+</script>
+
+</body>
+</html>
