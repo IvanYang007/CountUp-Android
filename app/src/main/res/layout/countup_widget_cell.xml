@@ -6,9 +6,9 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center_horizontal"
-    android:paddingStart="4dp"
-    android:paddingTop="2dp"
-    android:paddingEnd="4dp"
+    android:paddingStart="3dp"
+    android:paddingTop="1dp"
+    android:paddingEnd="3dp"
     android:paddingBottom="2dp">
 
     <TextView
@@ -18,11 +18,13 @@
         android:gravity="center"
         android:maxLines="1"
         android:ellipsize="end"
-        android:textSize="13sp" />
+        android:letterSpacing="0.03"
+        android:textSize="11.2sp"
+        android:layout_marginBottom="2dp" />
 
     <FrameLayout
-        android:layout_width="48dp"
-        android:layout_height="48dp">
+        android:layout_width="44dp"
+        android:layout_height="44dp">
 
         <ImageView
             android:id="@+id/cell_circle"
@@ -37,6 +39,6 @@
             android:layout_height="match_parent"
             android:gravity="center"
             android:maxLines="1"
-            android:textSize="18sp" />
+            android:textSize="17sp" />
     </FrameLayout>
 </LinearLayout>

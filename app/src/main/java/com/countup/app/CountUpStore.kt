@@ -217,23 +217,6 @@ class CountUpStore(context: Context) {
     }
 
     /**
-     * Records the epoch day on which the home-screen widget was last refreshed,
-     * so [widgetRefreshedOn] can gate redundant refreshes. Android throttles
-     * frequent widget updates, so a plain foreground with no data change must
-     * not trigger another rebuild.
-     */
-    fun markWidgetRefreshed(epochDay: Long) {
-        prefs.edit().putLong(KEY_LAST_WIDGET_REFRESH_DAY, epochDay).commit()
-    }
-
-    /**
-     * True when the widget was already refreshed on [epochDay]. Defaults to
-     * false on a fresh install, so the first foreground of a day still refreshes.
-     */
-    fun widgetRefreshedOn(epochDay: Long): Boolean =
-        prefs.getLong(KEY_LAST_WIDGET_REFRESH_DAY, NO_REFRESH_DAY) == epochDay
-
-    /**
      * Retrieves the saved [BackgroundTheme], defaulting to [BackgroundTheme.AUTO_DAILY].
      */
     fun getBackgroundTheme(): BackgroundTheme {
@@ -312,9 +295,7 @@ class CountUpStore(context: Context) {
         private const val KEY_ITEMS_QUARANTINE = "items_v1_quarantine"
         private const val KEY_LEGACY_DAY_QUARANTINE = "legacy_day_quarantine"
         private const val KEY_MIGRATED = "migrated_v1"
-        private const val KEY_LAST_WIDGET_REFRESH_DAY = "widget_last_refresh_day"
         private const val KEY_BACKGROUND_THEME = "background_theme_v1"
-        private const val NO_REFRESH_DAY = -1L
         private const val LEGACY_PREFS_NAME = "haircut_prefs"
         private const val LEGACY_KEY_EPOCH_DAY = "last_haircut_epoch_day"
         private const val BACKUP_FILE_NAME = "countup_backup.json"

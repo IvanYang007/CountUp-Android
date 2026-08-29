@@ -49,11 +49,12 @@ Production Kotlin is flat under `app/src/main/java/com/countup/app/`:
 | `DaysSince.kt` | Pure `daysSince(last, today)` using `ChronoUnit.DAYS` (supports negative future counts) |
 | `DateConversion.kt` | UTC-safe picker millis → `LocalDate`; localized date formatter; dynamic "SINCE" / "UNTIL" sub-labeling |
 | `ItemIcons.kt` | The 20-icon registry; `iconRes(name)` map + `SOCIAL_ICON_NAMES` + `DEFAULT_ICON` |
-| `CountUpWidget.kt` | Classic RemoteViews widget: `CountUpWidgetReceiver` (provider), `CountUpWidgetService` + factory (grid cells from `CountUpStore`), `ResetCountReceiver` (in-place double-tap reset confirmation), `pushWidgetUpdate()` imperative refresh |
+| `WidgetBackgroundRenderer.kt` | Native procedural Canvas/Path vector renderer for 5 Chinese ink wash themes on warm paper (< 180 KB memory) |
+| `CountUpWidget.kt` | Ultra-minimalist Zen RemoteViews widget: dynamic ink background, full-width 3-column grid, `ResetCountReceiver` (in-place double-tap reset confirmation), `pushWidgetUpdate()` imperative refresh |
 | (debug) `WidgetHostActivity.kt` | Debug-only activity to render the widget for screenshots (not in release) |
 
 Tests:
-- `app/src/test/...` (JVM): `CountUpItemTest`, `CountUpStoreTest`, `EdgeCaseMatrixTest`, `AbstractBackgroundTest`, `DateConversionTest`, `DaysSinceTest`, `ItemIconsTest`, `WidgetRowTest` → **68 JVM unit tests** (100% green)
+- `app/src/test/...` (JVM): `CountUpItemTest`, `CountUpStoreTest`, `EdgeCaseMatrixTest`, `AbstractBackgroundTest`, `DateConversionTest`, `DaysSinceTest`, `ItemIconsTest`, `WidgetRowTest`, `WidgetBackgroundTest` → **72 JVM unit tests** (100% green)
 - `app/src/androidTest/...` (device): `CountUpStoreInstrumentedTest` — CRUD, migration, recovery, icon assignment
 
 Resources: `res/values/strings.xml`, `plurals.xml` (`days_unit`), `themes.xml`, `colors.xml`; `res/drawable/ic_*.xml` (20 Material icons + `ic_zen_enso` + `ic_solid_circle` + `ic_widget_grid_*`); `res/xml/haircut_widget_info.xml`, `data_extraction_rules.xml`, `backup_rules.xml`.

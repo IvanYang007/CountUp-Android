@@ -1,32 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Classic RemoteViews widget root: 3-column grid + right-edge refresh button. -->
+<!-- Ultra-minimalist Zen RemoteViews widget: dynamic ink background + full-width 3-column grid. -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <GridView
-        android:id="@+id/widget_grid"
+    <!-- Active Chinese ink wash landscape background bitmap -->
+    <ImageView
+        android:id="@+id/widget_bg_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:numColumns="3"
-        android:stretchMode="columnWidth"
-        android:paddingStart="6dp"
-        android:paddingTop="2dp"
-        android:paddingEnd="2dp"
-        android:paddingBottom="2dp"
-        android:layout_marginEnd="34dp"
-        android:clipToPadding="false"
-        android:scrollbars="none"
-        android:listSelector="@android:color/transparent" />
+        android:scaleType="fitXY"
+        android:contentDescription="@null" />
 
-    <ImageView
-        android:id="@+id/widget_refresh"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_gravity="end|center_vertical"
-        android:layout_marginEnd="8dp"
-        android:contentDescription="@string/widget_refresh" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Quiet minimalist title on top-left (13.5sp poised seal) -->
+        <TextView
+            android:id="@+id/widget_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="14dp"
+            android:paddingTop="7dp"
+            android:paddingEnd="14dp"
+            android:paddingBottom="1dp"
+            android:textSize="13.5sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.06"
+            android:textColor="#5D5043"
+            android:text="@string/app_name" />
+
+        <!-- Full-width 3-column habit grid with balanced 5dp bottom margin -->
+        <GridView
+            android:id="@+id/widget_grid"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:numColumns="3"
+            android:stretchMode="columnWidth"
+            android:paddingStart="6dp"
+            android:paddingTop="2dp"
+            android:paddingEnd="6dp"
+            android:paddingBottom="5dp"
+            android:clipToPadding="true"
+            android:scrollbars="none"
+            android:listSelector="@android:color/transparent" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/widget_empty"

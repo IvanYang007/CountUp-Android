@@ -221,13 +221,7 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         items = store.items()
         backgroundTheme = store.getBackgroundTheme()
-        // Refresh the widget only when it is stale (day rolled over or never
-        // refreshed): counts depend on LocalDate.now(), so a new day always
-        // needs a rebuild, but a same-day foreground with no data change must
-        // not spam Android's widget throttler.
-        if (!store.widgetRefreshedOn(LocalDate.now().toEpochDay())) {
-            refreshWidget()
-        }
+        refreshWidget()
     }
 
     private fun addItem(name: String, epochDay: Long, comment: String = "") {
@@ -290,17 +284,13 @@ class MainActivity : ComponentActivity() {
         backgroundTheme = next
         store.setBackgroundTheme(next)
         feedbackMessage = getString(R.string.bg_switched_toast, getString(next.labelRes))
+        refreshWidget()
     }
 
     private fun refreshWidget() {
         // Classic RemoteViews push: synchronous IPC to the launcher, so an app-side
         // data change lands on the widget immediately (no composition pipeline).
         runCatching { pushWidgetUpdate(this) }
-            .onSuccess {
-                // Mark only after the update was sent, so a dropped push does not
-                // hide a stale widget from the next resume gate.
-                store.markWidgetRefreshed(LocalDate.now().toEpochDay())
-            }
     }
     private companion object {
         private const val STATE_EDITOR_TARGET_ID = "state_editor_target_id"

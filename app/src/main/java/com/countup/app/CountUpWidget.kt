@@ -26,29 +26,14 @@ import java.time.LocalDate
  * it through [CountUpWidgetService] whenever the launcher is told the collection
  * changed ([AppWidgetManager.notifyAppWidgetViewDataChanged]).
  *
- * Interaction parity with the previous Glance widget:
+ * Interaction:
  *  - tap the widget background -> open the app
- *  - tap a cell -> reset that one item's anchor to today
- *  - tap the right-edge refresh button -> re-render all placements
+ *  - tap a cell -> double-tap in-place confirmation to reset that item to today
  */
 class CountUpWidgetReceiver : AppWidgetProvider() {
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
         pushWidgetUpdate(context)
-    }
-
-    override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == ACTION_REFRESH) {
-            pushWidgetUpdate(context)
-            CountUpStore(context).markWidgetRefreshed(LocalDate.now().toEpochDay())
-            return
-        }
-        super.onReceive(context, intent)
-    }
-
-    companion object {
-        /** Broadcast action sent by the widget's refresh button. */
-        const val ACTION_REFRESH = "com.countup.app.action.WIDGET_REFRESH"
     }
 }
 
@@ -62,14 +47,24 @@ fun pushWidgetUpdate(context: Context) {
     manager.notifyAppWidgetViewDataChanged(ids, R.id.widget_grid)
 }
 
-/** Builds the widget frame: background, launch/reset/refresh intents, empty view. */
+/** Builds the widget frame: dynamic ink background, title, launch/reset intents, empty view. */
 @Suppress("DEPRECATION")
-private fun buildBaseViews(context: Context): RemoteViews {
+internal fun buildBaseViews(context: Context): RemoteViews {
     val night = isNightMode(context)
     val views = RemoteViews(context.packageName, R.layout.countup_widget)
 
-    // Warm beige paper background, matching the app theme.
-    views.setInt(R.id.widget_root, "setBackgroundColor", if (night) NIGHT_PAPER else PAPER)
+    // Render active Chinese ink wash landscape matching the main app theme
+    val store = CountUpStore(context)
+    val theme = store.getBackgroundTheme()
+    val bgBitmap = WidgetBackgroundRenderer.render(theme, isNight = night)
+    if (bgBitmap != null) {
+        views.setImageViewBitmap(R.id.widget_bg_image, bgBitmap)
+    } else {
+        views.setInt(R.id.widget_root, "setBackgroundColor", if (night) NIGHT_PAPER else PAPER)
+    }
+
+    // Minimal title in muted ink typography
+    views.setTextColor(R.id.widget_title, if (night) NIGHT_MUTED else MUTED)
 
     // Tap anywhere outside a cell (and on the empty state) -> open the app.
     val launch = PendingIntent.getActivity(
@@ -82,26 +77,8 @@ private fun buildBaseViews(context: Context): RemoteViews {
     views.setOnClickPendingIntent(R.id.widget_empty, launch)
     views.setTextColor(R.id.widget_empty, if (night) NIGHT_MUTED else MUTED)
 
-    // Right-edge refresh button: broadcast straight to the provider.
-    val refresh = PendingIntent.getBroadcast(
-        context,
-        REQUEST_REFRESH,
-        Intent(context, CountUpWidgetReceiver::class.java).setAction(CountUpWidgetReceiver.ACTION_REFRESH),
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-    )
-    views.setOnClickPendingIntent(R.id.widget_refresh, refresh)
-    views.setImageViewResource(
-        R.id.widget_refresh,
-        if (night) R.drawable.ic_refresh_dark else R.drawable.ic_refresh,
-    )
-
     // Cell taps: template broadcast to the reset receiver; each cell fills in
     // the tapped item's id (see the factory's setOnClickFillInIntent).
-    // SECURITY: FLAG_MUTABLE is required here — this is a RemoteViews collection
-    // template PendingIntent. The launcher merges each cell's fill-in intent (item
-    // id) into this template at tap time. An immutable template silently drops the
-    // fill-in extras, breaking all cell taps. The only extra is a UUID item id;
-    // the receiver validates it against the store before acting.
     val reset = PendingIntent.getBroadcast(
         context,
         REQUEST_RESET,
@@ -134,8 +111,6 @@ class ResetCountReceiver : BroadcastReceiver() {
                 // Push synchronously from the app process: the launcher redraws
                 // immediately, no composition pipeline in between.
                 pushWidgetUpdate(context)
-                // Keep the app's resume-time refresh gate accurate for today.
-                store.markWidgetRefreshed(today)
                 // In-place instant feedback: toast notification if supported by launcher
                 Toast.makeText(
                     context.applicationContext,
