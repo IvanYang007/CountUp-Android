@@ -1,0 +1,1563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CountUp Widget Header & Row 1 Layout — Expert Panel & Interactive Evaluation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0c1017;
+      --bg-surface: #151c28;
+      --bg-card: #1c2638;
+      --border-dark: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(217, 118, 66, 0.6);
+      --text-main: #f0f6fc;
+      --text-muted: #8b949e;
+      --text-sub: #adb5bd;
+      
+      /* CountUp Zen Brand Tokens */
+      --zen-paper: #F5E6D3;
+      --zen-paper-surface: #EBDCC3;
+      --zen-card: #FFFFFF;
+      --zen-ink: #2C2416;
+      --zen-ink-muted: #6B5D4F;
+      --zen-rule: #E3D3B8;
+      --zen-rule-variant: #D9C6A6;
+      --zen-vermilion: #D97642;
+      --zen-sage: #4A7C59;
+      --zen-ochre: #D4A574;
+      --zen-indigo: #7D9BA8;
+      --zen-dark-paper: #241D12;
+      --zen-dark-muted: #C4B291;
+      --zen-dark-number: #F5E6D3;
+
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --radius-widget: 28px;
+      --shadow-widget: 0 16px 36px -8px rgba(0,0,0,0.35), 0 0 1px 1px rgba(255,255,255,0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      padding: 2rem 1.5rem 6rem;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    header {
+      border-bottom: 1px solid var(--border-dark);
+      padding-bottom: 1.75rem;
+      margin-bottom: 2.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+    }
+
+    .title-group h1 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #ffffff 30%, #c4b291 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.35rem;
+    }
+
+    .title-group p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .badge-bar {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(217, 118, 66, 0.12);
+      color: var(--zen-vermilion);
+      border: 1px solid rgba(217, 118, 66, 0.3);
+    }
+
+    .badge.green {
+      background: rgba(74, 124, 89, 0.15);
+      color: #5bb377;
+      border-color: rgba(74, 124, 89, 0.35);
+    }
+
+    .badge.blue {
+      background: rgba(88, 166, 255, 0.12);
+      color: #79b8ff;
+      border-color: rgba(88, 166, 255, 0.3);
+    }
+
+    /* Layout Grid */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 460px 1fr;
+      gap: 2.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 1100px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Sticky Simulator Sidebar */
+    .simulator-pane {
+      position: sticky;
+      top: 1.5rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-dark);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+    }
+
+    .sim-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border-dark);
+    }
+
+    .sim-header h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* Live Controls */
+    .control-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .control-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .segmented-control {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      background: #0d131d;
+      border-radius: var(--radius-sm);
+      padding: 3px;
+      gap: 3px;
+      border: 1px solid var(--border-dark);
+    }
+
+    .segmented-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.45rem 0.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .segmented-btn:hover {
+      color: #fff;
+      background: rgba(255,255,255,0.05);
+    }
+
+    .segmented-btn.active {
+      background: var(--zen-vermilion);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(217, 118, 66, 0.4);
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      font-size: 0.85rem;
+      color: var(--text-sub);
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 42px;
+      height: 22px;
+    }
+
+    .switch input { opacity: 0; width: 0; height: 0; }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #2b3648;
+      transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 34px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 50%;
+    }
+
+    input:checked + .slider { background-color: var(--zen-vermilion); }
+    input:checked + .slider:before { transform: translateX(20px); }
+
+    /* Android Launcher Frame */
+    .launcher-frame {
+      position: relative;
+      width: 100%;
+      height: 380px;
+      border-radius: 36px;
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15), 0 20px 40px rgba(0,0,0,0.6);
+      background: linear-gradient(160deg, #1b2838 0%, #0d131a 100%);
+      padding: 1.25rem 1.1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 1rem;
+      transition: background 0.3s ease;
+    }
+
+    .launcher-frame.wallpaper-mountain {
+      background: radial-gradient(circle at 80% 20%, #2f435e 0%, #151d28 60%, #0c1017 100%);
+    }
+
+    .launcher-frame.wallpaper-nature {
+      background: radial-gradient(circle at 20% 30%, #2d4538 0%, #17261e 60%, #0c1410 100%);
+    }
+
+    .launcher-frame.wallpaper-minimal {
+      background: #12161f;
+    }
+
+    /* Launcher Status Bar */
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.85);
+      padding: 0 0.5rem;
+    }
+
+    /* The CountUp Android Widget Box */
+    .widget-container {
+      position: relative;
+      width: 100%;
+      height: 168px;
+      border-radius: var(--radius-widget);
+      background: var(--zen-paper);
+      box-shadow: var(--shadow-widget);
+      overflow: hidden;
+      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .widget-container.dark-mode {
+      background: var(--zen-dark-paper);
+    }
+
+    /* Background Ink Wash SVG Layer */
+    .widget-ink-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: 0.9;
+    }
+
+    /* Corner Radius Guideline Overlay */
+    .corner-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 20;
+      display: none;
+    }
+
+    .corner-overlay.active {
+      display: block;
+    }
+
+    .corner-arc {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 56px;
+      height: 56px;
+      border-top-left-radius: 28px;
+      border: 2px dashed #ff3b30;
+      border-right: none;
+      border-bottom: none;
+    }
+
+    .corner-tag {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      background: #ff3b30;
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 4px;
+      border-radius: 3px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Widget Internal Layouts */
+    .widget-content-wrap {
+      position: relative;
+      z-index: 10;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Option Variants */
+    /* 0. Current Baseline */
+    .layout-current .w-header {
+      padding: 7px 14px 1px 14px;
+      display: flex;
+      align-items: center;
+    }
+    .layout-current .w-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: #5D5043;
+    }
+    .layout-current .w-grid {
+      padding: 2px 6px 5px 6px;
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      align-items: center;
+    }
+
+    /* 1. Zen Yúbái (Negative Space Spacing) */
+    .layout-yubai .w-header {
+      padding: 14px 18px 0px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .layout-yubai .w-title {
+      font-size: 12.5px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--zen-ink-muted);
+      opacity: 0.88;
+    }
+    .layout-yubai .w-grid {
+      padding: 10px 10px 12px 10px;
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      align-items: center;
+    }
+
+    /* 2. Zen Hairline Rule (Editorial Line) */
+    .layout-hairline .w-header {
+      padding: 11px 16px 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .layout-hairline .w-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--zen-ink-muted);
+    }
+    .layout-hairline .w-divider {
+      height: 1px;
+      margin: 0 16px;
+      background: var(--zen-rule);
+      opacity: 0.8;
+    }
+    .layout-hairline .w-grid {
+      padding: 9px 8px 10px 8px;
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      align-items: center;
+    }
+
+    /* 3. Inset Pill / Seal Header */
+    .layout-pill .w-header {
+      padding: 12px 16px 4px 16px;
+      display: flex;
+      align-items: center;
+    }
+    .layout-pill .w-title-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(107, 93, 79, 0.09);
+      border: 0.5px solid rgba(107, 93, 79, 0.15);
+    }
+    .layout-pill .w-pill-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--zen-vermilion);
+    }
+    .layout-pill .w-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--zen-ink);
+    }
+    .layout-pill .w-grid {
+      padding: 6px 8px 10px 8px;
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      align-items: center;
+    }
+
+    /* 4. Golden Ratio Asymmetric Header */
+    .layout-golden .w-header {
+      padding: 13px 18px 0px 18px;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+    .layout-golden .w-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--zen-ink);
+    }
+    .layout-golden .w-meta {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--zen-ink-muted);
+      opacity: 0.7;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .layout-golden .w-grid {
+      padding: 12px 10px 12px 10px;
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      align-items: center;
+    }
+
+    /* Grid Cell Component */
+    .w-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 0 4px;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    .w-cell:hover {
+      transform: translateY(-2px);
+    }
+
+    .w-cell-name {
+      font-size: 11.5px;
+      letter-spacing: 0.03em;
+      font-weight: 500;
+      color: var(--zen-ink-muted);
+      margin-bottom: 3px;
+      max-width: 86px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .widget-container.dark-mode .w-cell-name {
+      color: var(--zen-dark-muted);
+    }
+
+    .w-circle-plate {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+      transition: all 0.2s ease;
+    }
+
+    .w-circle-plate.olive { background: var(--zen-sage); color: #fff; }
+    .w-circle-plate.orange { background: var(--zen-vermilion); color: #fff; }
+    .w-circle-plate.mustard { background: var(--zen-ochre); color: var(--zen-ink); }
+    .w-circle-plate.dark { background: #382c1b; color: var(--zen-dark-number); border: 1px solid rgba(255,255,255,0.08); }
+
+    .w-cell-count {
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1;
+      font-feature-settings: "tnum";
+    }
+
+    /* Metric Visualizer Table */
+    .metric-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: 0.8rem;
+    }
+
+    .metric-table th, .metric-table td {
+      padding: 0.55rem 0.65rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border-dark);
+    }
+
+    .metric-table th {
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+    }
+
+    .metric-table td {
+      color: var(--text-sub);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .metric-table tr.highlight {
+      background: rgba(217, 118, 66, 0.08);
+    }
+
+    .metric-table tr.highlight td {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    /* Right Main Content Pane */
+    .content-pane {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-dark);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+
+    .card h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .card h2 .icon-wrap {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(217, 118, 66, 0.15);
+      color: var(--zen-vermilion);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+
+    /* Expert Dialog Transcript */
+    .expert-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .expert-bubble {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 1.25rem;
+      align-items: start;
+      padding: 1.25rem;
+      border-radius: var(--radius-md);
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-dark);
+      transition: border-color 0.2s ease;
+    }
+
+    .expert-bubble:hover {
+      border-color: rgba(255,255,255,0.15);
+    }
+
+    .expert-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    .expert-avatar.vance { background: linear-gradient(135deg, #1e88e5, #1565c0); }
+    .expert-avatar.takahashi { background: linear-gradient(135deg, #d97642, #b85d2e); }
+    .expert-avatar.thorne { background: linear-gradient(135deg, #43a047, #2e7d32); }
+    .expert-avatar.mehta { background: linear-gradient(135deg, #8e24aa, #6a1b9a); }
+
+    .expert-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.4rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .expert-name {
+      font-weight: 700;
+      color: #fff;
+      font-size: 1rem;
+    }
+
+    .expert-title {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .expert-speech {
+      color: var(--text-sub);
+      font-size: 0.92rem;
+      line-height: 1.65;
+    }
+
+    .expert-speech p {
+      margin-bottom: 0.65rem;
+    }
+
+    .expert-speech p:last-child {
+      margin-bottom: 0;
+    }
+
+    .expert-quote-highlight {
+      padding: 0.65rem 0.9rem;
+      border-radius: 8px;
+      background: rgba(217, 118, 66, 0.08);
+      border-left: 3px solid var(--zen-vermilion);
+      color: #fce8df;
+      font-size: 0.88rem;
+      margin: 0.6rem 0;
+    }
+
+    /* Comparison Cards Grid */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .option-card {
+      background: #111722;
+      border: 1px solid var(--border-dark);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      transition: all 0.2s ease;
+    }
+
+    .option-card.recommended {
+      border-color: var(--zen-vermilion);
+      background: linear-gradient(180deg, rgba(217, 118, 66, 0.06) 0%, #111722 100%);
+    }
+
+    .option-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .option-header h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .option-pros-cons {
+      font-size: 0.82rem;
+      color: var(--text-sub);
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .pro { color: #5bb377; display: flex; gap: 0.4rem; }
+    .con { color: #f87171; display: flex; gap: 0.4rem; }
+
+    /* Code Snippets */
+    .code-block {
+      background: #090d14;
+      border: 1px solid var(--border-dark);
+      border-radius: var(--radius-sm);
+      padding: 1.1rem;
+      overflow-x: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: #d1d5db;
+      line-height: 1.5;
+    }
+
+    .code-block .kw { color: #f472b6; }
+    .code-block .attr { color: #38bdf8; }
+    .code-block .val { color: #fde047; }
+    .code-block .com { color: #6b7280; font-style: italic; }
+
+    /* Tabs */
+    .tab-bar {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border-dark);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .tab-btn.active {
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+    }
+
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <div class="title-group">
+      <h1>CountUp Home-Screen Widget — Layout Architecture & Spatial Ergonomics</h1>
+      <p>Multi-expert panel synthesis on resolving corner radius collision, title poise, and row-1 vertical rhythm</p>
+    </div>
+    <div class="badge-bar">
+      <span class="badge blue">Material 3 / Android 16 SystemUI</span>
+      <span class="badge">Zen "留白" Negative Space</span>
+      <span class="badge green">RemoteViews & Glance 1.1.1</span>
+    </div>
+  </header>
+
+  <!-- Main Grid -->
+  <div class="dashboard-grid">
+
+    <!-- Sticky Interactive Simulator -->
+    <div class="simulator-pane">
+      <div class="sim-header">
+        <h3>Live Widget Interactive Preview</h3>
+        <span class="badge" id="activeOptionBadge">Option A: Zen Yúbái</span>
+      </div>
+
+      <!-- Controls -->
+      <div class="control-group">
+        <div class="control-label">
+          <span>Layout Architecture</span>
+        </div>
+        <div class="segmented-control" id="layoutControl">
+          <button class="segmented-btn" data-layout="current">Current (Tight)</button>
+          <button class="segmented-btn active" data-layout="yubai">A: Zen Yúbái</button>
+          <button class="segmented-btn" data-layout="hairline">B: Hairline Rule</button>
+          <button class="segmented-btn" data-layout="pill">C: Seal Pill</button>
+          <button class="segmented-btn" data-layout="golden">D: Asymmetric</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <span>Paper Surface Theme</span>
+        </div>
+        <div class="segmented-control" id="themeControl">
+          <button class="segmented-btn active" data-theme="day">Warm Paper (Day)</button>
+          <button class="segmented-btn" data-theme="dark">Night Paper (Dark)</button>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <div class="control-label">
+          <span>Launcher Background</span>
+        </div>
+        <div class="segmented-control" id="wallpaperControl">
+          <button class="segmented-btn active" data-wp="mountain">Muted Dark</button>
+          <button class="segmented-btn" data-wp="nature">Sage Forest</button>
+          <button class="segmented-btn" data-wp="minimal">Minimal Slate</button>
+        </div>
+      </div>
+
+      <div class="toggle-row">
+        <span>Corner Radius Constraint Overlay (28dp)</span>
+        <label class="switch">
+          <input type="checkbox" id="cornerOverlayToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <span>Show Ink Wash Landscape Vector</span>
+        <label class="switch">
+          <input type="checkbox" id="inkWashToggle" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- Simulated Android Screen -->
+      <div class="launcher-frame wallpaper-mountain" id="launcherFrame">
+        <div class="status-bar">
+          <span>1:15</span>
+          <span>98%</span>
+        </div>
+
+        <!-- The Android Widget -->
+        <div class="widget-container layout-yubai" id="widgetBox">
+          
+          <!-- Ink Wash Background SVG -->
+          <svg class="widget-ink-bg" id="inkSvg" viewBox="0 0 480 280" preserveAspectRatio="none">
+            <path d="M 160 280 C 240 200, 310 168, 393 145 C 432 134, 460 156, 480 140 L 480 280 Z" fill="#254E6B" opacity="0.16" />
+            <path d="M 280 280 C 340 230, 400 190, 480 175 L 480 280 Z" fill="#224A7C" opacity="0.14" />
+          </svg>
+
+          <!-- Corner Radius Red Line Overlay -->
+          <div class="corner-overlay" id="cornerOverlay">
+            <div class="corner-arc">
+              <span class="corner-tag">28dp corner arc</span>
+            </div>
+          </div>
+
+          <!-- Content Layers injected via JS -->
+          <div class="widget-content-wrap" id="widgetContent">
+            <!-- Dynamically rendered according to layout choice -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Spacing Metrics Table -->
+      <table class="metric-table" id="metricTable">
+        <thead>
+          <tr>
+            <th>Dimension</th>
+            <th>Current</th>
+            <th>Recommended</th>
+            <th>Delta / Impact</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Padding Top</td>
+            <td>7 dp</td>
+            <td>14 dp</td>
+            <td style="color:#5bb377;">+7 dp (clears corner)</td>
+          </tr>
+          <tr>
+            <td>Padding Start</td>
+            <td>14 dp</td>
+            <td>18 dp</td>
+            <td style="color:#5bb377;">+4 dp (balanced inset)</td>
+          </tr>
+          <tr>
+            <td>Header to Row 1 Gap</td>
+            <td>3 dp</td>
+            <td>12 dp</td>
+            <td style="color:#5bb377;">+9 dp (resolves crowding)</td>
+          </tr>
+          <tr>
+            <td>Grid Bottom Margin</td>
+            <td>5 dp</td>
+            <td>10 dp</td>
+            <td style="color:#5bb377;">+5 dp (optical centering)</td>
+          </tr>
+        </tbody>
+      </table>
+
+    </div>
+
+    <!-- Right Side: Deep Expert Panel & Technical Analysis -->
+    <div class="content-pane">
+
+      <!-- Section 1: Problem Diagnosis & Mathematical Anatomy -->
+      <div class="card">
+        <h2>
+          <span class="icon-wrap">📐</span>
+          1. Geometric Anatomy of the Visual Tension
+        </h2>
+        <p style="margin-bottom:1rem; color:var(--text-sub);">
+          The user identified two distinct friction points in the existing widget: 
+          <strong>(1) The title sits too close to the curved widget corner</strong>, and 
+          <strong>(2) The vertical spacing between the title and the first line of items is overly cramped</strong>.
+        </p>
+
+        <div style="background:#0e141f; padding:1.25rem; border-radius:12px; border:1px solid var(--border-dark); margin-bottom:1.25rem;">
+          <h4 style="color:#fff; margin-bottom:0.6rem; font-size:0.95rem;">Mathematical Proof of Corner Collision on Android 12–16</h4>
+          <p style="font-size:0.88rem; color:var(--text-sub); margin-bottom:0.75rem;">
+            Modern Android launchers (Pixel Launcher, Samsung One UI) enforce a container corner radius $R = 28\text{dp}$. The boundary arc from the top-left origin follows:
+          </p>
+          <div style="font-family:'JetBrains Mono', monospace; font-size:0.85rem; color:#fde047; padding:0.5rem 0.8rem; background:#070a0f; border-radius:6px; margin-bottom:0.75rem;">
+            Arc Boundary: (x - 28)² + (y - 28)² = 28² = 784
+          </div>
+          <ul style="font-size:0.85rem; color:var(--text-sub); padding-left:1.25rem; display:flex; flex-direction:column; gap:0.4rem;">
+            <li><strong>Current Layout $(x=14\text{dp}, y=7\text{dp})$:</strong> Distance from corner center $(28,28) = \sqrt{(14-28)^2 + (7-28)^2} = \sqrt{196 + 441} = \mathbf{25.24\text{dp}}$.<br>
+            Clearance to the physical clipping curve = $28 - 25.24 = \mathbf{2.76\text{dp}}$. The "C" in "CountUp" sits less than 3dp away from the rounded edge, causing extreme visual pinching.</li>
+            <li><strong>Recommended Layout $(x=18\text{dp}, y=14\text{dp})$:</strong> Distance from $(28,28) = \sqrt{(18-28)^2 + (14-28)^2} = \sqrt{100 + 196} = \mathbf{17.20\text{dp}}$.<br>
+            Clearance to curve = $28 - 17.20 = \mathbf{10.80\text{dp}}$. This establishes the golden optical margin where the text feels comfortably anchored inside the card.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Section 2: Multi-Expert Discussion Panel -->
+      <div class="card">
+        <h2>
+          <span class="icon-wrap">🎙️</span>
+          2. Multi-Expert Panel Discussion: Space vs Line
+        </h2>
+
+        <div class="expert-panel">
+
+          <!-- Expert 1: Dr. Elena Vance -->
+          <div class="expert-bubble">
+            <div class="expert-avatar vance">EV</div>
+            <div class="expert-content">
+              <div class="expert-meta">
+                <span class="expert-name">Dr. Elena Vance</span>
+                <span class="expert-title">Principal Android System UI & Material 3 Architect</span>
+              </div>
+              <div class="expert-speech">
+                <p>
+                  "From the Android System UI perspective, widget design changed fundamentally with Android 12 (API 31) through Android 16. The platform standardizes on dynamic rounded corners (28dp outer, 16dp-20dp inner content), and launchers dynamically adjust insets.
+                </p>
+                <div class="expert-quote-highlight">
+                  "When an app widget sets <code>paddingTop="7dp"</code>, it is fighting the OS-level corner envelope. In Material 3 widget specifications, the recommended internal safe margin is never below 16dp."
+                </div>
+                <p>
+                  Regarding the choice between a <strong>divider line vs whitespace</strong>: lines in small 2x4 widgets create rigid compartments that often feel boxy. If we introduce a line across the width, it must either bleed edge-to-edge (which clashes with the 28dp rounded corner clip) or be inset. A pure spatial breathing room (14dp top padding + 12dp gap) is far more robust across varying launcher DPIs and widget cell sizes."
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Expert 2: Kaito Takahashi -->
+          <div class="expert-avatar-wrap expert-bubble">
+            <div class="expert-avatar takahashi">KT</div>
+            <div class="expert-content">
+              <div class="expert-meta">
+                <span class="expert-name">Kaito Takahashi</span>
+                <span class="expert-title">Zen & Mid-Century Modern Design Director</span>
+              </div>
+              <div class="expert-speech">
+                <p>
+                  "CountUp’s soul is not a generic utility app; it is rooted in <strong>Zen paper aesthetics (留白 - Yúbái) and Chinese ink wash landscapes</strong>. In traditional East Asian composition, empty space is not 'dead space'—it is active breath (气韵)."
+                </p>
+                <div class="expert-quote-highlight">
+                  "Drawing a hard horizontal stroke across the widget cuts right through the delicate mineral wash mountain peaks drawn by <code>WidgetBackgroundRenderer</code>. A divider line behaves like a scar on warm handmade paper."
+                </div>
+                <p>
+                  "Instead, we should give the title <strong>poise</strong>. Treat 'CountUp' as an understated seal: tracked out letter-spacing (<code>0.08em</code>), muted ink tone (<code>#6B5D4F</code>), with <strong>14dp top space and 12dp clearance down to the habit items</strong>. The eye immediately understands the spatial hierarchy without needing a barrier line to separate them."
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Expert 3: Marcus Thorne -->
+          <div class="expert-bubble">
+            <div class="expert-avatar thorne">MT</div>
+            <div class="expert-content">
+              <div class="expert-meta">
+                <span class="expert-name">Marcus Thorne</span>
+                <span class="expert-title">Senior Widget Ergonomics & Glanceability Specialist</span>
+              </div>
+              <div class="expert-speech">
+                <p>
+                  "Home-screen widgets have an attention window of <strong>under 600 milliseconds</strong>. When a user glances at their phone, their foveal vision needs to instantly separate two distinct functional zones:
+                  <strong>(1) The Context Anchor</strong> (What is this widget?) and 
+                  <strong>(2) The Actionable Data</strong> (What are my day counts?)."
+                </p>
+                <div class="expert-quote-highlight">
+                  "The current 3dp gap causes a Gestalt Proximity grouping error: the brain groups the title 'CountUp' directly with the middle column item rather than recognizing it as the master header."
+                </div>
+                <p>
+                  "Whether we choose a line or space, the vertical distance between the header baseline and the item labels must expand from 3dp to at least 10dp–12dp. Also, our cell tap targets (the 44dp circles) need adequate clearance from the top frame so quick taps don't misfire into the launcher shell."
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Expert 4: Siddharth Mehta -->
+          <div class="expert-bubble">
+            <div class="expert-avatar mehta">SM</div>
+            <div class="expert-content">
+              <div class="expert-meta">
+                <span class="expert-name">Siddharth Mehta</span>
+                <span class="expert-title">Lead Jetpack Compose & RemoteViews Systems Engineer</span>
+              </div>
+              <div class="expert-speech">
+                <p>
+                  "From an implementation standpoint in <code>countup_widget.xml</code> and Compose Glance, we must remember that <code>GridView</code> in RemoteViews has idiosyncrasies: <code>clipToPadding="true"</code>, and nested layouts incur RemoteViews IPC costs.
+                </p>
+                <div class="expert-quote-highlight">
+                  "If we add an extra <code>&lt;View android:id="@+id/divider"&gt;</code>, we increase the RemoteViews hierarchy complexity. But adjusting padding in <code>TextView</code> and <code>GridView</code> has ZERO performance overhead."
+                </div>
+                <p>
+                  "By updating <code>widget_title</code> to <code>paddingTop="14dp"</code>, <code>paddingStart="18dp"</code> and setting <code>widget_grid</code> to <code>paddingTop="6dp"</code>, we solve both the corner clipping and row-1 proximity in pure layout coordinates without adding view hierarchy weight."
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Section 3: Comparative Analysis of Architectural Options -->
+      <div class="card">
+        <h2>
+          <span class="icon-wrap">⚖️</span>
+          3. Comparative Evaluation of Approaches
+        </h2>
+
+        <div class="comparison-grid">
+
+          <!-- Option A -->
+          <div class="option-card recommended">
+            <div class="option-header">
+              <h4>Option A: The Zen Yúbái Spacing (Recommended)</h4>
+              <span class="badge green">Recommended ★</span>
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-sub);">
+              Employs calibrated negative space (14dp top, 18dp start, 12dp vertical rhythm gap). No line. Clean and airy.
+            </p>
+            <div class="option-pros-cons">
+              <span class="pro">✔ Preserves continuous ink wash landscape artwork without visual cuts.</span>
+              <span class="pro">✔ Completely clears the 28dp corner arc (10.8dp safe margin).</span>
+              <span class="pro">✔ Zero extra views; lowest RemoteViews overhead.</span>
+              <span class="con">✖ Requires disciplined vertical height balancing on 1-row compact resizes.</span>
+            </div>
+          </div>
+
+          <!-- Option B -->
+          <div class="option-card">
+            <div class="option-header">
+              <h4>Option B: Hairline Editorial Rule</h4>
+              <span class="badge blue">Structured</span>
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-sub);">
+              Adds a 1dp subtle rule (<code>#E3D3B8</code> at 40% opacity) inset by 16dp on both sides below the title.
+            </p>
+            <div class="option-pros-cons">
+              <span class="pro">✔ Distinct, explicit separation between title bar and data grid.</span>
+              <span class="pro">✔ Familiar pattern seen in Google Calendar / Keep widgets.</span>
+              <span class="con">✖ Bisects the Chinese ink wash mountains, reducing Zen aesthetic.</span>
+              <span class="con">✖ Consumes ~8dp of vertical space, tightening space for 2-row grids.</span>
+            </div>
+          </div>
+
+          <!-- Option C -->
+          <div class="option-card">
+            <div class="option-header">
+              <h4>Option C: Minimalist Seal Pill / Chip</h4>
+              <span class="badge">Compact Pill</span>
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-sub);">
+              Wraps the title in a subtle translucent rounded badge with a vermilion cinnabar dot.
+            </p>
+            <div class="option-pros-cons">
+              <span class="pro">✔ Visually encapsulates the brand, making it look like a physical stamp.</span>
+              <span class="pro">✔ High contrast against any background artwork.</span>
+              <span class="con">✖ Slightly more complex RemoteViews hierarchy with background shape.</span>
+            </div>
+          </div>
+
+          <!-- Option D -->
+          <div class="option-card">
+            <div class="option-header">
+              <h4>Option D: Asymmetric Eyebrow + Meta</h4>
+              <span class="badge">Editorial Meta</span>
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-sub);">
+              Title on the left with small monospaced count badge on the top right (e.g. "3 HABITS").
+            </p>
+            <div class="option-pros-cons">
+              <span class="pro">✔ Modern Swiss/Editorial typography balance.</span>
+              <span class="pro">✔ Gives utility information at top right.</span>
+              <span class="con">✖ Can look cluttered on narrow 2x2 widget sizes.</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Section 4: Production Implementation Code -->
+      <div class="card">
+        <h2>
+          <span class="icon-wrap">💻</span>
+          4. Recommended Implementation Code
+        </h2>
+
+        <div class="tab-bar">
+          <button class="tab-btn active" onclick="switchTab(event, 'tab-xml')">countup_widget.xml (RemoteViews)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'tab-compose')">CountUpWidget.kt (Glance/Compose Equivalent)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'tab-cell')">countup_widget_cell.xml</button>
+        </div>
+
+        <!-- Tab 1: XML -->
+        <div class="tab-pane active" id="tab-xml">
+          <div class="code-block">
+<span class="com">&lt;!-- Ultra-minimalist Zen RemoteViews widget: calibrated 28dp corner clearance + negative space rhythm --&gt;</span>
+&lt;<span class="kw">FrameLayout</span> <span class="attr">xmlns:android</span>=<span class="val">"http://schemas.android.com/apk/res/android"</span>
+    <span class="attr">android:id</span>=<span class="val">"@+id/widget_root"</span>
+    <span class="attr">android:layout_width</span>=<span class="val">"match_parent"</span>
+    <span class="attr">android:layout_height</span>=<span class="val">"match_parent"</span>&gt;
+
+    <span class="com">&lt;!-- Active Chinese ink wash landscape background bitmap --&gt;</span>
+    &lt;<span class="kw">ImageView</span>
+        <span class="attr">android:id</span>=<span class="val">"@+id/widget_bg_image"</span>
+        <span class="attr">android:layout_width</span>=<span class="val">"match_parent"</span>
+        <span class="attr">android:layout_height</span>=<span class="val">"match_parent"</span>
+        <span class="attr">android:scaleType</span>=<span class="val">"fitXY"</span>
+        <span class="attr">android:contentDescription</span>=<span class="val">"@null"</span> /&gt;
+
+    &lt;<span class="kw">LinearLayout</span>
+        <span class="attr">android:layout_width</span>=<span class="val">"match_parent"</span>
+        <span class="attr">android:layout_height</span>=<span class="val">"match_parent"</span>
+        <span class="attr">android:orientation</span>=<span class="val">"vertical"</span>&gt;
+
+        <span class="com">&lt;!-- Zen Title: 14dp top padding clears 28dp corner arc; 18dp start aligns with column optical center --&gt;</span>
+        &lt;<span class="kw">TextView</span>
+            <span class="attr">android:id</span>=<span class="val">"@+id/widget_title"</span>
+            <span class="attr">android:layout_width</span>=<span class="val">"wrap_content"</span>
+            <span class="attr">android:layout_height</span>=<span class="val">"wrap_content"</span>
+            <span class="attr">android:paddingStart</span>=<span class="val">"18dp"</span>
+            <span class="attr">android:paddingTop</span>=<span class="val">"14dp"</span>
+            <span class="attr">android:paddingEnd</span>=<span class="val">"18dp"</span>
+            <span class="attr">android:paddingBottom</span>=<span class="val">"4dp"</span>
+            <span class="attr">android:textSize</span>=<span class="val">"12.5sp"</span>
+            <span class="attr">android:textStyle</span>=<span class="val">"bold"</span>
+            <span class="attr">android:letterSpacing</span>=<span class="val">"0.08"</span>
+            <span class="attr">android:textColor</span>=<span class="val">"#6B5D4F"</span>
+            <span class="attr">android:text</span>=<span class="val">"@string/app_name"</span> /&gt;
+
+        <span class="com">&lt;!-- Full-width 3-column habit grid: 6dp top padding produces an 10dp-12dp net gap between header and row 1 --&gt;</span>
+        &lt;<span class="kw">GridView</span>
+            <span class="attr">android:id</span>=<span class="val">"@+id/widget_grid"</span>
+            <span class="attr">android:layout_width</span>=<span class="val">"match_parent"</span>
+            <span class="attr">android:layout_height</span>=<span class="val">"0dp"</span>
+            <span class="attr">android:layout_weight</span>=<span class="val">"1"</span>
+            <span class="attr">android:numColumns</span>=<span class="val">"3"</span>
+            <span class="attr">android:stretchMode</span>=<span class="val">"columnWidth"</span>
+            <span class="attr">android:paddingStart</span>=<span class="val">"8dp"</span>
+            <span class="attr">android:paddingTop</span>=<span class="val">"6dp"</span>
+            <span class="attr">android:paddingEnd</span>=<span class="val">"8dp"</span>
+            <span class="attr">android:paddingBottom</span>=<span class="val">"10dp"</span>
+            <span class="attr">android:clipToPadding</span>=<span class="val">"false"</span>
+            <span class="attr">android:scrollbars</span>=<span class="val">"none"</span>
+            <span class="attr">android:listSelector</span>=<span class="val">"@android:color/transparent"</span> /&gt;
+    &lt;/<span class="kw">LinearLayout</span>&gt;
+&lt;/<span class="kw">FrameLayout</span>&gt;
+          </div>
+        </div>
+
+        <!-- Tab 2: Compose -->
+        <div class="tab-pane" id="tab-compose">
+          <div class="code-block">
+<span class="com">// Jetpack Glance 1.1.1 / Compose Widget equivalent conforming to android-kotlin-compose skill</span>
+<span class="kw">@Composable</span>
+<span class="kw">fun</span> <span class="val">CountUpWidgetGlanceContent</span>(
+    state: WidgetState,
+    modifier: GlanceModifier = GlanceModifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(ZenPaperBackground)
+            .appWidgetBackground()
+    ) {
+        Column(
+            modifier = GlanceModifier
+                .fillMaxSize()
+                .padding(top = 14.dp, start = 18.dp, end = 18.dp, bottom = 10.dp)
+        ) {
+            <span class="com">// Header Title with Zen poise</span>
+            Text(
+                text = stringResource(R.string.app_name).uppercase(),
+                style = TextStyle(
+                    fontSize = 12.5.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = ColorProvider(ZenInkMuted)
+                ),
+                modifier = GlanceModifier.padding(bottom = 8.dp)
+            )
+
+            <span class="com">// Interactive 3-column Item Grid</span>
+            LazyVerticalGrid(
+                gridCells = GridCells.Fixed(3),
+                modifier = GlanceModifier.defaultWeight()
+            ) {
+                items(state.items, key = { it.id }) { item -&gt;
+                    WidgetCellGlance(item)
+                }
+            }
+        }
+    }
+}
+          </div>
+        </div>
+
+        <!-- Tab 3: Cell -->
+        <div class="tab-pane" id="tab-cell">
+          <div class="code-block">
+<span class="com">&lt;!-- countup_widget_cell.xml: refined label margin &amp; plate centering --&gt;</span>
+&lt;<span class="kw">LinearLayout</span> <span class="attr">xmlns:android</span>=<span class="val">"http://schemas.android.com/apk/res/android"</span>
+    <span class="attr">android:id</span>=<span class="val">"@+id/cell_root"</span>
+    <span class="attr">android:layout_width</span>=<span class="val">"match_parent"</span>
+    <span class="attr">android:layout_height</span>=<span class="val">"wrap_content"</span>
+    <span class="attr">android:orientation</span>=<span class="val">"vertical"</span>
+    <span class="attr">android:gravity</span>=<span class="val">"center_horizontal"</span>
+    <span class="attr">android:paddingStart</span>=<span class="val">"2dp"</span>
+    <span class="attr">android:paddingTop</span>=<span class="val">"2dp"</span>
+    <span class="attr">android:paddingEnd</span>=<span class="val">"2dp"</span>
+    <span class="attr">android:paddingBottom</span>=<span class="val">"4dp"</span>&gt;
+
+    &lt;<span class="kw">TextView</span>
+        <span class="attr">android:id</span>=<span class="val">"@+id/cell_name"</span>
+        <span class="attr">android:layout_width</span>=<span class="val">"match_parent"</span>
+        <span class="attr">android:layout_height</span>=<span class="val">"wrap_content"</span>
+        <span class="attr">android:gravity</span>=<span class="val">"center"</span>
+        <span class="attr">android:maxLines</span>=<span class="val">"1"</span>
+        <span class="attr">android:ellipsize</span>=<span class="val">"end"</span>
+        <span class="attr">android:letterSpacing</span>=<span class="val">"0.03"</span>
+        <span class="attr">android:textSize</span>=<span class="val">"11.5sp"</span>
+        <span class="attr">android:layout_marginBottom</span>=<span class="val">"3dp"</span> /&gt;
+
+    &lt;<span class="kw">FrameLayout</span>
+        <span class="attr">android:layout_width</span>=<span class="val">"44dp"</span>
+        <span class="attr">android:layout_height</span>=<span class="val">"44dp"</span>&gt;
+
+        &lt;<span class="kw">ImageView</span>
+            <span class="attr">android:id</span>=<span class="val">"@+id/cell_circle"</span>
+            <span class="attr">android:layout_width</span>=<span class="val">"match_parent"</span>
+            <span class="attr">android:layout_height</span>=<span class="val">"match_parent"</span>
+            <span class="attr">android:scaleType</span>=<span class="val">"fitCenter"</span>
+            <span class="attr">android:contentDescription</span>=<span class="val">"@null"</span> /&gt;
+
+        &lt;<span class="kw">TextView</span>
+            <span class="attr">android:id</span>=<span class="val">"@+id/cell_count"</span>
+            <span class="attr">android:layout_width</span>=<span class="val">"match_parent"</span>
+            <span class="attr">android:layout_height</span>=<span class="val">"match_parent"</span>
+            <span class="attr">android:gravity</span>=<span class="val">"center"</span>
+            <span class="attr">android:maxLines</span>=<span class="val">"1"</span>
+            <span class="attr">android:textSize</span>=<span class="val">"17sp"</span> /&gt;
+    &lt;/<span class="kw">FrameLayout</span>&gt;
+&lt;/<span class="kw">LinearLayout</span>&gt;
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  const layouts = {
+    current: {
+      badge: "Current (Overcrowded)",
+      html: `
+        <div class="w-header">
+          <span class="w-title">CountUp</span>
+        </div>
+        <div class="w-grid">
+          ${renderCells()}
+        </div>
+      `,
+      table: [
+        { label: "Padding Top", cur: "7 dp", rec: "7 dp", delta: "0 dp (Collision with 28dp arc)" },
+        { label: "Padding Start", cur: "14 dp", rec: "14 dp", delta: "0 dp (Tight to corner)" },
+        { label: "Header-to-Row 1", cur: "3 dp", rec: "3 dp", delta: "Gestalt proximity error" },
+        { label: "Bottom Margin", cur: "5 dp", rec: "5 dp", delta: "Off-center bottom" }
+      ]
+    },
+    yubai: {
+      badge: "Option A: Zen Yúbái (Recommended ★)",
+      html: `
+        <div class="w-header">
+          <span class="w-title">CountUp</span>
+        </div>
+        <div class="w-grid">
+          ${renderCells()}
+        </div>
+      `,
+      table: [
+        { label: "Padding Top", cur: "7 dp", rec: "14 dp", delta: "+7 dp (10.8dp safe margin)" },
+        { label: "Padding Start", cur: "14 dp", rec: "18 dp", delta: "+4 dp (Optical balance)" },
+        { label: "Header-to-Row 1", cur: "3 dp", rec: "12 dp", delta: "+9 dp (Clear hierarchy)" },
+        { label: "Bottom Margin", cur: "5 dp", rec: "10 dp", delta: "+5 dp (Golden centering)" }
+      ]
+    },
+    hairline: {
+      badge: "Option B: Hairline Editorial Rule",
+      html: `
+        <div class="w-header">
+          <span class="w-title">CountUp</span>
+        </div>
+        <div class="w-divider"></div>
+        <div class="w-grid">
+          ${renderCells()}
+        </div>
+      `,
+      table: [
+        { label: "Padding Top", cur: "7 dp", rec: "11 dp", delta: "+4 dp" },
+        { label: "Divider Thickness", cur: "None", rec: "1 dp", delta: "ZenHairlineRule (#E3D3B8)" },
+        { label: "Header-to-Row 1", cur: "3 dp", rec: "14 dp", delta: "+11 dp (Partitioned)" },
+        { label: "Bottom Margin", cur: "5 dp", rec: "8 dp", delta: "+3 dp" }
+      ]
+    },
+    pill: {
+      badge: "Option C: Minimalist Seal Pill",
+      html: `
+        <div class="w-header">
+          <div class="w-title-pill">
+            <div class="w-pill-dot"></div>
+            <span class="w-title">CountUp</span>
+          </div>
+        </div>
+        <div class="w-grid">
+          ${renderCells()}
+        </div>
+      `,
+      table: [
+        { label: "Padding Top", cur: "7 dp", rec: "12 dp", delta: "+5 dp" },
+        { label: "Header Container", cur: "Raw Text", rec: "Seal Pill", delta: "Capsule stamp" },
+        { label: "Header-to-Row 1", cur: "3 dp", rec: "10 dp", delta: "+7 dp" },
+        { label: "Bottom Margin", cur: "5 dp", rec: "8 dp", delta: "+3 dp" }
+      ]
+    },
+    golden: {
+      badge: "Option D: Asymmetric Meta Header",
+      html: `
+        <div class="w-header">
+          <span class="w-title">CountUp</span>
+          <span class="w-meta">3 HABITS</span>
+        </div>
+        <div class="w-grid">
+          ${renderCells()}
+        </div>
+      `,
+      table: [
+        { label: "Padding Top", cur: "7 dp", rec: "13 dp", delta: "+6 dp" },
+        { label: "Padding Start/End", cur: "14 dp", rec: "18 dp", delta: "+4 dp" },
+        { label: "Header-to-Row 1", cur: "3 dp", rec: "12 dp", delta: "+9 dp" },
+        { label: "Bottom Margin", cur: "5 dp", rec: "10 dp", delta: "+5 dp" }
+      ]
+    }
+  };
+
+  function renderCells() {
+    return `
+      <div class="w-cell">
+        <div class="w-cell-name">Haircut</div>
+        <div class="w-circle-plate olive">
+          <span class="w-cell-count">17</span>
+        </div>
+      </div>
+      <div class="w-cell">
+        <div class="w-cell-name">Plant</div>
+        <div class="w-circle-plate orange">
+          <span class="w-cell-count">24</span>
+        </div>
+      </div>
+      <div class="w-cell">
+        <div class="w-cell-name">Book</div>
+        <div class="w-circle-plate mustard">
+          <span class="w-cell-count">34</span>
+        </div>
+      </div>
+    `;
+  }
+
+  let currentLayout = 'yubai';
+  let isDarkMode = false;
+
+  const widgetBox = document.getElementById('widgetBox');
+  const widgetContent = document.getElementById('widgetContent');
+  const activeOptionBadge = document.getElementById('activeOptionBadge');
+  const metricTableBody = document.querySelector('#metricTable tbody');
+  const cornerOverlay = document.getElementById('cornerOverlay');
+  const cornerOverlayToggle = document.getElementById('cornerOverlayToggle');
+  const inkWashToggle = document.getElementById('inkWashToggle');
+  const inkSvg = document.getElementById('inkSvg');
+  const launcherFrame = document.getElementById('launcherFrame');
+
+  function updateWidget() {
+    const layout = layouts[currentLayout];
+    widgetBox.className = `widget-container layout-${currentLayout} ${isDarkMode ? 'dark-mode' : ''}`;
+    widgetContent.innerHTML = layout.html;
+    activeOptionBadge.textContent = layout.badge;
+
+    // Update dark mode plates if needed
+    if (isDarkMode) {
+      document.querySelectorAll('.w-circle-plate').forEach(plate => {
+        plate.className = 'w-circle-plate dark';
+      });
+    }
+
+    // Update table
+    metricTableBody.innerHTML = layout.table.map((row, i) => `
+      <tr class="${i === 0 || i === 2 ? 'highlight' : ''}">
+        <td>${row.label}</td>
+        <td>${row.cur}</td>
+        <td>${row.rec}</td>
+        <td>${row.delta}</td>
+      </tr>
+    `).join('');
+  }
+
+  // Layout Buttons
+  document.querySelectorAll('#layoutControl .segmented-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#layoutControl .segmented-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentLayout = btn.dataset.layout;
+      updateWidget();
+    });
+  });
+
+  // Theme Buttons
+  document.querySelectorAll('#themeControl .segmented-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#themeControl .segmented-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      isDarkMode = btn.dataset.theme === 'dark';
+      updateWidget();
+    });
+  });
+
+  // Wallpaper Buttons
+  document.querySelectorAll('#wallpaperControl .segmented-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#wallpaperControl .segmented-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      launcherFrame.className = `launcher-frame wallpaper-${btn.dataset.wp}`;
+    });
+  });
+
+  // Corner Overlay
+  cornerOverlayToggle.addEventListener('change', (e) => {
+    cornerOverlay.classList.toggle('active', e.target.checked);
+  });
+
+  // Ink Wash Overlay
+  inkWashToggle.addEventListener('change', (e) => {
+    inkSvg.style.display = e.target.checked ? 'block' : 'none';
+  });
+
+  // Tab switcher
+  window.switchTab = function(event, tabId) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+  };
+
+  // Initial render
+  updateWidget();
+</script>
+</body>
+</html>

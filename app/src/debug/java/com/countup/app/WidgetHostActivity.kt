@@ -78,7 +78,7 @@ class WidgetHostActivity : Activity() {
                     val nameView = view.findViewById<android.widget.TextView>(R.id.cell_name)
                     nameView?.text = item.name.uppercase()
                     nameView?.setTextColor(android.graphics.Color.parseColor("#6B5D4F"))
-                    nameView?.textSize = 11.2f
+                    nameView?.textSize = 10.8f
                     val countView = view.findViewById<android.widget.TextView>(R.id.cell_count)
                     val bg = view.findViewById<android.widget.ImageView>(R.id.cell_circle)
                     if (arrived) {

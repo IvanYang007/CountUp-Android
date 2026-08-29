@@ -65,6 +65,7 @@ internal fun buildBaseViews(context: Context): RemoteViews {
 
     // Minimal title in muted ink typography
     views.setTextColor(R.id.widget_title, if (night) NIGHT_MUTED else MUTED)
+    views.setInt(R.id.widget_divider, "setBackgroundColor", if (night) NIGHT_DIVIDER else DIVIDER)
 
     // Tap anywhere outside a cell (and on the empty state) -> open the app.
     val launch = PendingIntent.getActivity(
@@ -284,6 +285,8 @@ private val NIGHT_MUTED: Int = 0xFFC4B291.toInt()
 private val NUMBER: Int = 0xFF2C2416.toInt()
 private val NIGHT_NUMBER: Int = 0xFFF5E6D3.toInt()
 private val WHITE: Int = 0xFFFFFFFF.toInt()
+private val DIVIDER: Int = 0x66E3D3B8
+private val NIGHT_DIVIDER: Int = 0x40D9C6A6
 
 // Day-mode count plates rotate through matte MCM accents; number ink follows contrast.
 private val DAY_CIRCLES = intArrayOf(
