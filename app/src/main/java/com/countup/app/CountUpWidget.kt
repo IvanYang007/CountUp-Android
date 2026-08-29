@@ -53,6 +53,7 @@ class CountUpWidgetReceiver : AppWidgetProvider() {
 }
 
 /** Pushes a fresh base RemoteViews to every placed widget and re-queries the grid. */
+@Suppress("DEPRECATION")
 fun pushWidgetUpdate(context: Context) {
     val manager = AppWidgetManager.getInstance(context)
     val ids = manager.getAppWidgetIds(ComponentName(context, CountUpWidgetReceiver::class.java))
@@ -62,6 +63,7 @@ fun pushWidgetUpdate(context: Context) {
 }
 
 /** Builds the widget frame: background, launch/reset/refresh intents, empty view. */
+@Suppress("DEPRECATION")
 private fun buildBaseViews(context: Context): RemoteViews {
     val night = isNightMode(context)
     val views = RemoteViews(context.packageName, R.layout.countup_widget)

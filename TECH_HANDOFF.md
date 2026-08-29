@@ -38,53 +38,49 @@ Local SDK at `D:\Android\Sdk` (see `local.properties`).
 
 ## 3. Architecture — files & responsibilities
 
-Production Kotlin is flat under `app/src/main/java/com/ivanyang/countup/`:
+Production Kotlin is flat under `app/src/main/java/com/countup/app/`:
 
 | File | Responsibility |
 |---|---|
-| `MainActivity.kt` | Compose app: list screen, add/edit dialog (name + date picker), reset/delete confirmation, header with `+`, theme, and per-item press/`animateItem()` motion |
-| `CountUpItem.kt` | `CountUpItem` data class (`id`, `name`, `epochDay`, `icon`) + JSON `encodeItems`/`decodeItems` (org.json) |
-| `CountUpStore.kt` | Persistence: items as one JSON array in private `SharedPreferences` (`countup_prefs`); CRUD; one-time migration of legacy single value |
-| `DaysSince.kt` | Pure `daysSince(last, today)` using `ChronoUnit.DAYS` clamped ≥ 0 |
-| `DateConversion.kt` | UTC-safe picker millis → `LocalDate`; localized date formatter |
+| `MainActivity.kt` | Compose app: list screen, add/edit dialog (name + date picker + comment), reset/delete confirmation, background rotation header, dynamic "SINCE" / "UNTIL" sub-labeling |
+| `AbstractBackgrounds.kt` | 5 rotatable Chinese ink wash abstract background themes (Mountain, Sand Dunes, Sea Horizon, Solitary Isle with Taihu Scholar Rock, Willow Leaves) + auto-daily rotation |
+| `CountUpItem.kt` | `CountUpItem` data class (`id`, `name`, `epochDay`, `comment`, `icon`, `futureFlag`, `showInWidget`) + JSON `encodeItems`/`decodeItems` + balanced-brace stream `salvageItems` |
+| `CountUpStore.kt` | Zero-data-loss persistence: 5-tier fail-safe hierarchy (Primary Prefs -> JSON Salvage -> Atomic Disk Backup `countup_backup.json` -> Legacy Migration -> Timestamped Quarantine) |
+| `DaysSince.kt` | Pure `daysSince(last, today)` using `ChronoUnit.DAYS` (supports negative future counts) |
+| `DateConversion.kt` | UTC-safe picker millis → `LocalDate`; localized date formatter; dynamic "SINCE" / "UNTIL" sub-labeling |
 | `ItemIcons.kt` | The 20-icon registry; `iconRes(name)` map + `SOCIAL_ICON_NAMES` + `DEFAULT_ICON` |
-| `CountUpWidget.kt` | Classic RemoteViews widget: `CountUpWidgetReceiver` (provider), `CountUpWidgetService` + factory (grid cells from `CountUpStore`), `ResetCountReceiver` (per-cell tap-to-reset), `pushWidgetUpdate()` imperative refresh |
+| `CountUpWidget.kt` | Classic RemoteViews widget: `CountUpWidgetReceiver` (provider), `CountUpWidgetService` + factory (grid cells from `CountUpStore`), `ResetCountReceiver` (in-place double-tap reset confirmation), `pushWidgetUpdate()` imperative refresh |
 | (debug) `WidgetHostActivity.kt` | Debug-only activity to render the widget for screenshots (not in release) |
 
 Tests:
-- `app/src/test/...` (JVM): `CountUpItemTest` (8), `DaysSinceTest` (6), `WidgetRowTest` (3) → **17 unit tests**
-- `app/src/androidTest/...` (device): `CountUpStoreInstrumentedTest` (16) — CRUD, migration, recovery, icon assignment
+- `app/src/test/...` (JVM): `CountUpItemTest`, `CountUpStoreTest`, `EdgeCaseMatrixTest`, `AbstractBackgroundTest`, `DateConversionTest`, `DaysSinceTest`, `ItemIconsTest`, `WidgetRowTest` → **68 JVM unit tests** (100% green)
+- `app/src/androidTest/...` (device): `CountUpStoreInstrumentedTest` — CRUD, migration, recovery, icon assignment
 
-Resources: `res/values/strings.xml`, `plurals.xml` (`days_unit`), `themes.xml`, `colors.xml`; `res/drawable/ic_*.xml` (20 Material icons + `ic_zen_enso` + `ic_solid_circle` + `ic_launcher_foreground`); `res/xml/haircut_widget_info.xml`, `data_extraction_rules.xml`, `backup_rules.xml`.
+Resources: `res/values/strings.xml`, `plurals.xml` (`days_unit`), `themes.xml`, `colors.xml`; `res/drawable/ic_*.xml` (20 Material icons + `ic_zen_enso` + `ic_solid_circle` + `ic_widget_grid_*`); `res/xml/haircut_widget_info.xml`, `data_extraction_rules.xml`, `backup_rules.xml`.
 
 ---
 
 ## 4. Data model & storage
 
-One value per item, stored as a JSON array string under key `items_v1` in private prefs file `countup_prefs`:
+One value per item, stored as a JSON array string under key `items_v1` in private prefs file `countup_prefs` with dual-write atomic backup snapshot `countup_backup.json`:
 
 ```json
-[{"id":"uuid","name":"Haircut","epochDay":20667,"icon":"person"}]
+[{"id":"uuid","name":"Meditation","epochDay":20667,"comment":"Daily morning calm","icon":"person","futureFlag":false,"showInWidget":true}]
 ```
 
 - `epochDay` = `LocalDate.toEpochDay()`.
-- **Migration:** the old single-value format (`haircut_prefs/last_haircut_epoch_day`) is imported as one "Haircut" item on first read, guarded by a `migrated_v1` flag so it doesn't re-import after the user deletes everything.
-- **Robustness:** missing/corrupt JSON recovers to a migrated-or-empty list (never crashes). `addItem` assigns a random icon from `SOCIAL_ICON_NAMES`.
-- Writes use `commit()` (synchronous) deliberately — the app waits for persistence before updating the widget (write-before-update ordering).
-- No encryption: the stored data is just dates; encryption was explicitly ruled out as unjustified.
+- **Zero Data Loss Guarantee:** If SharedPreferences is wiped or corrupted, `CountUpStore` automatically self-heals from `countup_backup.json`. If a payload is truncated mid-write by OS power cutoff, `salvageItems` extracts all intact items and preserves the raw broken payload in a timestamped quarantine key.
+- **Migration:** The legacy v0 format (`haircut_prefs/last_haircut_epoch_day`) imports as one "Haircut" item on first read, guarded by `migrated_v1`.
+- **Writes use `commit()` and `fd.sync()`** synchronously before updating the widget (write-before-update ordering).
 
 ---
 
 ## 5. Design & behavior decisions
 
-- **Zen-paper theme** (from `minimalist-ui` + a parchment/serif take): warm paper background `#F7F6F3`, cards white with `1px #EAEAEA` border, radius 12, ink `#2F3437`, muted `#787774`; serif for headings/counts, sans for labels, monospace for meta. No gradients, no heavy shadows. Dark scheme variants defined in `MainActivity`.
-- **Scale-on-press** (`0.96` buttons / `0.99` cards) via `pressScale()`; list add/remove uses `Modifier.animateItem()`, disabled under system reduce-motion.
-- **Widget:** classic RemoteViews 3-column `GridView` (`countup_widget.xml`); cells show name (top) + a light circle (`ic_solid_circle`, faint ink rim) with a dark number. Tapping a cell fires the grid's mutable template `PendingIntent` with a per-id fill-in intent to `ResetCountReceiver`, which resets only **that** item and calls `pushWidgetUpdate()` synchronously. After every app-side store write, `MainActivity` pushes new `RemoteViews` + `notifyAppWidgetViewDataChanged()` — Gmail-style immediate update, no composition pass. The circle number stays dark ink even in dark mode because the circle fill is fixed light.
-
-### Widget architecture notes (post-Glance rewrite)
-- **No widget library dependency** — plain `AppWidgetProvider` + `RemoteViewsService`; the release APK shrank ~2.4 MB when Glance was removed.
-- **Template PendingIntent must be `FLAG_MUTABLE`** — immutable templates silently drop fill-in intents, so cell taps would reset nothing.
-- The collection service runs bound to the launcher and re-reads `CountUpStore` on every data-change notification.
+- **Zen-paper theme & Chinese Ink Wash Backgrounds:** Warm paper background `#F7F6F3`, cards white with `1px #EAEAEA` border, radius 12, ink `#2F3437`, muted `#787774`; serif for headings/counts, sans for labels. 5 authentic Chinese ink wash landscape themes anchored to borders with negative space.
+- **Dynamic Anchor Sub-labels:** Count $\ge 0$ renders `SINCE <date>`; count $< 0$ (future event) renders `UNTIL <date>`.
+- **Scale-on-press & Motion:** `0.96` buttons / `0.99` cards via `pressScale()`; list add/remove uses `Modifier.animateItem()`, disabled under system reduce-motion.
+- **Widget Double-Tap In-Place Reset:** Classic RemoteViews 3-column `GridView` (`countup_widget.xml`); tapping a cell once arms the item and prompts confirmation ("0?"), tapping again within 4 seconds resets the anchor date to today with Toast confirmation.
 
 ---
 
@@ -95,9 +91,9 @@ export JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-17.0.20.8-hotspot"
 ./gradlew clean
 ./gradlew assembleDebug            # debug APK
 ./gradlew assembleRelease          # unsigned release
-./gradlew test                     # 17 JVM unit tests
+./gradlew test                     # 68 JVM unit tests (100% green)
 ./gradlew connectedDebugAndroidTest # device tests (emulator/device online)
-./gradlew lintDebug                # 0 errors (warnings are intentional)
+./gradlew lintDebug                # 0 errors
 ```
 
 Install + launch:
