@@ -90,4 +90,52 @@ class SortOrderTest {
         assertEquals("id-a", sorted[0].id)
         assertEquals("id-b", sorted[1].id)
     }
+
+    @Test
+    fun filterItemsHandlesEmptyQueryWhitespaceAndExactMatches() {
+        val item1 = CountUpItem(id = "1", name = "Water Bonsai", epochDay = 20600L, comment = "Misting daily")
+        val item2 = CountUpItem(id = "2", name = "Reading Book", epochDay = 20610L, comment = "30 mins")
+        val item3 = CountUpItem(id = "3", name = "Meditation", epochDay = 20620L, comment = "Calm breathwork")
+        val list = listOf(item1, item2, item3)
+
+        // Empty & blank query returns full list
+        assertEquals(list, filterItems(list, ""))
+        assertEquals(list, filterItems(list, "   "))
+
+        // Case-insensitive substring match on name
+        val matchBo = filterItems(list, "bo")
+        assertEquals(2, matchBo.size)
+        assertEquals("Water Bonsai", matchBo[0].name)
+        assertEquals("Reading Book", matchBo[1].name)
+
+        // Substring match on comment
+        val matchBreath = filterItems(list, "breath")
+        assertEquals(1, matchBreath.size)
+        assertEquals("Meditation", matchBreath[0].name)
+
+        // Zero matches
+        val zeroMatch = filterItems(list, "gymnasium")
+        assertTrue(zeroMatch.isEmpty())
+    }
+
+    @Test
+    fun queryAndSortItemsCombinesFilteringWithSpecifiedSortOrder() {
+        val item1 = CountUpItem(id = "1", name = "Water Bonsai", epochDay = today.toEpochDay() - 10) // 10 days
+        val item2 = CountUpItem(id = "2", name = "Reading Book", epochDay = today.toEpochDay() - 40) // 40 days
+        val item3 = CountUpItem(id = "3", name = "Bottle Plant", epochDay = today.toEpochDay() - 20) // 20 days
+        val item4 = CountUpItem(id = "4", name = "Meditation", epochDay = today.toEpochDay() - 80) // 80 days
+        val list = listOf(item1, item2, item3, item4)
+
+        // Query "bo" matches Bonsai (10d), Book (40d), Bottle (20d)
+        val sortedDays = queryAndSortItems(list, "bo", SortOrder.DAYS_DESC, today)
+        assertEquals(3, sortedDays.size)
+        assertEquals("Reading Book", sortedDays[0].name) // 40d
+        assertEquals("Bottle Plant", sortedDays[1].name) // 20d
+        assertEquals("Water Bonsai", sortedDays[2].name) // 10d
+
+        val sortedName = queryAndSortItems(list, "bo", SortOrder.NAME_ASC, today)
+        assertEquals("Bottle Plant", sortedName[0].name)
+        assertEquals("Reading Book", sortedName[1].name)
+        assertEquals("Water Bonsai", sortedName[2].name)
+    }
 }

@@ -67,3 +67,31 @@ fun sortItems(
         )
     }
 }
+
+/**
+ * Pure case-insensitive substring filter matching against item name and comment.
+ * If [query] is empty or whitespace, returns all items untouched.
+ */
+fun filterItems(
+    items: List<CountUpItem>,
+    query: String,
+): List<CountUpItem> {
+    val q = query.trim()
+    if (q.isEmpty()) return items
+    return items.filter { item ->
+        item.name.contains(q, ignoreCase = true) || item.comment.contains(q, ignoreCase = true)
+    }
+}
+
+/**
+ * Convenience pipeline combining instant in-memory filtering and deterministic sorting.
+ */
+fun queryAndSortItems(
+    items: List<CountUpItem>,
+    query: String,
+    sortOrder: SortOrder,
+    today: LocalDate = LocalDate.now(),
+): List<CountUpItem> {
+    val filtered = filterItems(items, query)
+    return sortItems(filtered, sortOrder, today)
+}

@@ -60,14 +60,20 @@
     <string name="bg_willow_leaves">Willow Leaves</string>
     <string name="bg_switched_toast">Background: %1$s</string>
 
-    <!-- Sort Order -->
+    <!-- Sort & Search -->
     <string name="sort_prefix">Sort: </string>
     <string name="sort_days_desc">Days ↓</string>
     <string name="sort_date_desc">Date ↓</string>
     <string name="sort_name_asc">Name A–Z</string>
-    <string name="cd_sort_days_desc">Sorted by days elapsed. Tap to sort by newest anchor date.</string>
-    <string name="cd_sort_date_desc">Sorted by newest anchor date. Tap to sort alphabetically.</string>
-    <string name="cd_sort_name_asc">Sorted alphabetically. Tap to sort by days elapsed.</string>
+    <string name="cd_sort_days_desc">Sorted by days elapsed</string>
+    <string name="cd_sort_date_desc">Sorted by newest anchor date</string>
+    <string name="cd_sort_name_asc">Sorted alphabetically</string>
     <string name="items_count">%1$d items</string>
     <string name="items_count_one">1 item</string>
+    <string name="search_placeholder">Search habits…</string>
+    <string name="search_no_matches">No matching habits found</string>
+    <string name="search_no_matches_sub">Try another keyword or clear search.</string>
+    <string name="search_clear">Clear search</string>
+    <string name="sort_section_title">SORT ORDER</string>
+    <string name="cd_sort_search_pill">Sort and search options. Currently sorted by %1$s. Tap to search or change sort.</string>
 </resources>
