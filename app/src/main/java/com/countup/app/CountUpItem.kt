@@ -1,5 +1,6 @@
 package com.countup.app
 
+import androidx.compose.runtime.Immutable
 import org.json.JSONArray
 import org.json.JSONObject
 import java.time.LocalDate
@@ -9,6 +10,7 @@ import java.util.UUID
  * A single count-up item: a human-readable [name] anchored to a calendar day
  * represented as an [epochDay] (the value of [java.time.LocalDate.toEpochDay]).
  */
+@Immutable
 data class CountUpItem(
     val id: String,
     val name: String,

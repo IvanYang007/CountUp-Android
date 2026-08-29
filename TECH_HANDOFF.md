@@ -42,9 +42,14 @@ Production Kotlin is flat under `app/src/main/java/com/countup/app/`:
 
 | File | Responsibility |
 |---|---|
-| `MainActivity.kt` | Compose app: list screen, add/edit dialog (name + date picker + comment), reset/delete confirmation, background rotation header, dynamic "SINCE" / "UNTIL" sub-labeling |
+| `MainActivity.kt` | Lightweight Compose Activity host: collects `CountUpViewModel` state with lifecycle, binds UI effects to snackbars & widget updates |
+| `CountUpViewModel.kt` | MVI ViewModel: manages atomic `_state.update` transitions, instant search/sort pipeline, dialog state, and effect emissions |
+| `CountUpContract.kt` | Unidirectional MVI contract: `@Immutable CountUpUiState`, `CountUpUiEvent`, and `CountUpUiEffect` |
+| `CountUpContent.kt` | Stateless root composable: full-bleed edge-to-edge ink background, odometer digit roll animations, search popover, dialogs |
+| `ZenTheme.kt` | Mid-Century Modern Zen Paper token system via `CompositionLocalProvider(LocalZenColors)`, spring physics `pressScale`, a11y standards |
+| `CountUpRepository.kt` | Clean repository abstraction with `DefaultCountUpRepository` backed by zero-data-loss `CountUpStore` |
 | `AbstractBackgrounds.kt` | 5 rotatable Chinese ink wash abstract background themes (Mountain, Sand Dunes, Sea Horizon, Solitary Isle with Taihu Scholar Rock, Willow Leaves) + auto-daily rotation |
-| `CountUpItem.kt` | `CountUpItem` data class (`id`, `name`, `epochDay`, `comment`, `icon`, `futureFlag`, `showInWidget`) + JSON `encodeItems`/`decodeItems` + balanced-brace stream `salvageItems` |
+| `CountUpItem.kt` | `@Immutable` data class (`id`, `name`, `epochDay`, `comment`, `icon`, `futureFlag`, `showInWidget`) + JSON `encodeItems`/`decodeItems` + balanced-brace stream `salvageItems` |
 | `CountUpStore.kt` | Zero-data-loss persistence: 5-tier fail-safe hierarchy (Primary Prefs -> JSON Salvage -> Atomic Disk Backup `countup_backup.json` -> Legacy Migration -> Timestamped Quarantine) |
 | `DaysSince.kt` | Pure `daysSince(last, today)` using `ChronoUnit.DAYS` (supports negative future counts) |
 | `DateConversion.kt` | UTC-safe picker millis → `LocalDate`; localized date formatter; dynamic "SINCE" / "UNTIL" sub-labeling |
@@ -54,8 +59,8 @@ Production Kotlin is flat under `app/src/main/java/com/countup/app/`:
 | (debug) `WidgetHostActivity.kt` | Debug-only activity to render the widget for screenshots (not in release) |
 
 Tests:
-- `app/src/test/...` (JVM): `CountUpItemTest`, `CountUpStoreTest`, `EdgeCaseMatrixTest`, `AbstractBackgroundTest`, `DateConversionTest`, `DaysSinceTest`, `ItemIconsTest`, `WidgetRowTest`, `WidgetBackgroundTest` → **72 JVM unit tests** (100% green)
-- `app/src/androidTest/...` (device): `CountUpStoreInstrumentedTest` — CRUD, migration, recovery, icon assignment
+- `app/src/test/...` (JVM): `CountUpViewModelTest` (Turbine), `CountUpStressAndBoundaryTest` (1k items, unicode, leap years), `CountUpRepositoryTest`, `CountUpItemTest`, `CountUpStoreTest`, `EdgeCaseMatrixTest`, `AbstractBackgroundTest`, `DateConversionTest`, `DaysSinceTest`, `ItemIconsTest`, `SortOrderTest`, `WidgetRowTest`, `WidgetBackgroundTest` → **104 JVM unit tests** (100% green)
+- `app/src/androidTest/...` (device): `ComposeUiSmokeTest` (stateless UI & a11y semantics), `CountUpStoreInstrumentedTest` (CRUD, migration, recovery)
 
 Resources: `res/values/strings.xml`, `plurals.xml` (`days_unit`), `themes.xml`, `colors.xml`; `res/drawable/ic_*.xml` (20 Material icons + `ic_zen_enso` + `ic_solid_circle` + `ic_widget_grid_*`); `res/xml/haircut_widget_info.xml`, `data_extraction_rules.xml`, `backup_rules.xml`.
 
