@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalIndication
@@ -396,10 +397,13 @@ private fun SubHeaderRow(
             DropdownMenu(
                 expanded = isMenuOpen,
                 onDismissRequest = { onToggleMenu(false) },
+                shape = RoundedCornerShape(12.dp),
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                tonalElevation = 0.dp,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                shadowElevation = 6.dp,
                 modifier = Modifier
                     .width(260.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
                     .padding(horizontal = 8.dp, vertical = 6.dp),
             ) {
                 Box(
