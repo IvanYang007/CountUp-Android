@@ -51,7 +51,7 @@
     <string name="toast_hidden_from_widget">“%1$s” hidden from widget</string>
     <string name="toast_shown_in_widget">“%1$s” shown in widget</string>
 
-    <!-- Background Themes (13 Classical Poetic & Zen Landscapes) -->
+    <!-- Background Themes (30 Classical Poetic & Zen Landscapes) -->
     <string name="bg_auto_daily">Daily Landscape</string>
     <string name="bg_mountain">Mountain Peaks</string>
     <string name="bg_sand_dunes">Sand Dunes</string>
@@ -66,6 +66,23 @@
     <string name="bg_plum_shadow">Sparse Plum Shadows</string>
     <string name="bg_ancient_road">Ancient Road &amp; West Wind</string>
     <string name="bg_spring_rain">Spring Drizzle &amp; Slanted Wind</string>
+    <string name="bg_lotus_dragonfly">Lotus Bud &amp; Dragonfly</string>
+    <string name="bg_crisp_spring_rain">Crisp Spring Rain</string>
+    <string name="bg_solitary_sail_river">Solitary Sail on Yangtze</string>
+    <string name="bg_ocean_moon_tide">Ocean Moon &amp; Rising Tide</string>
+    <string name="bg_wild_sky_river_moon">Wild Horizon &amp; River Moon</string>
+    <string name="bg_green_hills_sail">Green Hills &amp; Approaching Sail</string>
+    <string name="bg_stars_fall_river_flow">Falling Stars &amp; Surging River</string>
+    <string name="bg_clouds_cottage">Cottage in Billowing Clouds</string>
+    <string name="bg_wine_spring_moon">Spring Dream &amp; Window Moon</string>
+    <string name="bg_apricot_rain">Apricot Blossom &amp; Spring Rain</string>
+    <string name="bg_deep_forest_deer">Deep Forest Deer</string>
+    <string name="bg_pear_blossom_willow">Pear Blossoms &amp; Weeping Willow</string>
+    <string name="bg_spring_water_sleep">Spring Water &amp; Moon Pillow</string>
+    <string name="bg_reading_lamp_moon">Extinguished Lamp &amp; Moonlight</string>
+    <string name="bg_moon_in_hand_wind">Moon in Hand &amp; Breeze in Sleeve</string>
+    <string name="bg_moss_courtyard_plantain">Mossy Courtyard &amp; Plantain Leaf</string>
+    <string name="bg_fish_jumping_duckweed">Leaping Fish in Duckweed</string>
     <string name="bg_switched_toast">Background: %1$s</string>
 
     <!-- Sort & Search -->

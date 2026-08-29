@@ -51,7 +51,7 @@
     <string name="toast_hidden_from_widget">已在微件中隐藏“%1$s”</string>
     <string name="toast_shown_in_widget">已在微件中显示“%1$s”</string>
 
-    <!-- Background Themes (13大古典诗意与水墨意境) -->
+    <!-- Background Themes (30大古典诗意与水墨意境) -->
     <string name="bg_auto_daily">每日意境</string>
     <string name="bg_mountain">远山含黛</string>
     <string name="bg_sand_dunes">平沙落雁</string>
@@ -66,6 +66,23 @@
     <string name="bg_plum_shadow">疏影横斜水清浅</string>
     <string name="bg_ancient_road">古道西风瘦马</string>
     <string name="bg_spring_rain">斜风细雨不须归</string>
+    <string name="bg_lotus_dragonfly">小荷才露尖尖角，早有蜻蜓立上头</string>
+    <string name="bg_crisp_spring_rain">天街小雨润如酥</string>
+    <string name="bg_solitary_sail_river">孤帆远影碧空尽，唯见长江天际流</string>
+    <string name="bg_ocean_moon_tide">海上明月共潮生</string>
+    <string name="bg_wild_sky_river_moon">野旷天低树，江清月近人</string>
+    <string name="bg_green_hills_sail">两岸青山相对出，孤帆一片日边来</string>
+    <string name="bg_stars_fall_river_flow">星垂平野阔，月涌大江流</string>
+    <string name="bg_clouds_cottage">白云生处有人家</string>
+    <string name="bg_wine_spring_moon">酒浓春入梦，窗破月寻人</string>
+    <string name="bg_apricot_rain">红杏开时，一霎清明雨</string>
+    <string name="bg_deep_forest_deer">树深时见鹿</string>
+    <string name="bg_pear_blossom_willow">梨花淡白柳深青，柳絮飞时花满城</string>
+    <string name="bg_spring_water_sleep">半篙春水一蓑烟，抱月怀中枕斗眠</string>
+    <string name="bg_reading_lamp_moon">吹灭读书灯，一身都是月</string>
+    <string name="bg_moon_in_hand_wind">揖让月在手，动摇风满怀</string>
+    <string name="bg_moss_courtyard_plantain">绿芜墙绕青苔院，中庭日淡芭蕉卷</string>
+    <string name="bg_fish_jumping_duckweed">小鱼跳出绿萍中</string>
     <string name="bg_switched_toast">背景切换为：%1$s</string>
 
     <!-- Sort & Search -->
