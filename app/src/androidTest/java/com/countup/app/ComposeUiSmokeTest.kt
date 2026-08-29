@@ -100,8 +100,8 @@ class ComposeUiSmokeTest {
                 )
             }
         }
-        composeTestRule.onNodeWithText("No items yet").assertIsDisplayed()
-        composeTestRule.onNodeWithText("Tap + to add what you count.").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Nothing here yet").assertIsDisplayed()
+        composeTestRule.onNodeWithText("Add your first count-up to start tracking days.").assertIsDisplayed()
     }
 
     @Test
@@ -131,7 +131,7 @@ class ComposeUiSmokeTest {
                 )
             }
         }
-        composeTestRule.onNodeWithText("No matching habits").assertIsDisplayed()
+        composeTestRule.onNodeWithText("No matching habits found").assertIsDisplayed()
         composeTestRule.onNodeWithText("Clear search").assertIsDisplayed()
     }
 

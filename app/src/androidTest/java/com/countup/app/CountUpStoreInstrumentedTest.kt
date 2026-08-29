@@ -29,6 +29,8 @@ class CountUpStoreInstrumentedTest {
         context = ApplicationProvider.getApplicationContext()
         countupPrefs().edit().clear().commit()
         legacyPrefs().edit().clear().commit()
+        java.io.File(context.filesDir, "countup_backup.json").delete()
+        java.io.File(context.filesDir, "countup_backup.json.tmp").delete()
     }
 
     @Test
@@ -166,18 +168,21 @@ class CountUpStoreInstrumentedTest {
     }
 
     @Test
-    fun freshInstallWidgetWasNeverRefreshed() {
-        assertFalse(CountUpStore(context).widgetRefreshedOn(20667L))
+    fun sortOrderPersistsAcrossInstances() {
+        val store = CountUpStore(context)
+        assertEquals(SortOrder.DAYS_DESC, store.getSortOrder())
+
+        assertTrue(store.setSortOrder(SortOrder.NAME_ASC))
+        assertEquals(SortOrder.NAME_ASC, CountUpStore(context).getSortOrder())
     }
 
     @Test
-    fun markWidgetRefreshedPersistsAndMatchesOnlyThatDay() {
+    fun backgroundThemePersistsAcrossInstances() {
         val store = CountUpStore(context)
-        store.markWidgetRefreshed(20667L)
-        // A fresh instance reads the same persisted marker.
-        assertTrue(CountUpStore(context).widgetRefreshedOn(20667L))
-        assertFalse(CountUpStore(context).widgetRefreshedOn(20668L))
-        assertFalse(CountUpStore(context).widgetRefreshedOn(-1L))
+        assertEquals(BackgroundTheme.AUTO_DAILY, store.getBackgroundTheme())
+
+        assertTrue(store.setBackgroundTheme(BackgroundTheme.SAND_DUNES))
+        assertEquals(BackgroundTheme.SAND_DUNES, CountUpStore(context).getBackgroundTheme())
     }
 
     // Finding #8: Tests for deleting items and empty state operations
