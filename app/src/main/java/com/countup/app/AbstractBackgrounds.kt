@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
@@ -323,81 +324,248 @@ private fun DrawScope.drawInkSeaHorizonTheme() {
 }
 
 /**
- * 4. 孤石清泉 · Zen Scholar Stone & Fading Ripples (右下孤石，圆融涟漪，无直横线)
+ * 4. 孤石清泉 · Zen Taihu Scholar Rock & Clear Spring (写意水墨太湖假山石 · 瘦皱漏透 · 斧劈折带皴 · 奇崛欹侧)
  */
 private fun DrawScope.drawInkSolitaryIsleTheme() {
     val w = size.width
     val h = size.height
 
-    val rockBaseY = h * 0.84f
+    val rockBaseY = h * 0.87f
     val rockCenterX = w * 0.78f
 
-    // Concentric ripple washes expanding from right stone to the left void
-    drawOval(
-        brush = Brush.radialGradient(
-            colors = listOf(InkMuted.copy(alpha = 0.22f), Color.Transparent),
-            center = Offset(rockCenterX, rockBaseY),
-            radius = w * 0.35f,
+    // Soft spring water wash anchored to right and bottom border (清溪淡墨晕染)
+    val waterWash = Path().apply {
+        moveTo(w * 0.40f, h)
+        cubicTo(w * 0.56f, h * 0.86f, w * 0.80f, h * 0.88f, w, h * 0.81f)
+        lineTo(w, h)
+        lineTo(w * 0.40f, h)
+        close()
+    }
+    drawPath(
+        path = waterWash,
+        brush = Brush.linearGradient(
+            colors = listOf(InkIndigo.copy(alpha = 0.10f), InkIndigo.copy(alpha = 0.01f)),
+            start = Offset(w, h * 0.81f),
+            end = Offset(w * 0.40f, h),
         ),
-        topLeft = Offset(rockCenterX - w * 0.35f, rockBaseY - 10.dp.toPx()),
-        size = Size(w * 0.70f, 20.dp.toPx()),
-        style = Stroke(width = 1.2.dp.toPx()),
-    )
-    drawOval(
-        brush = Brush.radialGradient(
-            colors = listOf(InkIndigo.copy(alpha = 0.14f), Color.Transparent),
-            center = Offset(rockCenterX, rockBaseY),
-            radius = w * 0.50f,
-        ),
-        topLeft = Offset(rockCenterX - w * 0.50f, rockBaseY - 16.dp.toPx()),
-        size = Size(w * 1.00f, 32.dp.toPx()),
-        style = Stroke(width = 1.dp.toPx()),
     )
 
-    // Taihu Scholar Stone sitting quietly on the right
-    val stonePath = Path().apply {
-        moveTo(rockCenterX - 45.dp.toPx(), rockBaseY)
+    // Concentric expanding ripples spreading softly into the left negative space
+    drawOval(
+        brush = Brush.radialGradient(
+            colors = listOf(InkIndigo.copy(alpha = 0.22f), Color.Transparent),
+            center = Offset(rockCenterX - 12.dp.toPx(), rockBaseY + 6.dp.toPx()),
+            radius = w * 0.38f,
+        ),
+        topLeft = Offset(rockCenterX - w * 0.38f, rockBaseY - 8.dp.toPx()),
+        size = Size(w * 0.76f, 22.dp.toPx()),
+        style = Stroke(width = 1.1.dp.toPx()),
+    )
+    drawOval(
+        brush = Brush.radialGradient(
+            colors = listOf(InkMuted.copy(alpha = 0.14f), Color.Transparent),
+            center = Offset(rockCenterX - 12.dp.toPx(), rockBaseY + 6.dp.toPx()),
+            radius = w * 0.56f,
+        ),
+        topLeft = Offset(rockCenterX - w * 0.56f, rockBaseY - 16.dp.toPx()),
+        size = Size(w * 1.12f, 34.dp.toPx()),
+        style = Stroke(width = 0.9.dp.toPx()),
+    )
+
+    // === 假山太湖奇石 (Classical Chinese Scholar Rock: 瘦皱漏透 · 叠石折带 · 苍岩古意) ===
+    // 1. Backing distant secondary peak (远景次峰，淡墨润色)
+    val backPeak = Path().apply {
+        moveTo(rockCenterX + 8.dp.toPx(), rockBaseY + 2.dp.toPx())
         cubicTo(
-            rockCenterX - 38.dp.toPx(), rockBaseY - 32.dp.toPx(),
-            rockCenterX - 18.dp.toPx(), rockBaseY - 52.dp.toPx(),
-            rockCenterX + 8.dp.toPx(), rockBaseY - 48.dp.toPx(),
+            rockCenterX + 22.dp.toPx(), rockBaseY - 20.dp.toPx(),
+            rockCenterX + 36.dp.toPx(), rockBaseY - 50.dp.toPx(),
+            rockCenterX + 26.dp.toPx(), rockBaseY - 82.dp.toPx(),
         )
         cubicTo(
-            rockCenterX + 32.dp.toPx(), rockBaseY - 44.dp.toPx(),
-            rockCenterX + 48.dp.toPx(), rockBaseY - 22.dp.toPx(),
-            rockCenterX + 42.dp.toPx(), rockBaseY,
+            rockCenterX + 20.dp.toPx(), rockBaseY - 96.dp.toPx(),
+            rockCenterX + 32.dp.toPx(), rockBaseY - 104.dp.toPx(),
+            rockCenterX + 40.dp.toPx(), rockBaseY - 92.dp.toPx(),
+        )
+        cubicTo(
+            rockCenterX + 48.dp.toPx(), rockBaseY - 72.dp.toPx(),
+            rockCenterX + 38.dp.toPx(), rockBaseY - 38.dp.toPx(),
+            rockCenterX + 44.dp.toPx(), rockBaseY + 4.dp.toPx(),
         )
         close()
     }
     drawPath(
-        path = stonePath,
-        brush = Brush.radialGradient(
-            colors = listOf(InkBlack.copy(alpha = 0.22f), InkSage.copy(alpha = 0.12f), InkMuted.copy(alpha = 0.04f)),
-            center = Offset(rockCenterX - 8.dp.toPx(), rockBaseY - 15.dp.toPx()),
-            radius = 55.dp.toPx(),
-        ),
-    )
-    drawPath(
-        path = stonePath,
+        path = backPeak,
         brush = Brush.linearGradient(
-            colors = listOf(InkBlack.copy(alpha = 0.32f), InkBlack.copy(alpha = 0.10f)),
-            start = Offset(rockCenterX - 35.dp.toPx(), rockBaseY),
-            end = Offset(rockCenterX + 35.dp.toPx(), rockBaseY - 48.dp.toPx()),
+            colors = listOf(InkIndigo.copy(alpha = 0.14f), InkMuted.copy(alpha = 0.04f)),
+            start = Offset(rockCenterX + 35.dp.toPx(), rockBaseY - 100.dp.toPx()),
+            end = Offset(rockCenterX + 10.dp.toPx(), rockBaseY),
         ),
-        style = Stroke(width = 1.5.dp.toPx(), cap = StrokeCap.Round),
+    )
+    drawPath(path = backPeak, color = InkIndigo.copy(alpha = 0.22f), style = Stroke(width = 1.1.dp.toPx(), cap = StrokeCap.Round))
+
+    // 2. Main soaring Taihu rock silhouette with natural arch cleft (主峰奇石 · 瘦挺奇绝 · 镂空穿石)
+    val rockOuter = Path().apply {
+        // Submerged base left (左入水基石)
+        moveTo(rockCenterX - 36.dp.toPx(), rockBaseY + 4.dp.toPx())
+
+        // Lower left jagged footing & ledge (左下叠石石基)
+        cubicTo(
+            rockCenterX - 42.dp.toPx(), rockBaseY - 10.dp.toPx(),
+            rockCenterX - 48.dp.toPx(), rockBaseY - 22.dp.toPx(),
+            rockCenterX - 38.dp.toPx(), rockBaseY - 32.dp.toPx(),
+        )
+
+        // Deep natural eroded arch / gorge carved into rock waist (腰部深幽天然透空石梁)
+        cubicTo(
+            rockCenterX - 22.dp.toPx(), rockBaseY - 38.dp.toPx(),
+            rockCenterX - 14.dp.toPx(), rockBaseY - 54.dp.toPx(),
+            rockCenterX - 32.dp.toPx(), rockBaseY - 60.dp.toPx(),
+        )
+
+        // Soaring overhang brow (左上凌空突兀飞崖)
+        cubicTo(
+            rockCenterX - 48.dp.toPx(), rockBaseY - 68.dp.toPx(),
+            rockCenterX - 40.dp.toPx(), rockBaseY - 86.dp.toPx(),
+            rockCenterX - 26.dp.toPx(), rockBaseY - 98.dp.toPx(),
+        )
+
+        // Towering pinnacle peak (主峰绝顶 · 欹侧向左)
+        cubicTo(
+            rockCenterX - 16.dp.toPx(), rockBaseY - 114.dp.toPx(),
+            rockCenterX - 6.dp.toPx(), rockBaseY - 124.dp.toPx(),
+            rockCenterX + 4.dp.toPx(), rockBaseY - 118.dp.toPx(),
+        )
+
+        // Summit crevice & right ridge descent (绝顶峰壑与右侧折带层台)
+        cubicTo(
+            rockCenterX + 8.dp.toPx(), rockBaseY - 108.dp.toPx(),
+            rockCenterX + 18.dp.toPx(), rockBaseY - 96.dp.toPx(),
+            rockCenterX + 12.dp.toPx(), rockBaseY - 82.dp.toPx(),
+        )
+        cubicTo(
+            rockCenterX + 22.dp.toPx(), rockBaseY - 70.dp.toPx(),
+            rockCenterX + 16.dp.toPx(), rockBaseY - 54.dp.toPx(),
+            rockCenterX + 26.dp.toPx(), rockBaseY - 40.dp.toPx(),
+        )
+        cubicTo(
+            rockCenterX + 20.dp.toPx(), rockBaseY - 24.dp.toPx(),
+            rockCenterX + 28.dp.toPx(), rockBaseY - 10.dp.toPx(),
+            rockCenterX + 22.dp.toPx(), rockBaseY + 4.dp.toPx(),
+        )
+
+        // Uneven submerged base roots (犬牙错落入水石根)
+        cubicTo(
+            rockCenterX + 10.dp.toPx(), rockBaseY + 6.dp.toPx(),
+            rockCenterX - 8.dp.toPx(), rockBaseY - 2.dp.toPx(),
+            rockCenterX - 20.dp.toPx(), rockBaseY + 5.dp.toPx(),
+        )
+        cubicTo(
+            rockCenterX - 28.dp.toPx(), rockBaseY - 1.dp.toPx(),
+            rockCenterX - 32.dp.toPx(), rockBaseY + 6.dp.toPx(),
+            rockCenterX - 36.dp.toPx(), rockBaseY + 4.dp.toPx(),
+        )
+        close()
+    }
+
+    // Rich multi-tone ink wash across main rock body (水墨五色：破墨与积墨)
+    drawPath(
+        path = rockOuter,
+        brush = Brush.radialGradient(
+            colors = listOf(InkBlack.copy(alpha = 0.32f), InkSage.copy(alpha = 0.18f), InkMuted.copy(alpha = 0.05f)),
+            center = Offset(rockCenterX - 6.dp.toPx(), rockBaseY - 55.dp.toPx()),
+            radius = 80.dp.toPx(),
+        ),
     )
 
-    // Moss dots on stone
-    drawCircle(color = InkBlack.copy(alpha = 0.28f), radius = 2.dp.toPx(), center = Offset(rockCenterX - 12.dp.toPx(), rockBaseY - 36.dp.toPx()))
-    drawCircle(color = InkBlack.copy(alpha = 0.22f), radius = 1.8.dp.toPx(), center = Offset(rockCenterX - 4.dp.toPx(), rockBaseY - 42.dp.toPx()))
-    drawCircle(color = InkBlack.copy(alpha = 0.25f), radius = 2.2.dp.toPx(), center = Offset(rockCenterX + 15.dp.toPx(), rockBaseY - 30.dp.toPx()))
-
-    // Shoreline curve anchoring bottom border (w*0.62, h) to right border (w, h*0.92)
-    val shoreLine = Path().apply {
-        moveTo(w * 0.62f, h)
-        cubicTo(w * 0.74f, h * 0.94f, w * 0.88f, h * 0.90f, w, h * 0.92f)
+    // === 镂空透天石眼 (Natural Porous Cavity / 穿云石眼) ===
+    val eyeCavity = Path().apply {
+        moveTo(rockCenterX - 6.dp.toPx(), rockBaseY - 84.dp.toPx())
+        cubicTo(
+            rockCenterX - 14.dp.toPx(), rockBaseY - 90.dp.toPx(),
+            rockCenterX - 10.dp.toPx(), rockBaseY - 102.dp.toPx(),
+            rockCenterX + 2.dp.toPx(), rockBaseY - 98.dp.toPx(),
+        )
+        cubicTo(
+            rockCenterX + 6.dp.toPx(), rockBaseY - 92.dp.toPx(),
+            rockCenterX, rockBaseY - 78.dp.toPx(),
+            rockCenterX - 6.dp.toPx(), rockBaseY - 84.dp.toPx(),
+        )
+        close()
     }
-    drawPath(shoreLine, color = InkMuted.copy(alpha = 0.16f), style = Stroke(width = 1.dp.toPx(), cap = StrokeCap.Round))
+    drawPath(path = eyeCavity, color = Color(0xFFF6F0E6))
+    drawPath(path = eyeCavity, color = InkBlack.copy(alpha = 0.42f), style = Stroke(width = 1.3.dp.toPx(), cap = StrokeCap.Round))
+
+    // === 水墨皴法筋骨 (Calligraphic Wrinkles / 折带皴、斧劈皴与披麻皴) ===
+    val crags = Path().apply {
+        // Main peak dorsal ridge (主峰苍劲中锋脊脉)
+        moveTo(rockCenterX - 6.dp.toPx(), rockBaseY - 122.dp.toPx())
+        cubicTo(rockCenterX - 1.dp.toPx(), rockBaseY - 106.dp.toPx(), rockCenterX + 6.dp.toPx(), rockBaseY - 92.dp.toPx(), rockCenterX - 2.dp.toPx(), rockBaseY - 76.dp.toPx())
+        cubicTo(rockCenterX - 6.dp.toPx(), rockBaseY - 62.dp.toPx(), rockCenterX + 8.dp.toPx(), rockBaseY - 48.dp.toPx(), rockCenterX + 4.dp.toPx(), rockBaseY - 32.dp.toPx())
+
+        // Overhang brow shelf lines (左崖折带皴折)
+        moveTo(rockCenterX - 26.dp.toPx(), rockBaseY - 98.dp.toPx())
+        cubicTo(rockCenterX - 18.dp.toPx(), rockBaseY - 88.dp.toPx(), rockCenterX - 24.dp.toPx(), rockBaseY - 78.dp.toPx(), rockCenterX - 38.dp.toPx(), rockBaseY - 70.dp.toPx())
+
+        // Arch throat crevice (石洞深壑阴阳墨线)
+        moveTo(rockCenterX - 32.dp.toPx(), rockBaseY - 60.dp.toPx())
+        cubicTo(rockCenterX - 20.dp.toPx(), rockBaseY - 54.dp.toPx(), rockCenterX - 16.dp.toPx(), rockBaseY - 44.dp.toPx(), rockCenterX - 26.dp.toPx(), rockBaseY - 36.dp.toPx())
+
+        // Right flank faceted shelves (右侧叠石层阶)
+        moveTo(rockCenterX + 16.dp.toPx(), rockBaseY - 94.dp.toPx())
+        cubicTo(rockCenterX + 8.dp.toPx(), rockBaseY - 84.dp.toPx(), rockCenterX + 18.dp.toPx(), rockBaseY - 74.dp.toPx(), rockCenterX + 10.dp.toPx(), rockBaseY - 60.dp.toPx())
+        cubicTo(rockCenterX + 4.dp.toPx(), rockBaseY - 48.dp.toPx(), rockCenterX + 14.dp.toPx(), rockBaseY - 38.dp.toPx(), rockCenterX + 10.dp.toPx(), rockBaseY - 18.dp.toPx())
+
+        // Base footing strata (下部基座横斜层理)
+        moveTo(rockCenterX - 24.dp.toPx(), rockBaseY - 18.dp.toPx())
+        cubicTo(rockCenterX - 6.dp.toPx(), rockBaseY - 22.dp.toPx(), rockCenterX + 8.dp.toPx(), rockBaseY - 14.dp.toPx(), rockCenterX + 18.dp.toPx(), rockBaseY - 4.dp.toPx())
+    }
+    drawPath(path = crags, color = InkBlack.copy(alpha = 0.40f), style = Stroke(width = 1.3.dp.toPx(), cap = StrokeCap.Round))
+
+    // Master calligraphic outline (写意浓墨骨线勾勒)
+    drawPath(
+        path = rockOuter,
+        brush = Brush.linearGradient(
+            colors = listOf(InkBlack.copy(alpha = 0.50f), InkBlack.copy(alpha = 0.24f)),
+            start = Offset(rockCenterX - 36.dp.toPx(), rockBaseY + 6.dp.toPx()),
+            end = Offset(rockCenterX + 4.dp.toPx(), rockBaseY - 126.dp.toPx()),
+        ),
+        style = Stroke(width = 1.6.dp.toPx(), cap = StrokeCap.Round),
+    )
+
+    // === 苍苔点翠 (Natural Lichen & Moss Dots / 依石点苔 · 聚散疏密) ===
+    val mossPoints = listOf(
+        // Summit cluster
+        Offset(rockCenterX - 6.dp.toPx(), rockBaseY - 124.dp.toPx()),
+        Offset(rockCenterX + 2.dp.toPx(), rockBaseY - 120.dp.toPx()),
+        Offset(rockCenterX + 14.dp.toPx(), rockBaseY - 108.dp.toPx()),
+        // Left overhang cluster
+        Offset(rockCenterX - 28.dp.toPx(), rockBaseY - 96.dp.toPx()),
+        Offset(rockCenterX - 38.dp.toPx(), rockBaseY - 86.dp.toPx()),
+        Offset(rockCenterX - 44.dp.toPx(), rockBaseY - 72.dp.toPx()),
+        Offset(rockCenterX - 36.dp.toPx(), rockBaseY - 62.dp.toPx()),
+        // Right stepped shelf cluster
+        Offset(rockCenterX + 18.dp.toPx(), rockBaseY - 92.dp.toPx()),
+        Offset(rockCenterX + 24.dp.toPx(), rockBaseY - 72.dp.toPx()),
+        Offset(rockCenterX + 22.dp.toPx(), rockBaseY - 42.dp.toPx()),
+        Offset(rockCenterX + 16.dp.toPx(), rockBaseY - 24.dp.toPx()),
+        // Base & crevice dots
+        Offset(rockCenterX - 20.dp.toPx(), rockBaseY - 76.dp.toPx()),
+        Offset(rockCenterX + 4.dp.toPx(), rockBaseY - 78.dp.toPx()),
+        Offset(rockCenterX - 10.dp.toPx(), rockBaseY - 20.dp.toPx()),
+        Offset(rockCenterX + 12.dp.toPx(), rockBaseY - 12.dp.toPx()),
+        Offset(rockCenterX - 26.dp.toPx(), rockBaseY - 10.dp.toPx()),
+    )
+    for (pt in mossPoints) {
+        drawCircle(color = InkBlack.copy(alpha = 0.44f), radius = 1.6.dp.toPx(), center = pt)
+        drawCircle(color = InkSage.copy(alpha = 0.32f), radius = 2.4.dp.toPx(), center = pt)
+    }
+
+    // Shoreline curve anchoring bottom border (w*0.60, h) to right border (w, h*0.92)
+    val shoreLine = Path().apply {
+        moveTo(w * 0.60f, h)
+        cubicTo(w * 0.72f, h * 0.94f, w * 0.88f, h * 0.90f, w, h * 0.92f)
+    }
+    drawPath(shoreLine, color = InkMuted.copy(alpha = 0.18f), style = Stroke(width = 1.dp.toPx(), cap = StrokeCap.Round))
 }
 
 /**
