@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CountUp — 7大诗意主题双端背景设计工坊 (App UI 纵向 vs 桌面 Widget 横向)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif+SC:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #080c12;
+      --bg-surface: #101622;
+      --bg-card: #162030;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(217, 118, 66, 0.5);
+      --text-main: #f0f6fc;
+      --text-muted: #8b949e;
+      --text-sub: #cbd5e1;
+
+      /* CountUp Zen Palette Tokens */
+      --zen-paper: #F5E6D3;
+      --zen-dark-paper: #241D12;
+      --zen-ink: #2C2416;
+      --zen-ink-muted: #6B5D4F;
+      --zen-vermilion: #D97642;
+      --zen-sage: #4A7C59;
+      --zen-ochre: #D4A574;
+      --zen-indigo: #4E6B7A;
+      --zen-black: #1E2124;
+      --zen-rule: #66E3D3B8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      padding: 1.75rem 1.5rem 6rem;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .container { max-width: 1600px; margin: 0 auto; }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 2rem;
+    }
+
+    .title-group h1 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 2.1rem;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+      background: linear-gradient(135deg, #ffffff 30%, #e3c49a 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.4rem;
+    }
+
+    .title-group p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .badge-bar { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      background: rgba(217, 118, 66, 0.15);
+      color: var(--zen-vermilion);
+      border: 1px solid rgba(217, 118, 66, 0.3);
+    }
+    .badge.green { background: rgba(74, 124, 89, 0.15); color: #5bb377; border-color: rgba(74, 124, 89, 0.3); }
+    .badge.blue { background: rgba(78, 107, 122, 0.2); color: #7db0c9; border-color: rgba(78, 107, 122, 0.4); }
+
+    .theme-mode-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: #0d121c;
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .toggle-btn {
+      padding: 0.35rem 0.8rem;
+      border-radius: 6px;
+      border: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+    }
+    .toggle-btn.active {
+      background: var(--zen-vermilion);
+      color: #fff;
+    }
+
+    /* Layout Grid */
+    .showcase-grid {
+      display: grid;
+      grid-template-columns: 360px 1fr 440px;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    @media (max-width: 1440px) {
+      .showcase-grid { grid-template-columns: 320px 1fr; }
+      .code-column { grid-column: span 2; }
+    }
+    @media (max-width: 1024px) {
+      .showcase-grid { grid-template-columns: 1fr; }
+      .code-column { grid-column: span 1; }
+    }
+
+    /* Left Theme Selector Panel */
+    .theme-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .theme-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.15rem;
+      cursor: pointer;
+      transition: all 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .theme-card:hover {
+      border-color: rgba(217, 118, 66, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .theme-card.active {
+      background: linear-gradient(135deg, rgba(217, 118, 66, 0.14) 0%, #131b26 100%);
+      border-color: var(--zen-vermilion);
+      box-shadow: 0 4px 18px rgba(217, 118, 66, 0.25);
+    }
+
+    .theme-card-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--zen-ochre);
+      margin-bottom: 0.2rem;
+    }
+
+    .theme-card-title {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.12rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.35rem;
+    }
+
+    .theme-card-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .theme-card-tags {
+      display: flex;
+      gap: 0.35rem;
+      margin-top: 0.6rem;
+      flex-wrap: wrap;
+    }
+
+    .mini-tag {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-sub);
+    }
+
+    /* Center Dual Preview Panel */
+    .preview-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+
+    .preview-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+
+    .preview-box-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .preview-box-header h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .comp-badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--zen-ochre);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* App Screen Simulator (Portrait 9:16) */
+    .phone-mockup {
+      position: relative;
+      width: 100%;
+      height: 520px;
+      border-radius: 36px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.1);
+      background: var(--zen-paper);
+      display: flex;
+      flex-direction: column;
+      transition: background 0.3s ease;
+    }
+
+    .phone-mockup.dark { background: var(--zen-dark-paper); }
+
+    .canvas-bg-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .app-content-layer {
+      position: relative;
+      z-index: 10;
+      height: 100%;
+      padding: 1.25rem 1.25rem 1rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .app-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .enso-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 3.5px solid var(--zen-vermilion);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .enso-logo::after {
+      content: '';
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--zen-vermilion);
+    }
+
+    .brand-text h2 {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--zen-ink);
+      line-height: 1.1;
+    }
+    .brand-text span {
+      font-size: 0.75rem;
+      font-style: italic;
+      color: var(--zen-ink-muted);
+      font-family: 'Playfair Display', serif;
+    }
+    .phone-mockup.dark .brand-text h2 { color: #f5e6d3; }
+    .phone-mockup.dark .brand-text span { color: #c4b291; }
+
+    .plus-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--zen-sage);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 700;
+      box-shadow: 0 4px 10px rgba(74, 124, 89, 0.4);
+    }
+
+    .card-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .app-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 1rem 1.15rem;
+      box-shadow: 0 6px 18px rgba(44, 36, 22, 0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s ease;
+    }
+    .phone-mockup.dark .app-card {
+      background: #2b2217;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+    }
+
+    .card-left h4 {
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--zen-ink-muted);
+      margin-bottom: 0.2rem;
+      text-transform: uppercase;
+    }
+    .card-left .count-num {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--zen-ink);
+      line-height: 1;
+      font-feature-settings: "tnum";
+    }
+    .card-left .count-unit {
+      font-size: 0.82rem;
+      color: var(--zen-ink-muted);
+      margin-left: 0.25rem;
+    }
+    .phone-mockup.dark .card-left h4 { color: #c4b291; }
+    .phone-mockup.dark .card-left .count-num { color: #f5e6d3; }
+    .phone-mockup.dark .card-left .count-unit { color: #c4b291; }
+
+    .card-pill {
+      font-size: 0.72rem;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      background: #fbf6ee;
+      color: var(--zen-ink-muted);
+      font-weight: 500;
+      max-width: 140px;
+      text-align: right;
+    }
+    .phone-mockup.dark .card-pill { background: #382c1e; color: #c4b291; }
+
+    /* Home-Screen Widget Simulator (Landscape 4:2, 480x280) */
+    .widget-mockup {
+      position: relative;
+      width: 100%;
+      height: 156px;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+      background: var(--zen-paper);
+      display: flex;
+      flex-direction: column;
+      transition: background 0.3s ease;
+    }
+    .widget-mockup.dark { background: var(--zen-dark-paper); }
+
+    .widget-ui {
+      position: relative;
+      z-index: 10;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .widget-title-row {
+      padding: 10px 18px 5px 18px;
+      font-size: 12.5px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #5D5043;
+    }
+    .widget-mockup.dark .widget-title-row { color: #c4b291; }
+
+    .widget-hairline {
+      height: 1px;
+      margin: 0 16px;
+      background: var(--zen-rule);
+    }
+
+    .widget-grid-row {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      padding: 4px 6px;
+      align-items: center;
+      text-align: center;
+    }
+    .w-cell-name {
+      font-size: 10.8px;
+      font-weight: 500;
+      color: #6B5D4F;
+      margin-bottom: 2px;
+      letter-spacing: 0.03em;
+    }
+    .widget-mockup.dark .w-cell-name { color: #c4b291; }
+
+    .w-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 15px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    }
+    .w-circle.sage { background: var(--zen-sage); }
+    .w-circle.orange { background: var(--zen-vermilion); }
+    .w-circle.ochre { background: var(--zen-ochre); color: var(--zen-ink); }
+
+    /* Right Code & Explanation Column */
+    .code-column {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .info-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1.5rem;
+    }
+
+    .info-card h3 {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.25rem;
+      color: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    .poem-quote {
+      font-family: 'Noto Serif SC', serif;
+      font-size: 1.05rem;
+      color: #fce8df;
+      background: rgba(217, 118, 66, 0.08);
+      border-left: 3px solid var(--zen-vermilion);
+      padding: 0.65rem 1rem;
+      border-radius: 6px;
+      margin: 0.85rem 0;
+      line-height: 1.5;
+    }
+
+    .dual-tab-nav {
+      display: flex;
+      gap: 4px;
+      background: #090d14;
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin-bottom: 0.75rem;
+    }
+
+    .dtab {
+      flex: 1;
+      padding: 0.45rem 0.6rem;
+      border-radius: 6px;
+      border: none;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    .dtab.active {
+      background: #182232;
+      color: #fff;
+    }
+
+    .code-box {
+      background: #070a0f;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.15rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: #e2e8f0;
+      line-height: 1.5;
+      overflow-x: auto;
+      max-height: 380px;
+    }
+
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 1.15rem;
+      border-radius: 8px;
+      background: var(--zen-vermilion);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.85rem;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 0.75rem;
+    }
+    .copy-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .kw { color: #f472b6; }
+    .fn { color: #38bdf8; }
+    .num { color: #fde047; }
+    .str { color: #86efac; }
+    .com { color: #64748b; font-style: italic; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <div class="title-group">
+      <h1>7大古典诗意主题双端背景设计工坊</h1>
+      <p>每一个主题均配备两套独立渲染算法：<strong>App UI 纵向深远构图</strong> vs <strong>桌面 Widget 横向扁平聚景</strong></p>
+    </div>
+    <div class="badge-bar">
+      <div class="theme-mode-toggle">
+        <button class="toggle-btn active" id="btnDay" onclick="setMode('day')">☀️ 宣纸暖白 (Day)</button>
+        <button class="toggle-btn" id="btnNight" onclick="setMode('night')">🌙 沉香墨夜 (Night)</button>
+      </div>
+      <span class="badge green">双端量身定制</span>
+      <span class="badge blue">无缝契合小部件细线与留白</span>
+    </div>
+  </header>
+
+  <!-- Main 3-Column Showcase Grid -->
+  <div class="showcase-grid">
+
+    <!-- Left: 7 Poetic Themes Selector -->
+    <div class="theme-list">
+
+      <!-- Theme 1 -->
+      <div class="theme-card active" onclick="selectTheme(1, this)">
+        <div class="theme-card-num">THEME 01</div>
+        <div class="theme-card-title">1. 满船清梦压星河</div>
+        <div class="theme-card-desc">【App】天际微芒星汉与水面广袤波澜；【Widget】右下角收敛水纹与精致扁舟剪影。</div>
+        <div class="theme-card-tags">
+          <span class="mini-tag">黛蓝水波</span>
+          <span class="mini-tag">孤舟剪影</span>
+          <span class="mini-tag">星汉微芒</span>
+        </div>
+      </div>
+
+      <!-- Theme 2 -->
+      <div class="theme-card" onclick="selectTheme(2, this)">
+        <div class="theme-card-num">THEME 02</div>
+        <div class="theme-card-title">2. 清泉石上流</div>
+        <div class="theme-card-desc">【App】清泉自上而下如绸缎般漫流；【Widget】底边平缓水溪与两枚温润苔绿卵石。</div>
+        <div class="theme-card-tags">
+          <span class="mini-tag">苔绿卵石</span>
+          <span class="mini-tag">澄澈水纹</span>
+          <span class="mini-tag">空山灵气</span>
+        </div>
+      </div>
+
+      <!-- Theme 3 -->
+      <div class="theme-card" onclick="selectTheme(3, this)">
+        <div class="theme-card-num">THEME 03</div>
+        <div class="theme-card-title">3. 长河落日圆</div>
+        <div class="theme-card-desc">【App】半空升腾的圆润朱砂落日与起伏大漠；【Widget】右侧地平线沉降落日与横向金赭沙纹。</div>
+        <div class="theme-card-tags">
+          <span class="mini-tag">朱砂红日</span>
+          <span class="mini-tag">金赭沙河</span>
+          <span class="mini-tag">苍茫雄浑</span>
+        </div>
+      </div>
+
+      <!-- Theme 4 -->
+      <div class="theme-card" onclick="selectTheme(4, this)">
+        <div class="theme-card-num">THEME 04</div>
+        <div class="theme-card-title">4. 一行白鹭上青天</div>
+        <div class="theme-card-desc">【App】群鹭自芦荡纵贯翱翔直上青天；【Widget】右上角紧凑排布3只轻盈白鹭掠过天际。</div>
+        <div class="theme-card-tags">
+          <span class="mini-tag">白鹭飞天</span>
+          <span class="mini-tag">水墨芦苇</span>
+          <span class="mini-tag">开阔高远</span>
+        </div>
+      </div>
+
+      <!-- Theme 5 -->
+      <div class="theme-card" onclick="selectTheme(5, this)">
+        <div class="theme-card-num">THEME 05</div>
+        <div class="theme-card-title">5. 疏影横斜水清浅</div>
+        <div class="theme-card-desc">【App】主枝遒劲斜贯中部，朱砂花瓣点缀；【Widget】右边框优雅横向探入梅枝嫩芽，不遮挡数字。</div>
+        <div class="theme-card-tags">
+          <span class="mini-tag">水墨梅枝</span>
+          <span class="mini-tag">朱砂梅瓣</span>
+          <span class="mini-tag">暗香清韵</span>
+        </div>
+      </div>
+
+      <!-- Theme 6 -->
+      <div class="theme-card" onclick="selectTheme(6, this)">
+        <div class="theme-card-num">THEME 06</div>
+        <div class="theme-card-title">6. 古道西风瘦马</div>
+        <div class="theme-card-desc">【App】蜿蜒盘旋的暮山古道与落霞；【Widget】右下角压低的山径折线与枯藤苍茫轮廓。</div>
+        <div class="theme-card-tags">
+          <span class="mini-tag">暮色山道</span>
+          <span class="mini-tag">枯藤古树</span>
+          <span class="mini-tag">深沉旷远</span>
+        </div>
+      </div>
+
+      <!-- Theme 7 -->
+      <div class="theme-card" onclick="selectTheme(7, this)">
+        <div class="theme-card-num">THEME 07</div>
+        <div class="theme-card-title">7. 斜风细雨不须归</div>
+        <div class="theme-card-desc">【App】漫天斜风雨丝与江南青绿水岸；【Widget】右上垂柳嫩丝与右下青翠水波，线条轻灵。</div>
+        <div class="theme-card-tags">
+          <span class="mini-tag">斜风春雨</span>
+          <span class="mini-tag">青绿山水</span>
+          <span class="mini-tag">烟雨江南</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Center: Live Dual Preview (App UI vs Widget) -->
+    <div class="preview-panel">
+
+      <!-- 1. App Screen Simulator -->
+      <div class="preview-box">
+        <div class="preview-box-header">
+          <h3><span>📱</span> 1. 主应用界面背景 (App UI · 纵向深远构图)</h3>
+          <span class="comp-badge">Compose DrawScope · 480 × 720</span>
+        </div>
+        <div class="phone-mockup" id="appMockup">
+          <canvas class="canvas-bg-layer" id="appCanvas" width="480" height="720"></canvas>
+          <div class="app-content-layer">
+            <div class="app-header">
+              <div class="app-brand">
+                <div class="enso-logo"></div>
+                <div class="brand-text">
+                  <h2>CountUp</h2>
+                  <span>Mindful Days Tracker</span>
+                </div>
+              </div>
+              <div class="plus-btn">+</div>
+            </div>
+
+            <div class="card-list">
+              <div class="app-card">
+                <div class="card-left">
+                  <h4>HAIRCUT</h4>
+                  <div><span class="count-num">22</span><span class="count-unit">days</span></div>
+                </div>
+                <div class="card-pill">Trim sides short</div>
+              </div>
+
+              <div class="app-card">
+                <div class="card-left">
+                  <h4>NO COFFEE</h4>
+                  <div><span class="count-num">47</span><span class="count-unit">days</span></div>
+                </div>
+                <div class="card-pill">Better sleep</div>
+              </div>
+
+              <div class="app-card">
+                <div class="card-left">
+                  <h4>GYM ROUTINE</h4>
+                  <div><span class="count-num">29</span><span class="count-unit">days</span></div>
+                </div>
+                <div class="card-pill">Consistency</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Home-Screen Widget Simulator -->
+      <div class="preview-box">
+        <div class="preview-box-header">
+          <h3><span>🪟</span> 2. 桌面小部件背景 (Widget · 横向扁平紧凑构图)</h3>
+          <span class="comp-badge">Canvas Hardware Bitmap · 480 × 280</span>
+        </div>
+        <div class="widget-mockup" id="widgetMockup">
+          <canvas class="canvas-bg-layer" id="widgetCanvas" width="480" height="280"></canvas>
+          <div class="widget-ui">
+            <div class="widget-title-row">CountUp</div>
+            <div class="widget-hairline"></div>
+            <div class="widget-grid-row">
+              <div>
+                <div class="w-cell-name">HAIRCUT</div>
+                <div class="w-circle sage">22</div>
+              </div>
+              <div>
+                <div class="w-cell-name">NO COFFEE</div>
+                <div class="w-circle orange">47</div>
+              </div>
+              <div>
+                <div class="w-cell-name">GYM</div>
+                <div class="w-circle ochre">29</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right: Code & Composition Logic -->
+    <div class="code-column">
+
+      <div class="info-card">
+        <h3 id="themeTitle">1. 满船清梦压星河</h3>
+        <div class="poem-quote" id="themePoem">
+          “醉后不知天在水，满船清梦压星河。” —— 唐珙《题龙阳县青草湖》
+        </div>
+        
+        <div style="font-size:0.85rem; color:var(--text-sub); margin-bottom:1rem;" id="themeDiffNotes">
+          <strong>构图差异化：</strong><br>
+          • <strong>App UI:</strong> 纵深广阔，上方高位有星汉晕染，下方扁舟有桨影与宽幅波光。<br>
+          • <strong>Widget:</strong> 针对 4x2 紧凑高度压低波浪，扁舟收缩至右下角安全区，绝不遮挡 3 列数字与细线。
+        </div>
+
+        <div class="dual-tab-nav">
+          <button class="dtab active" id="tabAppCode" onclick="switchCodeTarget('app')">📱 App UI (Compose)</button>
+          <button class="dtab" id="tabWidgetCode" onclick="switchCodeTarget('widget')">🪟 Widget (Canvas)</button>
+        </div>
+
+        <div class="code-box" id="codeBox">
+          <!-- Injected via JavaScript -->
+        </div>
+
+        <button class="copy-btn" onclick="copyKotlin()">
+          <span>📋</span> 复制代码到剪贴板
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  let currentThemeId = 1;
+  let currentMode = 'day';
+  let currentCodeTarget = 'app';
+
+  const themeData = {
+    1: {
+      title: "1. 满船清梦压星河",
+      poem: "“醉后不知天在水，满船清梦压星河。” —— 唐珙《题龙阳县青草湖》",
+      diff: "• <strong>App UI (纵向):</strong> 纵深广阔，上方高位有星汉微茫晕染，下方扁舟带有划桨与开阔波光。<br>• <strong>Widget (横向):</strong> 针对小部件压低水纹波幅，扁舟紧凑收纳于右下角，完全避开 3 列习惯圆圈。",
+      drawApp: (ctx, w, h, isNight) => {
+        // App: High sky glow
+        const glow = ctx.createRadialGradient(w * 0.82, h * 0.20, 0, w * 0.82, h * 0.20, h * 0.22);
+        glow.addColorStop(0, isNight ? 'rgba(245, 230, 211, 0.12)' : 'rgba(217, 118, 66, 0.12)');
+        glow.addColorStop(1, 'transparent');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(w * 0.82, h * 0.20, h * 0.22, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Stars
+        [[0.72, 0.14], [0.86, 0.16], [0.68, 0.25], [0.82, 0.28], [0.92, 0.22]].forEach(([sx, sy]) => {
+          ctx.fillStyle = isNight ? 'rgba(255, 255, 255, 0.35)' : 'rgba(78, 107, 122, 0.25)';
+          ctx.beginPath();
+          ctx.arc(w * sx, h * sy, 1.5, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        // Water Wave
+        ctx.beginPath();
+        ctx.moveTo(w * 0.30, h);
+        ctx.bezierCurveTo(w * 0.50, h * 0.82, w * 0.70, h * 0.68, w * 0.88, h * 0.60);
+        ctx.bezierCurveTo(w * 0.94, h * 0.58, w * 0.98, h * 0.65, w, h * 0.62);
+        ctx.lineTo(w, h);
+        ctx.closePath();
+        const waterGrad = ctx.createLinearGradient(w * 0.6, h * 0.6, w * 0.6, h);
+        waterGrad.addColorStop(0, isNight ? 'rgba(78, 107, 122, 0.22)' : 'rgba(78, 107, 122, 0.16)');
+        waterGrad.addColorStop(1, 'transparent');
+        ctx.fillStyle = waterGrad;
+        ctx.fill();
+
+        // Boat in App
+        const bx = w * 0.76;
+        const by = h * 0.68;
+        ctx.beginPath();
+        ctx.moveTo(bx - 32, by);
+        ctx.quadraticCurveTo(bx, by + 10, bx + 32, by - 4);
+        ctx.quadraticCurveTo(bx + 12, by + 4, bx - 32, by);
+        ctx.fillStyle = isNight ? 'rgba(245, 230, 211, 0.45)' : 'rgba(30, 33, 36, 0.40)';
+        ctx.fill();
+        // Oar
+        ctx.beginPath();
+        ctx.moveTo(bx - 4, by - 12);
+        ctx.lineTo(bx + 16, by + 12);
+        ctx.strokeStyle = isNight ? 'rgba(245, 230, 211, 0.35)' : 'rgba(30, 33, 36, 0.35)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      },
+      drawWidget: (ctx, w, h, isNight) => {
+        // Widget: Horizontal flatter wave in bottom right
+        ctx.beginPath();
+        ctx.moveTo(w * 0.45, h);
+        ctx.bezierCurveTo(w * 0.62, h * 0.82, w * 0.78, h * 0.68, w * 0.90, h * 0.65);
+        ctx.bezierCurveTo(w * 0.95, h * 0.64, w * 0.98, h * 0.70, w, h * 0.68);
+        ctx.lineTo(w, h);
+        ctx.closePath();
+        const wg = ctx.createLinearGradient(w * 0.7, h * 0.65, w * 0.7, h);
+        wg.addColorStop(0, isNight ? 'rgba(78, 107, 122, 0.24)' : 'rgba(78, 107, 122, 0.18)');
+        wg.addColorStop(1, 'transparent');
+        ctx.fillStyle = wg;
+        ctx.fill();
+
+        // Compact Mini Boat nestled in far bottom-right (X: 84%, Y: 75%)
+        const bx = w * 0.85;
+        const by = h * 0.75;
+        ctx.beginPath();
+        ctx.moveTo(bx - 22, by);
+        ctx.quadraticCurveTo(bx, by + 7, bx + 22, by - 3);
+        ctx.quadraticCurveTo(bx + 8, by + 3, bx - 22, by);
+        ctx.fillStyle = isNight ? 'rgba(245, 230, 211, 0.40)' : 'rgba(30, 33, 36, 0.35)';
+        ctx.fill();
+
+        // Subtle 2 stars in upper right
+        [[0.82, 0.28], [0.92, 0.22]].forEach(([sx, sy]) => {
+          ctx.fillStyle = isNight ? 'rgba(255, 255, 255, 0.30)' : 'rgba(78, 107, 122, 0.20)';
+          ctx.beginPath();
+          ctx.arc(w * sx, h * sy, 1.2, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+    },
+
+    2: {
+      title: "2. 清泉石上流",
+      poem: "“明月松间照，清泉石上流。” —— 王维《山居秋暝》",
+      diff: "• <strong>App UI (纵向):</strong> 双道清泉从右上方蜿蜒奔流而下，三枚苔绿卵石散布右下方。<br>• <strong>Widget (横向):</strong> 横向波纹贴近底边舒展，两枚扁圆卵石聚于右下脚，保持画面极度纯净。",
+      drawApp: (ctx, w, h, isNight) => {
+        // App Stream
+        const streams = [
+          { startX: 0.25, endY: 0.70, cp1x: 0.45, cp1y: 0.90, cp2x: 0.70, cp2y: 0.65, width: 22 },
+          { startX: 0.40, endY: 0.58, cp1x: 0.60, cp1y: 0.82, cp2x: 0.80, cp2y: 0.55, width: 16 }
+        ];
+        streams.forEach(s => {
+          ctx.beginPath();
+          ctx.moveTo(w * s.startX, h);
+          ctx.bezierCurveTo(w * s.cp1x, h * s.cp1y, w * s.cp2x, h * s.cp2y, w, h * s.endY);
+          ctx.strokeStyle = isNight ? 'rgba(78, 107, 122, 0.22)' : 'rgba(78, 107, 122, 0.16)';
+          ctx.lineWidth = s.width;
+          ctx.lineCap = 'round';
+          ctx.stroke();
+        });
+        // 3 App Stones
+        const stones = [
+          { x: 0.78, y: 0.82, rx: 42, ry: 24, rot: -0.15, col: 'rgba(74, 124, 89, 0.20)' },
+          { x: 0.66, y: 0.90, rx: 32, ry: 18, rot: 0.2, col: 'rgba(196, 139, 88, 0.22)' },
+          { x: 0.88, y: 0.72, rx: 28, ry: 16, rot: -0.3, col: 'rgba(74, 124, 89, 0.16)' }
+        ];
+        stones.forEach(st => {
+          ctx.save();
+          ctx.translate(w * st.x, h * st.y);
+          ctx.rotate(st.rot);
+          ctx.beginPath();
+          ctx.ellipse(0, 0, st.rx, st.ry, 0, 0, Math.PI * 2);
+          ctx.fillStyle = st.col;
+          ctx.fill();
+          ctx.restore();
+        });
+      },
+      drawWidget: (ctx, w, h, isNight) => {
+        // Widget Stream (horizontal sweep along bottom)
+        ctx.beginPath();
+        ctx.moveTo(w * 0.40, h);
+        ctx.bezierCurveTo(w * 0.60, h * 0.88, w * 0.78, h * 0.76, w, h * 0.78);
+        ctx.strokeStyle = isNight ? 'rgba(78, 107, 122, 0.22)' : 'rgba(78, 107, 122, 0.18)';
+        ctx.lineWidth = 14;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+
+        // 2 Compact Stones at far bottom right
+        const stones = [
+          { x: 0.85, y: 0.84, rx: 30, ry: 16, rot: -0.1, col: 'rgba(74, 124, 89, 0.22)' },
+          { x: 0.75, y: 0.90, rx: 22, ry: 12, rot: 0.15, col: 'rgba(196, 139, 88, 0.24)' }
+        ];
+        stones.forEach(st => {
+          ctx.save();
+          ctx.translate(w * st.x, h * st.y);
+          ctx.rotate(st.rot);
+          ctx.beginPath();
+          ctx.ellipse(0, 0, st.rx, st.ry, 0, 0, Math.PI * 2);
+          ctx.fillStyle = st.col;
+          ctx.fill();
+          ctx.restore();
+        });
+      }
+    },
+
+    3: {
+      title: "3. 长河落日圆",
+      poem: "“大漠孤烟直，长河落日圆。” —— 王维《使至塞上》",
+      diff: "• <strong>App UI (纵向):</strong> 高空红日雄浑饱满，广阔的金赭沙波在下半部层层舒展。<br>• <strong>Widget (横向):</strong> 红日紧贴右侧水平线呈半掩沉落之势，金赭沙丘平缓铺展。",
+      drawApp: (ctx, w, h, isNight) => {
+        const sunRadius = h * 0.16;
+        const sunX = w * 0.78;
+        const sunY = h * 0.42;
+
+        const sunWash = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, sunRadius * 1.4);
+        sunWash.addColorStop(0, 'rgba(211, 82, 59, 0.24)');
+        sunWash.addColorStop(1, 'transparent');
+        ctx.fillStyle = sunWash;
+        ctx.beginPath();
+        ctx.arc(sunX, sunY, sunRadius * 1.4, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = isNight ? 'rgba(211, 82, 59, 0.35)' : 'rgba(211, 82, 59, 0.22)';
+        ctx.beginPath();
+        ctx.arc(sunX, sunY, sunRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Dunes
+        ctx.beginPath();
+        ctx.moveTo(w * 0.20, h);
+        ctx.bezierCurveTo(w * 0.45, h * 0.85, w * 0.65, h * 0.65, w * 0.85, h * 0.60);
+        ctx.bezierCurveTo(w * 0.92, h * 0.58, w * 0.96, h * 0.66, w, h * 0.64);
+        ctx.lineTo(w, h);
+        ctx.closePath();
+        const duneGrad = ctx.createLinearGradient(w * 0.5, h * 0.6, w * 0.5, h);
+        duneGrad.addColorStop(0, 'rgba(196, 139, 88, 0.22)');
+        duneGrad.addColorStop(1, 'transparent');
+        ctx.fillStyle = duneGrad;
+        ctx.fill();
+      },
+      drawWidget: (ctx, w, h, isNight) => {
+        // Widget: Sun sinking on the right horizon
+        const sunRadius = h * 0.22;
+        const sunX = w * 0.86;
+        const sunY = h * 0.52;
+
+        const sunWash = ctx.createRadialGradient(sunX, sunY, 0, sunX, sunY, sunRadius * 1.3);
+        sunWash.addColorStop(0, 'rgba(211, 82, 59, 0.26)');
+        sunWash.addColorStop(1, 'transparent');
+        ctx.fillStyle = sunWash;
+        ctx.beginPath();
+        ctx.arc(sunX, sunY, sunRadius * 1.3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = isNight ? 'rgba(211, 82, 59, 0.32)' : 'rgba(211, 82, 59, 0.20)';
+        ctx.beginPath();
+        ctx.arc(sunX, sunY, sunRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Horizontal dune curve
+        ctx.beginPath();
+        ctx.moveTo(w * 0.40, h);
+        ctx.bezierCurveTo(w * 0.60, h * 0.88, w * 0.78, h * 0.72, w, h * 0.70);
+        ctx.lineTo(w, h);
+        ctx.closePath();
+        const dg = ctx.createLinearGradient(w * 0.6, h * 0.7, w * 0.6, h);
+        dg.addColorStop(0, 'rgba(196, 139, 88, 0.22)');
+        dg.addColorStop(1, 'transparent');
+        ctx.fillStyle = dg;
+        ctx.fill();
+      }
+    },
+
+    4: {
+      title: "4. 一行白鹭上青天",
+      poem: "“两个黄鹂鸣翠柳，一行白鹭上青天。” —— 杜甫《绝句》",
+      diff: "• <strong>App UI (纵向):</strong> 4只白鹭排成大对角线冲向长空，湿地芦苇丰满；<br>• <strong>Widget (横向):</strong> 3只精巧白鹭掠过右上天际，下部低平芦草点缀，空间感开朗明快。",
+      drawApp: (ctx, w, h, isNight) => {
+        // App Reeds
+        ctx.beginPath();
+        ctx.moveTo(w * 0.40, h);
+        ctx.bezierCurveTo(w * 0.60, h * 0.85, w * 0.75, h * 0.72, w, h * 0.75);
+        ctx.lineTo(w, h);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(74, 124, 89, 0.15)';
+        ctx.fill();
+
+        // 4 Egrets
+        [{ x: 0.42, y: 0.22, s: 1.1 }, { x: 0.52, y: 0.30, s: 1.0 }, { x: 0.62, y: 0.39, s: 0.9 }, { x: 0.70, y: 0.48, s: 0.8 }].forEach(eg => {
+          ctx.save();
+          ctx.translate(w * eg.x, h * eg.y);
+          ctx.scale(eg.s, eg.s);
+          ctx.beginPath();
+          ctx.moveTo(-12, 4);
+          ctx.quadraticCurveTo(-4, -6, 0, 0);
+          ctx.quadraticCurveTo(4, -6, 12, 4);
+          ctx.strokeStyle = isNight ? 'rgba(255, 255, 255, 0.75)' : 'rgba(30, 33, 36, 0.65)';
+          ctx.lineWidth = 1.8;
+          ctx.stroke();
+          ctx.restore();
+        });
+      },
+      drawWidget: (ctx, w, h, isNight) => {
+        // Widget Reeds (small right mound)
+        ctx.beginPath();
+        ctx.moveTo(w * 0.65, h);
+        ctx.bezierCurveTo(w * 0.78, h * 0.88, w * 0.88, h * 0.82, w, h * 0.80);
+        ctx.lineTo(w, h);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(74, 124, 89, 0.16)';
+        ctx.fill();
+
+        // 3 Egrets soaring in upper right
+        [{ x: 0.74, y: 0.28, s: 0.9 }, { x: 0.82, y: 0.36, s: 0.8 }, { x: 0.90, y: 0.44, s: 0.7 }].forEach(eg => {
+          ctx.save();
+          ctx.translate(w * eg.x, h * eg.y);
+          ctx.scale(eg.s, eg.s);
+          ctx.beginPath();
+          ctx.moveTo(-10, 3);
+          ctx.quadraticCurveTo(-3, -5, 0, 0);
+          ctx.quadraticCurveTo(3, -5, 10, 3);
+          ctx.strokeStyle = isNight ? 'rgba(255, 255, 255, 0.75)' : 'rgba(30, 33, 36, 0.65)';
+          ctx.lineWidth = 1.6;
+          ctx.stroke();
+          ctx.restore();
+        });
+      }
+    },
+
+    5: {
+      title: "5. 疏影横斜水清浅",
+      poem: "“疏影横斜水清浅，暗香浮动月黄昏。” —— 林逋《山园小梅》",
+      diff: "• <strong>App UI (纵向):</strong> 主干苍劲破空斜出，带有多级分支与飘零花瓣；<br>• <strong>Widget (横向):</strong> 梅枝自右边框水平嫩折而出，花瓣点缀于右边缘空白处，绝不抢占视线。",
+      drawApp: (ctx, w, h, isNight) => {
+        // Moon
+        const moon = ctx.createRadialGradient(w * 0.80, h * 0.25, 0, w * 0.80, h * 0.25, h * 0.20);
+        moon.addColorStop(0, 'rgba(212, 165, 116, 0.18)');
+        moon.addColorStop(1, 'transparent');
+        ctx.fillStyle = moon;
+        ctx.beginPath();
+        ctx.arc(w * 0.80, h * 0.25, h * 0.20, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Main Branch
+        ctx.beginPath();
+        ctx.moveTo(w, h * 0.45);
+        ctx.bezierCurveTo(w * 0.88, h * 0.48, w * 0.78, h * 0.38, w * 0.65, h * 0.42);
+        ctx.bezierCurveTo(w * 0.55, h * 0.45, w * 0.48, h * 0.38, w * 0.40, h * 0.40);
+        ctx.strokeStyle = isNight ? 'rgba(245, 230, 211, 0.5)' : 'rgba(30, 33, 36, 0.55)';
+        ctx.lineWidth = 3.2;
+        ctx.stroke();
+
+        // Petals
+        [[0.68, 0.26, 4], [0.65, 0.42, 4.5], [0.48, 0.38, 4], [0.40, 0.40, 3]].forEach(([px, py, pr]) => {
+          ctx.fillStyle = 'rgba(211, 82, 59, 0.65)';
+          ctx.beginPath();
+          ctx.arc(w * px, h * py, pr, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      },
+      drawWidget: (ctx, w, h, isNight) => {
+        // Widget Plum Twig (horizontal right entrance)
+        ctx.beginPath();
+        ctx.moveTo(w, h * 0.35);
+        ctx.bezierCurveTo(w * 0.90, h * 0.40, w * 0.82, h * 0.32, w * 0.76, h * 0.38);
+        ctx.strokeStyle = isNight ? 'rgba(245, 230, 211, 0.5)' : 'rgba(30, 33, 36, 0.50)';
+        ctx.lineWidth = 2.4;
+        ctx.stroke();
+
+        // Sub twig
+        ctx.beginPath();
+        ctx.moveTo(w * 0.86, h * 0.37);
+        ctx.quadraticCurveTo(w * 0.82, h * 0.48, w * 0.78, h * 0.52);
+        ctx.lineWidth = 1.4;
+        ctx.stroke();
+
+        // 3 Petals near right edge
+        [[0.76, 0.38, 3.5], [0.84, 0.32, 3], [0.78, 0.52, 3]].forEach(([px, py, pr]) => {
+          ctx.fillStyle = 'rgba(211, 82, 59, 0.65)';
+          ctx.beginPath();
+          ctx.arc(w * px, h * py, pr, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+    },
+
+    6: {
+      title: "6. 古道西风瘦马",
+      poem: "“枯藤老树昏鸦，小桥流水人家，古道西风瘦马。” —— 马致远《天净沙·秋思》",
+      diff: "• <strong>App UI (纵向):</strong> 暮色山峦、蜿蜒盘旋古道与枯藤老树全貌；<br>• <strong>Widget (横向):</strong> 压低的山脊剪影与苍劲古木残枝，凸显苍凉开阔意境。",
+      drawApp: (ctx, w, h, isNight) => {
+        // Mountain
+        ctx.beginPath();
+        ctx.moveTo(w * 0.35, h);
+        ctx.bezierCurveTo(w * 0.55, h * 0.80, w * 0.70, h * 0.62, w * 0.85, h * 0.58);
+        ctx.bezierCurveTo(w * 0.92, h * 0.56, w * 0.97, h * 0.64, w, h * 0.60);
+        ctx.lineTo(w, h);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(196, 139, 88, 0.16)';
+        ctx.fill();
+
+        // Path
+        ctx.beginPath();
+        ctx.moveTo(w * 0.48, h);
+        ctx.quadraticCurveTo(w * 0.68, h * 0.85, w * 0.76, h * 0.72);
+        ctx.quadraticCurveTo(w * 0.82, h * 0.64, w * 0.88, h * 0.60);
+        ctx.strokeStyle = isNight ? 'rgba(245, 230, 211, 0.3)' : 'rgba(30, 33, 36, 0.25)';
+        ctx.lineWidth = 2.0;
+        ctx.stroke();
+      },
+      drawWidget: (ctx, w, h, isNight) => {
+        // Low ridge
+        ctx.beginPath();
+        ctx.moveTo(w * 0.50, h);
+        ctx.bezierCurveTo(w * 0.68, h * 0.85, w * 0.82, h * 0.74, w, h * 0.72);
+        ctx.lineTo(w, h);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(196, 139, 88, 0.18)';
+        ctx.fill();
+
+        // Path line
+        ctx.beginPath();
+        ctx.moveTo(w * 0.62, h);
+        ctx.quadraticCurveTo(w * 0.78, h * 0.86, w * 0.88, h * 0.74);
+        ctx.strokeStyle = isNight ? 'rgba(245, 230, 211, 0.3)' : 'rgba(30, 33, 36, 0.25)';
+        ctx.lineWidth = 1.8;
+        ctx.stroke();
+      }
+    },
+
+    7: {
+      title: "7. 斜风细雨不须归",
+      poem: "“青箬笠，绿蓑衣，斜风细雨不须归。” —— 张志和《渔歌子》",
+      diff: "• <strong>App UI (纵向):</strong> 斜风春雨丝丝漫布全屏右侧，青绿山水与垂柳丰茂；<br>• <strong>Widget (横向):</strong> 右上轻盈柳丝如弦，右下青绿水岸如茵，几抹轻雨点缀。",
+      drawApp: (ctx, w, h, isNight) => {
+        // Hill
+        ctx.beginPath();
+        ctx.moveTo(w * 0.28, h);
+        ctx.bezierCurveTo(w * 0.50, h * 0.86, w * 0.72, h * 0.70, w * 0.88, h * 0.65);
+        ctx.lineTo(w, h);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(74, 124, 89, 0.16)';
+        ctx.fill();
+
+        // Rain
+        ctx.strokeStyle = isNight ? 'rgba(245, 230, 211, 0.14)' : 'rgba(78, 107, 122, 0.18)';
+        ctx.lineWidth = 1.0;
+        for (let i = 0; i < 16; i++) {
+          const rx = w * (0.42 + (i % 5) * 0.11);
+          const ry = h * (0.22 + Math.floor(i / 5) * 0.22);
+          ctx.beginPath();
+          ctx.moveTo(rx, ry);
+          ctx.lineTo(rx - 14, ry + 32);
+          ctx.stroke();
+        }
+      },
+      drawWidget: (ctx, w, h, isNight) => {
+        // Widget Hill
+        ctx.beginPath();
+        ctx.moveTo(w * 0.55, h);
+        ctx.bezierCurveTo(w * 0.72, h * 0.85, w * 0.86, h * 0.78, w, h * 0.76);
+        ctx.lineTo(w, h);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(74, 124, 89, 0.18)';
+        ctx.fill();
+
+        // Willow tendril at top right
+        ctx.beginPath();
+        ctx.moveTo(w, h * 0.12);
+        ctx.quadraticCurveTo(w * 0.88, h * 0.22, w * 0.82, h * 0.44);
+        ctx.strokeStyle = 'rgba(74, 124, 89, 0.35)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+    }
+  };
+
+  function selectTheme(id, el) {
+    currentThemeId = id;
+    document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    render();
+  }
+
+  function setMode(mode) {
+    currentMode = mode;
+    document.getElementById('btnDay').classList.toggle('active', mode === 'day');
+    document.getElementById('btnNight').classList.toggle('active', mode === 'night');
+    document.getElementById('appMockup').classList.toggle('dark', mode === 'night');
+    document.getElementById('widgetMockup').classList.toggle('dark', mode === 'night');
+    render();
+  }
+
+  function switchCodeTarget(target) {
+    currentCodeTarget = target;
+    document.getElementById('tabAppCode').classList.toggle('active', target === 'app');
+    document.getElementById('tabWidgetCode').classList.toggle('active', target === 'widget');
+    render();
+  }
+
+  function render() {
+    const t = themeData[currentThemeId];
+    document.getElementById('themeTitle').textContent = t.title;
+    document.getElementById('themePoem').textContent = t.poem;
+    document.getElementById('themeDiffNotes').innerHTML = t.diff;
+
+    const isNight = currentMode === 'night';
+
+    // 1. Draw App UI Canvas
+    const appCv = document.getElementById('appCanvas');
+    const appCtx = appCv.getContext('2d');
+    appCtx.clearRect(0, 0, 480, 720);
+    appCtx.fillStyle = isNight ? '#241D12' : '#F5E6D3';
+    appCtx.fillRect(0, 0, 480, 720);
+    t.drawApp(appCtx, 480, 720, isNight);
+
+    // 2. Draw Widget Canvas
+    const wCv = document.getElementById('widgetCanvas');
+    const wCtx = wCv.getContext('2d');
+    wCtx.clearRect(0, 0, 480, 280);
+    wCtx.fillStyle = isNight ? '#241D12' : '#F5E6D3';
+    wCtx.fillRect(0, 0, 480, 280);
+    t.drawWidget(wCtx, 480, 280, isNight);
+
+    updateKotlinCode();
+  }
+
+  function updateKotlinCode() {
+    const codeBox = document.getElementById('codeBox');
+    const id = currentThemeId;
+
+    if (currentCodeTarget === 'app') {
+      const appSnippets = {
+        1: `// 1. 满船清梦压星河 — App UI (AbstractBackgrounds.kt)
+private fun DrawScope.drawDreamBoatAppTheme() {
+    val w = size.width; val h = size.height
+    // 星月光晕
+    drawCircle(
+        brush = Brush.radialGradient(listOf(InkVermilion.copy(alpha = 0.12f), Color.Transparent), center = Offset(w * 0.82f, h * 0.20f), radius = 64.dp.toPx()),
+        radius = 64.dp.toPx(), center = Offset(w * 0.82f, h * 0.20f)
+    )
+    // 黛蓝水波
+    val water = Path().apply {
+        moveTo(w * 0.30f, h)
+        cubicTo(w * 0.50f, h * 0.82f, w * 0.70f, h * 0.68f, w * 0.88f, h * 0.60f)
+        cubicTo(w * 0.94f, h * 0.58f, w * 0.98f, h * 0.65f, w, h * 0.62f)
+        lineTo(w, h); close()
+    }
+    drawPath(water, brush = Brush.linearGradient(listOf(InkIndigo.copy(alpha = 0.16f), Color.Transparent), start = Offset(w * 0.6f, h * 0.6f), end = Offset(w * 0.6f, h)))
+    // 孤舟与桨
+    val boat = Path().apply {
+        moveTo(w * 0.76f - 32.dp.toPx(), h * 0.68f)
+        quadraticTo(w * 0.76f, h * 0.68f + 10.dp.toPx(), w * 0.76f + 32.dp.toPx(), h * 0.68f - 4.dp.toPx())
+        quadraticTo(w * 0.76f + 12.dp.toPx(), h * 0.68f + 4.dp.toPx(), w * 0.76f - 32.dp.toPx(), h * 0.68f)
+    }
+    drawPath(boat, color = InkBlack.copy(alpha = 0.40f))
+}`,
+        2: `// 2. 清泉石上流 — App UI (AbstractBackgrounds.kt)
+private fun DrawScope.drawClearSpringAppTheme() {
+    val w = size.width; val h = size.height
+    // 纵向奔流溪带
+    val stream = Path().apply {
+        moveTo(w * 0.25f, h)
+        cubicTo(w * 0.45f, h * 0.90f, w * 0.70f, h * 0.65f, w, h * 0.70f)
+    }
+    drawPath(stream, color = InkIndigo.copy(alpha = 0.16f), style = Stroke(width = 22.dp.toPx(), cap = StrokeCap.Round))
+    // 3枚苔绿青石
+    drawOval(color = InkSage.copy(alpha = 0.20f), topLeft = Offset(w * 0.74f, h * 0.80f), size = Size(56.dp.toPx(), 32.dp.toPx()))
+    drawOval(color = InkOchre.copy(alpha = 0.22f), topLeft = Offset(w * 0.62f, h * 0.88f), size = Size(42.dp.toPx(), 24.dp.toPx()))
+}`,
+        3: `// 3. 长河落日圆 — App UI (AbstractBackgrounds.kt)
+private fun DrawScope.drawDesertSunsetAppTheme() {
+    val w = size.width; val h = size.height
+    // 雄浑朱砂落日
+    drawCircle(color = InkVermilion.copy(alpha = 0.22f), radius = 54.dp.toPx(), center = Offset(w * 0.78f, h * 0.42f))
+    // 金赭沙河
+    val dunes = Path().apply {
+        moveTo(w * 0.20f, h)
+        cubicTo(w * 0.45f, h * 0.85f, w * 0.65f, h * 0.65f, w * 0.85f, h * 0.60f)
+        cubicTo(w * 0.92f, h * 0.58f, w * 0.96f, h * 0.66f, w, h * 0.64f)
+        lineTo(w, h); close()
+    }
+    drawPath(dunes, brush = Brush.linearGradient(listOf(InkOchre.copy(alpha = 0.22f), Color.Transparent), start = Offset(w * 0.5f, h * 0.6f), end = Offset(w * 0.5f, h)))
+}`,
+        4: `// 4. 一行白鹭上青天 — App UI (AbstractBackgrounds.kt)
+private fun DrawScope.drawEgretsAscendingAppTheme() {
+    val w = size.width; val h = size.height
+    // 芦荡
+    val marsh = Path().apply {
+        moveTo(w * 0.40f, h); cubicTo(w * 0.60f, h * 0.85f, w * 0.75f, h * 0.72f, w, h * 0.75f); lineTo(w, h); close()
+    }
+    drawPath(marsh, color = InkSage.copy(alpha = 0.15f))
+    // 4只翱翔白鹭队列
+    val egrets = Path().apply {
+        moveTo(w * 0.42f, h * 0.22f); quadraticTo(w * 0.44f, h * 0.20f, w * 0.46f, h * 0.22f)
+        moveTo(w * 0.52f, h * 0.30f); quadraticTo(w * 0.54f, h * 0.28f, w * 0.56f, h * 0.30f)
+        moveTo(w * 0.62f, h * 0.39f); quadraticTo(w * 0.64f, h * 0.37f, w * 0.66f, h * 0.39f)
+    }
+    drawPath(egrets, color = InkBlack.copy(alpha = 0.65f), style = Stroke(width = 1.8.dp.toPx(), cap = StrokeCap.Round))
+}`,
+        5: `// 5. 疏影横斜水清浅 — App UI (AbstractBackgrounds.kt)
+private fun DrawScope.drawPlumShadowAppTheme() {
+    val w = size.width; val h = size.height
+    // 主梅枝
+    val branch = Path().apply {
+        moveTo(w, h * 0.45f); cubicTo(w * 0.88f, h * 0.48f, w * 0.78f, h * 0.38f, w * 0.65f, h * 0.42f); cubicTo(w * 0.55f, h * 0.45f, w * 0.48f, h * 0.38f, w * 0.40f, h * 0.40f)
+    }
+    drawPath(branch, color = InkBlack.copy(alpha = 0.55f), style = Stroke(width = 3.2.dp.toPx(), cap = StrokeCap.Round))
+    // 朱砂梅瓣点染
+    drawCircle(color = InkVermilion.copy(alpha = 0.65f), radius = 4.dp.toPx(), center = Offset(w * 0.65f, h * 0.42f))
+    drawCircle(color = InkVermilion.copy(alpha = 0.65f), radius = 4.dp.toPx(), center = Offset(w * 0.48f, h * 0.38f))
+}`,
+        6: `// 6. 古道西风瘦马 — App UI (AbstractBackgrounds.kt)
+private fun DrawScope.drawAncientRoadAppTheme() {
+    val w = size.width; val h = size.height
+    val ridge = Path().apply {
+        moveTo(w * 0.35f, h); cubicTo(w * 0.55f, h * 0.80f, w * 0.70f, h * 0.62f, w * 0.85f, h * 0.58f); lineTo(w, h); close()
+    }
+    drawPath(ridge, color = InkOchre.copy(alpha = 0.16f))
+    val path = Path().apply {
+        moveTo(w * 0.48f, h); quadraticTo(w * 0.68f, h * 0.85f, w * 0.76f, h * 0.72f); quadraticTo(w * 0.82f, h * 0.64f, w * 0.88f, h * 0.60f)
+    }
+    drawPath(path, color = InkBlack.copy(alpha = 0.25f), style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round))
+}`,
+        7: `// 7. 斜风细雨不须归 — App UI (AbstractBackgrounds.kt)
+private fun DrawScope.drawSpringRainAppTheme() {
+    val w = size.width; val h = size.height
+    val hill = Path().apply {
+        moveTo(w * 0.28f, h); cubicTo(w * 0.50f, h * 0.86f, w * 0.72f, h * 0.70f, w * 0.88f, h * 0.65f); lineTo(w, h); close()
+    }
+    drawPath(hill, color = InkSage.copy(alpha = 0.16f))
+    // 垂柳丝丝
+    val willow = Path().apply {
+        moveTo(w, h * 0.15f); quadraticTo(w * 0.88f, h * 0.25f, w * 0.82f, h * 0.42f)
+    }
+    drawPath(willow, color = InkSage.copy(alpha = 0.35f), style = Stroke(width = 1.6.dp.toPx(), cap = StrokeCap.Round))
+}`
+      };
+      codeBox.textContent = appSnippets[id];
+    } else {
+      const widgetSnippets = {
+        1: `// 1. 满船清梦压星河 — Widget (WidgetBackgroundRenderer.kt)
+private fun drawDreamBoatWidget(canvas: Canvas, w: Float, h: Float) {
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    // 压低水纹波幅 (贴合底边)
+    val water = Path().apply {
+        moveTo(w * 0.45f, h)
+        cubicTo(w * 0.62f, h * 0.82f, w * 0.78f, h * 0.68f, w * 0.90f, h * 0.65f)
+        lineTo(w, h); close()
+    }
+    paint.shader = LinearGradient(w * 0.7f, h * 0.65f, w * 0.7f, h, INK_INDIGO, Color.TRANSPARENT, Shader.TileMode.CLAMP)
+    canvas.drawPath(water, paint)
+    // 扁舟收纳至右下角安全区 (X: 85%, Y: 75%)
+    paint.shader = null; paint.color = INK_BLACK
+    val boat = Path().apply {
+        moveTo(w * 0.85f - 22f, h * 0.75f)
+        quadTo(w * 0.85f, h * 0.75f + 7f, w * 0.85f + 22f, h * 0.75f - 3f)
+        quadTo(w * 0.85f + 8f, h * 0.75f + 3f, w * 0.85f - 22f, h * 0.75f)
+    }
+    canvas.drawPath(boat, paint)
+}`,
+        2: `// 2. 清泉石上流 — Widget (WidgetBackgroundRenderer.kt)
+private fun drawClearSpringWidget(canvas: Canvas, w: Float, h: Float) {
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE; strokeWidth = 14f; strokeCap = Paint.Cap.ROUND; color = INK_INDIGO
+    }
+    val stream = Path().apply {
+        moveTo(w * 0.40f, h); cubicTo(w * 0.60f, h * 0.88f, w * 0.78f, h * 0.76f, w, h * 0.78f)
+    }
+    canvas.drawPath(stream, paint)
+    // 2枚紧凑卵石聚于右下角
+    paint.style = Paint.Style.FILL; paint.color = INK_SAGE
+    canvas.drawOval(w * 0.80f, h * 0.80f, w * 0.92f, h * 0.92f, paint)
+}`,
+        3: `// 3. 长河落日圆 — Widget (WidgetBackgroundRenderer.kt)
+private fun drawDesertSunsetWidget(canvas: Canvas, w: Float, h: Float) {
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    // 右侧地平线半掩沉落之日
+    paint.color = INK_VERMILION
+    canvas.drawCircle(w * 0.86f, h * 0.52f, h * 0.22f, paint)
+    // 平缓沙丘
+    val dune = Path().apply {
+        moveTo(w * 0.40f, h); cubicTo(w * 0.60f, h * 0.88f, w * 0.78f, h * 0.72f, w, h * 0.70f); lineTo(w, h); close()
+    }
+    paint.shader = LinearGradient(w * 0.6f, h * 0.7f, w * 0.6f, h, INK_OCHRE, Color.TRANSPARENT, Shader.TileMode.CLAMP)
+    canvas.drawPath(dune, paint)
+}`,
+        4: `// 4. 一行白鹭上青天 — Widget (WidgetBackgroundRenderer.kt)
+private fun drawEgretsAscendingWidget(canvas: Canvas, w: Float, h: Float) {
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    paint.color = INK_SAGE
+    val marsh = Path().apply {
+        moveTo(w * 0.65f, h); cubicTo(w * 0.78f, h * 0.88f, w * 0.88f, h * 0.82f, w, h * 0.80f); lineTo(w, h); close()
+    }
+    canvas.drawPath(marsh, paint)
+    // 右上天际 3只精巧白鹭
+    paint.style = Paint.Style.STROKE; paint.strokeWidth = 1.6f; paint.color = INK_BLACK
+    val egret = Path().apply {
+        moveTo(w * 0.74f - 10f, h * 0.28f + 3f)
+        quadTo(w * 0.74f - 3f, h * 0.28f - 5f, w * 0.74f, h * 0.28f)
+        quadTo(w * 0.74f + 3f, h * 0.28f - 5f, w * 0.74f + 10f, h * 0.28f + 3f)
+    }
+    canvas.drawPath(egret, paint)
+}`,
+        5: `// 5. 疏影横斜水清浅 — Widget (WidgetBackgroundRenderer.kt)
+private fun drawPlumShadowWidget(canvas: Canvas, w: Float, h: Float) {
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE; strokeWidth = 2.4f; color = INK_BLACK
+    }
+    val twig = Path().apply {
+        moveTo(w, h * 0.35f); cubicTo(w * 0.90f, h * 0.40f, w * 0.82f, h * 0.32f, w * 0.76f, h * 0.38f)
+    }
+    canvas.drawPath(twig, paint)
+    // 3点朱砂梅花瓣
+    paint.style = Paint.Style.FILL; paint.color = INK_VERMILION
+    canvas.drawCircle(w * 0.76f, h * 0.38f, 3.5f, paint)
+    canvas.drawCircle(w * 0.84f, h * 0.32f, 3.0f, paint)
+}`,
+        6: `// 6. 古道西风瘦马 — Widget (WidgetBackgroundRenderer.kt)
+private fun drawAncientRoadWidget(canvas: Canvas, w: Float, h: Float) {
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    paint.color = INK_OCHRE
+    val ridge = Path().apply {
+        moveTo(w * 0.50f, h); cubicTo(w * 0.68f, h * 0.85f, w * 0.82f, h * 0.74f, w, h * 0.72f); lineTo(w, h); close()
+    }
+    canvas.drawPath(ridge, paint)
+    paint.style = Paint.Style.STROKE; paint.strokeWidth = 1.8f; paint.color = INK_BLACK
+    val path = Path().apply {
+        moveTo(w * 0.62f, h); quadTo(w * 0.78f, h * 0.86f, w * 0.88f, h * 0.74f)
+    }
+    canvas.drawPath(path, paint)
+}`,
+        7: `// 7. 斜风细雨不须归 — Widget (WidgetBackgroundRenderer.kt)
+private fun drawSpringRainWidget(canvas: Canvas, w: Float, h: Float) {
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    paint.color = INK_SAGE
+    val hill = Path().apply {
+        moveTo(w * 0.55f, h); cubicTo(w * 0.72f, h * 0.85f, w * 0.86f, h * 0.78f, w, h * 0.76f); lineTo(w, h); close()
+    }
+    canvas.drawPath(hill, paint)
+    // 右上轻灵垂柳
+    paint.style = Paint.Style.STROKE; strokeWidth = 1.5f
+    val willow = Path().apply {
+        moveTo(w, h * 0.12f); quadTo(w * 0.88f, h * 0.22f, w * 0.82f, h * 0.44f)
+    }
+    canvas.drawPath(willow, paint)
+}`
+      };
+      codeBox.textContent = widgetSnippets[id];
+    }
+  }
+
+  function copyKotlin() {
+    const text = document.getElementById('codeBox').innerText;
+    navigator.clipboard.writeText(text);
+    const btn = document.querySelector('.copy-btn');
+    btn.innerHTML = '<span>✅</span> 已复制到剪贴板！';
+    setTimeout(() => {
+      btn.innerHTML = '<span>📋</span> 复制代码到剪贴板';
+    }, 2000);
+  }
+
+  // Initial load
+  render();
+</script>
+</body>
+</html>

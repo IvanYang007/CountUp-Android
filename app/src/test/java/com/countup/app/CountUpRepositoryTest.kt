@@ -93,11 +93,11 @@ class CountUpRepositoryTest {
     fun backgroundThemePersistsAndRetrieves() {
         assertEquals(BackgroundTheme.AUTO_DAILY, repository.getBackgroundTheme())
 
-        assertTrue(repository.setBackgroundTheme(BackgroundTheme.SEA_HORIZON))
-        assertEquals(BackgroundTheme.SEA_HORIZON, repository.getBackgroundTheme())
+        assertTrue(repository.setBackgroundTheme(BackgroundTheme.DREAM_BOAT))
+        assertEquals(BackgroundTheme.DREAM_BOAT, repository.getBackgroundTheme())
 
-        assertTrue(repository.setBackgroundTheme(BackgroundTheme.SOLITARY_ISLE))
-        assertEquals(BackgroundTheme.SOLITARY_ISLE, repository.getBackgroundTheme())
+        assertTrue(repository.setBackgroundTheme(BackgroundTheme.CLEAR_SPRING))
+        assertEquals(BackgroundTheme.CLEAR_SPRING, repository.getBackgroundTheme())
     }
 
     @Test

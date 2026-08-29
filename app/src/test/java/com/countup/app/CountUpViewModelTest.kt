@@ -29,7 +29,7 @@ class CountUpViewModelTest {
     fun `initial state loads items and sort order correctly`() = runTest {
         val repo = FakeCountUpRepository(
             initialItems = sampleItems,
-            initialTheme = BackgroundTheme.MOUNTAIN,
+            initialTheme = BackgroundTheme.DREAM_BOAT,
             initialSortOrder = SortOrder.DAYS_DESC,
         )
         val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday })
@@ -37,7 +37,7 @@ class CountUpViewModelTest {
         viewModel.state.test {
             val state = awaitItem()
             assertEquals(3, state.items.size)
-            assertEquals(BackgroundTheme.MOUNTAIN, state.backgroundTheme)
+            assertEquals(BackgroundTheme.DREAM_BOAT, state.backgroundTheme)
             assertEquals(SortOrder.DAYS_DESC, state.sortOrder)
             assertEquals("Read Philosophy", state.displayItems.first().name)
         }
@@ -87,7 +87,7 @@ class CountUpViewModelTest {
 
     @Test
     fun `cycle background switches theme, updates repo and emits effects`() = runTest {
-        val repo = FakeCountUpRepository(initialTheme = BackgroundTheme.MOUNTAIN)
+        val repo = FakeCountUpRepository(initialTheme = BackgroundTheme.DREAM_BOAT)
         val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday })
 
         viewModel.effects.test {
@@ -96,7 +96,7 @@ class CountUpViewModelTest {
             val snackbarEffect = awaitItem()
             assertTrue(snackbarEffect is CountUpUiEffect.ShowSnackbar)
             assertEquals(R.string.bg_switched_toast, (snackbarEffect as CountUpUiEffect.ShowSnackbar).messageRes)
-            assertEquals(BackgroundTheme.MOUNTAIN.next().labelRes, snackbarEffect.formatArgRes)
+            assertEquals(BackgroundTheme.DREAM_BOAT.next().labelRes, snackbarEffect.formatArgRes)
 
             val refreshEffect = awaitItem()
             assertTrue(refreshEffect is CountUpUiEffect.RefreshWidget)
@@ -104,8 +104,8 @@ class CountUpViewModelTest {
 
         viewModel.state.test {
             val state = awaitItem()
-            assertEquals(BackgroundTheme.MOUNTAIN.next(), state.backgroundTheme)
-            assertEquals(BackgroundTheme.MOUNTAIN.next(), repo.getBackgroundTheme())
+            assertEquals(BackgroundTheme.DREAM_BOAT.next(), state.backgroundTheme)
+            assertEquals(BackgroundTheme.DREAM_BOAT.next(), repo.getBackgroundTheme())
         }
     }
 
