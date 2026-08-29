@@ -170,10 +170,19 @@ class CountUpStore(context: Context) {
 
     private fun quarantineRawPayload(undecodableRaw: String) {
         val timestamp = System.currentTimeMillis()
-        prefs.edit()
+        val newKey = "${KEY_ITEMS_QUARANTINE}_$timestamp"
+        val editor = prefs.edit()
             .putString(KEY_ITEMS_QUARANTINE, undecodableRaw)
-            .putString("${KEY_ITEMS_QUARANTINE}_$timestamp", undecodableRaw)
-            .commit()
+            .putString(newKey, undecodableRaw)
+
+        // Prune older quarantine entries to prevent unbounded growth (retain at most 3 historical snapshots)
+        val allKeys = (prefs.all.keys.filter { it.startsWith("${KEY_ITEMS_QUARANTINE}_") } + newKey).distinct().sorted()
+        if (allKeys.size > MAX_QUARANTINE_ENTRIES) {
+            for (oldKey in allKeys.take(allKeys.size - MAX_QUARANTINE_ENTRIES)) {
+                editor.remove(oldKey)
+            }
+        }
+        editor.commit()
     }
 
     /**
@@ -249,12 +258,20 @@ class CountUpStore(context: Context) {
     private fun writeBackup(encodedJson: String) {
         try {
             if (!filesDir.exists()) filesDir.mkdirs()
-            backupTempFile.writeText(encodedJson, Charsets.UTF_8)
+            java.io.FileOutputStream(backupTempFile).use { fos ->
+                fos.write(encodedJson.toByteArray(Charsets.UTF_8))
+                fos.flush()
+                fos.fd.sync()
+            }
             if (backupTempFile.exists()) {
                 if (backupFile.exists()) backupFile.delete()
                 val renamed = backupTempFile.renameTo(backupFile)
                 if (!renamed) {
-                    backupFile.writeText(encodedJson, Charsets.UTF_8)
+                    java.io.FileOutputStream(backupFile).use { fos ->
+                        fos.write(encodedJson.toByteArray(Charsets.UTF_8))
+                        fos.flush()
+                        fos.fd.sync()
+                    }
                     backupTempFile.delete()
                 }
             }
@@ -297,5 +314,6 @@ class CountUpStore(context: Context) {
         private const val LEGACY_PREFS_NAME = "haircut_prefs"
         private const val LEGACY_KEY_EPOCH_DAY = "last_haircut_epoch_day"
         private const val BACKUP_FILE_NAME = "countup_backup.json"
+        private const val MAX_QUARANTINE_ENTRIES = 3
     }
 }

@@ -208,6 +208,16 @@ class CountUpItemTest {
     }
 
     @Test
+    fun commentsWithNestedCurlyBracesAreSalvagedCorrectly() {
+        val payloadWithBraces =
+            "[{\"id\":\"b1\",\"name\":\"Gym\",\"epochDay\":100,\"comment\":\"Bench {warmup + 3 sets}\"},{\"id\":\"b2\",\"name\":\"Study\",\"epochDay\":200,\"comment\":\"Math {ch1, ch2}\"}"
+        val salvaged = salvageItems(payloadWithBraces)
+        assertEquals(2, salvaged.size)
+        assertEquals("Bench {warmup + 3 sets}", salvaged[0].comment)
+        assertEquals("Math {ch1, ch2}", salvaged[1].comment)
+    }
+
+    @Test
     fun hundredItemsStressTestRoundTripsAccurately() {
         val items = (1..150).map { i ->
             CountUpItem(

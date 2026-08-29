@@ -4,7 +4,6 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.time.LocalDate
 import java.util.UUID
-import java.util.regex.Pattern
 
 /**
  * A single count-up item: a human-readable [name] anchored to a calendar day
@@ -28,9 +27,6 @@ const val DEFAULT_ITEM_NAME: String = "Item"
 /** Inclusive epoch-day bounds of [LocalDate]; values outside this range crash render. */
 private val EPOCH_DAY_MIN: Long = LocalDate.MIN.toEpochDay()
 private val EPOCH_DAY_MAX: Long = LocalDate.MAX.toEpochDay()
-
-/** Regex pattern to match and extract individual JSON object tokens `{ ... }` from broken payloads. */
-private val JSON_OBJECT_PATTERN: Pattern = Pattern.compile("\\{[^{}]*\\}")
 
 /**
  * Encode a list of items to a compact JSON array string for storage.
@@ -79,16 +75,16 @@ internal fun decodeItems(raw: String?): List<CountUpItem>? {
 
 /**
  * Salvages valid [CountUpItem] objects from a syntactically malformed, corrupted,
- * or truncated JSON string by scanning and extracting individual JSON object tokens.
+ * or truncated JSON string by scanning and extracting balanced JSON object tokens,
+ * properly respecting string literals with nested curly braces.
  */
 internal fun salvageItems(raw: String?): List<CountUpItem> {
     if (raw.isNullOrBlank()) return emptyList()
     val out = ArrayList<CountUpItem>()
     val seenIds = HashSet<String>()
-    val matcher = JSON_OBJECT_PATTERN.matcher(raw)
+    val tokens = extractJsonObjects(raw)
 
-    while (matcher.find()) {
-        val token = matcher.group()
+    for (token in tokens) {
         try {
             val json = JSONObject(token)
             val item = decodeElement(json)
@@ -100,6 +96,52 @@ internal fun salvageItems(raw: String?): List<CountUpItem> {
         }
     }
     return out
+}
+
+/**
+ * Scans [raw] and extracts all top-level balanced `{ ... }` JSON object strings,
+ * properly tracking string literal boundaries (`"..."`) and escape characters (`\`).
+ * This correctly preserves user comments and names that contain curly braces (e.g. `"{warmup}"`).
+ */
+internal fun extractJsonObjects(raw: String): List<String> {
+    val objects = ArrayList<String>()
+    var depth = 0
+    var startIndex = -1
+    var inString = false
+    var escape = false
+
+    for (i in raw.indices) {
+        val c = raw[i]
+        if (escape) {
+            escape = false
+            continue
+        }
+        if (c == '\\' && inString) {
+            escape = true
+            continue
+        }
+        if (c == '"') {
+            inString = !inString
+            continue
+        }
+        if (!inString) {
+            if (c == '{') {
+                if (depth == 0) {
+                    startIndex = i
+                }
+                depth++
+            } else if (c == '}') {
+                if (depth > 0) {
+                    depth--
+                    if (depth == 0 && startIndex != -1) {
+                        objects.add(raw.substring(startIndex, i + 1))
+                        startIndex = -1
+                    }
+                }
+            }
+        }
+    }
+    return objects
 }
 
 /**

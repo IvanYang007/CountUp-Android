@@ -141,6 +141,22 @@ class CountUpStoreTest {
         assertTrue(store.items()[0].showInWidget)
     }
 
+    @Test
+    fun quarantinePruningKeepsAtMostThreeHistoricalSnapshots() {
+        val prefs = fakeContext.getSharedPreferences("countup_prefs", Context.MODE_PRIVATE)
+
+        // Simulate 5 consecutive corrupt read incidents over time
+        for (i in 1..5) {
+            prefs.edit().putString("items_v1", "broken_$i").commit()
+            val store = CountUpStore(fakeContext)
+            store.items()
+            Thread.sleep(2) // ensure distinct timestamps
+        }
+
+        val quarantineKeys = prefs.all.keys.filter { it.startsWith("items_v1_quarantine_") }
+        assertTrue("Expected <= 3 timestamped quarantine keys, found ${quarantineKeys.size}", quarantineKeys.size <= 3)
+    }
+
     // --- In-Memory Test Harness for Android Context & SharedPreferences ---
 
     private class FakeContext(private val baseFilesDir: File) : android.content.ContextWrapper(null) {
