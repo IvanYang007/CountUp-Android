@@ -17,10 +17,14 @@ import java.time.LocalDate
 /**
  * 13 Classical Chinese Poetic & Zen Landscape (国画诗词水墨意境) Abstract Background Themes.
  *
+ * Preserves the full collection of both:
+ * - 6 Classic Zen Archetypes: Mountain (远山含黛), Sand Dunes (平沙落雁), Sea Horizon (烟波浩渺), Solitary Isle (太湖石秀), Willow Leaves (柳浪闻莺), Zen Bamboo (幽竹虚心)
+ * - 7 Poetic Verse Landscapes: Dream Boat (满船清梦压星河), Clear Spring (清泉石上流), Desert Sunset (长河落日圆), Egrets (一行白鹭上青天), Plum Shadow (疏影横斜水清浅), Ancient Road (古道西风瘦马), Spring Rain (斜风细雨不须归)
+ *
  * Core Design Principles:
  * - Landscape contours anchor seamlessly to screen borders (right & bottom).
  * - Visual weight concentrated in the bottom-right corner (右下聚景).
- * - Generous, airy negative space on the left (左侧大面积留白 · 计白当黑) to keep habit cards legible.
+ * - Generous negative space on the left (左侧大面积留白 · 计白当黑) to keep habit cards legible.
  * - Sinuous Bézier curves and mineral gradient washes (12%–22% opacity) ensuring 100% text contrast.
  */
 enum class BackgroundTheme(val id: String, @get:StringRes val labelRes: Int) {
@@ -57,7 +61,7 @@ enum class BackgroundTheme(val id: String, @get:StringRes val labelRes: Int) {
 }
 
 /**
- * Resolves [theme] to one of the 13 concrete poetic themes.
+ * Resolves [theme] to one of the 13 concrete themes.
  * When set to [BackgroundTheme.AUTO_DAILY], cycles predictably based on [epochDay] across all 13 daily landscapes.
  */
 fun resolveActiveTheme(theme: BackgroundTheme, epochDay: Long = LocalDate.now().toEpochDay()): BackgroundTheme {
@@ -133,28 +137,31 @@ private fun DrawScope.drawInkMountainTheme() {
         center = Offset(w * 0.84f, h * 0.20f),
     )
 
-    // Main mountain peak
-    val mainPeak = Path().apply {
+    // Distant Karst Peaks
+    val distantMountain = Path().apply {
         moveTo(w * 0.35f, h)
-        cubicTo(w * 0.48f, h * 0.68f, w * 0.62f, h * 0.44f, w * 0.76f, h * 0.42f)
-        cubicTo(w * 0.86f, h * 0.41f, w * 0.94f, h * 0.54f, w, h * 0.62f)
-        lineTo(w, h)
-        close()
+        cubicTo(w * 0.50f, h * 0.72f, w * 0.65f, h * 0.56f, w * 0.80f, h * 0.50f)
+        cubicTo(w * 0.90f, h * 0.46f, w * 0.96f, h * 0.56f, w, h * 0.52f)
+        lineTo(w, h); close()
     }
-    drawPath(
-        path = mainPeak,
-        brush = Brush.linearGradient(
-            colors = listOf(InkIndigo.copy(alpha = 0.16f), Color.Transparent),
-            start = Offset(w * 0.6f, h * 0.42f),
-            end = Offset(w * 0.6f, h),
-        ),
-    )
-    val ridgeLine = Path().apply {
-        moveTo(w * 0.35f, h)
-        cubicTo(w * 0.48f, h * 0.68f, w * 0.62f, h * 0.44f, w * 0.76f, h * 0.42f)
-        cubicTo(w * 0.86f, h * 0.41f, w * 0.94f, h * 0.54f, w, h * 0.62f)
+    drawPath(distantMountain, brush = Brush.linearGradient(listOf(InkIndigo.copy(alpha = 0.14f), Color.Transparent), start = Offset(w * 0.6f, h * 0.5f), end = Offset(w * 0.6f, h)))
+
+    // Mid-ground Karst Peak
+    val midMountain = Path().apply {
+        moveTo(w * 0.48f, h)
+        cubicTo(w * 0.62f, h * 0.78f, w * 0.74f, h * 0.64f, w * 0.86f, h * 0.60f)
+        cubicTo(w * 0.92f, h * 0.58f, w * 0.98f, h * 0.66f, w, h * 0.64f)
+        lineTo(w, h); close()
     }
-    drawPath(ridgeLine, color = InkBlack.copy(alpha = 0.24f), style = Stroke(width = 1.4.dp.toPx(), cap = StrokeCap.Round))
+    drawPath(midMountain, brush = Brush.linearGradient(listOf(InkMuted.copy(alpha = 0.18f), Color.Transparent), start = Offset(w * 0.7f, h * 0.6f), end = Offset(w * 0.7f, h)))
+
+    // Calligraphic Foreground Ridge Line
+    val ridge = Path().apply {
+        moveTo(w * 0.48f, h)
+        cubicTo(w * 0.62f, h * 0.78f, w * 0.74f, h * 0.64f, w * 0.86f, h * 0.60f)
+        cubicTo(w * 0.92f, h * 0.58f, w * 0.98f, h * 0.66f, w, h * 0.64f)
+    }
+    drawPath(ridge, color = InkBlack.copy(alpha = 0.28f), style = Stroke(width = 1.4.dp.toPx(), cap = StrokeCap.Round))
 }
 
 // ============================================================================
@@ -164,21 +171,14 @@ private fun DrawScope.drawInkSandDunesTheme() {
     val w = size.width
     val h = size.height
 
-    val dune = Path().apply {
+    val dune1 = Path().apply {
         moveTo(w, h * 0.46f)
         cubicTo(w * 0.76f, h * 0.55f, w * 0.54f, h * 0.66f, w * 0.44f, h * 0.82f)
         cubicTo(w * 0.40f, h * 0.90f, w * 0.44f, h * 0.96f, w * 0.48f, h)
-        lineTo(w, h)
-        close()
+        lineTo(w, h); close()
     }
-    drawPath(
-        path = dune,
-        brush = Brush.linearGradient(
-            colors = listOf(InkOchre.copy(alpha = 0.20f), Color.Transparent),
-            start = Offset(w, h * 0.46f),
-            end = Offset(w * 0.42f, h * 0.85f),
-        ),
-    )
+    drawPath(dune1, brush = Brush.linearGradient(listOf(InkOchre.copy(alpha = 0.20f), Color.Transparent), start = Offset(w, h * 0.46f), end = Offset(w * 0.42f, h * 0.85f)))
+
     val duneLine = Path().apply {
         moveTo(w, h * 0.46f)
         cubicTo(w * 0.76f, h * 0.55f, w * 0.54f, h * 0.66f, w * 0.44f, h * 0.82f)
@@ -195,29 +195,21 @@ private fun DrawScope.drawInkSeaHorizonTheme() {
     val h = size.height
 
     drawCircle(
-        brush = Brush.radialGradient(
-            colors = listOf(InkVermilion.copy(alpha = 0.16f), Color.Transparent),
-            center = Offset(w * 0.75f, h * 0.45f),
-            radius = 50.dp.toPx(),
-        ),
-        radius = 50.dp.toPx(),
-        center = Offset(w * 0.75f, h * 0.45f),
+        brush = Brush.radialGradient(listOf(InkVermilion.copy(alpha = 0.16f), Color.Transparent), center = Offset(w * 0.75f, h * 0.45f), radius = 50.dp.toPx()),
+        radius = 50.dp.toPx(), center = Offset(w * 0.75f, h * 0.45f),
     )
 
     val sea = Path().apply {
         moveTo(w * 0.25f, h)
         cubicTo(w * 0.50f, h * 0.85f, w * 0.70f, h * 0.65f, w, h * 0.68f)
-        lineTo(w, h)
-        close()
+        lineTo(w, h); close()
     }
-    drawPath(
-        path = sea,
-        brush = Brush.linearGradient(
-            colors = listOf(InkIndigo.copy(alpha = 0.18f), Color.Transparent),
-            start = Offset(w * 0.6f, h * 0.65f),
-            end = Offset(w * 0.6f, h),
-        ),
-    )
+    drawPath(sea, brush = Brush.linearGradient(listOf(InkIndigo.copy(alpha = 0.18f), Color.Transparent), start = Offset(w * 0.6f, h * 0.65f), end = Offset(w * 0.6f, h)))
+
+    val boat = Path().apply {
+        moveTo(w * 0.82f, h * 0.65f); quadraticTo(w * 0.85f, h * 0.665f, w * 0.88f, h * 0.65f)
+    }
+    drawPath(boat, color = InkBlack.copy(alpha = 0.45f), style = Stroke(width = 1.8.dp.toPx(), cap = StrokeCap.Round))
 }
 
 // ============================================================================
@@ -227,34 +219,52 @@ private fun DrawScope.drawInkSolitaryIsleTheme() {
     val w = size.width
     val h = size.height
 
-    val rock = Path().apply {
-        moveTo(w * 0.70f, h)
-        cubicTo(w * 0.65f, h * 0.82f, w * 0.72f, h * 0.68f, w * 0.80f, h * 0.65f)
-        cubicTo(w * 0.88f, h * 0.62f, w * 0.94f, h * 0.78f, w * 0.92f, h)
+    val rockCenterX = w * 0.80f
+    val rockBaseY = h * 0.88f
+
+    // Taihu Scholar Stone
+    val stonePath = Path().apply {
+        moveTo(rockCenterX - 45.dp.toPx(), rockBaseY)
+        cubicTo(rockCenterX - 38.dp.toPx(), rockBaseY - 32.dp.toPx(), rockCenterX - 18.dp.toPx(), rockBaseY - 52.dp.toPx(), rockCenterX + 8.dp.toPx(), rockBaseY - 48.dp.toPx())
+        cubicTo(rockCenterX + 32.dp.toPx(), rockBaseY - 44.dp.toPx(), rockCenterX + 48.dp.toPx(), rockBaseY - 22.dp.toPx(), rockCenterX + 42.dp.toPx(), rockBaseY)
         close()
     }
-    drawPath(rock, color = InkSage.copy(alpha = 0.22f))
-    drawPath(rock, color = InkBlack.copy(alpha = 0.35f), style = Stroke(width = 1.4.dp.toPx(), cap = StrokeCap.Round))
+    drawPath(stonePath, brush = Brush.radialGradient(listOf(InkBlack.copy(alpha = 0.22f), InkSage.copy(alpha = 0.12f), Color.Transparent), center = Offset(rockCenterX - 8.dp.toPx(), rockBaseY - 15.dp.toPx()), radius = 55.dp.toPx()))
+    drawPath(stonePath, color = InkBlack.copy(alpha = 0.35f), style = Stroke(width = 1.5.dp.toPx(), cap = StrokeCap.Round))
+
+    // Moss dots on stone
+    drawCircle(color = InkBlack.copy(alpha = 0.32f), radius = 2.dp.toPx(), center = Offset(rockCenterX - 12.dp.toPx(), rockBaseY - 36.dp.toPx()))
+    drawCircle(color = InkSage.copy(alpha = 0.25f), radius = 2.5.dp.toPx(), center = Offset(rockCenterX + 15.dp.toPx(), rockBaseY - 30.dp.toPx()))
 }
 
 // ============================================================================
-// 5. 柳浪闻莺 · Willow Leaves & Spring Ripples
+// 5. 柳浪闻莺 · Willow Leaves & Ripples
 // ============================================================================
 private fun DrawScope.drawInkWillowLeavesTheme() {
     val w = size.width
     val h = size.height
 
-    val stem = Path().apply {
-        moveTo(w, h * 0.35f)
-        cubicTo(w * 0.86f, h * 0.45f, w * 0.78f, h * 0.60f, w * 0.74f, h * 0.75f)
+    // Water wash
+    val springWater = Path().apply {
+        moveTo(w * 0.46f, h); cubicTo(w * 0.62f, h * 0.82f, w * 0.84f, h * 0.84f, w, h * 0.76f); lineTo(w, h); close()
     }
-    drawPath(stem, color = InkBlack.copy(alpha = 0.30f), style = Stroke(width = 1.3.dp.toPx(), cap = StrokeCap.Round))
+    drawPath(springWater, brush = Brush.linearGradient(listOf(InkSage.copy(alpha = 0.12f), Color.Transparent), start = Offset(w, h * 0.76f), end = Offset(w * 0.46f, h)))
 
+    // Branches
+    val stem1 = Path().apply {
+        moveTo(w, h * 0.42f); cubicTo(w * 0.86f, h * 0.48f, w * 0.78f, h * 0.60f, w * 0.74f, h * 0.78f)
+    }
+    drawPath(stem1, color = InkBlack.copy(alpha = 0.35f), style = Stroke(width = 1.3.dp.toPx(), cap = StrokeCap.Round))
+
+    val stem2 = Path().apply {
+        moveTo(w, h * 0.55f); cubicTo(w * 0.90f, h * 0.62f, w * 0.82f, h * 0.72f, w * 0.80f, h * 0.86f)
+    }
+    drawPath(stem2, color = InkBlack.copy(alpha = 0.30f), style = Stroke(width = 1.1.dp.toPx(), cap = StrokeCap.Round))
+
+    // Leaves
     val leaves = listOf(
-        Offset(w * 0.92f, h * 0.40f),
-        Offset(w * 0.86f, h * 0.48f),
-        Offset(w * 0.80f, h * 0.58f),
-        Offset(w * 0.75f, h * 0.70f),
+        Offset(w * 0.92f, h * 0.46f), Offset(w * 0.86f, h * 0.51f), Offset(w * 0.82f, h * 0.57f),
+        Offset(w * 0.78f, h * 0.64f), Offset(w * 0.88f, h * 0.65f), Offset(w * 0.83f, h * 0.74f),
     )
     leaves.forEach { pt ->
         drawOval(color = InkSage.copy(alpha = 0.32f), topLeft = pt, size = Size(14.dp.toPx(), 6.dp.toPx()))
@@ -268,24 +278,19 @@ private fun DrawScope.drawInkZenBambooTheme() {
     val w = size.width
     val h = size.height
 
-    // Bamboo stalk 1
     val stalk1 = Path().apply {
         moveTo(w * 0.86f, h); lineTo(w * 0.88f, h * 0.35f)
     }
     drawPath(stalk1, color = InkSage.copy(alpha = 0.35f), style = Stroke(width = 4.dp.toPx(), cap = StrokeCap.Round))
 
-    // Bamboo stalk 2
     val stalk2 = Path().apply {
         moveTo(w * 0.94f, h); lineTo(w * 0.95f, h * 0.28f)
     }
     drawPath(stalk2, color = InkBlack.copy(alpha = 0.30f), style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round))
 
-    // Bamboo leaves
     val bLeaves = listOf(
-        Offset(w * 0.84f, h * 0.45f),
-        Offset(w * 0.82f, h * 0.52f),
-        Offset(w * 0.90f, h * 0.38f),
-        Offset(w * 0.88f, h * 0.60f),
+        Offset(w * 0.84f, h * 0.45f), Offset(w * 0.82f, h * 0.52f),
+        Offset(w * 0.90f, h * 0.38f), Offset(w * 0.88f, h * 0.60f),
     )
     bLeaves.forEach { pt ->
         val lf = Path().apply {
@@ -305,13 +310,8 @@ private fun DrawScope.drawDreamBoatTheme() {
     val h = size.height
 
     drawCircle(
-        brush = Brush.radialGradient(
-            colors = listOf(InkVermilion.copy(alpha = 0.12f), Color.Transparent),
-            center = Offset(w * 0.82f, h * 0.20f),
-            radius = 64.dp.toPx(),
-        ),
-        radius = 64.dp.toPx(),
-        center = Offset(w * 0.82f, h * 0.20f),
+        brush = Brush.radialGradient(listOf(InkVermilion.copy(alpha = 0.12f), Color.Transparent), center = Offset(w * 0.82f, h * 0.20f), radius = 64.dp.toPx()),
+        radius = 64.dp.toPx(), center = Offset(w * 0.82f, h * 0.20f),
     )
 
     listOf(
@@ -336,7 +336,6 @@ private fun DrawScope.drawDreamBoatTheme() {
         quadraticTo(bx + 12.dp.toPx(), by + 4.dp.toPx(), bx - 32.dp.toPx(), by)
     }
     drawPath(boat, color = InkBlack.copy(alpha = 0.40f))
-
     drawLine(color = InkBlack.copy(alpha = 0.35f), start = Offset(bx - 4.dp.toPx(), by - 12.dp.toPx()), end = Offset(bx + 16.dp.toPx(), by + 12.dp.toPx()), strokeWidth = 1.5.dp.toPx(), cap = StrokeCap.Round)
 }
 
@@ -353,8 +352,7 @@ private fun DrawScope.drawClearSpringTheme() {
     )
 
     val stream = Path().apply {
-        moveTo(w * 0.25f, h)
-        cubicTo(w * 0.45f, h * 0.90f, w * 0.70f, h * 0.65f, w, h * 0.70f)
+        moveTo(w * 0.25f, h); cubicTo(w * 0.45f, h * 0.90f, w * 0.70f, h * 0.65f, w, h * 0.70f)
     }
     drawPath(stream, color = InkIndigo.copy(alpha = 0.16f), style = Stroke(width = 22.dp.toPx(), cap = StrokeCap.Round))
 

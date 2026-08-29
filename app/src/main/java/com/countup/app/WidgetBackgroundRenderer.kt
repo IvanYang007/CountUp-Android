@@ -83,96 +83,166 @@ object WidgetBackgroundRenderer {
     }
 
     // ------------------------------------------------------------------------
-    // 1. 远山含黛 · Mountain Peaks
+    // 1. 远山含黛 · Mountain Peaks (Karst Ridges + Dawn Ochre Sun)
     // ------------------------------------------------------------------------
     private fun drawMountainWidget(canvas: Canvas, w: Float, h: Float) {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-        val ridge = Path().apply {
+
+        // Distant mountain wash
+        val ridge1 = Path().apply {
             moveTo(w * 0.35f, h)
             cubicTo(w * 0.50f, h * 0.72f, w * 0.65f, h * 0.60f, w * 0.82f, h * 0.52f)
             cubicTo(w * 0.90f, h * 0.48f, w * 0.96f, h * 0.56f, w, h * 0.50f)
             lineTo(w, h); close()
         }
         paint.shader = LinearGradient(w * 0.6f, h * 0.5f, w * 0.6f, h, INK_INDIGO, Color.TRANSPARENT, Shader.TileMode.CLAMP)
-        canvas.drawPath(ridge, paint)
+        canvas.drawPath(ridge1, paint)
         paint.shader = null
-        paint.color = INK_BLACK; paint.style = Paint.Style.STROKE; paint.strokeWidth = 1.6f
+
+        // Mid-ground peak
+        val ridge2 = Path().apply {
+            moveTo(w * 0.55f, h)
+            cubicTo(w * 0.68f, h * 0.78f, w * 0.78f, h * 0.65f, w * 0.88f, h * 0.62f)
+            cubicTo(w * 0.93f, h * 0.60f, w * 0.97f, h * 0.68f, w, h * 0.65f)
+            lineTo(w, h); close()
+        }
+        paint.color = INK_MUTED
+        canvas.drawPath(ridge2, paint)
+
+        // Calligraphic ridge line
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = 1.8f
+        paint.color = INK_BLACK
         val line = Path().apply {
-            moveTo(w * 0.35f, h)
-            cubicTo(w * 0.50f, h * 0.72f, w * 0.65f, h * 0.60f, w * 0.82f, h * 0.52f)
-            cubicTo(w * 0.90f, h * 0.48f, w * 0.96f, h * 0.56f, w, h * 0.50f)
+            moveTo(w * 0.60f, h)
+            cubicTo(w * 0.72f, h * 0.75f, w * 0.80f, h * 0.62f, w * 0.88f, h * 0.62f)
+            cubicTo(w * 0.93f, h * 0.60f, w * 0.97f, h * 0.68f, w, h * 0.65f)
         }
         canvas.drawPath(line, paint)
+
+        // Subtle Ochre Sun
+        paint.style = Paint.Style.FILL
+        paint.color = INK_OCHRE
+        canvas.drawCircle(w * 0.76f, h * 0.42f, h * 0.12f, paint)
     }
 
     // ------------------------------------------------------------------------
-    // 2. 平沙落雁 · Sand Dunes
+    // 2. 平沙落雁 · Sand Dunes (Flowing Dune & Ripple Lines)
     // ------------------------------------------------------------------------
     private fun drawSandDunesWidget(canvas: Canvas, w: Float, h: Float) {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-        val dune = Path().apply {
+        val dune1 = Path().apply {
             moveTo(w * 0.40f, h)
             cubicTo(w * 0.55f, h * 0.85f, w * 0.70f, h * 0.68f, w * 0.86f, h * 0.64f)
             cubicTo(w * 0.92f, h * 0.62f, w * 0.96f, h * 0.70f, w, h * 0.68f)
             lineTo(w, h); close()
         }
         paint.shader = LinearGradient(w * 0.6f, h * 0.6f, w * 0.6f, h, INK_OCHRE, Color.TRANSPARENT, Shader.TileMode.CLAMP)
-        canvas.drawPath(dune, paint)
+        canvas.drawPath(dune1, paint)
         paint.shader = null
+
+        paint.style = Paint.Style.STROKE; paint.strokeWidth = 1.8f; paint.color = INK_MUTED
+        val duneLine = Path().apply {
+            moveTo(w * 0.48f, h)
+            cubicTo(w * 0.62f, h * 0.82f, w * 0.75f, h * 0.72f, w * 0.88f, h * 0.74f)
+            cubicTo(w * 0.94f, h * 0.75f, w * 0.98f, h * 0.80f, w, h * 0.82f)
+        }
+        canvas.drawPath(duneLine, paint)
     }
 
     // ------------------------------------------------------------------------
-    // 3. 烟波浩渺 · Calm Sea Horizon
+    // 3. 烟波浩渺 · Calm Sea Horizon (Horizon Wash, Waves & Solitary Boat)
     // ------------------------------------------------------------------------
     private fun drawSeaHorizonWidget(canvas: Canvas, w: Float, h: Float) {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-        paint.color = INK_VERMILION
-        canvas.drawCircle(w * 0.84f, h * 0.46f, h * 0.18f, paint)
-
-        val sea = Path().apply {
-            moveTo(w * 0.45f, h)
-            cubicTo(w * 0.62f, h * 0.82f, w * 0.78f, h * 0.70f, w, h * 0.72f)
+        val water = Path().apply {
+            moveTo(w * 0.30f, h)
+            cubicTo(w * 0.50f, h * 0.78f, w * 0.75f, h * 0.70f, w, h * 0.68f)
             lineTo(w, h); close()
         }
-        paint.shader = LinearGradient(w * 0.6f, h * 0.7f, w * 0.6f, h, INK_INDIGO, Color.TRANSPARENT, Shader.TileMode.CLAMP)
-        canvas.drawPath(sea, paint)
+        paint.shader = LinearGradient(w * 0.6f, h * 0.68f, w * 0.6f, h, INK_INDIGO, Color.TRANSPARENT, Shader.TileMode.CLAMP)
+        canvas.drawPath(water, paint)
         paint.shader = null
+
+        paint.style = Paint.Style.STROKE; paint.strokeWidth = 1.6f; paint.color = INK_INDIGO
+        val wave1 = Path().apply {
+            moveTo(w * 0.50f, h * 0.82f)
+            cubicTo(w * 0.65f, h * 0.80f, w * 0.80f, h * 0.84f, w * 0.95f, h * 0.81f)
+        }
+        canvas.drawPath(wave1, paint)
+
+        val boat = Path().apply {
+            moveTo(w * 0.82f, h * 0.65f); quadTo(w * 0.85f, h * 0.665f, w * 0.88f, h * 0.65f)
+        }
+        paint.strokeWidth = 1.8f; paint.color = INK_BLACK
+        canvas.drawPath(boat, paint)
     }
 
     // ------------------------------------------------------------------------
-    // 4. 太湖石秀 · Solitary Taihu Scholar Stone
+    // 4. 太湖石秀 · Solitary Taihu Scholar Stone (Hollow Cavity & Lichen)
     // ------------------------------------------------------------------------
     private fun drawSolitaryIsleWidget(canvas: Canvas, w: Float, h: Float) {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-        paint.color = INK_SAGE
-        val rock = Path().apply {
-            moveTo(w * 0.78f, h)
-            cubicTo(w * 0.72f, h * 0.82f, w * 0.80f, h * 0.68f, w * 0.88f, h * 0.66f)
-            cubicTo(w * 0.94f, h * 0.64f, w * 0.96f, h * 0.80f, w * 0.94f, h)
+        val rockX = w * 0.82f; val rockY = h * 0.52f; val rockW = w * 0.16f; val rockH = h * 0.44f
+
+        val rockOutline = Path().apply {
+            moveTo(rockX, rockY + rockH)
+            cubicTo(rockX - rockW * 0.15f, rockY + rockH * 0.70f, rockX - rockW * 0.30f, rockY + rockH * 0.40f, rockX - rockW * 0.10f, rockY + rockH * 0.15f)
+            cubicTo(rockX, rockY + rockH * 0.02f, rockX + rockW * 0.40f, rockY - rockH * 0.05f, rockX + rockW * 0.60f, rockY + rockH * 0.12f)
+            cubicTo(rockX + rockW * 0.80f, rockY + rockH * 0.25f, rockX + rockW * 0.95f, rockY + rockH * 0.60f, rockX + rockW * 0.70f, rockY + rockH)
             close()
         }
-        canvas.drawPath(rock, paint)
-        paint.color = INK_BLACK; paint.style = Paint.Style.STROKE; paint.strokeWidth = 1.4f
-        canvas.drawPath(rock, paint)
+        paint.shader = LinearGradient(rockX, rockY, rockX + rockW, rockY + rockH, INK_INDIGO, INK_OCHRE, Shader.TileMode.CLAMP)
+        canvas.drawPath(rockOutline, paint)
+        paint.shader = null
+
+        paint.color = COLOR_PAPER
+        canvas.drawCircle(rockX + rockW * 0.22f, rockY + rockH * 0.30f, rockW * 0.14f, paint)
+
+        paint.style = Paint.Style.STROKE; paint.strokeWidth = 1.8f; paint.color = INK_BLACK
+        canvas.drawPath(rockOutline, paint)
+
+        paint.style = Paint.Style.FILL; paint.color = INK_SAGE
+        canvas.drawCircle(rockX - rockW * 0.05f, rockY + rockH * 0.25f, 2.2f, paint)
+        canvas.drawCircle(rockX + rockW * 0.45f, rockY + rockH * 0.15f, 2.5f, paint)
     }
 
     // ------------------------------------------------------------------------
-    // 5. 柳浪闻莺 · Willow Leaves & Ripples
+    // 5. 柳浪闻莺 · Willow Leaves & Ripples (Weeping Willow Branch & Leaves)
     // ------------------------------------------------------------------------
     private fun drawWillowLeavesWidget(canvas: Canvas, w: Float, h: Float) {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-        paint.color = INK_BLACK; paint.style = Paint.Style.STROKE; paint.strokeWidth = 1.3f
-        val stem = Path().apply {
-            moveTo(w, h * 0.25f); cubicTo(w * 0.88f, h * 0.38f, w * 0.82f, h * 0.55f, w * 0.80f, h * 0.75f)
+        paint.style = Paint.Style.STROKE; paint.strokeWidth = 1.6f; paint.color = INK_BLACK
+
+        val branch1 = Path().apply {
+            moveTo(w, h * 0.20f)
+            cubicTo(w * 0.90f, h * 0.32f, w * 0.82f, h * 0.50f, w * 0.85f, h * 0.75f)
         }
-        canvas.drawPath(stem, paint)
+        canvas.drawPath(branch1, paint)
+
+        val branch2 = Path().apply {
+            moveTo(w, h * 0.40f)
+            cubicTo(w * 0.93f, h * 0.52f, w * 0.88f, h * 0.68f, w * 0.92f, h * 0.88f)
+        }
+        paint.strokeWidth = 1.3f
+        canvas.drawPath(branch2, paint)
+
         paint.style = Paint.Style.FILL; paint.color = INK_SAGE
-        canvas.drawOval(w * 0.88f, h * 0.35f, w * 0.94f, h * 0.42f, paint)
-        canvas.drawOval(w * 0.82f, h * 0.50f, w * 0.88f, h * 0.57f, paint)
+        val coords = arrayOf(
+            floatArrayOf(w * 0.88f, h * 0.38f),
+            floatArrayOf(w * 0.83f, h * 0.48f),
+            floatArrayOf(w * 0.84f, h * 0.60f),
+            floatArrayOf(w * 0.86f, h * 0.72f),
+            floatArrayOf(w * 0.94f, h * 0.50f),
+            floatArrayOf(w * 0.89f, h * 0.64f),
+        )
+        for (c in coords) {
+            canvas.drawOval(c[0] - 2.5f, c[1] - 5.5f, c[0] + 2.5f, c[1] + 5.5f, paint)
+        }
     }
 
     // ------------------------------------------------------------------------
-    // 6. 幽竹虚心 · Zen Bamboo Grove
+    // 6. 幽竹虚心 · Zen Bamboo Grove (Stalk & Graceful Leaves)
     // ------------------------------------------------------------------------
     private fun drawZenBambooWidget(canvas: Canvas, w: Float, h: Float) {
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
