@@ -51,7 +51,7 @@ Install and launch on a connected device/emulator:
 
 ```bash
 adb install -r app/build/outputs/apk/debug/app-debug.apk
-adb shell am start -n com.ivanyang.countup/.MainActivity
+adb shell am start -n com.countup.app/.MainActivity
 ```
 
 Existing single-item installs are migrated automatically: the old
@@ -72,7 +72,7 @@ Managing counts:
 with the debug-only host activity (present in debug builds, not in release):
 
 ```bash
-adb shell am start -n com.ivanyang.countup/.WidgetHostActivity
+adb shell am start -n com.countup.app/.WidgetHostActivity
 adb exec-out screencap -p > artifacts/widget.png
 ```
 

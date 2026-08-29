@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <boolean name="migrated_v1" value="true" />
+    <string name="items_v1">[{"id":"1","name":"Haircut","epochDay":20672,"icon":"person","comment":"Trim sides short\nClassic taper cut","showInWidget":true,"futureFlag":false},{"id":"2","name":"No Coffee","epochDay":20647,"icon":"favorite","comment":"Feeling much better\nBetter sleep quality","showInWidget":true,"futureFlag":false},{"id":"3","name":"Gym Routine","epochDay":20665,"icon":"mood","comment":"Consistency is key","showInWidget":true,"futureFlag":false},{"id":"4","name":"Book Reading","epochDay":20680,"icon":"star","comment":"","showInWidget":true,"futureFlag":false},{"id":"5","name":"Japan Trip","epochDay":20698,"icon":"public","comment":"Tickets and JR Pass\nTokyo and Kyoto","showInWidget":true,"futureFlag":true}]</string>
+</map>

@@ -103,7 +103,7 @@ export JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-17.0.20.8-hotspot"
 Install + launch:
 ```bash
 adb install -r app/build/outputs/apk/debug/app-debug.apk
-adb shell am start -n com.ivanyang.countup/.MainActivity
+adb shell am start -n com.countup.app/.MainActivity
 ```
 
 Emulators available: `countUp_api26` (API 26) and `countUp_api36` (API 36). Running AVD port 5556. Widget placement on the API 36 launcher works but **drag-and-drop placement via blind `adb` is unreliable** — place it manually to inspect the widget.

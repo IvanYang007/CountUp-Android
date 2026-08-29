@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Mid-Century Modern 2x2 Modular Widget Grid (Inactive/Hidden state - Outline) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:strokeColor="#FF2C2416"
+        android:strokeWidth="1.5"
+        android:strokeLineJoin="round"
+        android:strokeLineCap="round"
+        android:pathData="M5,4.5h3.5a1,1 0 0,1 1,1v3.5a1,1 0 0,1 -1,1H5a1,1 0 0,1 -1,-1V5.5a1,1 0 0,1 1,-1zM15.5,4.5h3.5a1,1 0 0,1 1,1v3.5a1,1 0 0,1 -1,1H15.5a1,1 0 0,1 -1,-1V5.5a1,1 0 0,1 1,-1zM5,15h3.5a1,1 0 0,1 1,1v3.5a1,1 0 0,1 -1,1H5a1,1 0 0,1 -1,-1V16a1,1 0 0,1 1,-1zM15.5,15h3.5a1,1 0 0,1 1,1v3.5a1,1 0 0,1 -1,1H15.5a1,1 0 0,1 -1,-1V16a1,1 0 0,1 1,-1z"/>
+</vector>

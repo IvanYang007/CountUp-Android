@@ -4,7 +4,7 @@
 
     <application>
         <activity
-            android:name="com.ivanyang.countup.WidgetHostActivity"
+            android:name="com.countup.app.WidgetHostActivity"
             android:exported="true"
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
     </application>
