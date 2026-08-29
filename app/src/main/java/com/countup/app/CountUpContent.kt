@@ -65,6 +65,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -164,8 +165,8 @@ fun CountUpContent(
                         )
                     } else {
                         LazyColumn(
-                            verticalArrangement = Arrangement.spacedBy(14.dp),
-                            contentPadding = PaddingValues(vertical = 4.dp, horizontal = 2.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                            contentPadding = PaddingValues(vertical = 8.dp, horizontal = 6.dp),
                         ) {
                             items(
                                 items = displayItems,
@@ -555,23 +556,49 @@ fun ItemCard(
     val pluralSelector = kotlin.math.abs(count).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
     val unitLabel = pluralStringResource(R.plurals.days_unit, pluralSelector, count)
 
+    val cardShape = RoundedCornerShape(20.dp)
+    val surfaceBrush = remember {
+        Brush.verticalGradient(
+            colors = listOf(
+                Color.White,
+                Color(0xFFFAF5EE),
+            ),
+        )
+    }
+    val borderBrush = remember {
+        Brush.verticalGradient(
+            colors = listOf(
+                Color.White.copy(alpha = 0.90f),
+                Color(0xFFD8C7B0).copy(alpha = 0.65f),
+            ),
+        )
+    }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
             .shadow(
-                elevation = 3.dp,
-                shape = RoundedCornerShape(20.dp),
+                elevation = 2.5.dp,
+                shape = cardShape,
                 clip = false,
-                ambientColor = Color(0x1A2C2416),
-                spotColor = Color(0x262C2416),
+                ambientColor = Color(0x182C2416),
+                spotColor = Color(0x222C2416),
             )
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(20.dp))
+            .border(
+                width = 1.dp,
+                brush = borderBrush,
+                shape = cardShape,
+            )
+            .background(
+                brush = surfaceBrush,
+                shape = cardShape,
+            )
             .clickable(
                 interactionSource = cardInteraction,
                 indication = LocalIndication.current,
                 onClick = onClick,
             )
-            .pressScale(cardInteraction, 0.99f)
+            .pressScale(cardInteraction, 0.985f)
             .padding(horizontal = 16.dp, vertical = 14.dp)
             .semantics(mergeDescendants = true) {},
     ) {
