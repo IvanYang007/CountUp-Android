@@ -1,0 +1,5 @@
+﻿<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<map>
+    <string name="items_v1">[{"id":"1","name":"Meditation Practice","epochDay":20551,"comment":"Daily morning calm","icon":"","futureFlag":false,"showInWidget":true},{"id":"2","name":"Trip to Kyoto","epochDay":20719,"comment":"Autumn foliage tour","icon":"","futureFlag":true,"showInWidget":true},{"id":"3","name":"Daily Reading","epochDay":20631,"comment":"30 min evening streak","icon":"","futureFlag":false,"showInWidget":true}]</string>
+    <string name="background_theme_v1">willow_leaves</string>
+</map>
