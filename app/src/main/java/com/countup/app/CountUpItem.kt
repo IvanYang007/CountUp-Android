@@ -3,6 +3,8 @@ package com.countup.app
 import org.json.JSONArray
 import org.json.JSONObject
 import java.time.LocalDate
+import java.util.UUID
+import java.util.regex.Pattern
 
 /**
  * A single count-up item: a human-readable [name] anchored to a calendar day
@@ -27,6 +29,9 @@ const val DEFAULT_ITEM_NAME: String = "Item"
 private val EPOCH_DAY_MIN: Long = LocalDate.MIN.toEpochDay()
 private val EPOCH_DAY_MAX: Long = LocalDate.MAX.toEpochDay()
 
+/** Regex pattern to match and extract individual JSON object tokens `{ ... }` from broken payloads. */
+private val JSON_OBJECT_PATTERN: Pattern = Pattern.compile("\\{[^{}]*\\}")
+
 /**
  * Encode a list of items to a compact JSON array string for storage.
  * Pure and platform-independent so it can be unit-tested on the JVM.
@@ -49,43 +54,86 @@ internal fun encodeItems(items: List<CountUpItem>): String {
 }
 
 /**
- * Decode a previously-encoded JSON array. Returns null for null input, for
- * non-array data, or for an array whose every element is malformed (callers
- * treat null as "recover"). Elements that are individually malformed or carry
- * an out-of-range epochDay are dropped, keeping the remaining parseable items
- * so one bad element never destroys the whole list.
+ * Decode a previously-encoded JSON array with maximum fault tolerance.
+ *
+ * 1. Attempts standard [JSONArray] decoding.
+ * 2. If the array envelope is broken or truncated, falls back to [salvageItems]
+ *    to extract and recover all self-contained valid items.
+ * 3. Returns null only when the input is null/blank or completely unrecoverable,
+ *    allowing callers to quarantine the raw payload without losing salvageable items.
  */
 internal fun decodeItems(raw: String?): List<CountUpItem>? {
     if (raw.isNullOrBlank()) return null
     return try {
         val arr = JSONArray(raw)
+        if (arr.length() == 0) return emptyList()
         val out = ArrayList<CountUpItem>(arr.length())
         for (i in 0 until arr.length()) {
             decodeElement(arr.optJSONObject(i))?.let { out.add(it) }
         }
-        // Every element failed to decode: treat the whole payload as corrupt so
-        // the store can quarantine it instead of masking it as "no items".
-        if (out.isEmpty() && arr.length() > 0) return null
-        out
+        if (out.isEmpty() && arr.length() > 0) null else out
     } catch (_: Exception) {
         null
     }
 }
 
-/** Decodes one array element, or null when the element is malformed or its epochDay is out of range. */
-private fun decodeElement(o: JSONObject?): CountUpItem? {
+/**
+ * Salvages valid [CountUpItem] objects from a syntactically malformed, corrupted,
+ * or truncated JSON string by scanning and extracting individual JSON object tokens.
+ */
+internal fun salvageItems(raw: String?): List<CountUpItem> {
+    if (raw.isNullOrBlank()) return emptyList()
+    val out = ArrayList<CountUpItem>()
+    val seenIds = HashSet<String>()
+    val matcher = JSON_OBJECT_PATTERN.matcher(raw)
+
+    while (matcher.find()) {
+        val token = matcher.group()
+        try {
+            val json = JSONObject(token)
+            val item = decodeElement(json)
+            if (item != null && seenIds.add(item.id)) {
+                out.add(item)
+            }
+        } catch (_: Exception) {
+            // Ignore unparseable tokens and continue scanning
+        }
+    }
+    return out
+}
+
+/**
+ * Decodes one JSON object element defensively with type coercion and safe defaults:
+ * - Coerces [epochDay] from numbers or string representations within valid LocalDate bounds.
+ * - Generates a valid fallback [id] if missing or empty.
+ * - Defaults [name] to [DEFAULT_ITEM_NAME] if missing or blank.
+ * - Defaults [comment] to "", [icon] to "", [futureFlag] to false, and [showInWidget] to true.
+ * - Safely ignores any extra/unknown future fields.
+ */
+internal fun decodeElement(o: JSONObject?): CountUpItem? {
     if (o == null) return null
     return try {
-        val epochDay = o.getLong("epochDay")
+        val epochDay = when (val rawVal = o.opt("epochDay")) {
+            is Number -> rawVal.toLong()
+            is String -> rawVal.toLongOrNull()
+            else -> null
+        } ?: return null
+
         if (epochDay < EPOCH_DAY_MIN || epochDay > EPOCH_DAY_MAX) return null
+
+        val rawId = o.optString("id", "").trim()
+        val id = rawId.ifEmpty { UUID.randomUUID().toString() }
+
+        val rawName = o.optString("name", "").trim()
+        val name = rawName.ifEmpty { DEFAULT_ITEM_NAME }
+
         CountUpItem(
-            id = o.getString("id"),
-            name = o.getString("name"),
+            id = id,
+            name = name,
             epochDay = epochDay,
             comment = o.optString("comment", ""),
             icon = o.optString("icon", ""),
             futureFlag = o.optBoolean("futureFlag", false),
-            // Legacy items stored before this field existed stay visible.
             showInWidget = o.optBoolean("showInWidget", true),
         )
     } catch (_: Exception) {
