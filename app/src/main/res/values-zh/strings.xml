@@ -12,7 +12,7 @@
     <string name="error_save_failed">保存失败，请重试。</string>
 
     <!-- Multi-item list -->
-    <string name="app_subtitle">正念天数记录</string>
+    <string name="app_subtitle">日积寸心</string>
     <string name="new_item">新建记录</string>
     <string name="empty_heading">暂无记录</string>
     <string name="empty_body">添加你的第一条天数记录，开启专注生活。</string>
