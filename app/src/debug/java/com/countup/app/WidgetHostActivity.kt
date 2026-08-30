@@ -38,10 +38,9 @@ class WidgetHostActivity : Activity() {
         val views = buildBaseViews(this)
         val inflated = views.apply(this, card)
         card.addView(inflated)
-
         val store = CountUpStore(this)
-        var items = store.items().filter { it.showInWidget }
-        if (items.isEmpty()) {
+        var items: List<CountUpItem> = store.items().filter { it.showInWidget }
+        if (items.size < 9) {
             items = listOf(
                 CountUpItem(id = "1", name = "Meditation", epochDay = 20525),
                 CountUpItem(id = "2", name = "Water Bonsai", epochDay = 20635),
@@ -49,6 +48,9 @@ class WidgetHostActivity : Activity() {
                 CountUpItem(id = "4", name = "Tokyo Trip", epochDay = 20660, futureFlag = true),
                 CountUpItem(id = "5", name = "Yoga Stretch", epochDay = 20662),
                 CountUpItem(id = "6", name = "Clean Desk", epochDay = 20577),
+                CountUpItem(id = "7", name = "Journaling", epochDay = 20610),
+                CountUpItem(id = "8", name = "No Sugar", epochDay = 20640),
+                CountUpItem(id = "9", name = "Guitar Study", epochDay = 20590),
             )
         }
         val emptyView = inflated.findViewById<android.widget.TextView>(R.id.widget_empty)

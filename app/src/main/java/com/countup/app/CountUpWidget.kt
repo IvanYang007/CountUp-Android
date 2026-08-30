@@ -35,6 +35,15 @@ class CountUpWidgetReceiver : AppWidgetProvider() {
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
         pushWidgetUpdate(context)
     }
+
+    override fun onAppWidgetOptionsChanged(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetId: Int,
+        newOptions: android.os.Bundle?,
+    ) {
+        pushWidgetUpdate(context)
+    }
 }
 
 /** Pushes a fresh base RemoteViews to every placed widget and re-queries the grid. */
@@ -53,14 +62,16 @@ internal fun buildBaseViews(context: Context): RemoteViews {
     val night = isNightMode(context)
     val views = RemoteViews(context.packageName, R.layout.countup_widget)
 
+    // Base paper backdrop on root ensures seamless blending on any aspect ratio
+    val paperColor = if (night) NIGHT_PAPER else PAPER
+    views.setInt(R.id.widget_root, "setBackgroundColor", paperColor)
+
     // Render active Chinese ink wash landscape matching the main app theme
     val store = CountUpStore(context)
     val theme = store.getBackgroundTheme()
     val bgBitmap = WidgetBackgroundRenderer.render(theme, isNight = night)
     if (bgBitmap != null) {
         views.setImageViewBitmap(R.id.widget_bg_image, bgBitmap)
-    } else {
-        views.setInt(R.id.widget_root, "setBackgroundColor", if (night) NIGHT_PAPER else PAPER)
     }
 
     // Minimal title in muted ink typography
