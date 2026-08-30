@@ -19,12 +19,86 @@ class WidgetHostActivity : Activity() {
         super.onCreate(savedInstanceState)
 
         val root = FrameLayout(this)
-        root.setBackgroundColor(Color.parseColor("#E0E0E0"))
-        val card = FrameLayout(this)
-        card.layoutParams = FrameLayout.LayoutParams(WIDGET_WIDTH_PX, WIDGET_HEIGHT_PX).apply {
-            gravity = Gravity.CENTER
+        root.setBackgroundColor(Color.parseColor("#ECE5DA"))
+        val density = resources.displayMetrics.density
+
+        // Launcher Top Clock / Date
+        val topContainer = android.widget.LinearLayout(this).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+            ).apply {
+                topMargin = (72 * density).toInt()
+                marginStart = (28 * density).toInt()
+            }
         }
+        val clockText = android.widget.TextView(this).apply {
+            text = "12:17"
+            textSize = 54f
+            typeface = android.graphics.Typeface.create("sans-serif-light", android.graphics.Typeface.NORMAL)
+            setTextColor(Color.parseColor("#3C3228"))
+        }
+        val dateText = android.widget.TextView(this).apply {
+            text = "Sunday, August 30"
+            textSize = 16f
+            setTextColor(Color.parseColor("#6B5D4F"))
+            setPadding(0, (4 * density).toInt(), 0, 0)
+        }
+        topContainer.addView(clockText)
+        topContainer.addView(dateText)
+        root.addView(topContainer)
+
+        // Centered Widget Card
+        val card = FrameLayout(this)
+        card.layoutParams = FrameLayout.LayoutParams(
+            (364 * density).toInt(),
+            (180 * density).toInt(),
+        ).apply {
+            gravity = Gravity.CENTER
+            topMargin = (20 * density).toInt()
+        }
+        val shape = android.graphics.drawable.GradientDrawable().apply {
+            cornerRadius = 28 * density
+            setColor(Color.parseColor("#FCF8F2"))
+            setStroke((1 * density).toInt(), Color.parseColor("#20000000"))
+        }
+        card.background = shape
+        card.clipToOutline = true
+        card.elevation = 8 * density
         root.addView(card)
+
+        // Bottom Dock Search Pill
+        val searchPill = FrameLayout(this).apply {
+            layoutParams = FrameLayout.LayoutParams(
+                (340 * density).toInt(),
+                (48 * density).toInt(),
+            ).apply {
+                gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
+                bottomMargin = (36 * density).toInt()
+            }
+            val pillShape = android.graphics.drawable.GradientDrawable().apply {
+                cornerRadius = 24 * density
+                setColor(Color.parseColor("#F5EFE6"))
+                setStroke((1 * density).toInt(), Color.parseColor("#20000000"))
+            }
+            background = pillShape
+            elevation = 2 * density
+        }
+        val searchLabel = android.widget.TextView(this).apply {
+            text = "Search…"
+            textSize = 14f
+            setTextColor(Color.parseColor("#8C7E6F"))
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding((20 * density).toInt(), 0, 0, 0)
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT,
+            )
+        }
+        searchPill.addView(searchLabel)
+        root.addView(searchPill)
+
         setContentView(root)
 
         // Directly inflate the widget RemoteViews in debug host for instantaneous rendering
@@ -33,18 +107,17 @@ class WidgetHostActivity : Activity() {
         card.addView(inflated)
         val store = CountUpStore(this)
         var items: List<CountUpItem> = store.items().filter { it.showInWidget }
-        if (items.size < 9) {
+        if (items.isEmpty()) {
             items = listOf(
                 CountUpItem(id = "1", name = "Meditation", epochDay = 20525),
-                CountUpItem(id = "2", name = "Water Bonsai", epochDay = 20635),
-                CountUpItem(id = "3", name = "Reading Book", epochDay = 20605),
-                CountUpItem(id = "4", name = "Tokyo Trip", epochDay = 20660, futureFlag = true),
-                CountUpItem(id = "5", name = "Yoga Stretch", epochDay = 20662),
-                CountUpItem(id = "6", name = "Clean Desk", epochDay = 20577),
-                CountUpItem(id = "7", name = "Journaling", epochDay = 20610),
-                CountUpItem(id = "8", name = "No Sugar", epochDay = 20640),
-                CountUpItem(id = "9", name = "Guitar Study", epochDay = 20590),
+                CountUpItem(id = "2", name = "Running Streak", epochDay = 20645),
+                CountUpItem(id = "3", name = "Deep Reading", epochDay = 20610),
+                CountUpItem(id = "4", name = "Last Haircut", epochDay = 20670),
+                CountUpItem(id = "5", name = "Tea Ceremony", epochDay = 20683),
+                CountUpItem(id = "6", name = "Mountain Retreat", epochDay = 20710, futureFlag = true),
             )
+        } else {
+            items = items.take(6)
         }
         val emptyView = inflated.findViewById<android.widget.TextView>(R.id.widget_empty)
         val grid = inflated.findViewById<android.widget.GridView>(R.id.widget_grid)
