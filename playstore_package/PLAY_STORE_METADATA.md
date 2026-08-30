@@ -20,28 +20,28 @@ Track days since or until habits, milestones, and events with calm widgets.
 ```text
 CountUp is a calm, minimalist days-since and countdown tracker designed with a warm mid-century modern aesthetic. 
 
-Whether you are tracking habits, days since a haircut, sobriety milestones, gym streaks, or counting down to an upcoming journey, CountUp keeps your most meaningful milestones front and center—without clutter, ads, or distractions.
+Whether you are tracking habits, days since a haircut, sobriety milestones, gym streaks, or counting down to an upcoming journey, CountUp keeps your most meaningful milestones front and center—without clutter, ads, or distractions.✨ KEY FEATURES:
 
-✨ KEY FEATURES:
+• Calm, Tactile Aesthetic: Beautiful warm paper background, rich 3D card drop shadows with specular edge highlights, and thoughtful typography designed to bring mindfulness to daily tracking.
 
-• Calm, Tactile Aesthetic: Beautiful warm paper background, rich card drop shadows, and thoughtful typography designed to bring mindfulness to daily tracking.
+• 30 Classical Poetic Landscape Themes: Immerse your habit tracking in breathtaking Chinese ink wash landscapes that rotate daily or on-demand—from Mountain Peaks and Solitary Isle to Zen Bamboo and Falling Stars.
 
-• 2-Line Habit Notes & Comments: Add custom notes (e.g., "Trim sides short", "Better sleep quality") to any counter for quick, elegant context.
+• Instant Search & 1-Tap Sorting: Find any habit effortlessly on the same frame or sort by days elapsed, anchor date, or alphabetical name.
 
-• Glanceable Home Screen Widget: Keep live day counts right on your Android home screen with a clean, battery-efficient widget.
+• 2-Line Habit Notes & Comments: Add custom notes (e.g., "Trim sides short", "Morning 20-min mindfulness") to any counter for quick, elegant context.
+
+• Full-Width 3-Column Home Screen Widget: Keep live day counts right on your launcher with a battery-efficient widget, dynamic ink wash backgrounds, and tactile color plates.
+
+• Double-Tap In-Place Streak Reset: Reset any streak directly from your widget with safe 4-second confirmation without opening the app.
 
 • Widget Visibility Toggle: Choose exactly which milestones appear on your home screen widget with a single tap of the modular widget grid icon.
 
-• Instant Reset & Custom Anchor Dates: Reset any streak to today with one tap, or pick any past or future calendar date using the integrated date picker.
-
-• Future Event Countdowns: Set upcoming dates to track negative days until your trip, launch, or celebration arrives.
+• Future Event Countdowns: Set upcoming dates to track days until your trip, launch, or celebration arrives with automatic "UNTIL" sub-labeling.
 
 🔒 100% PRIVATE & OFFLINE:
 • Zero Permissions: CountUp requests no special Android permissions.
 • Completely Offline: No internet connection required. Your data never leaves your device.
 • No Ads, No Tracking: Pure, undisturbed tracking.
-
-Embrace simplicity and celebrate every day with CountUp.
 ```
 
 ## 2. Package Name & Application ID
@@ -58,7 +58,7 @@ com.countup.app
 |---|---|
 | **Application Type** | App |
 | **Category** | Productivity |
-| **Tags** | Habit Tracker, Day Counter, Countdown, Minimalist, Offline |
+| **Tags** | Habit Tracker, Day Counter, Countdown, Minimalist, Offline, Zen, Widget |
 | **Content Rating** | Everyone (PEGI 3 / ESRB Everyone) |
 | **Target Audience** | All ages |
 | **Contains Ads** | No |
@@ -111,23 +111,25 @@ All release artifacts are located in `playstore_package/`:
 | [`app-release.apk`](file:///d:/Github/countUp/playstore_package/app-release.apk) | **Signed Release APK** (For physical device validation) | ~8.3 MB |
 | [`icon_512x512.png`](file:///d:/Github/countUp/playstore_package/icon_512x512.png) | High-Res App Icon (32-bit RGB PNG, no alpha) | 512 x 512 px |
 | [`feature_graphic_1024x500.png`](file:///d:/Github/countUp/playstore_package/feature_graphic_1024x500.png) | Feature Graphic Banner | 1024 x 500 px |
-| [`screenshot_1_main_list.png`](file:///d:/Github/countUp/playstore_package/screenshot_1_main_list.png) | Phone Screenshot 1: Main List View | 1080 x 2400 px |
-| [`screenshot_2_edit_item.png`](file:///d:/Github/countUp/playstore_package/screenshot_2_edit_item.png) | Phone Screenshot 2: Edit Item & Notes | 1080 x 2400 px |
-| [`screenshot_3_date_picker.png`](file:///d:/Github/countUp/playstore_package/screenshot_3_date_picker.png) | Phone Screenshot 3: Material DatePicker | 1080 x 2400 px |
-| [`screenshot_4_home_widget.png`](file:///d:/Github/countUp/playstore_package/screenshot_4_home_widget.png) | Phone Screenshot 4: Home Screen Widget | 1080 x 2400 px |
+| [`screenshot_1_main_list.png`](file:///d:/Github/countUp/playstore_package/screenshot_1_main_list.png) | Phone Screenshot 1: **Main List View & 3D Tactile Cards** | 1080 x 2400 px |
+| [`screenshot_2_sort_search.png`](file:///d:/Github/countUp/playstore_package/screenshot_2_sort_search.png) | Phone Screenshot 2: **Instant Search & 1-Tap Sorting** | 1080 x 2400 px |
+| [`screenshot_3_edit_item.png`](file:///d:/Github/countUp/playstore_package/screenshot_3_edit_item.png) | Phone Screenshot 3: **Habit Editor & Tactile Inputs** | 1080 x 2400 px |
+| [`screenshot_4_date_picker.png`](file:///d:/Github/countUp/playstore_package/screenshot_4_date_picker.png) | Phone Screenshot 4: **Zen Material DatePicker** | 1080 x 2400 px |
+| [`screenshot_5_themes_gallery.png`](file:///d:/Github/countUp/playstore_package/screenshot_5_themes_gallery.png) | Phone Screenshot 5: **30 Classical Landscape Themes** | 1080 x 2400 px |
+| [`screenshot_6_home_widget.png`](file:///d:/Github/countUp/playstore_package/screenshot_6_home_widget.png) | Phone Screenshot 6: **Full-Width 3-Column Zen Widget** | 1080 x 2400 px |
 
 ---
 
 ## 6. Step-by-Step Play Console Submission Guide
 
 1. **Sign in to Google Play Console**: Go to [play.google.com/console](https://play.google.com/console).
-2. **Create App**: Click **Create app**, enter App name: `CountUp - Days Since Tracker`, Default language: `English (United States)`, Free app.
+2. **Create App**: Click **Create app**, enter App name: `CountUp - Mindful Days Tracker`, Default language: `English (United States)`, Free app.
 3. **Set up Store Presence**:
    - Navigate to **Grow** -> **Store presence** -> **Main store listing**.
    - Copy & paste the Short Description and Full Description from Section 1 above.
    - Upload `icon_512x512.png` to **App icon**.
    - Upload `feature_graphic_1024x500.png` to **Feature graphic**.
-   - Upload `screenshot_1_main_list.png`, `screenshot_2_edit_item.png`, `screenshot_3_date_picker.png`, and `screenshot_4_home_widget.png` to **Phone screenshots**.
+   - Upload all 6 screenshots (`screenshot_1` through `screenshot_6`) to **Phone screenshots**.
 4. **Complete App Content Questionnaire**:
    - Privacy Policy: Complete offline note or link to privacy policy.
    - Ads: Select "No, my app does not contain ads".
@@ -138,5 +140,5 @@ All release artifacts are located in `playstore_package/`:
    - Go to **Release** -> **Production**.
    - Click **Create new release**.
    - Upload [`playstore_package/app-release.aab`](file:///d:/Github/countUp/playstore_package/app-release.aab).
-   - Enter Release notes: `Initial release of CountUp: track days since or countdown to events with a calm mid-century modern aesthetic and home screen widgets.`
+   - Enter Release notes: `Release 1.4.1: Track days since or countdown to events with 30 Chinese ink wash landscapes, instant search & 1-tap sorting, and ultra-minimalist home screen widgets.`
    - Click **Review release** -> **Start rollout to Production**.
