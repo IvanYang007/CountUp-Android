@@ -107,8 +107,8 @@ All release artifacts are located in `playstore_package/`:
 
 | File | Description | Dimension / Size |
 |---|---|---|
-| [`app-release.aab`](file:///d:/Github/countUp/playstore_package/app-release.aab) | **Signed Production App Bundle** (Upload to Play Console) | ~8.0 MB |
-| [`app-release.apk`](file:///d:/Github/countUp/playstore_package/app-release.apk) | **Signed Release APK** (For physical device validation) | ~8.3 MB |
+| [`app-release.aab`](file:///d:/Github/countUp/playstore_package/app-release.aab) | **Signed Production App Bundle** (Upload to Play Console) | **4.4 MB** *(Includes 2.6 MB de-obfuscation mapping)* |
+| [`app-release.apk`](file:///d:/Github/countUp/playstore_package/app-release.apk) | **Signed Release APK** (For physical device validation) | **2.05 MB** *(Download size: ~1.6 MB)* |
 | [`icon_512x512.png`](file:///d:/Github/countUp/playstore_package/icon_512x512.png) | High-Res App Icon (32-bit RGB PNG, no alpha) | 512 x 512 px |
 | [`feature_graphic_1024x500.png`](file:///d:/Github/countUp/playstore_package/feature_graphic_1024x500.png) | Feature Graphic Banner | 1024 x 500 px |
 | [`screenshot_1_main_list.png`](file:///d:/Github/countUp/playstore_package/screenshot_1_main_list.png) | Phone Screenshot 1: **Main List View & 3D Tactile Cards** | 1080 x 2400 px |
