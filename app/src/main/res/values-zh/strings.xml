@@ -45,7 +45,6 @@
     <string name="widget_label">天数追踪</string>
     <string name="widget_description">显示记录以来的天数</string>
     <string name="widget_empty">在应用中添加记录后即可在此查看。</string>
-    <string name="widget_refresh">刷新计数</string>
     <string name="widget_reset_prompt">再次点击重置</string>
     <string name="widget_reset_toast">已将“%1$s”重置为今天</string>
     <string name="toast_hidden_from_widget">已在微件中隐藏“%1$s”</string>

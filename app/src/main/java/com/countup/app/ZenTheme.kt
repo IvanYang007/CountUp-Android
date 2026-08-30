@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -137,6 +138,12 @@ fun Modifier.pressScale(
         scaleY = scale
     }
 }
+
+/**
+ * Reusable MutableInteractionSource helper for tactile press feedback across the UI.
+ */
+@Composable
+fun rememberPressSource(): MutableInteractionSource = remember { MutableInteractionSource() }
 
 /**
  * Honors the system reduce-motion accessibility setting (animator duration scale == 0).

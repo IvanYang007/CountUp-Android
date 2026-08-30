@@ -23,23 +23,42 @@ class TestSharedPreferences : SharedPreferences {
 
     override fun getAll(): MutableMap<String, *> = HashMap(data)
 
-    override fun getString(key: String?, defValue: String?): String? =
-        data[key] as? String ?: defValue
+    override fun getString(key: String?, defValue: String?): String? {
+        val v = data[key] ?: return defValue
+        if (v !is String) throw ClassCastException("Value for $key is not a String ($v)")
+        return v
+    }
 
-    override fun getStringSet(key: String?, defValues: MutableSet<String>?): MutableSet<String>? =
-        @Suppress("UNCHECKED_CAST") (data[key] as? MutableSet<String>) ?: defValues
+    override fun getStringSet(key: String?, defValues: MutableSet<String>?): MutableSet<String>? {
+        val v = data[key] ?: return defValues
+        if (v !is Set<*>) throw ClassCastException("Value for $key is not a Set")
+        @Suppress("UNCHECKED_CAST")
+        return v as MutableSet<String>
+    }
 
-    override fun getInt(key: String?, defValue: Int): Int =
-        (data[key] as? Number)?.toInt() ?: defValue
+    override fun getInt(key: String?, defValue: Int): Int {
+        val v = data[key] ?: return defValue
+        if (v !is Number) throw ClassCastException("Value for $key is not an Int")
+        return v.toInt()
+    }
 
-    override fun getLong(key: String?, defValue: Long): Long =
-        (data[key] as? Number)?.toLong() ?: defValue
+    override fun getLong(key: String?, defValue: Long): Long {
+        val v = data[key] ?: return defValue
+        if (v !is Number) throw ClassCastException("Value for $key is not a Long")
+        return v.toLong()
+    }
 
-    override fun getFloat(key: String?, defValue: Float): Float =
-        (data[key] as? Number)?.toFloat() ?: defValue
+    override fun getFloat(key: String?, defValue: Float): Float {
+        val v = data[key] ?: return defValue
+        if (v !is Number) throw ClassCastException("Value for $key is not a Float")
+        return v.toFloat()
+    }
 
-    override fun getBoolean(key: String?, defValue: Boolean): Boolean =
-        data[key] as? Boolean ?: defValue
+    override fun getBoolean(key: String?, defValue: Boolean): Boolean {
+        val v = data[key] ?: return defValue
+        if (v !is Boolean) throw ClassCastException("Value for $key is not a Boolean")
+        return v
+    }
 
     override fun contains(key: String?): Boolean = data.containsKey(key)
 

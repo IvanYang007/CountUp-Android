@@ -1,9 +1,6 @@
 package com.countup.app
 
 import android.app.Activity
-import android.appwidget.AppWidgetHost
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
 import android.graphics.Color
 import android.os.Bundle
 import android.view.Gravity
@@ -20,10 +17,6 @@ class WidgetHostActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val manager = AppWidgetManager.getInstance(this)
-        val provider = ComponentName(this, CountUpWidgetReceiver::class.java)
-        val host = AppWidgetHost(this, HOST_ID)
 
         val root = FrameLayout(this)
         root.setBackgroundColor(Color.parseColor("#E0E0E0"))
@@ -101,7 +94,6 @@ class WidgetHostActivity : Activity() {
     }
 
     private companion object {
-        const val HOST_ID = 2048
         const val WIDGET_WIDTH_PX = 860
         const val WIDGET_HEIGHT_PX = 430
     }

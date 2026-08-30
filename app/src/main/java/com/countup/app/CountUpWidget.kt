@@ -52,13 +52,16 @@ fun pushWidgetUpdate(context: Context) {
     val manager = AppWidgetManager.getInstance(context)
     val ids = manager.getAppWidgetIds(ComponentName(context, CountUpWidgetReceiver::class.java))
     if (ids.isEmpty()) return
-    manager.updateAppWidget(ids, buildBaseViews(context))
+    for (id in ids) {
+        val options = manager.getAppWidgetOptions(id)
+        manager.updateAppWidget(id, buildBaseViews(context, options))
+    }
     manager.notifyAppWidgetViewDataChanged(ids, R.id.widget_grid)
 }
 
 /** Builds the widget frame: dynamic ink background, title, launch/reset intents, empty view. */
 @Suppress("DEPRECATION")
-internal fun buildBaseViews(context: Context): RemoteViews {
+internal fun buildBaseViews(context: Context, appWidgetOptions: android.os.Bundle? = null): RemoteViews {
     val night = isNightMode(context)
     val views = RemoteViews(context.packageName, R.layout.countup_widget)
 
@@ -66,10 +69,34 @@ internal fun buildBaseViews(context: Context): RemoteViews {
     val paperColor = if (night) NIGHT_PAPER else PAPER
     views.setInt(R.id.widget_root, "setBackgroundColor", paperColor)
 
-    // Render active Chinese ink wash landscape matching the main app theme
+    // Calculate row count and dynamic height so background graphics scale with widget rows
     val store = CountUpStore(context)
     val theme = store.getBackgroundTheme()
-    val bgBitmap = WidgetBackgroundRenderer.render(theme, isNight = night)
+    val widgetItems = store.items().filter { it.showInWidget }
+    val itemCount = widgetItems.size
+    val rowCount = ((itemCount + 2) / 3).coerceIn(1, 5)
+
+    // Compute target canvas height from launcher options or row count
+    val optionsHeightDp = appWidgetOptions?.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 0) ?: 0
+    val density = context.resources.displayMetrics.density
+    val targetHeight = if (optionsHeightDp > 100) {
+        (optionsHeightDp * density).toInt().coerceIn(180, 800)
+    } else {
+        when (rowCount) {
+            1 -> 200
+            2 -> 280
+            3 -> 400
+            4 -> 520
+            else -> 280 + (rowCount - 2) * 120
+        }
+    }
+
+    val bgBitmap = WidgetBackgroundRenderer.render(
+        theme = theme,
+        width = 480,
+        height = targetHeight,
+        isNight = night,
+    )
     if (bgBitmap != null) {
         views.setImageViewBitmap(R.id.widget_bg_image, bgBitmap)
     }
@@ -311,5 +338,4 @@ private val DAY_NUMBER_INKS = intArrayOf(WHITE, WHITE, NUMBER)
 private val ARRIVED_NUMBER: Int = 0xFFB71C1C.toInt()
 
 private const val REQUEST_LAUNCH = 1
-private const val REQUEST_REFRESH = 2
-private const val REQUEST_RESET = 3
+private const val REQUEST_RESET = 2

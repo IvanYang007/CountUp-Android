@@ -11,9 +11,10 @@
     public static ** valueOf(java.lang.String);
 }
 
-# Keep BroadcastReceivers and AppWidgetProvider instantiated by Android OS
--keep class com.countup.app.CountUpWidget { *; }
--keep class com.countup.app.WidgetUpdateReceiver { *; }
+# Keep BroadcastReceivers, RemoteViewsService, and AppWidgetProvider instantiated by Android OS
+-keep class com.countup.app.CountUpWidgetReceiver { *; }
+-keep class com.countup.app.ResetCountReceiver { *; }
+-keep class com.countup.app.CountUpWidgetService { *; }
 
 # Compose Runtime stability
 -keepclassmembers class * {

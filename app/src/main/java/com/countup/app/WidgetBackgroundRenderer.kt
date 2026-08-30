@@ -101,10 +101,9 @@ object WidgetBackgroundRenderer {
         }
     }
 
-    // Helper: Computes isotropic unit dimension clamped so tall widgets maintain 1:1 geometry
+    // Helper: Computes isotropic unit dimension scaling smoothly with width and height
     private fun getIsotropicUnit(w: Float, h: Float): Float {
-        val baseH = minOf(h, 280f * (w / 480f))
-        return minOf(w * 0.75f, baseH)
+        return minOf(w * 0.65f, maxOf(220f, h * 0.55f))
     }
 
     // ------------------------------------------------------------------------
@@ -112,21 +111,23 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawMountainWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         val ridge1 = Path().apply {
-            moveTo(w - u * 0.95f, h)
-            cubicTo(w - u * 0.70f, h - u * 0.40f, w - u * 0.45f, h - u * 0.60f, w - u * 0.22f, h - u * 0.70f)
-            cubicTo(w - u * 0.12f, h - u * 0.75f, w - u * 0.05f, h - u * 0.62f, w, h - u * 0.68f)
+            moveTo(w * 0.15f, h)
+            cubicTo(w * 0.38f, cy + u * 0.10f, cx - u * 0.10f, cy - u * 0.28f, cx + u * 0.18f, cy - u * 0.32f)
+            cubicTo(cx + u * 0.28f, cy - u * 0.30f, w * 0.88f, cy - u * 0.18f, w, cy - u * 0.22f)
             lineTo(w, h)
             close()
         }
-        paint.shader = LinearGradient(w - u * 0.5f, h - u * 0.75f, w - u * 0.5f, h, INK_INDIGO, Color.TRANSPARENT, Shader.TileMode.CLAMP)
+        paint.shader = LinearGradient(cx, cy - u * 0.35f, cx, h, INK_INDIGO, Color.TRANSPARENT, Shader.TileMode.CLAMP)
         canvas.drawPath(ridge1, paint); paint.shader = null
         paint.color = INK_MUTED
         val ridge2 = Path().apply {
-            moveTo(w - u * 0.65f, h)
-            cubicTo(w - u * 0.48f, h - u * 0.32f, w - u * 0.30f, h - u * 0.50f, w - u * 0.15f, h - u * 0.54f)
-            cubicTo(w - u * 0.08f, h - u * 0.56f, w - u * 0.03f, h - u * 0.46f, w, h - u * 0.48f)
+            moveTo(w * 0.35f, h)
+            cubicTo(w * 0.50f, cy + u * 0.18f, cx + u * 0.08f, cy - u * 0.12f, cx + u * 0.24f, cy - u * 0.16f)
+            cubicTo(cx + u * 0.35f, cy - u * 0.12f, w * 0.90f, cy - u * 0.05f, w, cy - u * 0.08f)
             lineTo(w, h)
             close()
         }
@@ -138,15 +139,17 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawSandDunesWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.54f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         val dune1 = Path().apply {
-            moveTo(w - u * 0.90f, h)
-            cubicTo(w - u * 0.65f, h - u * 0.22f, w - u * 0.42f, h - u * 0.48f, w - u * 0.20f, h - u * 0.52f)
-            cubicTo(w - u * 0.10f, h - u * 0.54f, w - u * 0.05f, h - u * 0.42f, w, h - u * 0.46f)
+            moveTo(w * 0.10f, h)
+            cubicTo(w * 0.35f, cy + u * 0.20f, cx, cy - u * 0.12f, cx + u * 0.22f, cy - u * 0.08f)
+            cubicTo(cx + u * 0.35f, cy - u * 0.05f, w * 0.88f, cy + u * 0.08f, w, cy + u * 0.05f)
             lineTo(w, h)
             close()
         }
-        paint.shader = LinearGradient(w - u * 0.5f, h - u * 0.6f, w - u * 0.5f, h, INK_OCHRE, Color.TRANSPARENT, Shader.TileMode.CLAMP)
+        paint.shader = LinearGradient(cx, cy - u * 0.20f, cx, h, INK_OCHRE, Color.TRANSPARENT, Shader.TileMode.CLAMP)
         canvas.drawPath(dune1, paint); paint.shader = null
     }
 
@@ -155,17 +158,19 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawSeaHorizonWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.color = INK_VERMILION
-        // Isotropic perfect circle for Sun anchored to bottom-right
-        canvas.drawCircle(w - u * 0.25f, h - u * 0.75f, u * 0.20f, paint)
+        // Isotropic perfect circle for Sun centered in breathable space
+        canvas.drawCircle(cx, cy - u * 0.20f, u * 0.18f, paint)
         val water = Path().apply {
-            moveTo(w - u * 0.95f, h)
-            cubicTo(w - u * 0.65f, h - u * 0.32f, w - u * 0.32f, h - u * 0.42f, w, h - u * 0.45f)
+            moveTo(w * 0.08f, h)
+            cubicTo(w * 0.35f, cy + u * 0.18f, cx, cy + u * 0.10f, w, cy + u * 0.08f)
             lineTo(w, h)
             close()
         }
-        paint.shader = LinearGradient(w - u * 0.5f, h - u * 0.45f, w - u * 0.5f, h, INK_INDIGO, Color.TRANSPARENT, Shader.TileMode.CLAMP)
+        paint.shader = LinearGradient(cx, cy + u * 0.08f, cx, h, INK_INDIGO, Color.TRANSPARENT, Shader.TileMode.CLAMP)
         canvas.drawPath(water, paint); paint.shader = null
     }
 
@@ -174,11 +179,13 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawSolitaryIsleWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-        val rockX = w - u * 0.32f
-        val rockY = h - u * 0.70f
-        val rockW = u * 0.24f
-        val rockH = u * 0.65f
+        val rockX = cx - u * 0.13f
+        val rockY = cy - u * 0.25f
+        val rockW = u * 0.26f
+        val rockH = u * 0.58f
         val rockOutline = Path().apply {
             moveTo(rockX, rockY + rockH)
             cubicTo(rockX - rockW * 0.15f, rockY + rockH * 0.70f, rockX - rockW * 0.30f, rockY + rockH * 0.40f, rockX - rockW * 0.10f, rockY + rockH * 0.15f)
@@ -189,7 +196,7 @@ object WidgetBackgroundRenderer {
         paint.shader = LinearGradient(rockX, rockY, rockX + rockW, rockY + rockH, INK_INDIGO, INK_OCHRE, Shader.TileMode.CLAMP)
         canvas.drawPath(rockOutline, paint); paint.shader = null
         paint.color = COLOR_PAPER
-        canvas.drawCircle(rockX + rockW * 0.22f, rockY + rockH * 0.30f, rockW * 0.14f, paint)
+        canvas.drawCircle(rockX + rockW * 0.28f, rockY + rockH * 0.35f, rockW * 0.14f, paint)
         paint.style = Paint.Style.STROKE; paint.strokeWidth = 1.8f; paint.color = INK_BLACK
         canvas.drawPath(rockOutline, paint)
     }
@@ -199,18 +206,20 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawWillowLeavesWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.style = Paint.Style.STROKE; paint.strokeWidth = 1.6f; paint.color = INK_BLACK
         val branch1 = Path().apply {
-            moveTo(w, h - u * 1.10f)
-            cubicTo(w - u * 0.15f, h - u * 0.95f, w - u * 0.26f, h - u * 0.70f, w - u * 0.22f, h - u * 0.35f)
+            moveTo(w, cy - u * 0.48f)
+            cubicTo(w * 0.80f, cy - u * 0.35f, cx + u * 0.10f, cy - u * 0.10f, cx - u * 0.05f, cy + u * 0.25f)
         }
         canvas.drawPath(branch1, paint)
         paint.style = Paint.Style.FILL; paint.color = INK_SAGE
         listOf(
-            floatArrayOf(w - u * 0.18f, h - u * 0.85f),
-            floatArrayOf(w - u * 0.25f, h - u * 0.72f),
-            floatArrayOf(w - u * 0.23f, h - u * 0.54f),
+            floatArrayOf(cx + u * 0.18f, cy - u * 0.22f),
+            floatArrayOf(cx + u * 0.05f, cy - u * 0.05f),
+            floatArrayOf(cx - u * 0.02f, cy + u * 0.12f),
         ).forEach { c ->
             canvas.drawOval(c[0] - 2.5f, c[1] - 5.5f, c[0] + 2.5f, c[1] + 5.5f, paint)
         }
@@ -221,18 +230,20 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawZenBambooWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.color = INK_SAGE; paint.style = Paint.Style.STROKE; paint.strokeWidth = 3.5f; paint.strokeCap = Paint.Cap.ROUND
         val stalk = Path().apply {
-            moveTo(w - u * 0.15f, h)
-            lineTo(w - u * 0.14f, h - u * 1.0f)
+            moveTo(cx + u * 0.10f, h * 0.85f)
+            lineTo(cx + u * 0.08f, cy - u * 0.45f)
         }
         canvas.drawPath(stalk, paint)
         paint.style = Paint.Style.FILL
         val leaf = Path().apply {
-            moveTo(w - u * 0.15f, h - u * 0.75f)
-            quadTo(w - u * 0.30f, h - u * 0.72f, w - u * 0.38f, h - u * 0.60f)
-            quadTo(w - u * 0.26f, h - u * 0.64f, w - u * 0.15f, h - u * 0.75f)
+            moveTo(cx + u * 0.08f, cy - u * 0.20f)
+            quadTo(cx - u * 0.08f, cy - u * 0.18f, cx - u * 0.18f, cy - u * 0.05f)
+            quadTo(cx - u * 0.05f, cy - u * 0.08f, cx + u * 0.08f, cy - u * 0.20f)
         }
         canvas.drawPath(leaf, paint)
     }
@@ -242,18 +253,20 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawDreamBoatWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         val water = Path().apply {
-            moveTo(w - u * 0.85f, h)
-            cubicTo(w - u * 0.55f, h - u * 0.25f, w - u * 0.32f, h - u * 0.45f, w, h - u * 0.45f)
+            moveTo(w * 0.10f, h)
+            cubicTo(w * 0.38f, cy + u * 0.22f, cx, cy + u * 0.10f, w, cy + u * 0.12f)
             lineTo(w, h)
             close()
         }
-        paint.shader = LinearGradient(w - u * 0.4f, h - u * 0.5f, w - u * 0.4f, h, INK_INDIGO, Color.TRANSPARENT, Shader.TileMode.CLAMP)
+        paint.shader = LinearGradient(cx, cy + u * 0.05f, cx, h, INK_INDIGO, Color.TRANSPARENT, Shader.TileMode.CLAMP)
         canvas.drawPath(water, paint); paint.shader = null
         paint.color = INK_BLACK
-        val bx = w - u * 0.22f
-        val by = h - u * 0.35f
+        val bx = cx
+        val by = cy + u * 0.05f
         val boat = Path().apply {
             moveTo(bx - 22f, by)
             quadTo(bx, by + 7f, bx + 22f, by - 3f)
@@ -267,14 +280,16 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawClearSpringWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 14f; strokeCap = Paint.Cap.ROUND; color = INK_INDIGO }
         val stream = Path().apply {
-            moveTo(w - u * 0.90f, h)
-            cubicTo(w - u * 0.60f, h - u * 0.16f, w - u * 0.32f, h - u * 0.34f, w, h - u * 0.32f)
+            moveTo(w * 0.08f, h)
+            cubicTo(w * 0.35f, cy + u * 0.22f, cx, cy + u * 0.08f, w, cy + u * 0.05f)
         }
         canvas.drawPath(stream, paint)
         paint.style = Paint.Style.FILL; paint.color = INK_SAGE
-        val stone1 = Path().apply { addOval(w - u * 0.30f, h - u * 0.28f, w - u * 0.12f, h - u * 0.12f, Path.Direction.CW) }
+        val stone1 = Path().apply { addOval(cx - u * 0.08f, cy + u * 0.06f, cx + u * 0.08f, cy + u * 0.20f, Path.Direction.CW) }
         canvas.drawPath(stone1, paint)
     }
 
@@ -283,17 +298,19 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawDesertSunsetWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.color = INK_VERMILION
         // Isotropic perfect circle for desert sunset
-        canvas.drawCircle(w - u * 0.22f, h - u * 0.68f, u * 0.24f, paint)
+        canvas.drawCircle(cx, cy - u * 0.18f, u * 0.22f, paint)
         val dune = Path().apply {
-            moveTo(w - u * 0.90f, h)
-            cubicTo(w - u * 0.60f, h - u * 0.16f, w - u * 0.32f, h - u * 0.38f, w, h - u * 0.42f)
+            moveTo(w * 0.08f, h)
+            cubicTo(w * 0.35f, cy + u * 0.22f, cx, cy + u * 0.12f, w, cy + u * 0.10f)
             lineTo(w, h)
             close()
         }
-        paint.shader = LinearGradient(w - u * 0.5f, h - u * 0.42f, w - u * 0.5f, h, INK_OCHRE, Color.TRANSPARENT, Shader.TileMode.CLAMP)
+        paint.shader = LinearGradient(cx, cy + u * 0.10f, cx, h, INK_OCHRE, Color.TRANSPARENT, Shader.TileMode.CLAMP)
         canvas.drawPath(dune, paint); paint.shader = null
     }
 
@@ -302,11 +319,13 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawEgretsAscendingWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 1.6f; strokeCap = Paint.Cap.ROUND; color = INK_BLACK }
         listOf(
-            Pair(w - u * 0.40f, h - u * 0.95f),
-            Pair(w - u * 0.28f, h - u * 0.85f),
-            Pair(w - u * 0.15f, h - u * 0.72f),
+            Pair(cx - u * 0.12f, cy - u * 0.15f),
+            Pair(cx, cy - u * 0.30f),
+            Pair(cx + u * 0.12f, cy - u * 0.45f),
         ).forEach { (ex, ey) ->
             val egret = Path().apply {
                 moveTo(ex - 10f, ey + 3f)
@@ -322,15 +341,17 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawPlumShadowWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.STROKE; strokeWidth = 2.4f; color = INK_BLACK }
         val twig = Path().apply {
-            moveTo(w, h - u * 0.90f)
-            cubicTo(w - u * 0.15f, h - u * 0.82f, w - u * 0.28f, h - u * 0.95f, w - u * 0.38f, h - u * 0.86f)
+            moveTo(w, cy - u * 0.38f)
+            cubicTo(w * 0.80f, cy - u * 0.28f, cx + u * 0.10f, cy - u * 0.35f, cx - u * 0.08f, cy - u * 0.18f)
         }
         canvas.drawPath(twig, paint)
         paint.style = Paint.Style.FILL; paint.color = INK_VERMILION
-        canvas.drawCircle(w - u * 0.38f, h - u * 0.86f, 3.5f, paint)
-        canvas.drawCircle(w - u * 0.25f, h - u * 0.95f, 3.0f, paint)
+        canvas.drawCircle(cx - u * 0.08f, cy - u * 0.18f, 4f, paint)
+        canvas.drawCircle(cx + u * 0.06f, cy - u * 0.28f, 3.5f, paint)
     }
 
     // ------------------------------------------------------------------------
@@ -338,11 +359,13 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawAncientRoadWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.color = INK_OCHRE
         val ridge = Path().apply {
-            moveTo(w - u * 0.75f, h)
-            cubicTo(w - u * 0.48f, h - u * 0.22f, w - u * 0.28f, h - u * 0.38f, w, h - u * 0.40f)
+            moveTo(w * 0.15f, h)
+            cubicTo(w * 0.42f, cy + u * 0.22f, cx, cy + u * 0.08f, w, cy + u * 0.10f)
             lineTo(w, h)
             close()
         }
@@ -354,11 +377,13 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawSpringRainWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.color = INK_SAGE
         val hill = Path().apply {
-            moveTo(w - u * 0.70f, h)
-            cubicTo(w - u * 0.42f, h - u * 0.22f, w - u * 0.22f, h - u * 0.32f, w, h - u * 0.35f)
+            moveTo(w * 0.18f, h)
+            cubicTo(w * 0.45f, cy + u * 0.20f, cx, cy + u * 0.05f, w, cy + u * 0.08f)
             lineTo(w, h)
             close()
         }
@@ -370,17 +395,19 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawLotusDragonflyWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.style = Paint.Style.STROKE; paint.strokeWidth = 2.0f; paint.color = INK_SAGE
         val stem = Path().apply {
-            moveTo(w - u * 0.22f, h)
-            quadTo(w - u * 0.25f, h - u * 0.42f, w - u * 0.28f, h - u * 0.74f)
+            moveTo(cx + u * 0.06f, h * 0.85f)
+            quadTo(cx + u * 0.02f, cy + u * 0.10f, cx - u * 0.04f, cy - u * 0.18f)
         }
         canvas.drawPath(stem, paint)
         paint.style = Paint.Style.FILL; paint.color = INK_VERMILION
-        canvas.drawCircle(w - u * 0.28f, h - u * 0.76f, 3.5f, paint)
+        canvas.drawCircle(cx - u * 0.04f, cy - u * 0.18f, 4.0f, paint)
         paint.color = INK_BLACK
-        canvas.drawCircle(w - u * 0.30f, h - u * 0.83f, 1.8f, paint)
+        canvas.drawCircle(cx - u * 0.06f, cy - u * 0.26f, 2.0f, paint)
     }
 
     // ------------------------------------------------------------------------
@@ -388,19 +415,21 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawCrispSpringRainWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.color = INK_SAGE
         val mound = Path().apply {
-            moveTo(w - u * 0.60f, h)
-            cubicTo(w - u * 0.38f, h - u * 0.20f, w - u * 0.18f, h - u * 0.26f, w, h - u * 0.24f)
+            moveTo(w * 0.20f, h)
+            cubicTo(w * 0.45f, cy + u * 0.20f, cx, cy + u * 0.10f, w, cy + u * 0.08f)
             lineTo(w, h)
             close()
         }
         canvas.drawPath(mound, paint)
         paint.style = Paint.Style.STROKE; paint.strokeWidth = 1.0f; paint.color = INK_INDIGO
         for (i in 0 until 8) {
-            val rx = w - u * (0.60f - (i % 4) * 0.15f)
-            val ry = h - u * (1.05f - (i / 4) * 0.42f)
+            val rx = cx - u * 0.20f + (i % 4) * u * 0.12f
+            val ry = cy - u * 0.40f + (i / 4) * u * 0.25f
             canvas.drawLine(rx, ry, rx - 6f, ry + 16f, paint)
         }
     }
@@ -410,18 +439,20 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawSolitarySailRiverWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         val river = Path().apply {
-            moveTo(w - u * 0.95f, h)
-            cubicTo(w - u * 0.60f, h - u * 0.32f, w - u * 0.30f, h - u * 0.60f, w, h - u * 0.68f)
+            moveTo(w * 0.08f, h)
+            cubicTo(w * 0.38f, cy + u * 0.22f, cx, cy + u * 0.05f, w, cy - u * 0.10f)
             lineTo(w, h)
             close()
         }
-        paint.shader = LinearGradient(w - u * 0.5f, h - u * 0.65f, w - u * 0.5f, h, INK_INDIGO, Color.TRANSPARENT, Shader.TileMode.CLAMP)
+        paint.shader = LinearGradient(cx, cy + u * 0.05f, cx, h, INK_INDIGO, Color.TRANSPARENT, Shader.TileMode.CLAMP)
         canvas.drawPath(river, paint); paint.shader = null
         paint.color = INK_BLACK
-        val sx = w - u * 0.18f
-        val sy = h - u * 0.66f
+        val sx = cx + u * 0.04f
+        val sy = cy - u * 0.08f
         val sail = Path().apply {
             moveTo(sx, sy)
             lineTo(sx + 5f, sy + 8f)
@@ -436,17 +467,19 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawOceanMoonTideWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.color = INK_VERMILION
         // Isotropic perfect moon
-        canvas.drawCircle(w - u * 0.22f, h - u * 0.85f, u * 0.22f, paint)
+        canvas.drawCircle(cx, cy - u * 0.22f, u * 0.20f, paint)
         val tide = Path().apply {
-            moveTo(w - u * 0.85f, h)
-            cubicTo(w - u * 0.55f, h - u * 0.28f, w - u * 0.28f, h - u * 0.45f, w, h - u * 0.48f)
+            moveTo(w * 0.10f, h)
+            cubicTo(w * 0.38f, cy + u * 0.22f, cx, cy + u * 0.10f, w, cy + u * 0.12f)
             lineTo(w, h)
             close()
         }
-        paint.shader = LinearGradient(w - u * 0.5f, h - u * 0.48f, w - u * 0.5f, h, INK_INDIGO, Color.TRANSPARENT, Shader.TileMode.CLAMP)
+        paint.shader = LinearGradient(cx, cy + u * 0.10f, cx, h, INK_INDIGO, Color.TRANSPARENT, Shader.TileMode.CLAMP)
         canvas.drawPath(tide, paint); paint.shader = null
     }
 
@@ -455,15 +488,17 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawWildSkyRiverMoonWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.color = INK_OCHRE
         // Isotropic perfect moon
-        canvas.drawCircle(w - u * 0.35f, h - u * 0.22f, u * 0.14f, paint)
+        canvas.drawCircle(cx - u * 0.10f, cy + u * 0.12f, u * 0.14f, paint)
         paint.style = Paint.Style.STROKE; paint.strokeWidth = 1.8f; paint.color = INK_BLACK
         val tree = Path().apply {
-            moveTo(w - u * 0.15f, h - u * 0.34f)
-            lineTo(w - u * 0.15f, h - u * 0.58f)
-            quadTo(w - u * 0.24f, h - u * 0.66f, w - u * 0.15f, h - u * 0.58f)
+            moveTo(cx + u * 0.10f, cy + u * 0.10f)
+            lineTo(cx + u * 0.10f, cy - u * 0.18f)
+            quadTo(cx + u * 0.02f, cy - u * 0.26f, cx + u * 0.10f, cy - u * 0.18f)
         }
         canvas.drawPath(tree, paint)
     }
@@ -473,22 +508,24 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawGreenHillsSailWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.color = INK_VERMILION
-        canvas.drawCircle(w - u * 0.25f, h - u * 0.88f, u * 0.16f, paint)
+        canvas.drawCircle(cx, cy - u * 0.28f, u * 0.16f, paint)
         paint.color = INK_SAGE
         val cliff = Path().apply {
-            moveTo(w - u * 0.60f, h)
-            cubicTo(w - u * 0.45f, h - u * 0.45f, w - u * 0.32f, h - u * 0.65f, w - u * 0.26f, h - u * 0.50f)
-            lineTo(w - u * 0.26f, h)
+            moveTo(cx - u * 0.35f, h)
+            cubicTo(cx - u * 0.25f, cy + u * 0.10f, cx - u * 0.18f, cy - u * 0.15f, cx - u * 0.12f, cy)
+            lineTo(cx - u * 0.12f, h)
             close()
         }
         canvas.drawPath(cliff, paint)
         paint.color = INK_INDIGO
         val cliff2 = Path().apply {
-            moveTo(w - u * 0.22f, h)
-            cubicTo(w - u * 0.18f, h - u * 0.60f, w - u * 0.08f, h - u * 0.74f, w, h - u * 0.64f)
-            lineTo(w, h)
+            moveTo(cx + u * 0.08f, h)
+            cubicTo(cx + u * 0.14f, cy - u * 0.10f, cx + u * 0.22f, cy - u * 0.22f, cx + u * 0.32f, cy - u * 0.12f)
+            lineTo(cx + u * 0.32f, h)
             close()
         }
         canvas.drawPath(cliff2, paint)
@@ -499,18 +536,20 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawStarsFallRiverFlowWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         val surge = Path().apply {
-            moveTo(w - u * 0.90f, h)
-            cubicTo(w - u * 0.60f, h - u * 0.32f, w - u * 0.30f, h - u * 0.20f, w, h - u * 0.50f)
+            moveTo(w * 0.10f, h)
+            cubicTo(w * 0.38f, cy + u * 0.22f, cx, cy + u * 0.08f, w, cy + u * 0.12f)
             lineTo(w, h)
             close()
         }
-        paint.shader = LinearGradient(w - u * 0.5f, h - u * 0.50f, w - u * 0.5f, h, INK_INDIGO, Color.TRANSPARENT, Shader.TileMode.CLAMP)
+        paint.shader = LinearGradient(cx, cy + u * 0.08f, cx, h, INK_INDIGO, Color.TRANSPARENT, Shader.TileMode.CLAMP)
         canvas.drawPath(surge, paint); paint.shader = null
         paint.color = INK_INDIGO
-        canvas.drawCircle(w - u * 0.40f, h - u * 0.95f, 1.8f, paint)
-        canvas.drawCircle(w - u * 0.22f, h - u * 1.05f, 1.8f, paint)
+        canvas.drawCircle(cx - u * 0.10f, cy - u * 0.30f, 2.2f, paint)
+        canvas.drawCircle(cx + u * 0.08f, cy - u * 0.42f, 2.2f, paint)
     }
 
     // ------------------------------------------------------------------------
@@ -518,18 +557,20 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawCloudsCottageWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.color = INK_INDIGO
         val ridge = Path().apply {
-            moveTo(w - u * 0.75f, h)
-            cubicTo(w - u * 0.48f, h - u * 0.34f, w - u * 0.26f, h - u * 0.58f, w, h - u * 0.54f)
+            moveTo(w * 0.18f, h)
+            cubicTo(w * 0.45f, cy + u * 0.20f, cx, cy - u * 0.05f, w, cy - u * 0.02f)
             lineTo(w, h)
             close()
         }
         canvas.drawPath(ridge, paint)
         paint.color = INK_OCHRE
-        val rx = w - u * 0.30f
-        val ry = h - u * 0.48f
+        val rx = cx
+        val ry = cy - u * 0.02f
         val roof = Path().apply {
             moveTo(rx, ry)
             lineTo(rx + 10f, ry - 6f)
@@ -544,10 +585,12 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawWineSpringMoonWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.style = Paint.Style.STROKE; paint.strokeWidth = 1.4f; paint.color = INK_BLACK
-        val wx = w - u * 0.32f
-        val wy = h - u * 0.88f
+        val wx = cx - 20f
+        val wy = cy - u * 0.15f
         canvas.drawRect(wx, wy, wx + 40f, wy + 40f, paint)
         canvas.drawLine(wx + 20f, wy, wx + 20f, wy + 40f, paint)
         paint.style = Paint.Style.FILL; paint.color = INK_VERMILION
@@ -559,16 +602,18 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawApricotRainWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.style = Paint.Style.STROKE; paint.strokeWidth = 1.8f; paint.color = INK_BLACK
         val branch = Path().apply {
-            moveTo(w, h - u * 0.92f)
-            quadTo(w - u * 0.18f, h - u * 0.84f, w - u * 0.30f, h - u * 0.76f)
+            moveTo(w, cy - u * 0.35f)
+            quadTo(cx + u * 0.12f, cy - u * 0.25f, cx - u * 0.08f, cy - u * 0.12f)
         }
         canvas.drawPath(branch, paint)
         paint.style = Paint.Style.FILL; paint.color = INK_VERMILION
-        canvas.drawCircle(w - u * 0.30f, h - u * 0.76f, 4f, paint)
-        canvas.drawCircle(w - u * 0.18f, h - u * 0.86f, 3.5f, paint)
+        canvas.drawCircle(cx - u * 0.08f, cy - u * 0.12f, 4f, paint)
+        canvas.drawCircle(cx + u * 0.06f, cy - u * 0.22f, 3.5f, paint)
     }
 
     // ------------------------------------------------------------------------
@@ -576,12 +621,14 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawDeepForestDeerWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.color = INK_BLACK; paint.strokeWidth = 3f; paint.strokeCap = Paint.Cap.ROUND
-        canvas.drawLine(w - u * 0.28f, h, w - u * 0.30f, h - u * 0.70f, paint)
-        canvas.drawLine(w - u * 0.12f, h, w - u * 0.14f, h - u * 0.82f, paint)
+        canvas.drawLine(cx - u * 0.08f, h, cx - u * 0.08f, cy - u * 0.20f, paint)
+        canvas.drawLine(cx + u * 0.10f, h, cx + u * 0.10f, cy - u * 0.30f, paint)
         paint.color = INK_OCHRE
-        canvas.drawCircle(w - u * 0.24f, h - u * 0.36f, 6f, paint)
+        canvas.drawCircle(cx, cy + u * 0.08f, 6.5f, paint)
     }
 
     // ------------------------------------------------------------------------
@@ -589,16 +636,18 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawPearBlossomWillowWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.style = Paint.Style.STROKE; paint.strokeWidth = 1.6f; paint.color = INK_SAGE
         val willow = Path().apply {
-            moveTo(w, h - u * 1.05f)
-            quadTo(w - u * 0.18f, h - u * 0.84f, w - u * 0.24f, h - u * 0.42f)
+            moveTo(w, cy - u * 0.45f)
+            quadTo(cx + u * 0.12f, cy - u * 0.25f, cx - u * 0.06f, cy + u * 0.10f)
         }
         canvas.drawPath(willow, paint)
         paint.style = Paint.Style.FILL; paint.color = COLOR_PAPER
-        canvas.drawCircle(w - u * 0.26f, h - u * 0.70f, 3.5f, paint)
-        canvas.drawCircle(w - u * 0.18f, h - u * 0.82f, 3.0f, paint)
+        canvas.drawCircle(cx - u * 0.04f, cy - u * 0.08f, 3.5f, paint)
+        canvas.drawCircle(cx + u * 0.08f, cy - u * 0.22f, 3.0f, paint)
     }
 
     // ------------------------------------------------------------------------
@@ -606,11 +655,13 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawSpringWaterSleepWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.color = INK_BLACK; paint.strokeWidth = 1.6f
-        canvas.drawLine(w - u * 0.42f, h - u * 0.62f, w - u * 0.18f, h, paint)
-        val bx = w - u * 0.26f
-        val by = h - u * 0.28f
+        canvas.drawLine(cx - u * 0.18f, cy - u * 0.20f, cx + u * 0.12f, cy + u * 0.30f, paint)
+        val bx = cx
+        val by = cy + u * 0.08f
         val boat = Path().apply {
             moveTo(bx - 16f, by)
             quadTo(bx, by + 5f, bx + 16f, by - 2f)
@@ -624,12 +675,14 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawReadingLampMoonWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.color = INK_INDIGO
-        canvas.drawCircle(w - u * 0.26f, h - u * 0.64f, u * 0.28f, paint)
+        canvas.drawCircle(cx, cy - u * 0.12f, u * 0.24f, paint)
         paint.color = INK_BLACK
-        val lx = w - u * 0.20f
-        val ly = h - u * 0.25f
+        val lx = cx + u * 0.08f
+        val ly = cy + u * 0.18f
         canvas.drawRect(lx - 5f, ly - 8f, lx + 5f, ly, paint)
     }
 
@@ -638,10 +691,12 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawMoonInHandWindWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.style = Paint.Style.STROKE; paint.strokeWidth = 1.4f; paint.color = INK_INDIGO
-        val rx = w - u * 0.26f
-        val ry = h - u * 0.35f
+        val rx = cx
+        val ry = cy + u * 0.05f
         canvas.drawOval(rx - 22f, ry - 10f, rx + 22f, ry + 10f, paint)
         paint.style = Paint.Style.FILL; paint.color = INK_OCHRE
         canvas.drawCircle(rx, ry, 7f, paint)
@@ -652,12 +707,14 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawMossCourtyardPlantainWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.color = INK_SAGE
         val leaf = Path().apply {
-            moveTo(w - u * 0.32f, h)
-            cubicTo(w - u * 0.36f, h - u * 0.50f, w - u * 0.22f, h - u * 0.68f, w - u * 0.12f, h - u * 0.74f)
-            cubicTo(w - u * 0.06f, h - u * 0.56f, w - u * 0.18f, h - u * 0.34f, w - u * 0.20f, h)
+            moveTo(cx - u * 0.10f, h)
+            cubicTo(cx - u * 0.14f, cy + u * 0.10f, cx - u * 0.02f, cy - u * 0.18f, cx + u * 0.08f, cy - u * 0.25f)
+            cubicTo(cx + u * 0.14f, cy - u * 0.10f, cx + u * 0.02f, cy + u * 0.15f, cx, h)
             close()
         }
         canvas.drawPath(leaf, paint)
@@ -668,13 +725,15 @@ object WidgetBackgroundRenderer {
     // ------------------------------------------------------------------------
     private fun drawFishJumpingDuckweedWidget(canvas: Canvas, w: Float, h: Float) {
         val u = getIsotropicUnit(w, h)
+        val cx = w * 0.62f
+        val cy = h * 0.52f
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         paint.color = INK_SAGE
-        canvas.drawOval(w - u * 0.42f, h - u * 0.25f, w - u * 0.26f, h - u * 0.16f, paint)
-        canvas.drawOval(w - u * 0.24f, h - u * 0.28f, w - u * 0.08f, h - u * 0.20f, paint)
+        canvas.drawOval(cx - u * 0.18f, cy + u * 0.12f, cx - u * 0.02f, cy + u * 0.21f, paint)
+        canvas.drawOval(cx, cy + u * 0.08f, cx + u * 0.16f, cy + u * 0.16f, paint)
         paint.color = INK_VERMILION
-        val fx = w - u * 0.30f
-        val fy = h - u * 0.42f
+        val fx = cx
+        val fy = cy - u * 0.05f
         val fish = Path().apply {
             moveTo(fx - 10f, fy + 8f)
             quadTo(fx, fy - 10f, fx + 10f, fy + 4f)
