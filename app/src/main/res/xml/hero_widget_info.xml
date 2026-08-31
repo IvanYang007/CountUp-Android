@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="57dp"
+    android:minHeight="57dp"
+    android:minResizeWidth="57dp"
+    android:minResizeHeight="57dp"
+    android:targetCellWidth="2"
+    android:targetCellHeight="1"
+    android:updatePeriodMillis="1800000"
+    android:initialLayout="@layout/countup_hero_widget_2x1"
+    android:previewImage="@drawable/hero_widget_preview"
+    android:description="@string/hero_widget_description"
+    android:widgetCategory="home_screen"
+    android:resizeMode="horizontal|vertical"
+    android:configure="com.countup.app.HeroWidgetConfigureActivity"
+    android:label="@string/hero_widget_label" />

@@ -45,14 +45,21 @@
     <string name="delete_title">删除记录？</string>
     <string name="delete_message">确定要删除“%1$s”吗？此操作无法撤销。</string>
 
-    <!-- Widget -->
-    <string name="widget_label">天数追踪</string>
-    <string name="widget_description">显示记录以来的天数</string>
+    <!-- Widget: Overview Grid -->
+    <string name="widget_label">全部计数（网格概览）</string>
+    <string name="widget_description">以网格概览显示记录以来的天数</string>
     <string name="widget_empty">在应用中添加记录后即可在此查看。</string>
     <string name="widget_reset_prompt">再次点击重置</string>
     <string name="widget_reset_toast">已将“%1$s”重置为今天</string>
     <string name="toast_hidden_from_widget">已在微件中隐藏“%1$s”</string>
     <string name="toast_shown_in_widget">已在微件中显示“%1$s”</string>
+
+    <!-- Widget: Hero Milestone (1x1 & 2x1) -->
+    <string name="hero_widget_label">焦点里程碑（单项纪念）</string>
+    <string name="hero_widget_description">专注展示单个核心目标与达成里程碑</string>
+    <string name="hero_widget_empty">点击选择计数器</string>
+    <string name="hero_widget_configure_title">选择焦点计数器</string>
+    <string name="hero_widget_configure_subtitle">选择要在此小组件上展示的目标</string>
 
     <!-- Background Themes (30大古典诗意与水墨意境) -->
     <string name="bg_auto_daily">每日意境</string>

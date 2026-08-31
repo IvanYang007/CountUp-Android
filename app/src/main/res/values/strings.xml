@@ -45,14 +45,21 @@
     <string name="delete_title">Delete item?</string>
     <string name="delete_message">Remove “%1$s”? This cannot be undone.</string>
 
-    <!-- Widget -->
-    <string name="widget_label">Count-ups</string>
-    <string name="widget_description">Days since each count-up anchor</string>
+    <!-- Widget: Overview Grid -->
+    <string name="widget_label">All Counters (Grid)</string>
+    <string name="widget_description">Days since each count-up anchor in an overview grid</string>
     <string name="widget_empty">Add items in the app to see your count-ups.</string>
     <string name="widget_reset_prompt">Tap again</string>
     <string name="widget_reset_toast">Reset “%1$s” to today</string>
     <string name="toast_hidden_from_widget">“%1$s” hidden from widget</string>
     <string name="toast_shown_in_widget">“%1$s” shown in widget</string>
+
+    <!-- Widget: Hero Milestone (1x1 & 2x1) -->
+    <string name="hero_widget_label">Hero Milestone (Single Counter)</string>
+    <string name="hero_widget_description">Focus on a single sacred counter with milestone accents</string>
+    <string name="hero_widget_empty">Tap to choose a counter</string>
+    <string name="hero_widget_configure_title">Choose Hero Counter</string>
+    <string name="hero_widget_configure_subtitle">Select the counter to honor on this widget</string>
 
     <!-- Background Themes (30 Classical Poetic & Zen Landscapes) -->
     <string name="bg_auto_daily">Daily Landscape</string>

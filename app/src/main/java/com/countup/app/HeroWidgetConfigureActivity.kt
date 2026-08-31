@@ -1,0 +1,149 @@
+package com.countup.app
+
+import android.app.Activity
+import android.appwidget.AppWidgetManager
+import android.content.Intent
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import java.time.LocalDate
+
+/**
+ * Minimalist Compose configuration screen for the Hero Milestone Widget.
+ * Allows the user to select which specific counter to honor on this widget instance.
+ */
+class HeroWidgetConfigureActivity : ComponentActivity() {
+
+    private var appWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID
+    private lateinit var store: CountUpStore
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
+        super.onCreate(savedInstanceState)
+
+        // Set RESULT_CANCELED first so back button cancels widget placement
+        setResult(Activity.RESULT_CANCELED)
+
+        appWidgetId = intent?.extras?.getInt(
+            AppWidgetManager.EXTRA_APPWIDGET_ID,
+            AppWidgetManager.INVALID_APPWIDGET_ID,
+        ) ?: AppWidgetManager.INVALID_APPWIDGET_ID
+
+        if (appWidgetId == AppWidgetManager.INVALID_APPWIDGET_ID) {
+            finish()
+            return
+        }
+
+        store = CountUpStore(this)
+        val items = store.items()
+        val today = LocalDate.now()
+
+        setContent {
+            ZenTheme {
+                HeroWidgetConfigureScreen(
+                    items = items,
+                    today = today,
+                    onSelect = { selectedItem ->
+                        store.setHeroWidgetBinding(appWidgetId, selectedItem.id)
+                        pushHeroWidgetUpdate(this, appWidgetId)
+
+                        val resultValue = Intent().apply {
+                            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                        }
+                        setResult(Activity.RESULT_OK, resultValue)
+                        finish()
+                    },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun HeroWidgetConfigureScreen(
+    items: List<CountUpItem>,
+    today: LocalDate,
+    onSelect: (CountUpItem) -> Unit,
+) {
+    val haptic = LocalHapticFeedback.current
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(LocalZenColors.current.paperBackground)
+            .safeDrawingPadding()
+            .padding(horizontal = 20.dp, vertical = 16.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.hero_widget_configure_title).uppercase(),
+            style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.2.sp),
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = stringResource(R.string.hero_widget_configure_subtitle),
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(Modifier.height(18.dp))
+
+        if (items.isEmpty()) {
+            Text(
+                text = stringResource(R.string.empty_body),
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 24.dp),
+            )
+        } else {
+            LazyColumn(
+                contentPadding = PaddingValues(bottom = 24.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                items(
+                    items = items,
+                    key = { it.id },
+                ) { item ->
+                    ItemCard(
+                        item = item,
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onSelect(item)
+                        },
+                        onDelete = {},
+                        onReset = {},
+                        onToggleWidget = {},
+                        today = today,
+                        reduceMotion = true,
+                    )
+                }
+            }
+        }
+    }
+}

@@ -269,6 +269,39 @@ class CountUpStore(context: Context) {
             .commit()
     }
 
+    /** Retrieves the bound item ID for a Hero Widget instance. */
+    fun getHeroWidgetBinding(appWidgetId: Int): String? {
+        return prefs.getString(PREFIX_HERO_BINDING + appWidgetId, null)
+    }
+
+    /** Binds a specific count-up item to a Hero Widget instance. */
+    fun setHeroWidgetBinding(appWidgetId: Int, itemId: String): Boolean {
+        return prefs.edit()
+            .putString(PREFIX_HERO_BINDING + appWidgetId, itemId)
+            .commit()
+    }
+
+    /** Removes the binding for a deleted Hero Widget instance. */
+    fun removeHeroWidgetBinding(appWidgetId: Int): Boolean {
+        return prefs.edit()
+            .remove(PREFIX_HERO_BINDING + appWidgetId)
+            .commit()
+    }
+
+    /** Retrieves all active hero widget bindings. */
+    fun getAllHeroWidgetBindings(): Map<Int, String> {
+        val result = mutableMapOf<Int, String>()
+        prefs.all.forEach { (key, value) ->
+            if (key.startsWith(PREFIX_HERO_BINDING) && value is String) {
+                val widgetId = key.removePrefix(PREFIX_HERO_BINDING).toIntOrNull()
+                if (widgetId != null) {
+                    result[widgetId] = value
+                }
+            }
+        }
+        return result
+    }
+
     private fun persist(items: List<CountUpItem>): Boolean {
         val encoded = encodeItems(items)
         writeBackup(encoded)
@@ -336,6 +369,7 @@ class CountUpStore(context: Context) {
         private const val LEGACY_PREFS_NAME = "haircut_prefs"
         private const val LEGACY_KEY_EPOCH_DAY = "last_haircut_epoch_day"
         private const val BACKUP_FILE_NAME = "countup_backup.json"
+        private const val PREFIX_HERO_BINDING = "hero_widget_binding_"
         private const val MAX_QUARANTINE_ENTRIES = 3
     }
 }

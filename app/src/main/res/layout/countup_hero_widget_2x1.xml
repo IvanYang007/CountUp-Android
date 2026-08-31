@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/hero_widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/hero_widget_bg"
+    android:paddingStart="16dp"
+    android:paddingTop="12dp"
+    android:paddingEnd="16dp"
+    android:paddingBottom="12dp">
+
+    <!-- Left: 44dp Circular Icon Badge -->
+    <RelativeLayout
+        android:id="@+id/hero_badge_container"
+        android:layout_width="46dp"
+        android:layout_height="46dp"
+        android:layout_centerVertical="true"
+        android:layout_alignParentStart="true">
+
+        <ImageView
+            android:id="@+id/hero_badge_circle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_circle_olive"
+            android:contentDescription="@null" />
+
+        <ImageView
+            android:id="@+id/hero_badge_icon"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/ic_person"
+            android:contentDescription="@null" />
+    </RelativeLayout>
+
+    <!-- Right: Title, Odometer Count, and Subtitle -->
+    <LinearLayout
+        android:id="@+id/hero_content_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@id/hero_badge_container"
+        android:layout_marginStart="14dp"
+        android:orientation="vertical">
+
+        <!-- Title Row with optional Milestone Accent Dot -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/hero_name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="11.5sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.08"
+                android:textColor="#5D5043"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:text="SOBRIETY" />
+
+            <ImageView
+                android:id="@+id/hero_milestone_dot"
+                android:layout_width="7dp"
+                android:layout_height="7dp"
+                android:layout_marginStart="6dp"
+                android:src="@drawable/hero_milestone_dot"
+                android:visibility="gone"
+                android:contentDescription="@null" />
+        </LinearLayout>
+
+        <!-- Count + Unit -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="bottom"
+            android:orientation="horizontal"
+            android:layout_marginTop="1dp">
+
+            <TextView
+                android:id="@+id/hero_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="32sp"
+                android:textStyle="bold"
+                android:includeFontPadding="false"
+                android:textColor="#2C2416"
+                android:text="120" />
+
+            <TextView
+                android:id="@+id/hero_unit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_marginBottom="3dp"
+                android:textSize="12.5sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.06"
+                android:textColor="#8C7E70"
+                android:text="DAYS" />
+        </LinearLayout>
+
+        <!-- Anchor Date Subtitle -->
+        <TextView
+            android:id="@+id/hero_sublabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:letterSpacing="0.02"
+            android:textColor="#8C7E70"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:text="since May 3, 2026" />
+    </LinearLayout>
+
+    <!-- Empty State overlay -->
+    <TextView
+        android:id="@+id/hero_empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:textColor="#8C7E70"
+        android:text="@string/hero_widget_empty"
+        android:visibility="gone" />
+
+</RelativeLayout>

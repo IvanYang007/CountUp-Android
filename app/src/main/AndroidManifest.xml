@@ -54,6 +54,28 @@
                 android:resource="@xml/haircut_widget_info" />
         </receiver>
 
+        <!-- Focused Hero Milestone Widget (1x1 & 2x1) -->
+        <receiver
+            android:name=".HeroWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.appwidget.action.APPWIDGET_DELETED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/hero_widget_info" />
+        </receiver>
+
+        <!-- Configuration Activity for Hero Widget -->
+        <activity
+            android:name=".HeroWidgetConfigureActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
         <!-- Serves the widget grid's cell views to the launcher. Exported=false
              is safe: only the system can hold BIND_REMOTEVIEWS. -->
         <service

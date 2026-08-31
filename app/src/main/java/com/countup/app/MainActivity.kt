@@ -88,6 +88,9 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun refreshWidget() {
-        runCatching { pushWidgetUpdate(this) }
+        runCatching {
+            pushWidgetUpdate(this)
+            pushAllHeroWidgetsUpdate(this)
+        }
     }
 }

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/hero_widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/hero_widget_bg"
+    android:padding="8dp">
+
+    <LinearLayout
+        android:id="@+id/hero_content_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <!-- Centered circular stamp with icon + number -->
+        <RelativeLayout
+            android:id="@+id/hero_badge_container"
+            android:layout_width="62dp"
+            android:layout_height="62dp">
+
+            <ImageView
+                android:id="@+id/hero_badge_circle"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_circle_olive"
+                android:contentDescription="@null" />
+
+            <ImageView
+                android:id="@+id/hero_milestone_dot"
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="2dp"
+                android:layout_marginEnd="2dp"
+                android:src="@drawable/hero_milestone_dot"
+                android:visibility="gone"
+                android:contentDescription="@null" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:gravity="center_horizontal"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/hero_badge_icon"
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:src="@drawable/ic_person"
+                    android:contentDescription="@null" />
+
+                <TextView
+                    android:id="@+id/hero_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:includeFontPadding="false"
+                    android:textColor="#FFFFFF"
+                    android:text="120" />
+            </LinearLayout>
+        </RelativeLayout>
+
+        <!-- Tracked Name Below Stamp -->
+        <TextView
+            android:id="@+id/hero_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:textSize="10.5sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.08"
+            android:textColor="#5D5043"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:text="SOBRIETY" />
+
+        <TextView
+            android:id="@+id/hero_unit"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/hero_sublabel"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/hero_empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:textColor="#8C7E70"
+        android:text="@string/hero_widget_empty"
+        android:visibility="gone" />
+
+</RelativeLayout>
