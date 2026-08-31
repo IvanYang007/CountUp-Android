@@ -166,6 +166,7 @@ class ResetCountReceiver : BroadcastReceiver() {
                 // Push synchronously from the app process: the launcher redraws
                 // immediately, no composition pipeline in between.
                 pushWidgetUpdate(context)
+                pushAllHeroWidgetsUpdate(context)
                 // In-place instant feedback: toast notification if supported by launcher
                 Toast.makeText(
                     context.applicationContext,
@@ -177,6 +178,7 @@ class ResetCountReceiver : BroadcastReceiver() {
             // First tap: arm this cell and re-render widget to show "Tap again" / "0?"
             arm(id)
             pushWidgetUpdate(context)
+            pushAllHeroWidgetsUpdate(context)
         }
     }
 

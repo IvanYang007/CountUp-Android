@@ -17,8 +17,9 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <!-- Top: Count + 'd' + Milestone Dot -->
+        <!-- Top: Count + 'd' + Milestone Dot (Tap target for reset) -->
         <LinearLayout
+            android:id="@+id/hero_1x1_count_row"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"

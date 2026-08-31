@@ -133,6 +133,7 @@ private fun buildHero1x1RemoteViews(
     views.setViewVisibility(R.id.hero_1x1_empty_view, View.GONE)
     views.setViewVisibility(R.id.hero_1x1_content_container, View.VISIBLE)
 
+    val armed = ResetCountReceiver.isArmed(item.id)
     val count = daysSince(LocalDate.ofEpochDay(item.epochDay), today)
     val isMilestone = isMilestoneDay(count)
     val style = resolveCardStyle(item.cardColor)
@@ -141,44 +142,77 @@ private fun buildHero1x1RemoteViews(
     val primaryInkInt = style.primaryInk.toArgb()
     val mutedInkInt = style.mutedInk.toArgb()
     val isDark = style.isDark
+    val alertVermilion = 0xFFC45249.toInt()
 
     views.setInt(R.id.hero_1x1_root, "setBackgroundColor", cardBgInt)
-    views.setTextViewText(R.id.hero_1x1_count, count.toString())
-    views.setTextColor(R.id.hero_1x1_count, primaryInkInt)
-    views.setTextColor(R.id.hero_1x1_unit, mutedInkInt)
 
-    // Milestone Gold Accent Dot
-    if (isMilestone) {
-        views.setViewVisibility(R.id.hero_1x1_milestone_dot, View.VISIBLE)
-    } else {
-        views.setViewVisibility(R.id.hero_1x1_milestone_dot, View.GONE)
+    val resetIntent = Intent(context, ResetCountReceiver::class.java).apply {
+        putExtra(ResetCountReceiver.EXTRA_ITEM_ID, item.id)
     }
+    val resetPendingIntent = PendingIntent.getBroadcast(
+        context,
+        appWidgetIdHashCode(item.id) + 3003,
+        resetIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE,
+    )
 
-    // Two-line dynamic title stack
-    val (line1, line2) = splitTitleFor1x1(item.name)
-    views.setTextViewText(R.id.hero_1x1_line1, line1)
-    views.setTextColor(R.id.hero_1x1_line1, if (isDark) 0xFFDEB285.toInt() else mutedInkInt)
-
-    if (line2.isNotBlank()) {
-        views.setViewVisibility(R.id.hero_1x1_line2, View.VISIBLE)
-        views.setTextViewText(R.id.hero_1x1_line2, line2)
-        views.setTextColor(R.id.hero_1x1_line2, mutedInkInt)
-    } else {
-        views.setViewVisibility(R.id.hero_1x1_line2, View.GONE)
-    }
-
-    // Tap anywhere on widget -> open MainActivity
     val launchIntent = Intent(context, MainActivity::class.java).apply {
         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         putExtra("EXTRA_TARGET_ITEM_ID", item.id)
     }
-    val pendingIntent = PendingIntent.getActivity(
+    val openAppPendingIntent = PendingIntent.getActivity(
         context,
         appWidgetIdHashCode(item.id) + 1001,
         launchIntent,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
-    views.setOnClickPendingIntent(R.id.hero_1x1_root, pendingIntent)
+
+    if (armed) {
+        // Armed state: visual confirmation prompt
+        views.setTextViewText(R.id.hero_1x1_count, "0?")
+        views.setTextColor(R.id.hero_1x1_count, alertVermilion)
+        views.setTextViewText(R.id.hero_1x1_unit, "")
+        views.setViewVisibility(R.id.hero_1x1_milestone_dot, View.GONE)
+
+        views.setTextViewText(R.id.hero_1x1_line1, "RESET?")
+        views.setTextColor(R.id.hero_1x1_line1, alertVermilion)
+
+        views.setViewVisibility(R.id.hero_1x1_line2, View.VISIBLE)
+        views.setTextViewText(R.id.hero_1x1_line2, context.getString(R.string.widget_reset_prompt).uppercase())
+        views.setTextColor(R.id.hero_1x1_line2, alertVermilion)
+
+        // When armed, tapping anywhere confirms the reset
+        views.setOnClickPendingIntent(R.id.hero_1x1_root, resetPendingIntent)
+        views.setOnClickPendingIntent(R.id.hero_1x1_count_row, resetPendingIntent)
+    } else {
+        // Normal active state
+        views.setTextViewText(R.id.hero_1x1_count, count.toString())
+        views.setTextColor(R.id.hero_1x1_count, primaryInkInt)
+        views.setTextViewText(R.id.hero_1x1_unit, "d")
+        views.setTextColor(R.id.hero_1x1_unit, mutedInkInt)
+
+        if (isMilestone) {
+            views.setViewVisibility(R.id.hero_1x1_milestone_dot, View.VISIBLE)
+        } else {
+            views.setViewVisibility(R.id.hero_1x1_milestone_dot, View.GONE)
+        }
+
+        val (line1, line2) = splitTitleFor1x1(item.name)
+        views.setTextViewText(R.id.hero_1x1_line1, line1)
+        views.setTextColor(R.id.hero_1x1_line1, if (isDark) 0xFFDEB285.toInt() else mutedInkInt)
+
+        if (line2.isNotBlank()) {
+            views.setViewVisibility(R.id.hero_1x1_line2, View.VISIBLE)
+            views.setTextViewText(R.id.hero_1x1_line2, line2)
+            views.setTextColor(R.id.hero_1x1_line2, mutedInkInt)
+        } else {
+            views.setViewVisibility(R.id.hero_1x1_line2, View.GONE)
+        }
+
+        // Tap count row to arm reset; tap root to open MainActivity
+        views.setOnClickPendingIntent(R.id.hero_1x1_count_row, resetPendingIntent)
+        views.setOnClickPendingIntent(R.id.hero_1x1_root, openAppPendingIntent)
+    }
 
     return views
 }
@@ -214,6 +248,7 @@ private fun buildHero2x1RemoteViews(
     views.setViewVisibility(R.id.hero_content_container, View.VISIBLE)
     views.setViewVisibility(R.id.hero_badge_container, View.VISIBLE)
 
+    val armed = ResetCountReceiver.isArmed(item.id)
     val count = daysSince(LocalDate.ofEpochDay(item.epochDay), today)
     val isMilestone = isMilestoneDay(count)
     val style = resolveCardStyle(item.cardColor)
@@ -229,55 +264,101 @@ private fun buildHero2x1RemoteViews(
         position = 0,
     )
 
-    // Palette & Colors
     val cardBgInt = style.cardBg.toArgb()
     val primaryInkInt = style.primaryInk.toArgb()
     val mutedInkInt = style.mutedInk.toArgb()
     val isDark = style.isDark
+    val alertVermilion = 0xFFC45249.toInt()
 
     views.setInt(R.id.hero_widget_root, "setBackgroundColor", cardBgInt)
-    views.setTextViewText(R.id.hero_name, item.name.uppercase())
-    views.setTextColor(R.id.hero_name, if (isDark) 0xFFDEB285.toInt() else mutedInkInt)
 
-    views.setTextViewText(R.id.hero_count, count.toString())
-    views.setTextColor(R.id.hero_count, primaryInkInt)
-    views.setTextColor(R.id.hero_unit, mutedInkInt)
-
-    // Badge circle and icon
-    views.setImageViewResource(R.id.hero_badge_circle, R.drawable.ic_circle_olive)
-    views.setInt(R.id.hero_badge_circle, "setColorFilter", circleStyle.circleColor)
-
-    val iconDrawableRes = iconRes(item.icon.ifBlank { DEFAULT_ICON })
-    views.setImageViewResource(R.id.hero_badge_icon, iconDrawableRes)
-    views.setInt(R.id.hero_badge_icon, "setColorFilter", circleStyle.textInk)
-
-    // Milestone Gold Accent Dot
-    if (isMilestone) {
-        views.setViewVisibility(R.id.hero_milestone_dot, View.VISIBLE)
-    } else {
-        views.setViewVisibility(R.id.hero_milestone_dot, View.GONE)
+    val resetIntent = Intent(context, ResetCountReceiver::class.java).apply {
+        putExtra(ResetCountReceiver.EXTRA_ITEM_ID, item.id)
     }
+    val resetPendingIntent = PendingIntent.getBroadcast(
+        context,
+        appWidgetIdHashCode(item.id) + 4004,
+        resetIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE,
+    )
 
-    // Sublabel
-    val date = LocalDate.ofEpochDay(item.epochDay)
-    val sinceTemplate = context.getString(R.string.since_label)
-    val untilTemplate = context.getString(R.string.until_label)
-    val sublabel = formatAnchorDateSubLabel(count, date, sinceTemplate, untilTemplate)
-    views.setTextViewText(R.id.hero_sublabel, sublabel)
-    views.setTextColor(R.id.hero_sublabel, mutedInkInt)
-
-    // Tap anywhere on widget -> open MainActivity
     val launchIntent = Intent(context, MainActivity::class.java).apply {
         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         putExtra("EXTRA_TARGET_ITEM_ID", item.id)
     }
-    val pendingIntent = PendingIntent.getActivity(
+    val openAppPendingIntent = PendingIntent.getActivity(
         context,
         appWidgetIdHashCode(item.id),
         launchIntent,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
-    views.setOnClickPendingIntent(R.id.hero_widget_root, pendingIntent)
+
+    if (armed) {
+        // Armed state: visual confirmation prompt
+        views.setTextViewText(R.id.hero_name, "RESET TO TODAY?")
+        views.setTextColor(R.id.hero_name, alertVermilion)
+
+        views.setTextViewText(R.id.hero_count, "0?")
+        views.setTextColor(R.id.hero_count, alertVermilion)
+
+        views.setTextViewText(R.id.hero_unit, context.getString(R.string.widget_reset_prompt).uppercase())
+        views.setTextColor(R.id.hero_unit, alertVermilion)
+
+        views.setViewVisibility(R.id.hero_milestone_dot, View.GONE)
+
+        views.setTextViewText(R.id.hero_sublabel, "Tap again to reset counter")
+        views.setTextColor(R.id.hero_sublabel, alertVermilion)
+
+        views.setImageViewResource(R.id.hero_badge_circle, R.drawable.ic_circle_olive)
+        views.setInt(R.id.hero_badge_circle, "setColorFilter", alertVermilion)
+
+        val iconDrawableRes = iconRes(item.icon.ifBlank { DEFAULT_ICON })
+        views.setImageViewResource(R.id.hero_badge_icon, iconDrawableRes)
+        views.setInt(R.id.hero_badge_icon, "setColorFilter", 0xFFFFFFFF.toInt())
+
+        // When armed, tapping anywhere on the card confirms reset
+        views.setOnClickPendingIntent(R.id.hero_widget_root, resetPendingIntent)
+        views.setOnClickPendingIntent(R.id.hero_badge_container, resetPendingIntent)
+        views.setOnClickPendingIntent(R.id.hero_count_container, resetPendingIntent)
+    } else {
+        // Normal active state
+        views.setTextViewText(R.id.hero_name, item.name.uppercase())
+        views.setTextColor(R.id.hero_name, if (isDark) 0xFFDEB285.toInt() else mutedInkInt)
+
+        views.setTextViewText(R.id.hero_count, count.toString())
+        views.setTextColor(R.id.hero_count, primaryInkInt)
+
+        views.setTextViewText(R.id.hero_unit, "DAYS")
+        views.setTextColor(R.id.hero_unit, mutedInkInt)
+
+        // Badge circle and icon
+        views.setImageViewResource(R.id.hero_badge_circle, R.drawable.ic_circle_olive)
+        views.setInt(R.id.hero_badge_circle, "setColorFilter", circleStyle.circleColor)
+
+        val iconDrawableRes = iconRes(item.icon.ifBlank { DEFAULT_ICON })
+        views.setImageViewResource(R.id.hero_badge_icon, iconDrawableRes)
+        views.setInt(R.id.hero_badge_icon, "setColorFilter", circleStyle.textInk)
+
+        // Milestone Gold Accent Dot
+        if (isMilestone) {
+            views.setViewVisibility(R.id.hero_milestone_dot, View.VISIBLE)
+        } else {
+            views.setViewVisibility(R.id.hero_milestone_dot, View.GONE)
+        }
+
+        // Sublabel
+        val date = LocalDate.ofEpochDay(item.epochDay)
+        val sinceTemplate = context.getString(R.string.since_label)
+        val untilTemplate = context.getString(R.string.until_label)
+        val sublabel = formatAnchorDateSubLabel(count, date, sinceTemplate, untilTemplate)
+        views.setTextViewText(R.id.hero_sublabel, sublabel)
+        views.setTextColor(R.id.hero_sublabel, mutedInkInt)
+
+        // Tap badge or count to arm reset; tap background/title to open MainActivity
+        views.setOnClickPendingIntent(R.id.hero_badge_container, resetPendingIntent)
+        views.setOnClickPendingIntent(R.id.hero_count_container, resetPendingIntent)
+        views.setOnClickPendingIntent(R.id.hero_widget_root, openAppPendingIntent)
+    }
 
     return views
 }

@@ -75,6 +75,7 @@
 
         <!-- Count + Unit -->
         <LinearLayout
+            android:id="@+id/hero_count_container"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="bottom"
