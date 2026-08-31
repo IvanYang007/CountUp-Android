@@ -78,6 +78,12 @@ class MainActivity : ComponentActivity() {
             intent.data?.toString() == "countup://new"
         if (isAdd) {
             activeViewModel?.onEvent(CountUpUiEvent.OpenEditor(target = null))
+        } else if (intent.data?.toString() == "countup://pin_hero") {
+            val manager = getSystemService(android.appwidget.AppWidgetManager::class.java)
+            if (manager.isRequestPinAppWidgetSupported) {
+                val myProvider = android.content.ComponentName(this, HeroWidgetReceiver::class.java)
+                manager.requestPinAppWidget(myProvider, null, null)
+            }
         }
     }
 

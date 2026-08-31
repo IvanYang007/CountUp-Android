@@ -69,42 +69,22 @@ fun pushHeroWidgetUpdate(context: Context, appWidgetId: Int) {
 
     val today = LocalDate.now()
 
-    val views2x1 = buildHeroRemoteViews(
+    val views = buildHeroRemoteViews(
         context = context,
         layoutResId = R.layout.countup_hero_widget_2x1,
         item = targetItem,
         today = today,
-        isCompact1x1 = false,
     )
 
-    val finalViews = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        val views1x1 = buildHeroRemoteViews(
-            context = context,
-            layoutResId = R.layout.countup_hero_widget_1x1,
-            item = targetItem,
-            today = today,
-            isCompact1x1 = true,
-        )
-        RemoteViews(
-            mapOf(
-                SizeF(57f, 57f) to views1x1,
-                SizeF(130f, 57f) to views2x1,
-            )
-        )
-    } else {
-        views2x1
-    }
-
-    manager.updateAppWidget(appWidgetId, finalViews)
+    manager.updateAppWidget(appWidgetId, views)
 }
 
-/** Builds the RemoteViews hierarchy for either the 2x1 or 1x1 Hero layout. */
+/** Builds the RemoteViews hierarchy for the 2x1 Hero Poetic Card layout. */
 private fun buildHeroRemoteViews(
     context: Context,
     layoutResId: Int,
     item: CountUpItem?,
     today: LocalDate,
-    isCompact1x1: Boolean,
 ): RemoteViews {
     val views = RemoteViews(context.packageName, layoutResId)
 
@@ -112,9 +92,7 @@ private fun buildHeroRemoteViews(
         // Empty state: show prompt and tap to open app
         views.setViewVisibility(R.id.hero_empty_view, View.VISIBLE)
         views.setViewVisibility(R.id.hero_content_container, View.GONE)
-        if (!isCompact1x1) {
-            views.setViewVisibility(R.id.hero_badge_container, View.GONE)
-        }
+        views.setViewVisibility(R.id.hero_badge_container, View.GONE)
 
         val launchIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -131,9 +109,7 @@ private fun buildHeroRemoteViews(
 
     views.setViewVisibility(R.id.hero_empty_view, View.GONE)
     views.setViewVisibility(R.id.hero_content_container, View.VISIBLE)
-    if (!isCompact1x1) {
-        views.setViewVisibility(R.id.hero_badge_container, View.VISIBLE)
-    }
+    views.setViewVisibility(R.id.hero_badge_container, View.VISIBLE)
 
     val count = daysSince(LocalDate.ofEpochDay(item.epochDay), today)
     val isMilestone = isMilestoneDay(count)
@@ -161,14 +137,8 @@ private fun buildHeroRemoteViews(
     views.setTextColor(R.id.hero_name, if (isDark) 0xFFDEB285.toInt() else mutedInkInt)
 
     views.setTextViewText(R.id.hero_count, count.toString())
-
-    // In 1x1, count is inside the circular badge
-    if (isCompact1x1) {
-        views.setTextColor(R.id.hero_count, circleStyle.textInk)
-    } else {
-        views.setTextColor(R.id.hero_count, primaryInkInt)
-        views.setTextColor(R.id.hero_unit, mutedInkInt)
-    }
+    views.setTextColor(R.id.hero_count, primaryInkInt)
+    views.setTextColor(R.id.hero_unit, mutedInkInt)
 
     // Badge circle and icon
     views.setImageViewResource(R.id.hero_badge_circle, R.drawable.ic_circle_olive)
@@ -185,15 +155,13 @@ private fun buildHeroRemoteViews(
         views.setViewVisibility(R.id.hero_milestone_dot, View.GONE)
     }
 
-    // Sublabel (2x1 only)
-    if (!isCompact1x1) {
-        val date = LocalDate.ofEpochDay(item.epochDay)
-        val sinceTemplate = context.getString(R.string.since_label)
-        val untilTemplate = context.getString(R.string.until_label)
-        val sublabel = formatAnchorDateSubLabel(count, date, sinceTemplate, untilTemplate)
-        views.setTextViewText(R.id.hero_sublabel, sublabel)
-        views.setTextColor(R.id.hero_sublabel, mutedInkInt)
-    }
+    // Sublabel
+    val date = LocalDate.ofEpochDay(item.epochDay)
+    val sinceTemplate = context.getString(R.string.since_label)
+    val untilTemplate = context.getString(R.string.until_label)
+    val sublabel = formatAnchorDateSubLabel(count, date, sinceTemplate, untilTemplate)
+    views.setTextViewText(R.id.hero_sublabel, sublabel)
+    views.setTextColor(R.id.hero_sublabel, mutedInkInt)
 
     // Tap anywhere on widget -> open MainActivity
     val launchIntent = Intent(context, MainActivity::class.java).apply {
