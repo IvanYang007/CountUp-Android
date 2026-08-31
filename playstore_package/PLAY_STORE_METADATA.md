@@ -140,5 +140,5 @@ All release artifacts are located in `playstore_package/`:
    - Go to **Release** -> **Production**.
    - Click **Create new release**.
    - Upload [`playstore_package/app-release.aab`](file:///d:/Github/countUp/playstore_package/app-release.aab).
-   - Enter Release notes: `Release 1.5.0: Added Focused Hero Milestone Widgets (1x1 Compact Stamp & 2x1 Poetic Card) with custom counter picker, Tactile Zen Micro-Haptics on cards and buttons, Quick Add (+) on widget toolbar, Android Launcher Shortcuts (countup://new), real-time smart keyword styling for common habits, and ambient milestone gold accents.`
+   - Enter Release notes: `Release 1.5.1: Added dual-size Hero Milestone Widgets (1x1 Dynamic Stack & 2x1 Poetic Card) with intelligent multi-word title wrapping, true 1x1 single-cell launcher snapping, custom counter picker, tactile Zen micro-haptics, and ambient milestone gold accents.`
    - Click **Review release** -> **Start rollout to Production**.
