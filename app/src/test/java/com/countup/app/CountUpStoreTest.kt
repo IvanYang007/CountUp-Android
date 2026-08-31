@@ -179,4 +179,83 @@ class CountUpStoreTest {
         val store = CountUpStore(testContext)
         assertEquals(SortOrder.DAYS_DESC, store.getSortOrder())
     }
+
+    @Test
+    fun addItemAndPersistCustomIconAndCardColor() {
+        val store = CountUpStore(testContext)
+        val item = store.addItem(
+            name = "Yoga",
+            epochDay = 20000L,
+            comment = "Morning routine",
+            icon = "spa",
+            cardColor = "willow_sage",
+        )
+        assertNotNull(item)
+        assertEquals("spa", item!!.icon)
+        assertEquals("willow_sage", item.cardColor)
+
+        // Read back from a new store instance
+        val store2 = CountUpStore(testContext)
+        val items = store2.items()
+        assertEquals(1, items.size)
+        assertEquals("spa", items[0].icon)
+        assertEquals("willow_sage", items[0].cardColor)
+
+        // Verify disk backup contains icon and cardColor
+        val backupContent = File(tempDir, "countup_backup.json").readText(Charsets.UTF_8)
+        assertTrue(backupContent.contains("\"icon\":\"spa\""))
+        assertTrue(backupContent.contains("\"cardColor\":\"willow_sage\""))
+    }
+
+    @Test
+    fun updateItemPreservesCustomIconAndCardColor() {
+        val store = CountUpStore(testContext)
+        val item = store.addItem(
+            name = "Gardening",
+            epochDay = 19000L,
+            comment = "Seeds",
+            icon = "plant",
+            cardColor = "warm_sand",
+        )!!
+
+        assertTrue(
+            store.updateItem(
+                id = item.id,
+                name = "Bonsai Tree",
+                epochDay = 19500L,
+                comment = "Pruned",
+                icon = "yard",
+                cardColor = "terracotta",
+            )
+        )
+
+        val updated = store.items()[0]
+        assertEquals("Bonsai Tree", updated.name)
+        assertEquals("yard", updated.icon)
+        assertEquals("terracotta", updated.cardColor)
+    }
+
+    @Test
+    fun backupHealingPreservesCustomIconAndCardColor() {
+        val store1 = CountUpStore(testContext)
+        store1.addItem(
+            name = "Space Launch",
+            epochDay = 20500L,
+            comment = "Orbit",
+            icon = "rocket_launch",
+            cardColor = "deep_ink",
+        )
+
+        // Wipe SharedPreferences
+        val prefs = testContext.getSharedPreferences("countup_prefs", Context.MODE_PRIVATE)
+        prefs.edit().clear().commit()
+
+        // Re-read from disk backup
+        val store2 = CountUpStore(testContext)
+        val items = store2.items()
+        assertEquals(1, items.size)
+        assertEquals("Space Launch", items[0].name)
+        assertEquals("rocket_launch", items[0].icon)
+        assertEquals("deep_ink", items[0].cardColor)
+    }
 }

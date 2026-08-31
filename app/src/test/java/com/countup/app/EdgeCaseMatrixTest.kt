@@ -15,6 +15,8 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 
 /**
  * Aggressive Edge Case & Adversarial Quality Assurance Matrix.
@@ -278,6 +280,87 @@ class EdgeCaseMatrixTest {
         for (theme in themes) {
             assertTrue(theme != BackgroundTheme.AUTO_DAILY)
             assertNotNull(theme.id)
+        }
+    }
+
+    // =========================================================================
+    // 9. CARD COLOR CONTRAST & ADVERSARIAL TOKEN RESOLUTION MATRIX
+    // =========================================================================
+
+    @Test
+    fun cardBackgroundColorAdversarialInputsGracefullyResolve() {
+        // Null, empty, whitespace, and corrupt strings
+        assertEquals(Color.White, cardBackgroundColor(null))
+        assertEquals(Color.White, cardBackgroundColor(""))
+        assertEquals(Color.White, cardBackgroundColor("   "))
+        assertEquals(Color.White, cardBackgroundColor("invalid_token_12345"))
+        assertEquals(Color.White, cardBackgroundColor("not_a_hex"))
+        assertEquals(Color.White, cardBackgroundColor("#XYZ123"))
+
+        // Valid presets
+        for (preset in CARD_COLOR_PRESETS) {
+            assertEquals(preset.cardBg, cardBackgroundColor(preset.id))
+        }
+
+        // Custom hex strings (with and without hash)
+        assertEquals(Color(0xFFE88B58), cardBackgroundColor("#E88B58"))
+        assertEquals(Color(0xFF5E8C6D), cardBackgroundColor("#5e8c6d"))
+        assertEquals(Color(0xFF2C2416), cardBackgroundColor("2C2416"))
+    }
+
+    @Test
+    fun cardInkContrastMeetsWcagLuminanceThresholdsAcrossAllPresets() {
+        for (preset in CARD_COLOR_PRESETS) {
+            val bg = preset.cardBg
+            val isDark = isDarkCardBackground(bg)
+            val primaryInk = cardPrimaryInk(bg)
+            val mutedInk = cardMutedInk(bg)
+            val border = cardBorderColor(bg)
+
+            if (isDark) {
+                // On dark cards, ink must be light/white
+                assertTrue("Dark card ${preset.id} primary ink should be light", primaryInk.luminance() > 0.8f)
+                assertTrue("Dark card ${preset.id} muted ink should be light", mutedInk.luminance() > 0.5f)
+            } else {
+                // On light cards, ink must be dark
+                assertTrue("Light card ${preset.id} primary ink should be dark", primaryInk.luminance() < 0.2f)
+                assertTrue("Light card ${preset.id} muted ink should be dark", mutedInk.luminance() < 0.35f)
+            }
+
+            assertNotNull(border)
+        }
+    }
+
+    // =========================================================================
+    // 10. EXPANDED ICON RESILIENCE & PHOSPHOR MAPPING MATRIX
+    // =========================================================================
+
+    @Test
+    fun allFiftyNineIconsResolveToValidNonZeroResourceIds() {
+        assertEquals(59, ALL_ICON_NAMES.size)
+
+        for (iconName in ALL_ICON_NAMES) {
+            val resId = iconRes(iconName)
+            assertTrue("Icon '$iconName' must resolve to a valid resource ID > 0", resId > 0)
+        }
+    }
+
+    @Test
+    fun iconResFallbackHandlesCorruptedAndAdversarialStrings() {
+        val defaultRes = R.drawable.ic_person
+        val testInputs = listOf(
+            null to defaultRes,
+            "" to defaultRes,
+            "   " to defaultRes,
+            "\n\t" to defaultRes,
+            "../../etc/passwd" to defaultRes,
+            "<script>alert(1)</script>" to defaultRes,
+            "🔥🚀🎉" to defaultRes,
+            "unknown_icon" to defaultRes,
+        )
+
+        for ((input, expected) in testInputs) {
+            assertEquals("Input '$input' should resolve to default person icon", expected, iconRes(input ?: ""))
         }
     }
 }

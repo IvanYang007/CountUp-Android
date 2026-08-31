@@ -115,4 +115,45 @@ class WidgetRowTest {
         )
         assertEquals(listOf("A", "B"), widgetRows(items, today).map { it.name })
     }
+
+    @Test
+    fun widgetRowsCarriesCustomIconAndCardColor() {
+        val items = listOf(
+            CountUpItem(id = "1", name = "Meditation", epochDay = today.toEpochDay() - 10, icon = "spa", cardColor = "willow_sage"),
+            CountUpItem(id = "2", name = "Workout", epochDay = today.toEpochDay() - 5, icon = "fitness_center", cardColor = "terracotta"),
+        )
+        val rows = widgetRows(items, today)
+        assertEquals(2, rows.size)
+        assertEquals("spa", rows[0].icon)
+        assertEquals("willow_sage", rows[0].cardColor)
+        assertEquals("fitness_center", rows[1].icon)
+        assertEquals("terracotta", rows[1].cardColor)
+    }
+
+    @Test
+    fun widgetCircleStyleProvidesDifferentColorsForDefaultedCards() {
+        val row1 = WidgetRowData(id = "item1", name = "Item 1", count = 5, futureFlag = false, cardColor = "")
+        val row2 = WidgetRowData(id = "item2", name = "Item 2", count = 10, futureFlag = false, cardColor = "")
+        val row3 = WidgetRowData(id = "item3", name = "Item 3", count = 15, futureFlag = false, cardColor = "")
+
+        val style1 = resolveWidgetCircleStyle(row1, 0)
+        val style2 = resolveWidgetCircleStyle(row2, 1)
+        val style3 = resolveWidgetCircleStyle(row3, 2)
+
+        assertTrue(DEFAULT_WIDGET_PALETTE.any { it.circleColor == style1.circleColor })
+        assertTrue(DEFAULT_WIDGET_PALETTE.any { it.circleColor == style2.circleColor })
+        assertTrue(DEFAULT_WIDGET_PALETTE.any { it.circleColor == style3.circleColor })
+        // Verify distinct adjacent styles
+        org.junit.Assert.assertNotEquals(style1.circleColor, style2.circleColor)
+    }
+
+    @Test
+    fun widgetCircleStyleHonorsCustomCardPresets() {
+        val customRow = WidgetRowData(id = "custom", name = "Custom", count = 20, futureFlag = false, cardColor = "ink_gold")
+        val style = resolveWidgetCircleStyle(customRow, 0)
+        // Ochre gold badge color
+        assertEquals(0xFFDEB285.toInt(), style.circleColor)
+        // Ochre gold is light, so text ink is dark
+        assertEquals(0xFF2C2416.toInt(), style.textInk)
+    }
 }

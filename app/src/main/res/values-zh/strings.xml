@@ -28,13 +28,17 @@
     <string name="reset_message">将“%1$s”重置为今天，计数将归零。</string>
 
     <!-- Item editor -->
-    <string name="add_title">新建记录</string>
-    <string name="edit_title">编辑记录</string>
+    <string name="add_title">新建事项</string>
+    <string name="edit_title">编辑事项</string>
     <string name="item_name">名称</string>
     <string name="name_placeholder">例如：上次理发</string>
     <string name="item_comment">备注</string>
-    <string name="comment_placeholder">可选备注（最多2行）</string>
+    <string name="comment_placeholder">选填备注（最多2行）</string>
     <string name="anchor_date">起始日期</string>
+    <string name="customize_style_and_icon">自定义样式与图标</string>
+    <string name="hide_customization">收起样式与图标</string>
+    <string name="cd_expand_customization">展开样式与图标自定义选项</string>
+    <string name="cd_collapse_customization">收起样式与图标自定义选项</string>
     <string name="save">保存</string>
 
     <!-- Delete confirm -->
@@ -100,4 +104,89 @@
     <string name="search_clear">清除搜索</string>
     <string name="sort_section_title">排序方式</string>
     <string name="cd_sort_search_pill">排序与搜索选项。当前按 %1$s 排序。点击进行搜索或更改排序。</string>
+
+    <!-- Card & Badge Style Presets (White, Green, Blackish) -->
+    <string name="card_color_label">卡片样式</string>
+    <string name="color_paper_sage">宣白 · 柳叶</string>
+    <string name="color_paper_terracotta">宣白 · 陶土</string>
+    <string name="color_paper_indigo">宣白 · 靛蓝</string>
+    <string name="color_sage_forest">柳绿 · 幽森</string>
+    <string name="color_sage_ochre">柳绿 · 赭石</string>
+    <string name="color_ink_gold">墨黑 · 沉金</string>
+    <string name="color_ink_jade">墨黑 · 碧翠</string>
+    <string name="color_ink_crimson">墨黑 · 辰砂</string>
+    <string name="cd_color_default">默认（宣白 · 柳叶）卡片样式</string>
+    <string name="cd_color_option">%1$s 卡片样式</string>
+
+    <!-- Icon Categories & Selection -->
+    <string name="icon_label">图标</string>
+    <string name="category_all">全部</string>
+    <string name="category_health">健康</string>
+    <string name="category_habits">习惯</string>
+    <string name="category_work">工作</string>
+    <string name="category_milestones">生活</string>
+    <string name="category_social">社交</string>
+    <string name="category_nature">自然</string>
+    <string name="cd_icon_option">%1$s 图标</string>
+
+    <!-- Human-Friendly TalkBack Icon Descriptions -->
+    <string name="cd_icon_spa">莲花（冥想）</string>
+    <string name="cd_icon_self_improvement">太极阴阳（专注）</string>
+    <string name="cd_icon_fitness_center">哑铃（健身）</string>
+    <string name="cd_icon_directions_walk">足迹（步行）</string>
+    <string name="cd_icon_water_drop">水滴（饮水）</string>
+    <string name="cd_icon_bed">睡床（睡眠）</string>
+    <string name="cd_icon_local_hospital">急救箱（健康医疗）</string>
+    <string name="cd_icon_content_cut">剪刀（理发）</string>
+    <string name="cd_icon_smoke_free">戒烟（自律习惯）</string>
+    <string name="cd_icon_local_cafe">咖啡杯（咖啡）</string>
+    <string name="cd_icon_local_bar">酒杯（饮品）</string>
+    <string name="cd_icon_restaurant">刀叉（用餐）</string>
+    <string name="cd_icon_book">书本（阅读）</string>
+    <string name="cd_icon_school">学位帽（学业进修）</string>
+    <string name="cd_icon_pets">爪印（宠物）</string>
+    <string name="cd_icon_terminal">终端命令行（编程）</string>
+    <string name="cd_icon_business_center">公文包（工作职场）</string>
+    <string name="cd_icon_task_alt">对勾印章（目标达成）</string>
+    <string name="cd_icon_timer">计时器（专注冲刺）</string>
+    <string name="cd_icon_lightbulb">灯泡（灵感创意）</string>
+    <string name="cd_icon_payments">货币符号（财务储蓄）</string>
+    <string name="cd_icon_rocket_launch">火箭（产品发布）</string>
+    <string name="cd_icon_palette">画笔（艺术创作）</string>
+    <string name="cd_icon_cake">蛋糕（生日纪念）</string>
+    <string name="cd_icon_celebration">礼花碎屑（庆祝盛典）</string>
+    <string name="cd_icon_child_care">婴儿（家庭育儿）</string>
+    <string name="cd_icon_home">房屋（乔迁新居）</string>
+    <string name="cd_icon_flight">飞机（旅行度假）</string>
+    <string name="cd_icon_directions_car">汽车（自驾出行）</string>
+    <string name="cd_icon_luggage">行李箱（度假出游）</string>
+    <string name="cd_icon_emoji_events">奖杯（荣誉成就）</string>
+    <string name="cd_icon_person">人物（默认）</string>
+    <string name="cd_icon_group">双人（群体社区）</string>
+    <string name="cd_icon_face">笑脸（情绪）</string>
+    <string name="cd_icon_favorite">爱心（喜爱）</string>
+    <string name="cd_icon_thumb_up">点赞（认可）</string>
+    <string name="cd_icon_share">分享（连接）</string>
+    <string name="cd_icon_public">地球（世界）</string>
+    <string name="cd_icon_mood">星芒（美好）</string>
+    <string name="cd_icon_sentiment_satisfied">微笑</string>
+    <string name="cd_icon_sentiment_very_satisfied">眨眼笑脸</string>
+    <string name="cd_icon_sentiment_neutral">平静表情</string>
+    <string name="cd_icon_sentiment_dissatisfied">难过表情</string>
+    <string name="cd_icon_recommend">认证印章</string>
+    <string name="cd_icon_star">星标（精选）</string>
+    <string name="cd_icon_emoji_emotions">爱心笑脸</string>
+    <string name="cd_icon_person_add">添加成员</string>
+    <string name="cd_icon_notification_important">提醒铃铛</string>
+    <string name="cd_icon_party_mode">相机（记录回忆）</string>
+    <string name="cd_icon_visibility">眼睛（查看）</string>
+    <string name="cd_icon_group_add">三人团队</string>
+    <string name="cd_icon_park">树木（公园自然）</string>
+    <string name="cd_icon_yard">盆栽植物（园艺）</string>
+    <string name="cd_icon_sunny">太阳（日光）</string>
+    <string name="cd_icon_bedtime">弯月（夜晚）</string>
+    <string name="cd_icon_local_florist">花朵（花卉）</string>
+    <string name="cd_icon_sailing">帆船（扬帆启航）</string>
+    <string name="cd_icon_music_note">音符（音乐）</string>
+    <string name="cd_icon_eco">绿叶（生态环保）</string>
 </resources>

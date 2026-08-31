@@ -91,14 +91,22 @@ class CountUpStore(context: Context) {
      * chosen anchor day is after today.
      * @return the persisted item, or null if the write failed.
      */
-    fun addItem(name: String, epochDay: Long, comment: String = ""): CountUpItem? {
+    fun addItem(
+        name: String,
+        epochDay: Long,
+        comment: String = "",
+        icon: String = "",
+        cardColor: String = "",
+    ): CountUpItem? {
         val trimmed = name.trim()
+        val resolvedIcon = icon.trim().ifEmpty { ALL_ICON_NAMES.random() }
         val item = CountUpItem(
             id = newId(),
             name = trimmed.ifEmpty { DEFAULT_ITEM_NAME },
             epochDay = epochDay,
             comment = comment.trim(),
-            icon = SOCIAL_ICON_NAMES.random(),
+            icon = resolvedIcon,
+            cardColor = cardColor.trim(),
             futureFlag = epochDay > LocalDate.now().toEpochDay(),
         )
         return synchronized(lock) {
@@ -108,21 +116,32 @@ class CountUpStore(context: Context) {
     }
 
     /**
-     * Updates the name and/or anchor day of the item with [id], keeping its id.
+     * Updates the item with [id], keeping its id.
      * The future flag is recomputed from the new anchor day, so saving a past
      * date clears it and saving a future date sets it.
      * @return false if [id] was not found or the write failed.
      */
-    fun updateItem(id: String, name: String, epochDay: Long, comment: String = ""): Boolean {
+    fun updateItem(
+        id: String,
+        name: String,
+        epochDay: Long,
+        comment: String = "",
+        icon: String = "",
+        cardColor: String = "",
+    ): Boolean {
         val trimmed = name.trim()
         return synchronized(lock) {
             val list = items().toMutableList()
             val index = list.indexOfFirst { it.id == id }
             if (index < 0) return false
-            list[index] = list[index].copy(
+            val current = list[index]
+            val resolvedIcon = icon.trim().ifEmpty { current.icon.ifEmpty { DEFAULT_ICON } }
+            list[index] = current.copy(
                 name = trimmed.ifEmpty { DEFAULT_ITEM_NAME },
                 epochDay = epochDay,
                 comment = comment.trim(),
+                icon = resolvedIcon,
+                cardColor = cardColor.trim(),
                 futureFlag = epochDay > LocalDate.now().toEpochDay(),
             )
             persist(list)

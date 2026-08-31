@@ -17,10 +17,24 @@ data class CountUpItem(
     val epochDay: Long,
     val comment: String = "",
     val icon: String = "",
+    val cardColor: String = "",
     /** True when this item was created or last updated with a future date. */
     val futureFlag: Boolean = false,
     /** True when this item appears in the home-screen widget. Defaults to open eye. */
     val showInWidget: Boolean = true,
+)
+
+/**
+ * Uncommitted draft payload representing user input in creation or edit dialogs.
+ * Encapsulates the form fields to eliminate loose multi-primitive lambdas and prevent transposition bugs.
+ */
+@Immutable
+data class ItemDraft(
+    val name: String,
+    val epochDay: Long,
+    val comment: String = "",
+    val icon: String = "",
+    val cardColor: String = "",
 )
 
 /** Default name used when a name is left blank. */
@@ -44,6 +58,7 @@ internal fun encodeItems(items: List<CountUpItem>): String {
                 .put("epochDay", item.epochDay)
                 .put("comment", item.comment)
                 .put("icon", item.icon)
+                .put("cardColor", item.cardColor)
                 .put("futureFlag", item.futureFlag)
                 .put("showInWidget", item.showInWidget),
         )
@@ -177,6 +192,7 @@ internal fun decodeElement(o: JSONObject?): CountUpItem? {
             epochDay = epochDay,
             comment = o.optString("comment", ""),
             icon = o.optString("icon", ""),
+            cardColor = o.optString("cardColor", ""),
             futureFlag = o.optBoolean("futureFlag", false),
             showInWidget = o.optBoolean("showInWidget", true),
         )

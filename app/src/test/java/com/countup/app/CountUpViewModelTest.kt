@@ -119,7 +119,15 @@ class CountUpViewModelTest {
         assertNull(viewModel.state.value.editorTarget)
 
         viewModel.effects.test {
-            viewModel.onEvent(CountUpUiEvent.SaveItem(name = "Tea Ceremony", epochDay = fixedToday.toEpochDay(), comment = "Matcha"))
+            viewModel.onEvent(
+                CountUpUiEvent.SaveItem(
+                    name = "Tea Ceremony",
+                    epochDay = fixedToday.toEpochDay(),
+                    comment = "Matcha",
+                    icon = "spa",
+                    cardColor = "willow_sage",
+                )
+            )
 
             val effect = awaitItem()
             assertTrue(effect is CountUpUiEffect.RefreshWidget)
@@ -129,7 +137,10 @@ class CountUpViewModelTest {
             val state = awaitItem()
             assertFalse(state.isEditorOpen)
             assertEquals(1, state.items.size)
-            assertEquals("Tea Ceremony", state.items.first().name)
+            val item = state.items.first()
+            assertEquals("Tea Ceremony", item.name)
+            assertEquals("spa", item.icon)
+            assertEquals("willow_sage", item.cardColor)
         }
     }
 
@@ -142,7 +153,15 @@ class CountUpViewModelTest {
         viewModel.onEvent(CountUpUiEvent.OpenEditor(target))
         assertEquals(target, viewModel.state.value.editorTarget)
 
-        viewModel.onEvent(CountUpUiEvent.SaveItem(name = "Water Bonsai Trees", epochDay = target.epochDay, comment = "Updated note"))
+        viewModel.onEvent(
+            CountUpUiEvent.SaveItem(
+                name = "Water Bonsai Trees",
+                epochDay = target.epochDay,
+                comment = "Updated note",
+                icon = "yard",
+                cardColor = "terracotta",
+            )
+        )
 
         viewModel.state.test {
             val state = awaitItem()
@@ -150,6 +169,8 @@ class CountUpViewModelTest {
             val updated = state.items.first { it.id == target.id }
             assertEquals("Water Bonsai Trees", updated.name)
             assertEquals("Updated note", updated.comment)
+            assertEquals("yard", updated.icon)
+            assertEquals("terracotta", updated.cardColor)
         }
     }
 

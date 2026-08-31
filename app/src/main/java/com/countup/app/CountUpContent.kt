@@ -183,8 +183,8 @@ fun CountUpContent(
                 item = state.editorTarget,
                 today = state.today,
                 onDismiss = { onEvent(CountUpUiEvent.CloseEditor) },
-                onSave = { name, epochDay, comment ->
-                    onEvent(CountUpUiEvent.SaveItem(name, epochDay, comment))
+                onSave = { draft ->
+                    onEvent(CountUpUiEvent.SaveItem(draft))
                 },
             )
         }
@@ -535,10 +535,16 @@ fun ItemCard(
     val widgetVisible = item.showInWidget
     val widgetDesc = stringResource(if (widgetVisible) R.string.widget_hide else R.string.widget_show)
 
-    val accents = ZenDayAccents
+    val style = resolveCardStyle(item.cardColor)
+    val isCustomCardColor = item.cardColor.isNotBlank()
+    val baseBgColor = style.cardBg
+    val isDarkCard = style.isDark
+    val primaryInk = style.primaryInk
+    val mutedInk = style.mutedInk
+
     val arrivedFuture = item.futureFlag && count >= 0
-    val accent = if (arrivedFuture) ZenArrivedGreen else accents[(item.id.hashCode() % accents.size + accents.size) % accents.size]
-    val onAccent = if (accent.luminance() > 0.35f) ZenInkBlack else ZenWhite
+    val accent = if (arrivedFuture) ZenArrivedGreen else style.badgeBg
+    val onAccent = if (arrivedFuture) ZenWhite else style.badgeTint
 
     val pluralSelector = kotlin.math.abs(count).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
     val unitLabel = pluralStringResource(R.plurals.days_unit, pluralSelector, count)
@@ -561,8 +567,27 @@ fun ItemCard(
         )
     }
 
-    Column(
-        modifier = modifier
+    val cardModifier = if (isCustomCardColor) {
+        modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = if (isDarkCard) 4.dp else 2.5.dp,
+                shape = cardShape,
+                clip = false,
+                ambientColor = Color(0x182C2416),
+                spotColor = Color(0x222C2416),
+            )
+            .border(
+                width = 1.dp,
+                color = cardBorderColor(baseBgColor),
+                shape = cardShape,
+            )
+            .background(
+                color = baseBgColor,
+                shape = cardShape,
+            )
+    } else {
+        modifier
             .fillMaxWidth()
             .shadow(
                 elevation = 2.5.dp,
@@ -580,6 +605,10 @@ fun ItemCard(
                 brush = surfaceBrush,
                 shape = cardShape,
             )
+    }
+
+    Column(
+        modifier = cardModifier
             .clickable(
                 interactionSource = cardInteraction,
                 indication = LocalIndication.current,
@@ -606,7 +635,7 @@ fun ItemCard(
                 text = item.name.uppercase(),
                 style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 1.sp),
                 fontFamily = FontFamily.SansSerif,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = mutedInk,
                 modifier = Modifier.weight(1f),
             )
             Box(
@@ -624,7 +653,11 @@ fun ItemCard(
                 Icon(
                     painter = painterResource(if (widgetVisible) R.drawable.ic_widget_grid_filled else R.drawable.ic_widget_grid_outline),
                     contentDescription = null,
-                    tint = if (widgetVisible) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    tint = if (widgetVisible) {
+                        if (isDarkCard) ZenOchre else MaterialTheme.colorScheme.primary
+                    } else {
+                        mutedInk.copy(alpha = 0.5f)
+                    },
                     modifier = Modifier.size(14.dp),
                 )
             }
@@ -644,7 +677,7 @@ fun ItemCard(
                 Icon(
                     painter = painterResource(R.drawable.ic_refresh),
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = if (isDarkCard) Color(0xFFFAF7F2) else MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(15.dp),
                 )
             }
@@ -664,7 +697,12 @@ fun ItemCard(
                 Box(
                     modifier = Modifier
                         .size(width = 11.dp, height = 2.2.dp)
-                        .background(MaterialTheme.colorScheme.error, RoundedCornerShape(1.dp)),
+                        .background(
+                            if (isDarkCard) Color(0xFFE57A77)
+                            else if (item.cardColor == "terracotta" || item.cardColor == "rose_clay") Color(0xFF6B1D19)
+                            else MaterialTheme.colorScheme.error,
+                            RoundedCornerShape(1.dp),
+                        ),
                 )
             }
         }
@@ -683,7 +721,7 @@ fun ItemCard(
                             fontSize = 44.sp,
                             fontFamily = FontFamily.SansSerif,
                             fontWeight = FontWeight.Bold,
-                            color = if (arrivedFuture) ZenArrivedRed else MaterialTheme.colorScheme.onSurface,
+                            color = if (arrivedFuture) ZenArrivedRed else primaryInk,
                         )
                     } else {
                         AnimatedContent(
@@ -706,7 +744,7 @@ fun ItemCard(
                                 fontSize = 44.sp,
                                 fontFamily = FontFamily.SansSerif,
                                 fontWeight = FontWeight.Bold,
-                                color = if (arrivedFuture) ZenArrivedRed else MaterialTheme.colorScheme.onSurface,
+                                color = if (arrivedFuture) ZenArrivedRed else primaryInk,
                             )
                         }
                     }
@@ -715,7 +753,7 @@ fun ItemCard(
                         text = unitLabel,
                         fontSize = 16.sp,
                         fontFamily = FontFamily.SansSerif,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = mutedInk,
                         modifier = Modifier.padding(bottom = 6.dp),
                     )
                 }
@@ -728,7 +766,7 @@ fun ItemCard(
                         untilTemplate = stringResource(R.string.until_label),
                     ),
                     style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = mutedInk,
                 )
             }
 
@@ -738,7 +776,10 @@ fun ItemCard(
                     modifier = Modifier
                         .weight(1f, fill = false)
                         .clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f))
+                        .background(
+                            if (isDarkCard) Color(0x24FFFFFF)
+                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)
+                        )
                         .padding(horizontal = 10.dp, vertical = 6.dp),
                 ) {
                     Text(
@@ -747,7 +788,7 @@ fun ItemCard(
                             lineHeight = 15.sp,
                             fontSize = 11.sp,
                         ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (isDarkCard) Color(0xFFFAF7F2) else MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                     )

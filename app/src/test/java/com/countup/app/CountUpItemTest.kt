@@ -111,6 +111,19 @@ class CountUpItemTest {
     }
 
     @Test
+    fun cardColorSurvivesRoundTrip() {
+        val withColor = CountUpItem(id = "cc", name = "Spa", epochDay = 150, cardColor = "terracotta")
+        assertEquals(listOf(withColor), decodeItems(encodeItems(listOf(withColor))))
+    }
+
+    @Test
+    fun missingCardColorFieldDecodesToEmpty() {
+        // Legacy items stored before cardColor existed decode with empty string (defaults to paper white).
+        val decoded = decodeItems("[{\"id\":\"a\",\"name\":\"Old\",\"epochDay\":5}]")
+        assertEquals("", decoded!![0].cardColor)
+    }
+
+    @Test
     fun oneMalformedElementDoesNotDestroyTheRest() {
         // A single corrupt element is dropped; parseable siblings survive.
         val raw = "[{\"id\":\"a\",\"name\":\"Good\",\"epochDay\":5},{\"id\":123},{\"id\":\"b\",\"name\":\"Also good\",\"epochDay\":9}]"
@@ -234,5 +247,27 @@ class CountUpItemTest {
         val decoded = decodeItems(encoded)!!
         assertEquals(150, decoded.size)
         assertEquals(items, decoded)
+    }
+
+    @Test
+    fun itemDraftEncapsulatesAllFieldsWithDefaults() {
+        val defaultDraft = ItemDraft(name = "Meditation", epochDay = 20500L)
+        assertEquals("Meditation", defaultDraft.name)
+        assertEquals(20500L, defaultDraft.epochDay)
+        assertEquals("", defaultDraft.comment)
+        assertEquals("", defaultDraft.icon)
+        assertEquals("", defaultDraft.cardColor)
+
+        val customDraft = ItemDraft(
+            name = "Zen Garden",
+            epochDay = 20600L,
+            comment = "Daily pruning",
+            icon = "spa",
+            cardColor = "sage_forest",
+        )
+        val copyDraft = customDraft.copy(comment = "Weekly pruning")
+        assertEquals("Weekly pruning", copyDraft.comment)
+        assertEquals("spa", copyDraft.icon)
+        assertEquals("sage_forest", copyDraft.cardColor)
     }
 }

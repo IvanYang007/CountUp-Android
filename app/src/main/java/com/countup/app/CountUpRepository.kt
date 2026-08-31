@@ -8,8 +8,21 @@ import java.time.LocalDate
  */
 interface CountUpRepository {
     fun getItems(): List<CountUpItem>
-    fun addItem(name: String, epochDay: Long, comment: String = ""): CountUpItem?
-    fun updateItem(id: String, name: String, epochDay: Long, comment: String = ""): Boolean
+    fun addItem(
+        name: String,
+        epochDay: Long,
+        comment: String = "",
+        icon: String = "",
+        cardColor: String = "",
+    ): CountUpItem?
+    fun updateItem(
+        id: String,
+        name: String,
+        epochDay: Long,
+        comment: String = "",
+        icon: String = "",
+        cardColor: String = "",
+    ): Boolean
     fun deleteItem(id: String): Boolean
     fun resetTo(id: String, epochDay: Long = LocalDate.now().toEpochDay()): Boolean
     fun setWidgetVisibility(id: String, showInWidget: Boolean): Boolean
@@ -28,11 +41,24 @@ class DefaultCountUpRepository(
 ) : CountUpRepository {
     override fun getItems(): List<CountUpItem> = store.items()
 
-    override fun addItem(name: String, epochDay: Long, comment: String): CountUpItem? =
-        store.addItem(name, epochDay, comment)
+    override fun addItem(
+        name: String,
+        epochDay: Long,
+        comment: String,
+        icon: String,
+        cardColor: String,
+    ): CountUpItem? =
+        store.addItem(name, epochDay, comment, icon, cardColor)
 
-    override fun updateItem(id: String, name: String, epochDay: Long, comment: String): Boolean =
-        store.updateItem(id, name, epochDay, comment)
+    override fun updateItem(
+        id: String,
+        name: String,
+        epochDay: Long,
+        comment: String,
+        icon: String,
+        cardColor: String,
+    ): Boolean =
+        store.updateItem(id, name, epochDay, comment, icon, cardColor)
 
     override fun deleteItem(id: String): Boolean =
         store.deleteItem(id)

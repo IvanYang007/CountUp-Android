@@ -70,9 +70,22 @@ class CountUpViewModel(
             is CountUpUiEvent.SaveItem -> {
                 val target = _state.value.editorTarget
                 val success = if (target == null) {
-                    repository.addItem(event.name, event.epochDay, event.comment) != null
+                    repository.addItem(
+                        name = event.name,
+                        epochDay = event.epochDay,
+                        comment = event.comment,
+                        icon = event.icon,
+                        cardColor = event.cardColor,
+                    ) != null
                 } else {
-                    repository.updateItem(target.id, event.name, event.epochDay, event.comment)
+                    repository.updateItem(
+                        id = target.id,
+                        name = event.name,
+                        epochDay = event.epochDay,
+                        comment = event.comment,
+                        icon = event.icon,
+                        cardColor = event.cardColor,
+                    )
                 }
                 if (success) {
                     _state.update {

@@ -35,6 +35,10 @@
     <string name="item_comment">Comment</string>
     <string name="comment_placeholder">Optional note (max 2 lines)</string>
     <string name="anchor_date">Anchor date</string>
+    <string name="customize_style_and_icon">Customize style &amp; icon</string>
+    <string name="hide_customization">Hide style &amp; icon</string>
+    <string name="cd_expand_customization">Expand style and icon customization options</string>
+    <string name="cd_collapse_customization">Collapse style and icon customization options</string>
     <string name="save">Save</string>
 
     <!-- Delete confirm -->
@@ -100,4 +104,89 @@
     <string name="search_clear">Clear search</string>
     <string name="sort_section_title">SORT ORDER</string>
     <string name="cd_sort_search_pill">Sort and search options. Currently sorted by %1$s. Tap to search or change sort.</string>
+
+    <!-- Card & Badge Style Presets (White, Green, Blackish) -->
+    <string name="card_color_label">Card Style</string>
+    <string name="color_paper_sage">Paper &amp; Sage</string>
+    <string name="color_paper_terracotta">Paper &amp; Terracotta</string>
+    <string name="color_paper_indigo">Paper &amp; Indigo</string>
+    <string name="color_sage_forest">Sage &amp; Forest</string>
+    <string name="color_sage_ochre">Sage &amp; Ochre</string>
+    <string name="color_ink_gold">Ink &amp; Gold</string>
+    <string name="color_ink_jade">Ink &amp; Jade</string>
+    <string name="color_ink_crimson">Ink &amp; Crimson</string>
+    <string name="cd_color_default">Default (Paper &amp; Sage) card style</string>
+    <string name="cd_color_option">%1$s card style</string>
+
+    <!-- Icon Categories & Selection -->
+    <string name="icon_label">Icon</string>
+    <string name="category_all">All</string>
+    <string name="category_health">Health</string>
+    <string name="category_habits">Habits</string>
+    <string name="category_work">Work</string>
+    <string name="category_milestones">Life</string>
+    <string name="category_social">Social</string>
+    <string name="category_nature">Nature</string>
+    <string name="cd_icon_option">%1$s icon</string>
+
+    <!-- Human-Friendly TalkBack Icon Descriptions -->
+    <string name="cd_icon_spa">Lotus flower (Meditation)</string>
+    <string name="cd_icon_self_improvement">Yin Yang (Mindfulness)</string>
+    <string name="cd_icon_fitness_center">Barbell (Fitness)</string>
+    <string name="cd_icon_directions_walk">Footprints (Walking)</string>
+    <string name="cd_icon_water_drop">Water drop (Hydration)</string>
+    <string name="cd_icon_bed">Bed (Sleep)</string>
+    <string name="cd_icon_local_hospital">First aid kit (Medical)</string>
+    <string name="cd_icon_content_cut">Scissors (Haircut)</string>
+    <string name="cd_icon_smoke_free">No smoking (Habit streak)</string>
+    <string name="cd_icon_local_cafe">Coffee cup (Cafe)</string>
+    <string name="cd_icon_local_bar">Wine glass (Drinks)</string>
+    <string name="cd_icon_restaurant">Fork and knife (Dining)</string>
+    <string name="cd_icon_book">Open book (Reading)</string>
+    <string name="cd_icon_school">Graduation cap (Education)</string>
+    <string name="cd_icon_pets">Paw print (Pets)</string>
+    <string name="cd_icon_terminal">Terminal (Coding)</string>
+    <string name="cd_icon_business_center">Briefcase (Career)</string>
+    <string name="cd_icon_task_alt">Checkmark (Goal achieved)</string>
+    <string name="cd_icon_timer">Timer (Focus sprint)</string>
+    <string name="cd_icon_lightbulb">Lightbulb (Ideas)</string>
+    <string name="cd_icon_payments">Dollar currency (Savings)</string>
+    <string name="cd_icon_rocket_launch">Rocket (Launch)</string>
+    <string name="cd_icon_palette">Paint brush (Creative)</string>
+    <string name="cd_icon_cake">Birthday cake (Milestone)</string>
+    <string name="cd_icon_celebration">Party confetti (Celebration)</string>
+    <string name="cd_icon_child_care">Baby (Family)</string>
+    <string name="cd_icon_home">House (New home)</string>
+    <string name="cd_icon_flight">Airplane (Travel)</string>
+    <string name="cd_icon_directions_car">Car (Road trip)</string>
+    <string name="cd_icon_luggage">Suitcase (Vacation)</string>
+    <string name="cd_icon_emoji_events">Trophy (Achievement)</string>
+    <string name="cd_icon_person">Person (Default)</string>
+    <string name="cd_icon_group">Users (Community)</string>
+    <string name="cd_icon_face">Smiley face (Mood)</string>
+    <string name="cd_icon_favorite">Heart (Favorite)</string>
+    <string name="cd_icon_thumb_up">Thumbs up (Approval)</string>
+    <string name="cd_icon_share">Share network (Connect)</string>
+    <string name="cd_icon_public">Globe (World)</string>
+    <string name="cd_icon_mood">Sparkles (Wonder)</string>
+    <string name="cd_icon_sentiment_satisfied">Smiling face</string>
+    <string name="cd_icon_sentiment_very_satisfied">Winking face</string>
+    <string name="cd_icon_sentiment_neutral">Neutral face</string>
+    <string name="cd_icon_sentiment_dissatisfied">Sad face</string>
+    <string name="cd_icon_recommend">Verified seal</string>
+    <string name="cd_icon_star">Star (Milestone)</string>
+    <string name="cd_icon_emoji_emotions">Heart smile</string>
+    <string name="cd_icon_person_add">Add person</string>
+    <string name="cd_icon_notification_important">Ringing bell</string>
+    <string name="cd_icon_party_mode">Camera (Memories)</string>
+    <string name="cd_icon_visibility">Eye (View)</string>
+    <string name="cd_icon_group_add">Team (Group of three)</string>
+    <string name="cd_icon_park">Tree (Nature)</string>
+    <string name="cd_icon_yard">Potted plant (Gardening)</string>
+    <string name="cd_icon_sunny">Sun (Daytime)</string>
+    <string name="cd_icon_bedtime">Crescent moon (Night)</string>
+    <string name="cd_icon_local_florist">Flower (Blossom)</string>
+    <string name="cd_icon_sailing">Sailboat (Ocean)</string>
+    <string name="cd_icon_music_note">Music notes (Audio)</string>
+    <string name="cd_icon_eco">Leaf (Eco)</string>
 </resources>

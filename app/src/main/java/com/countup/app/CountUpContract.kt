@@ -39,7 +39,31 @@ sealed interface CountUpUiEvent {
     data object CycleBackground : CountUpUiEvent
     data class OpenEditor(val target: CountUpItem? = null) : CountUpUiEvent
     data object CloseEditor : CountUpUiEvent
-    data class SaveItem(val name: String, val epochDay: Long, val comment: String = "") : CountUpUiEvent
+    data class SaveItem(
+        val draft: ItemDraft,
+    ) : CountUpUiEvent {
+        constructor(
+            name: String,
+            epochDay: Long,
+            comment: String = "",
+            icon: String = "",
+            cardColor: String = "",
+        ) : this(
+            ItemDraft(
+                name = name,
+                epochDay = epochDay,
+                comment = comment,
+                icon = icon,
+                cardColor = cardColor,
+            )
+        )
+
+        val name: String get() = draft.name
+        val epochDay: Long get() = draft.epochDay
+        val comment: String get() = draft.comment
+        val icon: String get() = draft.icon
+        val cardColor: String get() = draft.cardColor
+    }
     data class RequestDelete(val target: CountUpItem) : CountUpUiEvent
     data object DismissDelete : CountUpUiEvent
     data class ConfirmDelete(val id: String) : CountUpUiEvent

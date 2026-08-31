@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- One grid cell: item name above a solid circle with the day count. -->
+<!-- One grid cell: item icon & name above a solid circle with the day count. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/cell_root"
     android:layout_width="match_parent"
@@ -11,16 +11,31 @@
     android:paddingEnd="3dp"
     android:paddingBottom="2dp">
 
-    <TextView
-        android:id="@+id/cell_name"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:gravity="center"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:letterSpacing="0.03"
-        android:textSize="10.8sp"
-        android:layout_marginBottom="1dp" />
+        android:layout_marginBottom="1dp">
+
+        <ImageView
+            android:id="@+id/cell_icon"
+            android:layout_width="11dp"
+            android:layout_height="11dp"
+            android:layout_marginEnd="2.5dp"
+            android:scaleType="fitCenter"
+            android:contentDescription="@null" />
+
+        <TextView
+            android:id="@+id/cell_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:letterSpacing="0.03"
+            android:textSize="10.8sp" />
+    </LinearLayout>
 
     <FrameLayout
         android:layout_width="36dp"

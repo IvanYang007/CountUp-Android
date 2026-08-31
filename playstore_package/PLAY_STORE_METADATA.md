@@ -140,5 +140,5 @@ All release artifacts are located in `playstore_package/`:
    - Go to **Release** -> **Production**.
    - Click **Create new release**.
    - Upload [`playstore_package/app-release.aab`](file:///d:/Github/countUp/playstore_package/app-release.aab).
-   - Enter Release notes: `Release 1.4.3: Track days since or countdown to events with 30 Chinese ink wash landscapes, instant search & 1-tap sorting, and ultra-minimalist home screen widgets.`
+   - Enter Release notes: `Release 1.4.5: Added curated Mid-Century Modern and Zen card color combinations with random Paper White defaults, 38 Phosphor line icons, instant search & 1-tap sorting, and ultra-minimalist home screen widgets.`
    - Click **Review release** -> **Start rollout to Production**.

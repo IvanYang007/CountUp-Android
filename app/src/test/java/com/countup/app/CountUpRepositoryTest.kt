@@ -110,4 +110,49 @@ class CountUpRepositoryTest {
         assertTrue(repository.setSortOrder(SortOrder.NAME_ASC))
         assertEquals(SortOrder.NAME_ASC, repository.getSortOrder())
     }
+
+    @Test
+    fun addItemWithCustomIconAndCardColor() {
+        val item = repository.addItem(
+            name = "Anniversary",
+            epochDay = 18000L,
+            comment = "Dinner",
+            icon = "cake",
+            cardColor = "rose_clay",
+        )
+        assertNotNull(item)
+        assertEquals("cake", item!!.icon)
+        assertEquals("rose_clay", item.cardColor)
+
+        val retrieved = repository.getItems().first { it.id == item.id }
+        assertEquals("cake", retrieved.icon)
+        assertEquals("rose_clay", retrieved.cardColor)
+    }
+
+    @Test
+    fun updateItemWithCustomIconAndCardColor() {
+        val item = repository.addItem(
+            name = "Project",
+            epochDay = 20000L,
+            comment = "Initial",
+            icon = "lightbulb",
+            cardColor = "ochre_gold",
+        )!!
+
+        assertTrue(
+            repository.updateItem(
+                id = item.id,
+                name = "Project Launch",
+                epochDay = 20100L,
+                comment = "Shipped",
+                icon = "rocket_launch",
+                cardColor = "dusty_indigo",
+            )
+        )
+
+        val updated = repository.getItems().first { it.id == item.id }
+        assertEquals("Project Launch", updated.name)
+        assertEquals("rocket_launch", updated.icon)
+        assertEquals("dusty_indigo", updated.cardColor)
+    }
 }

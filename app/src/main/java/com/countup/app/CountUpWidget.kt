@@ -7,7 +7,6 @@ import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.graphics.Typeface
 import android.text.SpannableString
 import android.text.Spanned
@@ -16,6 +15,8 @@ import android.os.SystemClock
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import android.widget.Toast
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.toArgb
 import java.time.LocalDate
 
 /**
@@ -203,6 +204,8 @@ internal data class WidgetRowData(
     val name: String,
     val count: Long,
     val futureFlag: Boolean,
+    val icon: String = DEFAULT_ICON,
+    val cardColor: String = "",
 )
 
 /** Pure derivation shared by the widget (and unit-tested on the JVM). */
@@ -213,6 +216,8 @@ internal fun widgetRows(items: List<CountUpItem>, today: LocalDate): List<Widget
             name = item.name,
             count = daysSince(LocalDate.ofEpochDay(item.epochDay), today),
             futureFlag = item.futureFlag,
+            icon = item.icon,
+            cardColor = item.cardColor,
         )
     }
 
@@ -232,7 +237,7 @@ internal fun widgetCountText(count: Long, arrived: Boolean): CharSequence =
         count.toString()
     }
 
-private class WidgetViewsFactory(private val context: Context) : RemoteViewsService.RemoteViewsFactory {
+internal class WidgetViewsFactory(private val context: Context) : RemoteViewsService.RemoteViewsFactory {
 
     private var rows: List<WidgetRowData> = emptyList()
     private var night = false
@@ -261,17 +266,25 @@ private class WidgetViewsFactory(private val context: Context) : RemoteViewsServ
         val row = rows[position]
         val views = RemoteViews(context.packageName, R.layout.countup_widget_cell)
 
+        val textInk = if (night) NIGHT_MUTED else MUTED
         val armed = ResetCountReceiver.isArmed(row.id)
+
+        // Set Phosphor icon and tint to text ink
+        val iconDrawableId = iconRes(row.icon.ifEmpty { DEFAULT_ICON })
+        views.setImageViewResource(R.id.cell_icon, iconDrawableId)
+        views.setInt(R.id.cell_icon, "setColorFilter", textInk)
+
         if (armed) {
             // Confirmation state: visual double-tap prompt directly on the widget
             views.setTextViewText(R.id.cell_name, context.getString(R.string.widget_reset_prompt))
-            views.setTextColor(R.id.cell_name, if (night) NIGHT_MUTED else MUTED)
+            views.setTextColor(R.id.cell_name, textInk)
             views.setTextViewText(R.id.cell_count, "0?")
-            views.setTextColor(R.id.cell_count, Color.WHITE)
+            views.setTextColor(R.id.cell_count, WHITE)
             views.setImageViewResource(R.id.cell_circle, R.drawable.ic_circle_orange)
+            views.setInt(R.id.cell_circle, "setColorFilter", 0)
         } else {
             views.setTextViewText(R.id.cell_name, row.name)
-            views.setTextColor(R.id.cell_name, if (night) NIGHT_MUTED else MUTED)
+            views.setTextColor(R.id.cell_name, textInk)
             val arrived = arrivedFuture(row)
             views.setTextViewText(R.id.cell_count, widgetCountText(row.count, arrived))
             if (arrived) {
@@ -279,16 +292,12 @@ private class WidgetViewsFactory(private val context: Context) : RemoteViewsServ
                 // dark-red bold count, on both night and day plates.
                 views.setTextColor(R.id.cell_count, ARRIVED_NUMBER)
                 views.setImageViewResource(R.id.cell_circle, R.drawable.ic_circle_green)
-            } else if (night) {
-                // Dark ink on the warm dark plate at night, so the number stands out.
-                views.setTextColor(R.id.cell_count, NIGHT_NUMBER)
-                views.setImageViewResource(R.id.cell_circle, R.drawable.ic_solid_circle_dark)
+                views.setInt(R.id.cell_circle, "setColorFilter", 0)
             } else {
-                // Day plates rotate through matte MCM accents (olive, orange, mustard);
-                // the number ink flips to deep brown on the light mustard plate.
-                val slot = position % DAY_CIRCLES.size
-                views.setTextColor(R.id.cell_count, DAY_NUMBER_INKS[slot])
-                views.setImageViewResource(R.id.cell_circle, DAY_CIRCLES[slot])
+                val circleStyle = resolveWidgetCircleStyle(row, position)
+                views.setTextColor(R.id.cell_count, circleStyle.textInk)
+                views.setImageViewResource(R.id.cell_circle, R.drawable.ic_circle_olive)
+                views.setInt(R.id.cell_circle, "setColorFilter", circleStyle.circleColor)
             }
         }
 
@@ -311,6 +320,44 @@ private class WidgetViewsFactory(private val context: Context) : RemoteViewsServ
     override fun hasStableIds(): Boolean = true
 }
 
+/** Styling parameters for an individual widget cell count circle. */
+internal data class WidgetCircleStyle(
+    val circleColor: Int,
+    val textInk: Int,
+)
+
+/**
+ * Curated Zen & MCM palette of circle badge colors for widget cells.
+ * Even when card surface is defaulted to Paper White, widget circles cycle through
+ * these rich, harmonious colors to ensure visual variety across home screen cells.
+ */
+internal val DEFAULT_WIDGET_PALETTE = listOf(
+    WidgetCircleStyle(circleColor = 0xFF5E8C6D.toInt(), textInk = 0xFFFFFFFF.toInt()), // Willow Sage
+    WidgetCircleStyle(circleColor = 0xFFD87A4F.toInt(), textInk = 0xFFFFFFFF.toInt()), // Warm Terracotta
+    WidgetCircleStyle(circleColor = 0xFF5A7B8C.toInt(), textInk = 0xFFFFFFFF.toInt()), // Slate Indigo
+    WidgetCircleStyle(circleColor = 0xFFDEB285.toInt(), textInk = 0xFF2C2416.toInt()), // Ochre Gold
+    WidgetCircleStyle(circleColor = 0xFFC45249.toInt(), textInk = 0xFFFFFFFF.toInt()), // Japanese Vermilion
+    WidgetCircleStyle(circleColor = 0xFF33523D.toInt(), textInk = 0xFFFFFFFF.toInt()), // Deep Forest
+    WidgetCircleStyle(circleColor = 0xFF4D7A58.toInt(), textInk = 0xFFFFFFFF.toInt()), // Jade Green
+)
+
+/**
+ * Resolves the circle badge color and high-contrast text ink for a widget cell.
+ */
+internal fun resolveWidgetCircleStyle(row: WidgetRowData, position: Int): WidgetCircleStyle {
+    if (row.cardColor.isNotBlank() && row.cardColor != DEFAULT_CARD_COLOR) {
+        val customPreset = resolveCardStyle(row.cardColor)
+        val badgeColor = customPreset.badgeBg
+        val colorInt = badgeColor.toArgb()
+        val textInk = if (badgeColor.luminance() < 0.40f) 0xFFFFFFFF.toInt() else 0xFF2C2416.toInt()
+        return WidgetCircleStyle(circleColor = colorInt, textInk = textInk)
+    }
+    // Defaulted card: provide distinct, deterministic, varied colors from the curated palette
+    val hash = if (row.id.isNotEmpty()) kotlin.math.abs(row.id.hashCode()) else position
+    val index = (hash + position) % DEFAULT_WIDGET_PALETTE.size
+    return DEFAULT_WIDGET_PALETTE[index]
+}
+
 /** Whether the device is in dark (night) mode. */
 /** Light palette only (design decision): dark text mode is removed, so this is false. */
 private fun isNightMode(context: Context): Boolean = false
@@ -325,14 +372,6 @@ private val NIGHT_NUMBER: Int = 0xFFF5E6D3.toInt()
 private val WHITE: Int = 0xFFFFFFFF.toInt()
 private val DIVIDER: Int = 0x66E3D3B8
 private val NIGHT_DIVIDER: Int = 0x40D9C6A6
-
-// Day-mode count plates rotate through matte MCM accents; number ink follows contrast.
-private val DAY_CIRCLES = intArrayOf(
-    R.drawable.ic_circle_olive,
-    R.drawable.ic_circle_orange,
-    R.drawable.ic_circle_mustard,
-)
-private val DAY_NUMBER_INKS = intArrayOf(WHITE, WHITE, NUMBER)
 
 // Arrived-future styling: solid green plate with a dark red bold count.
 private val ARRIVED_NUMBER: Int = 0xFFB71C1C.toInt()

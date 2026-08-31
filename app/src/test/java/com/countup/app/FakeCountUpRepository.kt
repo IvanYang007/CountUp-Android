@@ -20,14 +20,21 @@ class FakeCountUpRepository(
 
     override fun getItems(): List<CountUpItem> = itemsList.toList()
 
-    override fun addItem(name: String, epochDay: Long, comment: String): CountUpItem? {
+    override fun addItem(
+        name: String,
+        epochDay: Long,
+        comment: String,
+        icon: String,
+        cardColor: String,
+    ): CountUpItem? {
         if (shouldFailWrite) return null
         val item = CountUpItem(
             id = UUID.randomUUID().toString(),
             name = name.ifBlank { DEFAULT_ITEM_NAME },
             epochDay = epochDay,
             comment = comment,
-            icon = "star",
+            icon = icon.ifBlank { "star" },
+            cardColor = cardColor,
             futureFlag = epochDay > LocalDate.now().toEpochDay(),
             showInWidget = true,
         )
@@ -35,7 +42,14 @@ class FakeCountUpRepository(
         return item
     }
 
-    override fun updateItem(id: String, name: String, epochDay: Long, comment: String): Boolean {
+    override fun updateItem(
+        id: String,
+        name: String,
+        epochDay: Long,
+        comment: String,
+        icon: String,
+        cardColor: String,
+    ): Boolean {
         if (shouldFailWrite) return false
         val idx = itemsList.indexOfFirst { it.id == id }
         if (idx == -1) return false
@@ -44,6 +58,8 @@ class FakeCountUpRepository(
             name = name.ifBlank { DEFAULT_ITEM_NAME },
             epochDay = epochDay,
             comment = comment,
+            icon = icon.ifBlank { existing.icon },
+            cardColor = cardColor,
             futureFlag = epochDay > LocalDate.now().toEpochDay(),
         )
         return true
