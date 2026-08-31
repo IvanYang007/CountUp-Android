@@ -102,11 +102,12 @@ internal fun buildBaseViews(context: Context, appWidgetOptions: android.os.Bundl
         views.setImageViewBitmap(R.id.widget_bg_image, bgBitmap)
     }
 
-    // Minimal title in muted ink typography
+    // Minimal title & '+' quick add button in muted ink typography
     views.setTextColor(R.id.widget_title, if (night) NIGHT_MUTED else MUTED)
+    views.setTextColor(R.id.widget_add_button, if (night) NIGHT_MUTED else MUTED)
     views.setInt(R.id.widget_divider, "setBackgroundColor", if (night) NIGHT_DIVIDER else DIVIDER)
 
-    // Tap anywhere outside a cell (and on the empty state) -> open the app.
+    // Tap title or background -> open the app.
     val launch = PendingIntent.getActivity(
         context,
         REQUEST_LAUNCH,
@@ -114,7 +115,21 @@ internal fun buildBaseViews(context: Context, appWidgetOptions: android.os.Bundl
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
     views.setOnClickPendingIntent(R.id.widget_root, launch)
-    views.setOnClickPendingIntent(R.id.widget_empty, launch)
+    views.setOnClickPendingIntent(R.id.widget_title, launch)
+
+    // Tap '+' quick add action or empty state -> open the app straight into Add Item dialog.
+    val addIntent = Intent(context, MainActivity::class.java).apply {
+        action = ACTION_ADD_ITEM
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+    }
+    val addPendingIntent = PendingIntent.getActivity(
+        context,
+        REQUEST_ADD,
+        addIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+    )
+    views.setOnClickPendingIntent(R.id.widget_add_button, addPendingIntent)
+    views.setOnClickPendingIntent(R.id.widget_empty, addPendingIntent)
     views.setTextColor(R.id.widget_empty, if (night) NIGHT_MUTED else MUTED)
 
     // Cell taps: template broadcast to the reset receiver; each cell fills in
@@ -376,5 +391,8 @@ private val NIGHT_DIVIDER: Int = 0x40D9C6A6
 // Arrived-future styling: solid green plate with a dark red bold count.
 private val ARRIVED_NUMBER: Int = 0xFFB71C1C.toInt()
 
+const val ACTION_ADD_ITEM: String = "com.countup.app.ACTION_ADD_ITEM"
+
 private const val REQUEST_LAUNCH = 1
 private const val REQUEST_RESET = 2
+private const val REQUEST_ADD = 3

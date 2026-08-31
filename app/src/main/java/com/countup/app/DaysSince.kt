@@ -16,3 +16,15 @@ import java.time.temporal.ChronoUnit
 fun daysSince(anchorDate: LocalDate, today: LocalDate): Long {
     return ChronoUnit.DAYS.between(anchorDate, today)
 }
+
+/**
+ * Evaluates whether a given day count represents a landmark zen milestone.
+ * Milestones: 7, 30, 50, 100, 200, 365, 500, 1000, and multiples of 1000.
+ */
+fun isMilestoneDay(count: Long): Boolean {
+    if (count <= 0) return false
+    return when (count) {
+        7L, 30L, 50L, 100L, 200L, 365L, 500L, 1000L -> true
+        else -> count % 1000L == 0L
+    }
+}

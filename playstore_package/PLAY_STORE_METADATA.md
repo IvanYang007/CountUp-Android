@@ -140,5 +140,5 @@ All release artifacts are located in `playstore_package/`:
    - Go to **Release** -> **Production**.
    - Click **Create new release**.
    - Upload [`playstore_package/app-release.aab`](file:///d:/Github/countUp/playstore_package/app-release.aab).
-   - Enter Release notes: `Release 1.4.6: Added curated Mid-Century Modern and Zen card color combinations with random Paper White defaults, 38 Phosphor line icons, instant search & 1-tap sorting, and ultra-minimalist home screen widgets.`
+   - Enter Release notes: `Release 1.4.7: Added Tactile Zen Micro-Haptics on cards and buttons, Quick Add (+) on widget toolbar, Android Launcher Shortcuts (countup://new), real-time smart keyword styling for common habits, and ambient milestone gold accents.`
    - Click **Review release** -> **Start rollout to Production**.

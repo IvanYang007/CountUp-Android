@@ -60,4 +60,47 @@ class ItemIconsTest {
         assertEquals(R.string.cd_icon_person, iconDescriptionRes("unknown_nonexistent"))
         assertEquals(R.string.cd_icon_person, iconDescriptionRes(""))
     }
+
+    @Test
+    fun `matchKeywordStyle correctly maps English and Chinese keywords to curated icon and color pairs`() {
+        // English keywords
+        val haircut = matchKeywordStyle("Haircut appointment")
+        assertEquals(KeywordStyleMatch("content_cut", ""), haircut)
+
+        val meditation = matchKeywordStyle("Daily Meditation Streak")
+        assertEquals(KeywordStyleMatch("self_improvement", "sage_forest"), meditation)
+
+        val smoke = matchKeywordStyle("Smoke Free Since Jan")
+        assertEquals(KeywordStyleMatch("smoke_free", "paper_terracotta"), smoke)
+
+        val oil = matchKeywordStyle("Car Oil Service")
+        assertEquals(KeywordStyleMatch("directions_car", "ink_gold"), oil)
+
+        val reading = matchKeywordStyle("Read 30 pages a day")
+        assertEquals(KeywordStyleMatch("book", "paper_indigo"), reading)
+
+        val gym = matchKeywordStyle("Morning Gym Routine")
+        assertEquals(KeywordStyleMatch("fitness_center", "ink_crimson"), gym)
+
+        val water = matchKeywordStyle("Drink 2.5L Water")
+        assertEquals(KeywordStyleMatch("water_drop", "paper_indigo"), water)
+
+        val sleep = matchKeywordStyle("   Sleep by 10pm   ")
+        assertEquals(KeywordStyleMatch("bedtime", "sage_forest"), sleep)
+
+        // Chinese keywords
+        val hairZh = matchKeywordStyle("上次剪发")
+        assertEquals(KeywordStyleMatch("content_cut", ""), hairZh)
+
+        val zazenZh = matchKeywordStyle("晨间冥想")
+        assertEquals(KeywordStyleMatch("self_improvement", "sage_forest"), zazenZh)
+
+        val quitSmokingZh = matchKeywordStyle("戒烟天数")
+        assertEquals(KeywordStyleMatch("smoke_free", "paper_terracotta"), quitSmokingZh)
+
+        // Unmatched / Blank
+        org.junit.Assert.assertNull(matchKeywordStyle("Unmatched Random Custom Habit 12345"))
+        org.junit.Assert.assertNull(matchKeywordStyle(""))
+        org.junit.Assert.assertNull(matchKeywordStyle("   "))
+    }
 }

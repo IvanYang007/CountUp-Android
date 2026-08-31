@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="new_counter"
+        android:enabled="true"
+        android:icon="@drawable/ic_pencil_edit"
+        android:shortcutShortLabel="@string/shortcut_new_counter"
+        android:shortcutLongLabel="@string/shortcut_new_counter_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.countup.app"
+            android:targetClass="com.countup.app.MainActivity"
+            android:data="countup://new" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+</shortcuts>

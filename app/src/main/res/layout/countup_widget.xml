@@ -18,20 +18,43 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Quiet minimalist title on top-left (12.5sp poised seal, 10dp top / 18dp start clears 28dp corner arc) -->
-        <TextView
-            android:id="@+id/widget_title"
-            android:layout_width="wrap_content"
+        <!-- Quiet minimalist toolbar with title on top-left and '+' quick add action on top-right -->
+        <RelativeLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingStart="18dp"
-            android:paddingTop="10dp"
-            android:paddingEnd="18dp"
-            android:paddingBottom="5dp"
-            android:textSize="12.5sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.08"
-            android:textColor="#5D5043"
-            android:text="@string/app_name" />
+            android:paddingTop="8dp"
+            android:paddingEnd="14dp"
+            android:paddingBottom="4dp">
+
+            <TextView
+                android:id="@+id/widget_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:textSize="12.5sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.08"
+                android:textColor="#5D5043"
+                android:text="@string/app_name" />
+
+            <TextView
+                android:id="@+id/widget_add_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:paddingStart="12dp"
+                android:paddingTop="2dp"
+                android:paddingEnd="4dp"
+                android:paddingBottom="2dp"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#5D5043"
+                android:text="+"
+                android:contentDescription="@string/cd_widget_add" />
+        </RelativeLayout>
 
         <!-- 1dp subtle hairline editorial rule (#E3D3B8 at 40% opacity) inset by 16dp on both sides -->
         <ImageView

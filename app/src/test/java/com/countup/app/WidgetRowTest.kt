@@ -156,4 +156,9 @@ class WidgetRowTest {
         // Ochre gold is light, so text ink is dark
         assertEquals(0xFF2C2416.toInt(), style.textInk)
     }
+
+    @Test
+    fun widgetActionAddItemMatchesConstant() {
+        assertEquals("com.countup.app.ACTION_ADD_ITEM", ACTION_ADD_ITEM)
+    }
 }

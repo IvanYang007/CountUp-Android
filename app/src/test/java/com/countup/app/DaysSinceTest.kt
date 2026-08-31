@@ -51,4 +51,19 @@ class DaysSinceTest {
         val afterNonLeap = LocalDate.of(2023, 3, 1)
         assertEquals(1, daysSince(fromNonLeap, afterNonLeap))
     }
+
+    @Test
+    fun `isMilestoneDay correctly identifies landmark zen milestone day counts`() {
+        // Milestone days
+        val milestones = listOf(7L, 30L, 50L, 100L, 200L, 365L, 500L, 1000L, 2000L, 5000L, 10000L)
+        milestones.forEach { day ->
+            org.junit.Assert.assertTrue("Day $day should be a milestone", isMilestoneDay(day))
+        }
+
+        // Non-milestone days
+        val nonMilestones = listOf(-10L, -1L, 0L, 1L, 2L, 6L, 8L, 29L, 31L, 49L, 51L, 99L, 101L, 364L, 366L, 999L, 1001L)
+        nonMilestones.forEach { day ->
+            org.junit.Assert.assertFalse("Day $day should NOT be a milestone", isMilestoneDay(day))
+        }
+    }
 }

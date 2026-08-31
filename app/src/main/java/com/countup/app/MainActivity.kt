@@ -1,5 +1,6 @@
 package com.countup.app
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -38,6 +39,7 @@ class MainActivity : ComponentActivity() {
                 val snackbarHostState = remember { SnackbarHostState() }
 
                 LaunchedEffect(Unit) {
+                    handleIntent(intent)
                     viewModel.effects.collect { effect ->
                         when (effect) {
                             is CountUpUiEffect.ShowSnackbar -> {
@@ -61,6 +63,21 @@ class MainActivity : ComponentActivity() {
                     snackbarHostState = snackbarHostState,
                 )
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
+        if (intent == null) return
+        val isAdd = intent.action == ACTION_ADD_ITEM ||
+            intent.data?.toString() == "countup://new"
+        if (isAdd) {
+            activeViewModel?.onEvent(CountUpUiEvent.OpenEditor(target = null))
         }
     }
 

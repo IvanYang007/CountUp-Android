@@ -12,12 +12,15 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 
 /**
  * Mid-Century Modern Zen Paper & Chinese Ink Pigment Color Tokens.
@@ -117,7 +120,7 @@ fun ZenTheme(
 }
 
 /**
- * Tactile spring-damped press feedback for buttons, chips, and interactive cards.
+ * Tactile spring-damped press feedback and micro-haptic sensation for buttons, chips, and interactive cards.
  */
 @Composable
 fun Modifier.pressScale(
@@ -125,6 +128,12 @@ fun Modifier.pressScale(
     targetScale: Float = 0.96f,
 ): Modifier {
     val pressed by interactionSource.collectIsPressedAsState()
+    val haptic = LocalHapticFeedback.current
+    LaunchedEffect(pressed) {
+        if (pressed) {
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+        }
+    }
     val scale by animateFloatAsState(
         targetValue = if (pressed) targetScale else 1f,
         animationSpec = spring(

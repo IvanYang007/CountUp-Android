@@ -92,6 +92,7 @@ fun ItemEditorDialog(
     var isCustomizationExpanded by rememberSaveable {
         mutableStateOf(item != null && (item.cardColor.isNotBlank() || item.icon.isNotBlank()))
     }
+    var hasCustomizedManually by rememberSaveable { mutableStateOf(false) }
     var selectedCategoryIndex by rememberSaveable { mutableIntStateOf(0) }
     var showPicker by rememberSaveable { mutableStateOf(false) }
 
@@ -200,7 +201,16 @@ fun ItemEditorDialog(
             ) {
                 TextField(
                     value = name,
-                    onValueChange = { name = it },
+                    onValueChange = {
+                        name = it
+                        if (item == null && !hasCustomizedManually) {
+                            val match = matchKeywordStyle(it)
+                            if (match != null) {
+                                selectedIcon = match.icon
+                                selectedCardColor = match.cardColor
+                            }
+                        }
+                    },
                     label = { Text(stringResource(R.string.item_name)) },
                     placeholder = { Text(stringResource(R.string.name_placeholder)) },
                     singleLine = true,
@@ -330,7 +340,10 @@ fun ItemEditorDialog(
                                                 .clickable(
                                                     interactionSource = colorInteraction,
                                                     indication = LocalIndication.current,
-                                                    onClick = { selectedCardColor = preset.id },
+                                                    onClick = {
+                                                        selectedCardColor = preset.id
+                                                        hasCustomizedManually = true
+                                                    },
                                                 )
                                                 .pressScale(colorInteraction)
                                                 .semantics { contentDescription = colorDescription },
@@ -456,7 +469,10 @@ fun ItemEditorDialog(
                                                 .clickable(
                                                     interactionSource = iconInteraction,
                                                     indication = LocalIndication.current,
-                                                    onClick = { selectedIcon = iconName },
+                                                    onClick = {
+                                                        selectedIcon = iconName
+                                                        hasCustomizedManually = true
+                                                    },
                                                 )
                                                 .pressScale(iconInteraction)
                                                 .semantics { contentDescription = iconDesc },

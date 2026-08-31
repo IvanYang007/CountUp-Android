@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CountUp — Hero Milestone Widget Prototype (1x1 & 2x1)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-page: #0f1115;
+    --card-dark: #181b20;
+    --accent-gold: #deb285;
+    --accent-vermilion: #b84a39;
+    --accent-sage: #33523d;
+    --text-main: #f0ede6;
+    --text-muted: #9ba1a6;
+    --border-subtle: rgba(255,255,255,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg-page);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Header */
+  header {
+    background: #14171c;
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .brand-logo {
+    width: 32px;
+    height: 32px;
+    background: #33523d;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 800;
+    font-size: 16px;
+  }
+  .brand-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .badge-tag {
+    font-size: 11px;
+    background: rgba(222, 178, 133, 0.2);
+    color: var(--accent-gold);
+    border: 1px solid rgba(222, 178, 133, 0.4);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  /* Main Workspace */
+  main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 24px;
+    padding: 24px 28px;
+    max-width: 1560px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  @media (max-width: 1024px) {
+    main { grid-template-columns: 1fr; }
+  }
+
+  /* Control Panel */
+  .panel {
+    background: var(--card-dark);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: fit-content;
+  }
+  .panel-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent-gold);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .control-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+  .btn-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .opt-btn {
+    background: #20242b;
+    border: 1px solid rgba(255,255,255,0.06);
+    color: var(--text-main);
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.18s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .opt-btn:hover {
+    background: #2a3039;
+    border-color: rgba(255,255,255,0.15);
+  }
+  .opt-btn.active {
+    background: #33523d;
+    border-color: #4d7a58;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(51, 82, 61, 0.4);
+  }
+
+  .color-swatches {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .swatch {
+    height: 40px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.15s, border-color 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+  }
+  .swatch:hover { transform: scale(1.05); }
+  .swatch.active { border-color: #deb285; transform: scale(1.05); }
+
+  /* Device Stage */
+  .stage-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+  .device-mockup {
+    width: 380px;
+    height: 740px;
+    background: #000;
+    border-radius: 46px;
+    padding: 12px;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255,255,255,0.15);
+    position: relative;
+    user-select: none;
+    overflow: hidden;
+  }
+  .screen {
+    width: 100%;
+    height: 100%;
+    border-radius: 36px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background-size: cover;
+    background-position: center;
+    transition: background 0.3s ease;
+  }
+
+  /* Screen Wallpaper Themes */
+  .wp-sand { background: radial-gradient(circle at 50% 20%, #f4ede2 0%, #dfd3bf 100%); }
+  .wp-forest { background: radial-gradient(circle at 50% 20%, #2b3a32 0%, #151d18 100%); }
+  .wp-midnight { background: radial-gradient(circle at 50% 20%, #1a1e27 0%, #0d1017 100%); }
+  .wp-mist { background: radial-gradient(circle at 50% 20%, #ebe7df 0%, #b8af9f 100%); }
+
+  /* Android Status Bar */
+  .status-bar {
+    height: 38px;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(44, 36, 22, 0.85);
+    z-index: 10;
+  }
+  .screen.dark-wp .status-bar { color: rgba(255,255,255,0.85); }
+  .camera-punch {
+    width: 12px;
+    height: 12px;
+    background: #000;
+    border-radius: 50%;
+  }
+
+  /* Home Screen Content */
+  .home-screen {
+    flex: 1;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .widget-slot {
+    display: flex;
+    justify-content: center;
+    transition: all 0.25s ease;
+  }
+
+  /* WIDGET STYLES */
+
+  /* Common Widget Base */
+  .zen-widget {
+    border-radius: 24px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.08);
+    transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+    position: relative;
+    cursor: pointer;
+  }
+  .zen-widget:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.16);
+  }
+  .zen-widget:active {
+    transform: scale(0.97);
+  }
+
+  /* 1x1 Compact Stamp */
+  .widget-1x1 {
+    width: 148px;
+    height: 148px;
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    text-align: center;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+  .stamp-circle {
+    width: 78px;
+    height: 78px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+    position: relative;
+    transition: all 0.2s;
+  }
+  .stamp-icon {
+    width: 18px;
+    height: 18px;
+    opacity: 0.9;
+    margin-bottom: 1px;
+  }
+  .stamp-number {
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.5px;
+  }
+  .stamp-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+    margin-top: 4px;
+  }
+  .stamp-milestone-dot {
+    position: absolute;
+    top: 2px;
+    right: 4px;
+    width: 7px;
+    height: 7px;
+    background: var(--accent-gold);
+    border-radius: 50%;
+    box-shadow: 0 0 8px #deb285;
+  }
+
+  /* 2x1 Poetic Card */
+  .widget-2x1 {
+    width: 320px;
+    height: 148px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+  .card-badge {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+  }
+  .card-badge-icon {
+    width: 32px;
+    height: 32px;
+  }
+  .card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .card-title-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .card-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+  }
+  .card-milestone-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--accent-gold);
+    border-radius: 50%;
+    box-shadow: 0 0 6px #deb285;
+  }
+  .card-odometer-row {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-top: 2px;
+  }
+  .card-odometer {
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+  .card-unit {
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0.75;
+  }
+  .card-subtitle {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+    opacity: 0.65;
+    margin-top: 4px;
+  }
+
+  /* 2x1 Split Ribbon (Alternative Zen Concept) */
+  .widget-2x1-ribbon {
+    width: 320px;
+    height: 148px;
+    padding: 0;
+    display: flex;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+  .ribbon-spine {
+    width: 80px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .ribbon-spine-icon {
+    width: 28px;
+    height: 28px;
+  }
+  .ribbon-spine-tag {
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    opacity: 0.8;
+  }
+  .ribbon-content {
+    flex: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  /* Preset Colors */
+  .preset-paper {
+    background: #FAF5EE;
+    color: #2C2416;
+  }
+  .preset-paper .stamp-circle, .preset-paper .card-badge, .preset-paper .ribbon-spine {
+    background: #33523D;
+    color: #FFFFFF;
+  }
+
+  .preset-sage {
+    background: #E8EFE9;
+    color: #1F3827;
+  }
+  .preset-sage .stamp-circle, .preset-sage .card-badge, .preset-sage .ribbon-spine {
+    background: #33523D;
+    color: #FFFFFF;
+  }
+
+  .preset-terracotta {
+    background: #F8EFEA;
+    color: #4A221D;
+  }
+  .preset-terracotta .stamp-circle, .preset-terracotta .card-badge, .preset-terracotta .ribbon-spine {
+    background: #B84A39;
+    color: #FFFFFF;
+  }
+
+  .preset-gold {
+    background: #25201A;
+    color: #FAF5EE;
+  }
+  .preset-gold .stamp-circle, .preset-gold .card-badge, .preset-gold .ribbon-spine {
+    background: #DEB285;
+    color: #2C2416;
+  }
+
+  .preset-charcoal {
+    background: #1C1F1E;
+    color: #FAF7F2;
+  }
+  .preset-charcoal .stamp-circle, .preset-charcoal .card-badge, .preset-charcoal .ribbon-spine {
+    background: #4D7A58;
+    color: #FFFFFF;
+  }
+
+  .preset-indigo {
+    background: #ECEEF4;
+    color: #1A2744;
+  }
+  .preset-indigo .stamp-circle, .preset-indigo .card-badge, .preset-indigo .ribbon-spine {
+    background: #2B3A67;
+    color: #FFFFFF;
+  }
+
+  /* App Icons Grid on Mockup Home */
+  .app-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    padding: 10px 6px;
+  }
+  .dummy-app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  .app-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.7);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+  .screen.dark-wp .app-icon { background: rgba(255,255,255,0.15); color: #fff; }
+  .app-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(44,36,22,0.8);
+  }
+  .screen.dark-wp .app-label { color: rgba(255,255,255,0.8); }
+
+  /* Dock */
+  .dock {
+    position: absolute;
+    bottom: 24px;
+    left: 18px;
+    right: 18px;
+    height: 72px;
+    background: rgba(255,255,255,0.35);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 10px;
+  }
+  .screen.dark-wp .dock { background: rgba(255,255,255,0.12); }
+  .dock-app {
+    width: 48px;
+    height: 48px;
+    border-radius: 13px;
+    background: rgba(255,255,255,0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
+  .screen.dark-wp .dock-app { background: rgba(255,255,255,0.2); }
+
+  /* Explanatory callout */
+  .callout {
+    background: #14171c;
+    border-left: 3px solid var(--accent-gold);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-muted);
+  }
+  .callout strong { color: var(--text-main); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-logo">C</div>
+    <div class="brand-title">CountUp — Hero Milestone Widget Prototype</div>
+    <div class="badge-tag">Compose 2026 Ready</div>
+  </div>
+  <div style="font-size: 13px; color: var(--text-muted);">
+    Interactive Design Sandbox for 1x1 Compact Stamp & 2x1 Poetic Card
+  </div>
+</header>
+
+<main>
+  <!-- Control Sidebar -->
+  <div class="panel">
+    <div class="panel-title">
+      <span>📐</span> Widget Form Factor
+    </div>
+    <div class="control-group">
+      <div class="btn-grid">
+        <button class="opt-btn active" onclick="setWidgetType('1x1')">1x1 Compact Stamp</button>
+        <button class="opt-btn" onclick="setWidgetType('2x1')">2x1 Poetic Card</button>
+        <button class="opt-btn" onclick="setWidgetType('ribbon')">2x1 Split Ribbon</button>
+        <button class="opt-btn" onclick="setWidgetType('both')">Side-by-Side View</button>
+      </div>
+    </div>
+
+    <div class="panel-title">
+      <span>🎯</span> Select Hero Counter
+    </div>
+    <div class="control-group">
+      <div class="btn-grid">
+        <button class="opt-btn active" onclick="selectCounter('sobriety')">Sobriety (120d)</button>
+        <button class="opt-btn" onclick="selectCounter('meditation')">Meditation (30d)</button>
+        <button class="opt-btn" onclick="selectCounter('nosmoke')">Quit Smoke (7d)</button>
+        <button class="opt-btn" onclick="selectCounter('baby')">Baby Born (215d)</button>
+        <button class="opt-btn" onclick="selectCounter('wedding')">Anniversary (365d)</button>
+        <button class="opt-btn" onclick="selectCounter('haircut')">Haircut (18d)</button>
+      </div>
+    </div>
+
+    <div class="panel-title">
+      <span>🎨</span> Palette & Card Theme
+    </div>
+    <div class="color-swatches">
+      <div class="swatch preset-paper active" title="Paper White" onclick="setTheme('preset-paper')">Paper</div>
+      <div class="swatch preset-sage" title="Sage Forest" onclick="setTheme('preset-sage')">Sage</div>
+      <div class="swatch preset-terracotta" title="Terracotta" onclick="setTheme('preset-terracotta')">Terra</div>
+      <div class="swatch preset-gold" title="Ink Gold (Dark)" onclick="setTheme('preset-gold')">Gold</div>
+      <div class="swatch preset-charcoal" title="Charcoal (Dark)" onclick="setTheme('preset-charcoal')">Charcoal</div>
+      <div class="swatch preset-indigo" title="Indigo Clay" onclick="setTheme('preset-indigo')">Indigo</div>
+    </div>
+
+    <div class="panel-title">
+      <span>🌄</span> Android Launcher Wallpaper
+    </div>
+    <div class="control-group">
+      <div class="btn-grid">
+        <button class="opt-btn active" onclick="setWallpaper('wp-sand', false)">Sand Dunes</button>
+        <button class="opt-btn" onclick="setWallpaper('wp-forest', true)">Nordic Pine</button>
+        <button class="opt-btn" onclick="setWallpaper('wp-midnight', true)">Midnight Ink</button>
+        <button class="opt-btn" onclick="setWallpaper('wp-mist', false)">Morning Mist</button>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>Zen Design Philosophy:</strong> Dedicated to one sacred goal. Zero visual distraction, instant sub-millisecond refresh, and zero background battery drain.
+    </div>
+  </div>
+
+  <!-- Device Simulation Stage -->
+  <div class="stage-container">
+    <div class="device-mockup">
+      <div class="screen wp-sand" id="deviceScreen">
+        <!-- Status Bar -->
+        <div class="status-bar">
+          <span id="clockDisplay">11:58</span>
+          <div class="camera-punch"></div>
+          <span>5G &bull; 98%</span>
+        </div>
+
+        <!-- Home Screen Space -->
+        <div class="home-screen">
+          <!-- Widget Slot -->
+          <div class="widget-slot" id="widgetSlotContainer">
+            <!-- Rendered by JS -->
+          </div>
+
+          <!-- Dummy App Icons on Home Screen -->
+          <div class="app-grid">
+            <div class="dummy-app">
+              <div class="app-icon">📷</div>
+              <div class="app-label">Camera</div>
+            </div>
+            <div class="dummy-app">
+              <div class="app-icon">🌿</div>
+              <div class="app-label">Zen Log</div>
+            </div>
+            <div class="dummy-app">
+              <div class="app-icon">📖</div>
+              <div class="app-label">Books</div>
+            </div>
+            <div class="dummy-app">
+              <div class="app-icon">☕</div>
+              <div class="app-label">Coffee</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Android Launcher Dock -->
+        <div class="dock">
+          <div class="dock-app">📞</div>
+          <div class="dock-app">💬</div>
+          <div class="dock-app">🌐</div>
+          <div class="dock-app">⚙️</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  const COUNTERS = {
+    sobriety: {
+      id: '1',
+      name: 'Sobriety Streak',
+      count: 120,
+      since: 'since May 3, 2026',
+      iconSvg: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`,
+      isMilestone: true,
+      defaultTheme: 'preset-paper'
+    },
+    meditation: {
+      id: '2',
+      name: 'Daily Meditation',
+      count: 30,
+      since: 'since Aug 1, 2026',
+      iconSvg: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14h2v2h-2zm0-10h2v8h-2z"/></svg>`,
+      isMilestone: true,
+      defaultTheme: 'preset-sage'
+    },
+    nosmoke: {
+      id: '3',
+      name: 'Smoke Free',
+      count: 7,
+      since: 'since Aug 24, 2026',
+      iconSvg: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>`,
+      isMilestone: true,
+      defaultTheme: 'preset-terracotta'
+    },
+    baby: {
+      id: '4',
+      name: 'Baby Born (Clara)',
+      count: 215,
+      since: 'since Jan 28, 2026',
+      iconSvg: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 1 0 5 5 5 5 0 0 0-5-5zm0 12c-5.33 0-8 2.67-8 4v2h16v-2c0-1.33-2.67-4-8-4z"/></svg>`,
+      isMilestone: false,
+      defaultTheme: 'preset-indigo'
+    },
+    wedding: {
+      id: '5',
+      name: 'Wedding Anniversary',
+      count: 365,
+      since: 'since Aug 31, 2025',
+      iconSvg: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>`,
+      isMilestone: true,
+      defaultTheme: 'preset-gold'
+    },
+    haircut: {
+      id: '6',
+      name: 'Haircut',
+      count: 18,
+      since: 'since Aug 13, 2026',
+      iconSvg: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.64 7.64c.23-.5.36-1.05.36-1.64 0-2.21-1.79-4-4-4S2 3.79 2 6s1.79 4 4 4c.59 0 1.14-.13 1.64-.36L10 12l-2.36 2.36C7.14 14.13 6.59 14 6 14c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4c0-.59-.13-1.14-.36-1.64L12 14l7 7h3v-1L9.64 7.64zM6 8c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm0 12c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm6-7.5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5.5.22.5.5-.22.5-.5.5zM19 3l-6 6 2 2 7-7V3h-3z"/></svg>`,
+      isMilestone: false,
+      defaultTheme: 'preset-paper'
+    }
+  };
+
+  let state = {
+    widgetType: '1x1',
+    counterKey: 'sobriety',
+    theme: 'preset-paper',
+    wallpaper: 'wp-sand',
+    darkWp: false
+  };
+
+  function setWidgetType(type) {
+    state.widgetType = type;
+    document.querySelectorAll('.btn-grid button').forEach(btn => {
+      if (btn.innerText.includes('1x1') && type === '1x1') btn.classList.add('active');
+      else if (btn.innerText.includes('2x1 Poetic') && type === '2x1') btn.classList.add('active');
+      else if (btn.innerText.includes('Ribbon') && type === 'ribbon') btn.classList.add('active');
+      else if (btn.innerText.includes('Side-by-Side') && type === 'both') btn.classList.add('active');
+      else if (['1x1', '2x1', 'ribbon', 'both'].includes(type) && (btn.getAttribute('onclick')||'').includes('setWidgetType')) {
+        btn.classList.remove('active');
+      }
+    });
+    render();
+  }
+
+  function selectCounter(key) {
+    state.counterKey = key;
+    document.querySelectorAll('.btn-grid button').forEach(btn => {
+      if ((btn.getAttribute('onclick')||'').includes('selectCounter')) {
+        btn.classList.toggle('active', (btn.getAttribute('onclick')||'').includes(`'${key}'`));
+      }
+    });
+    render();
+  }
+
+  function setTheme(theme) {
+    state.theme = theme;
+    document.querySelectorAll('.swatch').forEach(sw => {
+      sw.classList.toggle('active', sw.classList.contains(theme));
+    });
+    render();
+  }
+
+  function setWallpaper(wp, isDark) {
+    state.wallpaper = wp;
+    state.darkWp = isDark;
+    const scr = document.getElementById('deviceScreen');
+    scr.className = `screen ${wp} ${isDark ? 'dark-wp' : ''}`;
+    document.querySelectorAll('.btn-grid button').forEach(btn => {
+      if ((btn.getAttribute('onclick')||'').includes('setWallpaper')) {
+        btn.classList.toggle('active', (btn.getAttribute('onclick')||'').includes(`'${wp}'`));
+      }
+    });
+  }
+
+  function render() {
+    const item = COUNTERS[state.counterKey];
+    const container = document.getElementById('widgetSlotContainer');
+    let html = '';
+
+    if (state.widgetType === '1x1') {
+      html = `
+        <div class="zen-widget widget-1x1 ${state.theme}" onclick="triggerHaptic('1x1')">
+          <div class="stamp-circle">
+            ${item.isMilestone ? '<div class="stamp-milestone-dot" title="Milestone Reached"></div>' : ''}
+            <div class="stamp-icon">${item.iconSvg}</div>
+            <div class="stamp-number">${item.count}</div>
+          </div>
+          <div class="stamp-title">${item.name}</div>
+        </div>
+      `;
+    } else if (state.widgetType === '2x1') {
+      html = `
+        <div class="zen-widget widget-2x1 ${state.theme}" onclick="triggerHaptic('2x1')">
+          <div class="card-badge">
+            <div class="card-badge-icon">${item.iconSvg}</div>
+          </div>
+          <div class="card-body">
+            <div class="card-title-row">
+              <div class="card-title">${item.name}</div>
+              ${item.isMilestone ? '<div class="card-milestone-dot" title="Milestone Reached"></div>' : ''}
+            </div>
+            <div class="card-odometer-row">
+              <span class="card-odometer">${item.count}</span>
+              <span class="card-unit">DAYS</span>
+            </div>
+            <div class="card-subtitle">${item.since}</div>
+          </div>
+        </div>
+      `;
+    } else if (state.widgetType === 'ribbon') {
+      html = `
+        <div class="zen-widget widget-2x1-ribbon ${state.theme}" onclick="triggerHaptic('ribbon')">
+          <div class="ribbon-spine">
+            <div class="ribbon-spine-icon">${item.iconSvg}</div>
+            <div class="ribbon-spine-tag">HERO</div>
+          </div>
+          <div class="ribbon-content">
+            <div class="card-title-row">
+              <div class="card-title">${item.name}</div>
+              ${item.isMilestone ? '<div class="card-milestone-dot" title="Milestone Reached"></div>' : ''}
+            </div>
+            <div class="card-odometer-row">
+              <span class="card-odometer">${item.count}</span>
+              <span class="card-unit">DAYS</span>
+            </div>
+            <div class="card-subtitle">${item.since}</div>
+          </div>
+        </div>
+      `;
+    } else if (state.widgetType === 'both') {
+      html = `
+        <div style="display: flex; flex-direction: column; gap: 14px; width: 100%; align-items: center;">
+          <div class="zen-widget widget-2x1 ${state.theme}" onclick="triggerHaptic('2x1')">
+            <div class="card-badge">
+              <div class="card-badge-icon">${item.iconSvg}</div>
+            </div>
+            <div class="card-body">
+              <div class="card-title-row">
+                <div class="card-title">${item.name}</div>
+                ${item.isMilestone ? '<div class="card-milestone-dot"></div>' : ''}
+              </div>
+              <div class="card-odometer-row">
+                <span class="card-odometer">${item.count}</span>
+                <span class="card-unit">DAYS</span>
+              </div>
+              <div class="card-subtitle">${item.since}</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 14px;">
+            <div class="zen-widget widget-1x1 ${state.theme}" onclick="triggerHaptic('1x1')">
+              <div class="stamp-circle">
+                ${item.isMilestone ? '<div class="stamp-milestone-dot"></div>' : ''}
+                <div class="stamp-icon">${item.iconSvg}</div>
+                <div class="stamp-number">${item.count}</div>
+              </div>
+              <div class="stamp-title">${item.name}</div>
+            </div>
+            <div class="dummy-app" style="justify-content: center; width: 148px;">
+              <div class="app-icon">✨</div>
+              <div class="app-label">Mindful Space</div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    container.innerHTML = html;
+  }
+
+  function triggerHaptic(type) {
+    if (navigator.vibrate) {
+      navigator.vibrate(12);
+    }
+  }
+
+  // Live Clock
+  function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    document.getElementById('clockDisplay').innerText = `${h}:${m}`;
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // Initial render
+  render();
+</script>
+</body>
+</html>

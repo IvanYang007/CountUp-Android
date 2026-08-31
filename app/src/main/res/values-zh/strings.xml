@@ -189,4 +189,10 @@
     <string name="cd_icon_sailing">帆船（扬帆启航）</string>
     <string name="cd_icon_music_note">音符（音乐）</string>
     <string name="cd_icon_eco">绿叶（生态环保）</string>
+
+    <!-- Quick Add & Shortcuts -->
+    <string name="cd_widget_add">添加新计数器</string>
+    <string name="shortcut_new_counter">新建计数</string>
+    <string name="shortcut_new_counter_long">创建新的倒数/正数天</string>
+    <string name="cd_milestone_reached">已达成里程碑：%1$d 天</string>
 </resources>

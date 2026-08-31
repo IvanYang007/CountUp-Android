@@ -756,6 +756,23 @@ fun ItemCard(
                         color = mutedInk,
                         modifier = Modifier.padding(bottom = 6.dp),
                     )
+                    val isMilestone = remember(count) { isMilestoneDay(count) }
+                    if (isMilestone) {
+                        val milestoneDesc = stringResource(R.string.cd_milestone_reached, count)
+                        Spacer(Modifier.width(6.dp))
+                        Box(
+                            modifier = Modifier
+                                .padding(bottom = 12.dp)
+                                .size(6.dp)
+                                .background(
+                                    if (isDarkCard) ZenOchre else ZenVermilion,
+                                    CircleShape,
+                                )
+                                .semantics {
+                                    contentDescription = milestoneDesc
+                                },
+                        )
+                    }
                 }
 
                 Text(
