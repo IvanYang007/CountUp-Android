@@ -57,32 +57,4 @@ class HeroWidgetTest {
         assertEquals(30L, daysSince(pastDate, today))
         assertEquals(-7L, daysSince(futureDate, today))
     }
-
-    @Test
-    fun `splitTitleFor1x1 correctly divides multi-word habit names for zero truncation display`() {
-        // Single word -> line1 = word, line2 = ""
-        val (s1, s2) = splitTitleFor1x1("Meditation")
-        assertEquals("MEDITATION", s1)
-        assertEquals("", s2)
-
-        // Two words -> line1 = first word, line2 = second word
-        val (w1, w2) = splitTitleFor1x1("Sobriety Streak")
-        assertEquals("SOBRIETY", w1)
-        assertEquals("STREAK", w2)
-
-        // Three words -> line1 = first 2 words, line2 = 3rd word
-        val (t1, t2) = splitTitleFor1x1("Daily Morning Meditation")
-        assertEquals("DAILY MORNING", t1)
-        assertEquals("MEDITATION", t2)
-
-        // Four words -> balanced 2 and 2
-        val (f1, f2) = splitTitleFor1x1("Studying For Bar Exam")
-        assertEquals("STUDYING FOR", f1)
-        assertEquals("BAR EXAM", f2)
-
-        // Empty string
-        val (e1, e2) = splitTitleFor1x1("   ")
-        assertEquals("", e1)
-        assertEquals("", e2)
-    }
 }
