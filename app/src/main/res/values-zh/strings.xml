@@ -23,10 +23,6 @@
     <string name="widget_hide">在微件中隐藏</string>
     <string name="widget_show">在微件中显示</string>
 
-    <!-- Reset confirm -->
-    <string name="reset_title">重置为今天？</string>
-    <string name="reset_message">将“%1$s”重置为今天，计数将归零。</string>
-
     <!-- Item editor -->
     <string name="add_title">新建事项</string>
     <string name="edit_title">编辑事项</string>

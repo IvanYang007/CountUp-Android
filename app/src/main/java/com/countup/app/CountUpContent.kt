@@ -104,8 +104,8 @@ import java.time.LocalDate
 fun CountUpContent(
     state: CountUpUiState,
     onEvent: (CountUpUiEvent) -> Unit,
-    modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    modifier: Modifier = Modifier,
 ) {
     val localContext = LocalContext.current
     val reduceMotion = remember(localContext) { isReducedMotion(localContext) }
@@ -627,9 +627,9 @@ fun ItemCard(
     onDelete: () -> Unit,
     onReset: () -> Unit,
     onToggleWidget: () -> Unit,
-    modifier: Modifier = Modifier,
     today: LocalDate = LocalDate.now(),
     reduceMotion: Boolean = false,
+    modifier: Modifier = Modifier,
 ) {
     val count = daysSince(LocalDate.ofEpochDay(item.epochDay), today)
     val cardInteraction = rememberPressSource()
@@ -637,7 +637,6 @@ fun ItemCard(
     val widgetInteraction = rememberPressSource()
     val countRowInteraction = rememberPressSource()
     val haptic = LocalHapticFeedback.current
-    val localContext = LocalContext.current
 
     var displayMode by rememberSaveable(item.id) { mutableStateOf(TimeDisplayMode.DAYS) }
     val decomposed = remember(item.epochDay, today, displayMode) {
@@ -855,33 +854,56 @@ fun ItemCard(
                             fontWeight = FontWeight.Bold,
                             color = if (arrivedFuture) ZenArrivedRed else primaryInk,
                         )
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            text = currentUnitLabel,
+                            fontSize = 15.sp,
+                            fontFamily = FontFamily.SansSerif,
+                            color = mutedInk,
+                            modifier = Modifier.padding(bottom = 6.dp),
+                        )
                     } else {
                         AnimatedContent(
-                            targetState = decomposed.valueText,
+                            targetState = displayMode,
                             transitionSpec = {
                                 (slideInVertically(tween(220)) { height -> height } + fadeIn(tween(220))).togetherWith(
                                     slideOutVertically(tween(220)) { height -> -height } + fadeOut(tween(220))
                                 ).using(SizeTransform(clip = false))
                             },
                             label = "day_odometer",
-                        ) { targetText ->
-                            Text(
-                                text = targetText,
-                                fontSize = fontSize,
-                                fontFamily = FontFamily.SansSerif,
-                                fontWeight = FontWeight.Bold,
-                                color = if (arrivedFuture) ZenArrivedRed else primaryInk,
-                            )
+                        ) { targetMode ->
+                            val targetDecomposed = remember(item.epochDay, today, targetMode) {
+                                decomposeTime(LocalDate.ofEpochDay(item.epochDay), today, targetMode)
+                            }
+                            val targetUnitLabel = if (targetMode == TimeDisplayMode.DAYS) {
+                                rawUnitLabel
+                            } else {
+                                stringResource(targetDecomposed.unitLabelRes)
+                            }
+                            val targetFontSize = when (targetMode) {
+                                TimeDisplayMode.DAYS -> 44.sp
+                                TimeDisplayMode.ELAPSED_BREAKDOWN -> 34.sp
+                                TimeDisplayMode.TOTAL_WEEKS -> 38.sp
+                            }
+                            Row(verticalAlignment = Alignment.Bottom) {
+                                Text(
+                                    text = targetDecomposed.valueText,
+                                    fontSize = targetFontSize,
+                                    fontFamily = FontFamily.SansSerif,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (arrivedFuture) ZenArrivedRed else primaryInk,
+                                )
+                                Spacer(Modifier.width(6.dp))
+                                Text(
+                                    text = targetUnitLabel,
+                                    fontSize = 15.sp,
+                                    fontFamily = FontFamily.SansSerif,
+                                    color = mutedInk,
+                                    modifier = Modifier.padding(bottom = 6.dp),
+                                )
+                            }
                         }
                     }
-                    Spacer(Modifier.width(6.dp))
-                    Text(
-                        text = currentUnitLabel,
-                        fontSize = 15.sp,
-                        fontFamily = FontFamily.SansSerif,
-                        color = mutedInk,
-                        modifier = Modifier.padding(bottom = 6.dp),
-                    )
                     val isMilestone = remember(count) { isMilestoneDay(count) }
                     if (isMilestone) {
                         val milestoneDesc = stringResource(R.string.cd_milestone_reached, count)

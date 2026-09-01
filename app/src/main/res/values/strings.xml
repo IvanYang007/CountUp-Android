@@ -23,10 +23,6 @@
     <string name="widget_hide">Hide from widget</string>
     <string name="widget_show">Show in widget</string>
 
-    <!-- Reset confirm -->
-    <string name="reset_title">Reset to today?</string>
-    <string name="reset_message">Set “%1$s” to today so its count returns to 0.</string>
-
     <!-- Item editor -->
     <string name="add_title">New item</string>
     <string name="edit_title">Edit item</string>
