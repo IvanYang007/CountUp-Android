@@ -89,11 +89,12 @@ private fun HeroWidgetConfigureScreen(
     items: List<CountUpItem>,
     today: LocalDate,
     onSelect: (CountUpItem) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val haptic = LocalHapticFeedback.current
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(LocalZenColors.current.paperBackground)
             .safeDrawingPadding()
@@ -129,6 +130,7 @@ private fun HeroWidgetConfigureScreen(
                 items(
                     items = items,
                     key = { it.id },
+                    contentType = { "hero_configure_item" },
                 ) { item ->
                     ItemCard(
                         item = item,

@@ -11,6 +11,6 @@
     android:previewImage="@drawable/hero_widget_preview"
     android:description="@string/hero_widget_description"
     android:widgetCategory="home_screen"
-    android:resizeMode="horizontal|vertical"
+    android:resizeMode="horizontal"
     android:configure="com.countup.app.HeroWidgetConfigureActivity"
     android:label="@string/hero_widget_label" />

@@ -156,7 +156,6 @@ private fun buildHero2x1RemoteViews(
         // Armed state: visual confirmation prompt
         views.setTextViewText(R.id.hero_name, context.getString(R.string.hero_widget_reset_prompt).uppercase())
         views.setTextColor(R.id.hero_name, alertVermilion)
-
         views.setTextViewText(R.id.hero_count, "0?")
         views.setTextColor(R.id.hero_count, alertVermilion)
 
@@ -168,7 +167,6 @@ private fun buildHero2x1RemoteViews(
         views.setTextViewText(R.id.hero_sublabel, context.getString(R.string.hero_widget_reset_sublabel))
         views.setTextColor(R.id.hero_sublabel, alertVermilion)
 
-        views.setImageViewResource(R.id.hero_badge_circle, R.drawable.ic_circle_olive)
         views.setInt(R.id.hero_badge_circle, "setColorFilter", alertVermilion)
 
         val iconDrawableRes = iconRes(item.icon.ifBlank { DEFAULT_ICON })
@@ -191,7 +189,6 @@ private fun buildHero2x1RemoteViews(
         views.setTextColor(R.id.hero_unit, mutedInkInt)
 
         // Badge circle and icon
-        views.setImageViewResource(R.id.hero_badge_circle, R.drawable.ic_circle_olive)
         views.setInt(R.id.hero_badge_circle, "setColorFilter", circleStyle.circleColor)
 
         val iconDrawableRes = iconRes(item.icon.ifBlank { DEFAULT_ICON })
