@@ -55,7 +55,7 @@
                 android:resource="@xml/haircut_widget_info" />
         </receiver>
 
-        <!-- Focused Hero Milestone Widget (1x1 & 2x1) -->
+        <!-- Focused Hero Milestone Widget (2x1) -->
         <receiver
             android:name=".HeroWidgetReceiver"
             android:exported="true">

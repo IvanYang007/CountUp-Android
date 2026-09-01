@@ -50,7 +50,7 @@
     <string name="toast_hidden_from_widget">已在微件中隐藏“%1$s”</string>
     <string name="toast_shown_in_widget">已在微件中显示“%1$s”</string>
 
-    <!-- Widget: Hero Milestone (1x1 & 2x1) -->
+    <!-- Widget: Hero Milestone (2x1) -->
     <string name="hero_widget_label">焦点里程碑（单项纪念）</string>
     <string name="hero_widget_description">专注展示单个核心目标与达成里程碑</string>
     <string name="hero_widget_empty">点击选择计数器</string>

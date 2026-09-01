@@ -104,8 +104,8 @@ import java.time.LocalDate
 fun CountUpContent(
     state: CountUpUiState,
     onEvent: (CountUpUiEvent) -> Unit,
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     modifier: Modifier = Modifier,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
     val localContext = LocalContext.current
     val reduceMotion = remember(localContext) { isReducedMotion(localContext) }
@@ -528,8 +528,8 @@ private fun MechanicalResetButton(
     onResetConfirmed: () -> Unit,
     contentDescription: String,
     tint: Color,
-    isDarkCard: Boolean = false,
     modifier: Modifier = Modifier,
+    isDarkCard: Boolean = false,
 ) {
     var isPressed by remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
@@ -627,9 +627,9 @@ fun ItemCard(
     onDelete: () -> Unit,
     onReset: () -> Unit,
     onToggleWidget: () -> Unit,
+    modifier: Modifier = Modifier,
     today: LocalDate = LocalDate.now(),
     reduceMotion: Boolean = false,
-    modifier: Modifier = Modifier,
 ) {
     val count = daysSince(LocalDate.ofEpochDay(item.epochDay), today)
     val cardInteraction = rememberPressSource()

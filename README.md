@@ -10,7 +10,7 @@ the **days since a set of anchor dates** (e.g. last haircut, a habit, sobriety, 
 - **Habit Notes & Countdowns:** 2-line custom notes and automatic "UNTIL" sub-labeling for future target dates.
 - **Dual Home-Screen Widgets:**
   - **Count-ups (Multi-Item Grid):** Full-width 3-column / 2-column grid widget displaying active milestones on dynamic ink wash backgrounds with 7-color MCM palettes.
-  - **Hero Milestone Widget:** Dedicated single-milestone widget in **1x1 Compact Dynamic Stack** (with true 1-cell launcher snap) and **2x1 Poetic Card** layouts, complete with counter picker on placement, ambient milestone gold accents, and safe two-tap direct in-place reset.
+  - **Hero Milestone Widget:** Dedicated single-milestone widget in **2x1 Poetic Card** layout, complete with counter picker on placement, ambient milestone gold accents, and safe two-tap direct in-place reset.
 - **Privacy First:** 100% offline, zero permissions, no accounts, no analytics, no ads, no background scheduler.
 
 ## 2. Build requirements and pinned versions
@@ -43,7 +43,7 @@ Requirements on this machine:
 ./gradlew clean
 ./gradlew assembleDebug             # debug APK
 ./gradlew assembleRelease           # signed release APK & bundle
-./gradlew test                      # JVM unit tests (139 tests)
+./gradlew test                      # JVM unit tests (143 tests)
 ./gradlew connectedDebugAndroidTest # instrumented tests (emulator/device online)
 ./gradlew lintDebug                 # lint (0 errors)
 ```
@@ -63,13 +63,13 @@ Existing single-item installs are migrated automatically: the old
 ### 1. Count-ups (Multi-Item Grid Widget)
 Long-press the home screen → **Widgets** → find **Count-ups** → drag to a slot.
 The widget lists all enabled items in a clean grid with quantity-aware day counts and dynamic ink wash backgrounds.
-- **In-place reset:** Tapping an item cell arms the direct reset confirmation ("0?"), and a second tap within 4 seconds zeroes that counter to today without opening the app.
+- **In-place reset:** Tapping the number arms the direct reset confirmation ("0?"), and a second tap within 1.5 seconds zeroes that counter to today without opening the app.
 
-### 2. Hero Milestone Widget (1x1 & 2x1)
+### 2. Hero Milestone Widget (2x1 Poetic Card)
 Long-press the home screen → **Widgets** → find **Hero Milestone** → drag to a slot.
 - **Configuration Picker:** Automatically opens a picker dialog to choose which specific milestone to pin.
-- **Responsive 1x1 & 2x1 Layouts:** Automatically adapts from a **1x1 Compact Dynamic Stack** (single-cell snap with icon, title, large count, and date sub-label) to a **2x1 Poetic Card**.
-- **Safe Two-Tap Reset:** Tap the reset icon once to arm confirmation ("0?"), tap again within 4 seconds to reset to today. Tapping anywhere else on the card opens the app directly to that habit.
+- **Poetic 2x1 Card Layout:** Displays icon badge, habit name, large bold day count, and anchor date sub-label with milestone gold accents.
+- **Safe Two-Tap Reset:** Tap the count or badge once to arm confirmation ("0?"), tap again within 1.5 seconds to reset to today. Tapping the background opens the app directly to that habit.
 
 **Widget screenshot (debug builds only):** the widget can be rendered on-device
 with the debug-only host activity (present in debug builds, not in release):

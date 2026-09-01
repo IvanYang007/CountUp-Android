@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.toArgb
 import java.time.LocalDate
 
 /**
- * Focused Hero Milestone Widget provider (1x1 Compact Stamp & 2x1 Poetic Card).
+ * Focused Hero Milestone Widget provider (2x1 Poetic Card).
  *
  * Dedicated to honoring a single chosen counter on the home screen with
  * ambient milestone gold accents, custom palette styling, and zero battery drain.

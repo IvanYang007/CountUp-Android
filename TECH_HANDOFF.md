@@ -12,7 +12,7 @@ Purpose of this doc: let another engineer (or agent) pick up the project and und
 - App: zen-paper styled list (warm off-white, serif/sans/mono typography, 1px borders), add/edit/delete/reset, instant search & 1-tap sorting, 30 rotatable Chinese ink wash landscape themes.
 - Widgets:
   - **Count-ups Grid Widget:** A 3-column / 2-column grid of item cells on dynamic ink wash backgrounds; **double-tap resets an item to today**.
-  - **Hero Milestone Widget:** A dedicated single-milestone widget with **1x1 Compact Dynamic Stack** and **2x1 Poetic Card** layouts, configuration picker on placement, milestone gold accent indicator, and safe two-tap in-place reset.
+  - **Hero Milestone Widget:** A dedicated single-milestone widget with **2x1 Poetic Card** layout, configuration picker on placement, milestone gold accent indicator, and safe two-tap in-place reset.
 
 Threat/scope model is deliberately minimal: **no accounts, no network, no analytics, no database, no background scheduler, zero permissions, backup disabled.**
 
@@ -58,12 +58,12 @@ Production Kotlin is flat under `app/src/main/java/com/countup/app/`:
 | `ItemIcons.kt` | Curated Material + Phosphor icon registry with Category metadata |
 | `WidgetBackgroundRenderer.kt` | Native procedural Canvas/Path vector renderer for Chinese ink wash themes on warm paper (< 180 KB memory) |
 | `CountUpWidget.kt` | Ultra-minimalist Zen RemoteViews multi-item grid widget: dynamic ink background, full-width grid, `ResetCountReceiver` (in-place double-tap reset confirmation), `pushWidgetUpdate()` imperative refresh |
-| `HeroWidgetReceiver.kt` | Dedicated single-item Hero Milestone widget receiver (1x1 Dynamic Stack & 2x1 Poetic Card), safe two-tap direct in-place reset (`ResetHeroCountReceiver`), responsive size provider |
+| `HeroWidgetReceiver.kt` | Dedicated single-item Hero Milestone widget receiver (2x1 Poetic Card), safe two-tap direct in-place reset (`ResetHeroCountReceiver`) |
 | `HeroWidgetConfigureActivity.kt` | Interactive launcher widget configuration activity to select and pin a counter to a Hero widget instance |
 | (debug) `WidgetHostActivity.kt` | Debug-only activity to render the widget for screenshots (not in release) |
 
 Tests:
-- `app/src/test/...` (JVM): `CountUpViewModelTest` (Turbine), `HeroWidgetTest` (1x1/2x1 layout & reset verification), `CountUpStressAndBoundaryTest` (1k items, unicode, leap years), `CountUpRepositoryTest`, `CountUpItemTest`, `CountUpStoreTest`, `EdgeCaseMatrixTest`, `AbstractBackgroundTest`, `DateConversionTest`, `DaysSinceTest`, `ItemIconsTest`, `SortOrderTest`, `WidgetRowTest`, `WidgetBackgroundTest` → **139 JVM unit tests** (100% green)
+- `app/src/test/...` (JVM): `CountUpViewModelTest` (Turbine), `HeroWidgetTest` (2x1 layout & reset verification), `CountUpStressAndBoundaryTest` (1k items, unicode, leap years), `CountUpRepositoryTest`, `CountUpItemTest`, `CountUpStoreTest`, `EdgeCaseMatrixTest`, `AbstractBackgroundTest`, `DateConversionTest`, `DaysSinceTest`, `ItemIconsTest`, `SortOrderTest`, `WidgetRowTest`, `WidgetBackgroundTest` → **143 JVM unit tests** (100% green)
 - `app/src/androidTest/...` (device): `ComposeUiSmokeTest` (stateless UI & a11y semantics), `CountUpStoreInstrumentedTest` (CRUD, migration, recovery)
 
 Resources: `res/values/strings.xml`, `plurals.xml` (`days_unit`), `themes.xml`, `colors.xml`; `res/drawable/ic_*.xml` (Material & Phosphor icons + `hero_milestone_dot`); `res/xml/haircut_widget_info.xml`, `res/xml/hero_widget_info.xml`, `data_extraction_rules.xml`, `backup_rules.xml`.
@@ -90,10 +90,9 @@ One value per item, stored as a JSON array string under key `items_v1` in privat
 - **Zen-paper theme & Chinese Ink Wash Backgrounds:** Warm paper background `#F7F6F3`, cards white with `1px #EAEAEA` border, radius 12, ink `#2F3437`, muted `#787774`; serif for headings/counts, sans for labels. 30 authentic Chinese ink wash landscape themes anchored to borders with negative space.
 - **Dynamic Anchor Sub-labels:** Count $\ge 0$ renders `SINCE <date>`; count $< 0$ (future event) renders `UNTIL <date>`.
 - **Scale-on-press & Motion:** `0.96` buttons / `0.99` cards via `pressScale()`; list add/remove uses `Modifier.animateItem()`, disabled under system reduce-motion.
-- **Hero Milestone Widget (1x1 & 2x1):**
-  - **1x1 Compact Dynamic Stack (Variant D):** Fits single-cell home screen slots (`minWidth="40dp"`, `minHeight="40dp"`). Organizes icon badge + title header row, prominent bold day count with "DAYS" sub-unit, anchor date sub-label, and milestone gold accent dot.
-  - **2x1 Poetic Card:** Wide horizontal card format with prominent count, icon badge, milestone dot, and anchor date.
-  - **Safe Two-Tap Reset:** Direct in-place reset armed with 4-second timeout without opening the app.
+- **Hero Milestone Widget (2x1 Poetic Card):**
+  - **2x1 Poetic Card:** Wide horizontal card format (`minWidth="110dp"`, `minResizeWidth="110dp"`, `targetCellWidth="2"`, `targetCellHeight="1"`) with prominent count, icon badge, milestone dot, and anchor date sub-label.
+  - **Safe Two-Tap Reset:** Direct in-place reset armed with 1.5-second timeout and hardware haptics without opening the app.
 
 ---
 
