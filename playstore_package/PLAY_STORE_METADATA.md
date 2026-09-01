@@ -140,5 +140,5 @@ All release artifacts are located in `playstore_package/`:
    - Go to **Release** -> **Production**.
    - Click **Create new release**.
    - Upload [`playstore_package/app-release.aab`](file:///d:/Github/countUp/playstore_package/app-release.aab).
-   - Enter Release notes: `Release 1.5.1: Added dual-size Hero Milestone Widgets (1x1 Dynamic Stack & 2x1 Poetic Card) with intelligent multi-word title wrapping, true 1x1 single-cell launcher snapping, custom counter picker, tactile Zen micro-haptics, and ambient milestone gold accents.`
+   - Enter Release notes: `Release 1.7.0 (v18): Added Poetic Ephemeris Odometer with synchronized number & unit roll transitions (tap to cycle between raw days, elapsed Y/M/D, and total weeks), 24dp in-card tactile mechanical spring hold reset with detent haptics, and dedicated 2x1 Poetic Card Hero Milestone Widget with drag-and-drop launcher placement and direct 1.5s hardware haptic in-place reset.`
    - Click **Review release** -> **Start rollout to Production**.

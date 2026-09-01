@@ -11,8 +11,8 @@ android {
         applicationId = "com.countup.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 17
-        versionName = "1.6.0"
+        versionCode = 18
+        versionName = "1.7.0"
     }
 
     signingConfigs {
