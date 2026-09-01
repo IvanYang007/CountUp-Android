@@ -336,8 +336,8 @@ class EdgeCaseMatrixTest {
     // =========================================================================
 
     @Test
-    fun allFiftyNineIconsResolveToValidNonZeroResourceIds() {
-        assertEquals(59, ALL_ICON_NAMES.size)
+    fun allNinetyOneIconsResolveToValidNonZeroResourceIds() {
+        assertEquals(91, ALL_ICON_NAMES.size)
 
         for (iconName in ALL_ICON_NAMES) {
             val resId = iconRes(iconName)

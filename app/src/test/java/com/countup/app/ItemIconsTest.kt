@@ -88,6 +88,28 @@ class ItemIconsTest {
         val sleep = matchKeywordStyle("   Sleep by 10pm   ")
         assertEquals(KeywordStyleMatch("bedtime", "sage_forest"), sleep)
 
+        // New concrete habit & life keywords (English)
+        val dental = matchKeywordStyle("Visit Dentist")
+        assertEquals(KeywordStyleMatch("tooth", "paper_indigo"), dental)
+
+        val pill = matchKeywordStyle("Daily Vitamin D")
+        assertEquals(KeywordStyleMatch("pill", "paper_terracotta"), pill)
+
+        val guitar = matchKeywordStyle("Acoustic Guitar Practice")
+        assertEquals(KeywordStyleMatch("guitar", "paper_terracotta"), guitar)
+
+        val bike = matchKeywordStyle("Bike commute")
+        assertEquals(KeywordStyleMatch("bicycle", "paper_terracotta"), bike)
+
+        val laundry = matchKeywordStyle("Do Laundry")
+        assertEquals(KeywordStyleMatch("washing_machine", "paper_indigo"), laundry)
+
+        val mountain = matchKeywordStyle("Mountain hiking trip")
+        assertEquals(KeywordStyleMatch("mountains", "sage_forest"), mountain)
+
+        val savings = matchKeywordStyle("Save money for vacation")
+        assertEquals(KeywordStyleMatch("piggy_bank", "ink_gold"), savings)
+
         // Chinese keywords
         val hairZh = matchKeywordStyle("上次剪发")
         assertEquals(KeywordStyleMatch("content_cut", ""), hairZh)
@@ -97,6 +119,24 @@ class ItemIconsTest {
 
         val quitSmokingZh = matchKeywordStyle("戒烟天数")
         assertEquals(KeywordStyleMatch("smoke_free", "paper_terracotta"), quitSmokingZh)
+
+        val toothZh = matchKeywordStyle("早起刷牙")
+        assertEquals(KeywordStyleMatch("tooth", "paper_indigo"), toothZh)
+
+        val guitarZh = matchKeywordStyle("练琴吉他")
+        assertEquals(KeywordStyleMatch("guitar", "paper_terracotta"), guitarZh)
+
+        val bikeZh = matchKeywordStyle("周末骑车")
+        assertEquals(KeywordStyleMatch("bicycle", "paper_terracotta"), bikeZh)
+
+        val laundryZh = matchKeywordStyle("洗衣服")
+        assertEquals(KeywordStyleMatch("washing_machine", "paper_indigo"), laundryZh)
+
+        val mountainZh = matchKeywordStyle("周末爬山")
+        assertEquals(KeywordStyleMatch("mountains", "sage_forest"), mountainZh)
+
+        val saveZh = matchKeywordStyle("每月存钱")
+        assertEquals(KeywordStyleMatch("piggy_bank", "ink_gold"), saveZh)
 
         // Unmatched / Blank
         org.junit.Assert.assertNull(matchKeywordStyle("Unmatched Random Custom Habit 12345"))

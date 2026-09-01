@@ -2,14 +2,16 @@
 
 ## 1. What the app does
 
-An intentionally small, fully offline Android app + home-screen widget that tracks
-the **days since a set of anchor dates** (e.g. last haircut, a habit, an anniversary).
+An intentionally small, fully offline Android app + home-screen widgets that track
+the **days since a set of anchor dates** (e.g. last haircut, a habit, sobriety, an anniversary) or **days until upcoming events**.
 
-- Create, rename, and delete any number of count-up items; each has a name, a randomly
-  assigned icon from the Material "Social" category, and one anchor date.
-- A mid-century-modern styled list shows each item's day count with calm add/edit/delete animations.
-- A home-screen widget shows all items in a **compact 2-per-row grid**, each with a quantity-aware day count and its anchor date.
-- No accounts, no network, no analytics, no database, no background scheduler.
+- **Calm, Mindful Aesthetic:** Mid-century modern tactile styling with warm paper background, rich card drop shadows, and 30 rotating classical Chinese ink wash landscape themes.
+- **Instant Search & 1-Tap Sorting:** Live query filtering and sorting by days elapsed, anchor date, or alphabetical name.
+- **Habit Notes & Countdowns:** 2-line custom notes and automatic "UNTIL" sub-labeling for future target dates.
+- **Dual Home-Screen Widgets:**
+  - **Count-ups (Multi-Item Grid):** Full-width 3-column / 2-column grid widget displaying active milestones on dynamic ink wash backgrounds with 7-color MCM palettes.
+  - **Hero Milestone Widget:** Dedicated single-milestone widget in **1x1 Compact Dynamic Stack** (with true 1-cell launcher snap) and **2x1 Poetic Card** layouts, complete with counter picker on placement, ambient milestone gold accents, and safe two-tap direct in-place reset.
+- **Privacy First:** 100% offline, zero permissions, no accounts, no analytics, no ads, no background scheduler.
 
 ## 2. Build requirements and pinned versions
 
@@ -17,12 +19,11 @@ Versions are pinned in `gradle/libs.versions.toml` and deliberately **not** upgr
 
 | Component | Version |
 |---|---|
-| Android Gradle Plugin | `9.3.0` (built-in Kotlin) |
-| Gradle | `9.5.0` |
+| Android Gradle Plugin | `9.4.0` (built-in Kotlin) |
+| Gradle | `9.7.1` |
 | JDK | `17` |
 | Kotlin | `2.3.21` |
 | Compose BOM | `2026.06.00` |
-| Glance AppWidget | `1.1.1` |
 | compileSdk / targetSdk / minSdk | `37` / `37` / `26` |
 
 > AGP 9 uses built-in Kotlin, so no `kotlin-android` plugin is applied; Kotlin
@@ -41,8 +42,8 @@ Requirements on this machine:
 ```bash
 ./gradlew clean
 ./gradlew assembleDebug             # debug APK
-./gradlew assembleRelease           # release APK
-./gradlew test                      # JVM unit tests
+./gradlew assembleRelease           # signed release APK & bundle
+./gradlew test                      # JVM unit tests (139 tests)
 ./gradlew connectedDebugAndroidTest # instrumented tests (emulator/device online)
 ./gradlew lintDebug                 # lint (0 errors)
 ```
@@ -57,16 +58,18 @@ adb shell am start -n com.countup.app/.MainActivity
 Existing single-item installs are migrated automatically: the old
 `last_haircut_epoch_day` value becomes a "Haircut" item on first launch.
 
-## 4. How to add and use the widget
+## 4. How to add and use the widgets
 
+### 1. Count-ups (Multi-Item Grid Widget)
 Long-press the home screen → **Widgets** → find **Count-ups** → drag to a slot.
-The widget lists every item in a compact 2-column grid, each with its day count.
+The widget lists all enabled items in a clean grid with quantity-aware day counts and dynamic ink wash backgrounds.
+- **In-place reset:** Tapping an item cell arms the direct reset confirmation ("0?"), and a second tap within 4 seconds zeroes that counter to today without opening the app.
 
-Managing counts:
-
-- **App:** each card has **Reset** (with a confirmation) and **Delete**; tapping the card edits it.
-- **Widget:** each item cell has a small **reset to today** action that zeroes that
-  item's count directly, without opening the app. Tapping anywhere else opens the app.
+### 2. Hero Milestone Widget (1x1 & 2x1)
+Long-press the home screen → **Widgets** → find **Hero Milestone** → drag to a slot.
+- **Configuration Picker:** Automatically opens a picker dialog to choose which specific milestone to pin.
+- **Responsive 1x1 & 2x1 Layouts:** Automatically adapts from a **1x1 Compact Dynamic Stack** (single-cell snap with icon, title, large count, and date sub-label) to a **2x1 Poetic Card**.
+- **Safe Two-Tap Reset:** Tap the reset icon once to arm confirmation ("0?"), tap again within 4 seconds to reset to today. Tapping anywhere else on the card opens the app directly to that habit.
 
 **Widget screenshot (debug builds only):** the widget can be rendered on-device
 with the debug-only host activity (present in debug builds, not in release):
@@ -76,42 +79,23 @@ adb shell am start -n com.countup.app/.WidgetHostActivity
 adb exec-out screencap -p > artifacts/widget.png
 ```
 
-On a (windowless) headless emulator, widget placement/binding can be blocked
-("Couldn't add widget") — use an interactive emulator or a physical device, or
-place it through the launcher and screenshot the home screen.
-
-**Receiver `exported` value:** `false` (secure default). If a specific launcher
-cannot reach the receiver, flip to `true` and re-run the widget checks.
+**Receiver `exported` value:** `false` (secure default).
 
 ## 5. Verification performed
 
-- Clean debug and release builds succeed.
-- Unit tests (15) and instrumented tests (12) pass, including: multi-item
-  create/read/update/delete, migration of the legacy single value into one item
-  (without re-import after delete), corrupt-data recovery, JSON round-trips, and
-  widget row derivation.
-- `lintDebug`: **0 errors**, 21 warnings — all deliberate, listed below.
-- Merged debug and release manifests request **zero permissions** (Glance's
-  transitive permissions are stripped via `tools:node="remove"`); backup disabled.
-- On-device (API 26 + API 36): added multiple items via the UI, counts verified
-  (e.g. Haircut 17 days, Plant 84 days); migration verified end-to-end; data
-  survives force-stop and **reboot**; the multi-item widget placed on the home
-  screen rendering both items with counts.
-- Widget receiver is registered and handles `APPWIDGET_UPDATE` without crashing.
-
-Remaining warnings (all deliberate):
-
-- `ApplySharedPref` / `UseKtx`: `commit()` is intentional — writes must be
-  confirmed before the widget is updated.
-- `UnusedAttribute` (`targetCellWidth/Height`): sizing attributes for API 31+, ignored below.
-- `AndroidGradlePluginVersion` / `GradleDependency` / `NewerVersionAvailable`:
-  the baseline is pinned; no upgrades are part of this project.
-- `ObsoleteSdkInt` (`mipmap-anydpi-v26`): adaptive icons require the `-v26` qualifier regardless of minSdk.
-- `VectorRaster` (widget preview drawable): a widget preview, not a launcher icon.
+- Clean debug and release builds succeed with R8 minification and resource shrinking enabled (`isMinifyEnabled = true`, `isShrinkResources = true`).
+- **139 JVM unit tests** and instrumented tests pass, including: multi-item
+  create/read/update/delete, migration of the legacy single value into one item,
+  Hero widget configuration and 1x1/2x1 rendering, two-tap in-place reset protocols,
+  corrupt-data recovery, JSON round-trips, and widget row derivation.
+- `lintDebug`: **0 errors**.
+- Merged debug and release manifests request **zero permissions**; backup disabled.
+- On-device (API 26 + API 36): verified UI interactions, data persistence across reboots,
+  and both Multi-Item Grid and Hero Milestone widgets on launcher home screens.
 
 ## 6. Known limitation: best-effort widget refresh after midnight
 
-The widget refreshes when the app resumes, when an item is added/edited/deleted,
+The widgets refresh when the app resumes, when an item is added/edited/deleted/reset,
 when the launcher or system asks, and on `updatePeriodMillis` (30 minutes) as a
 fallback. **Counts may remain stale after midnight** until the launcher/system
 refreshes or the app is opened — documented rather than hidden behind
@@ -119,7 +103,8 @@ AlarmManager/WorkManager, which are intentionally excluded.
 
 ## 7. Icons & licensing
 
-Item icons are a curated set from **Google Material Icons** (fonts.google.com/icons),
-"Social" category. They are licensed under the **Apache License 2.0**, which permits
-free commercial use. A copy of the license is at https://www.apache.org/licenses/LICENSE-2.0.
+Item icons are a curated set from **Google Material Icons** (fonts.google.com/icons)
+and **Phosphor Icons**, licensed under the **Apache License 2.0** and **MIT License**, which permit
+free commercial use. A copy of the Apache license is at https://www.apache.org/licenses/LICENSE-2.0.
+
 

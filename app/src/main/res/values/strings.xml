@@ -197,6 +197,40 @@
     <string name="cd_icon_music_note">Music notes (Audio)</string>
     <string name="cd_icon_eco">Leaf (Eco)</string>
 
+    <!-- Expanded Tangible Life & Habit Icons -->
+    <string name="cd_icon_tooth">Tooth (Dental care)</string>
+    <string name="cd_icon_pill">Pill (Medication &amp; vitamins)</string>
+    <string name="cd_icon_sneaker">Running shoe (Jogging &amp; steps)</string>
+    <string name="cd_icon_shower">Shower (Hygiene &amp; bath)</string>
+    <string name="cd_icon_scales">Weight scale (Diet &amp; fitness)</string>
+    <string name="cd_icon_heartbeat">Heart rate (Cardio &amp; pulse)</string>
+    <string name="cd_icon_guitar">Guitar (Music practice)</string>
+    <string name="cd_icon_game_controller">Game controller (Gaming)</string>
+    <string name="cd_icon_bicycle">Bicycle (Cycling &amp; commute)</string>
+    <string name="cd_icon_cooking_pot">Cooking pot (Meal prep &amp; culinary)</string>
+    <string name="cd_icon_knife">Kitchen knife (Cooking prep)</string>
+    <string name="cd_icon_washing_machine">Washing machine (Laundry)</string>
+    <string name="cd_icon_broom">Broom (Sweeping &amp; cleaning)</string>
+    <string name="cd_icon_yarn">Yarn ball (Knitting &amp; crafts)</string>
+    <string name="cd_icon_wrench">Wrench (Tools &amp; maintenance)</string>
+    <string name="cd_icon_identification_card">ID card (Credentials &amp; license)</string>
+    <string name="cd_icon_piggy_bank">Piggy bank (Savings &amp; budget)</string>
+    <string name="cd_icon_newspaper">Newspaper (Press &amp; reading)</string>
+    <string name="cd_icon_target">Target (Goal precision &amp; OKR)</string>
+    <string name="cd_icon_key">Key (New home &amp; keys)</string>
+    <string name="cd_icon_ticket">Ticket (Concert &amp; event pass)</string>
+    <string name="cd_icon_baby_carriage">Stroller (Baby &amp; parenting)</string>
+    <string name="cd_icon_medal">Medal (Competition &amp; finisher)</string>
+    <string name="cd_icon_crown">Crown (Milestone honor)</string>
+    <string name="cd_icon_handshake">Handshake (Agreement &amp; partnership)</string>
+    <string name="cd_icon_gift">Gift box (Present &amp; surprise)</string>
+    <string name="cd_icon_envelope">Envelope (Letter &amp; mail)</string>
+    <string name="cd_icon_mountains">Mountain range (Hiking &amp; summit)</string>
+    <string name="cd_icon_campfire">Campfire (Bonfire &amp; camping)</string>
+    <string name="cd_icon_tent">Tent (Outdoors &amp; backpacking)</string>
+    <string name="cd_icon_compass">Compass (Navigation &amp; exploration)</string>
+    <string name="cd_icon_camera">Camera (Photography)</string>
+
     <!-- Quick Add & Shortcuts -->
     <string name="cd_widget_add">Add new counter</string>
     <string name="shortcut_new_counter">New Counter</string>
