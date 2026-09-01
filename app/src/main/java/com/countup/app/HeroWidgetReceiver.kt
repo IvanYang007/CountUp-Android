@@ -22,6 +22,10 @@ import java.time.LocalDate
  */
 class HeroWidgetReceiver : AppWidgetProvider() {
 
+    companion object {
+        const val EXTRA_TARGET_ITEM_ID = "EXTRA_TARGET_ITEM_ID"
+    }
+
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
         for (appWidgetId in appWidgetIds) {
             pushHeroWidgetUpdate(context, appWidgetId)
@@ -139,7 +143,7 @@ private fun buildHero2x1RemoteViews(
 
     val launchIntent = Intent(context, MainActivity::class.java).apply {
         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-        putExtra("EXTRA_TARGET_ITEM_ID", item.id)
+        putExtra(HeroWidgetReceiver.EXTRA_TARGET_ITEM_ID, item.id)
     }
     val openAppPendingIntent = PendingIntent.getActivity(
         context,
@@ -150,7 +154,7 @@ private fun buildHero2x1RemoteViews(
 
     if (armed) {
         // Armed state: visual confirmation prompt
-        views.setTextViewText(R.id.hero_name, "RESET TO TODAY?")
+        views.setTextViewText(R.id.hero_name, context.getString(R.string.hero_widget_reset_prompt).uppercase())
         views.setTextColor(R.id.hero_name, alertVermilion)
 
         views.setTextViewText(R.id.hero_count, "0?")
@@ -161,7 +165,7 @@ private fun buildHero2x1RemoteViews(
 
         views.setViewVisibility(R.id.hero_milestone_dot, View.GONE)
 
-        views.setTextViewText(R.id.hero_sublabel, "Tap again to reset counter")
+        views.setTextViewText(R.id.hero_sublabel, context.getString(R.string.hero_widget_reset_sublabel))
         views.setTextColor(R.id.hero_sublabel, alertVermilion)
 
         views.setImageViewResource(R.id.hero_badge_circle, R.drawable.ic_circle_olive)
@@ -183,7 +187,7 @@ private fun buildHero2x1RemoteViews(
         views.setTextViewText(R.id.hero_count, count.toString())
         views.setTextColor(R.id.hero_count, primaryInkInt)
 
-        views.setTextViewText(R.id.hero_unit, "DAYS")
+        views.setTextViewText(R.id.hero_unit, context.getString(R.string.unit_days))
         views.setTextColor(R.id.hero_unit, mutedInkInt)
 
         // Badge circle and icon

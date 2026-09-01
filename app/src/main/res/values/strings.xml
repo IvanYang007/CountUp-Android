@@ -56,6 +56,8 @@
     <string name="hero_widget_empty">Tap to choose a counter</string>
     <string name="hero_widget_configure_title">Choose Hero Counter</string>
     <string name="hero_widget_configure_subtitle">Select the counter to honor on this widget</string>
+    <string name="hero_widget_reset_prompt">Reset to today?</string>
+    <string name="hero_widget_reset_sublabel">Tap again to reset counter</string>
 
     <!-- Background Themes (30 Classical Poetic & Zen Landscapes) -->
     <string name="bg_auto_daily">Daily Landscape</string>
