@@ -18,7 +18,6 @@ data class CountUpUiState(
     val isEditorOpen: Boolean = false,
     val isSearchSortMenuOpen: Boolean = false,
     val pendingDelete: CountUpItem? = null,
-    val pendingReset: CountUpItem? = null,
     val today: LocalDate = LocalDate.now(),
 ) {
     /**
@@ -67,8 +66,6 @@ sealed interface CountUpUiEvent {
     data class RequestDelete(val target: CountUpItem) : CountUpUiEvent
     data object DismissDelete : CountUpUiEvent
     data class ConfirmDelete(val id: String) : CountUpUiEvent
-    data class RequestReset(val target: CountUpItem) : CountUpUiEvent
-    data object DismissReset : CountUpUiEvent
     data class ConfirmReset(val id: String) : CountUpUiEvent
     data class ToggleWidgetVisibility(val id: String) : CountUpUiEvent
     data class SetSearchSortMenuOpen(val open: Boolean) : CountUpUiEvent

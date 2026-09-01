@@ -120,19 +120,12 @@ class CountUpViewModel(
                     emitEffect(CountUpUiEffect.ShowSnackbar(R.string.error_save_failed))
                 }
             }
-            is CountUpUiEvent.RequestReset -> {
-                _state.update { it.copy(pendingReset = event.target) }
-            }
-            CountUpUiEvent.DismissReset -> {
-                _state.update { it.copy(pendingReset = null) }
-            }
             is CountUpUiEvent.ConfirmReset -> {
                 val targetItem = _state.value.items.firstOrNull { it.id == event.id }
                 if (repository.resetTo(event.id, todayProvider().toEpochDay())) {
                     _state.update {
                         it.copy(
                             items = repository.getItems(),
-                            pendingReset = null,
                         )
                     }
                     if (targetItem != null) {
@@ -145,7 +138,6 @@ class CountUpViewModel(
                     }
                     emitEffect(CountUpUiEffect.RefreshWidget)
                 } else {
-                    _state.update { it.copy(pendingReset = null) }
                     emitEffect(CountUpUiEffect.ShowSnackbar(R.string.error_save_failed))
                 }
             }

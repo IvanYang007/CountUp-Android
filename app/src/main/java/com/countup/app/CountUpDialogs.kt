@@ -607,66 +607,6 @@ fun DeleteConfirmDialog(
 }
 
 /**
- * Confirmation dialog for resetting an item's anchor date to today.
- */
-@Composable
-fun ResetConfirmDialog(
-    itemName: String,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = Color(0xFFFCF8F2),
-        tonalElevation = 0.dp,
-        shape = RoundedCornerShape(20.dp),
-        title = {
-            Text(
-                text = stringResource(R.string.reset_title).uppercase(),
-                style = MaterialTheme.typography.titleMedium.copy(letterSpacing = 1.2.sp),
-                fontFamily = FontFamily.SansSerif,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        },
-        text = {
-            Text(
-                text = stringResource(R.string.reset_message, itemName),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        },
-        confirmButton = {
-            Button(
-                onClick = onConfirm,
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                ),
-            ) {
-                Text(
-                    text = stringResource(R.string.reset),
-                    fontFamily = FontFamily.SansSerif,
-                    fontWeight = FontWeight.SemiBold,
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismiss,
-                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
-            ) {
-                Text(
-                    text = stringResource(R.string.cancel),
-                    fontFamily = FontFamily.SansSerif,
-                )
-            }
-        },
-    )
-}
-
-/**
  * Fullscreen date picker dialog for selecting an anchor date.
  */
 @Composable

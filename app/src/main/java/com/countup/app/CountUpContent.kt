@@ -214,14 +214,6 @@ fun CountUpContent(
                 onConfirm = { onEvent(CountUpUiEvent.ConfirmDelete(target.id)) },
             )
         }
-
-        state.pendingReset?.let { target ->
-            ResetConfirmDialog(
-                itemName = target.name,
-                onDismiss = { onEvent(CountUpUiEvent.DismissReset) },
-                onConfirm = { onEvent(CountUpUiEvent.ConfirmReset(target.id)) },
-            )
-        }
     }
 }
 
@@ -536,8 +528,8 @@ private fun MechanicalResetButton(
     onResetConfirmed: () -> Unit,
     contentDescription: String,
     tint: Color,
-    modifier: Modifier = Modifier,
     isDarkCard: Boolean = false,
+    modifier: Modifier = Modifier,
 ) {
     var isPressed by remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
@@ -675,6 +667,11 @@ fun ItemCard(
     } else {
         stringResource(decomposed.unitLabelRes)
     }
+
+    val tapToDecomposeDesc = stringResource(
+        R.string.cd_tap_to_decompose,
+        "${decomposed.valueText} $currentUnitLabel",
+    )
 
     val fontSize = when (displayMode) {
         TimeDisplayMode.DAYS -> 44.sp
@@ -847,10 +844,7 @@ fun ItemCard(
                         )
                         .pressScale(countRowInteraction, 0.98f)
                         .semantics {
-                            contentDescription = localContext.getString(
-                                R.string.cd_tap_to_decompose,
-                                "${decomposed.valueText} $currentUnitLabel",
-                            )
+                            contentDescription = tapToDecomposeDesc
                         },
                 ) {
                     if (reduceMotion) {

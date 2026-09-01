@@ -203,9 +203,6 @@ class CountUpViewModelTest {
         val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday })
         val target = sampleItems.first()
 
-        viewModel.onEvent(CountUpUiEvent.RequestReset(target))
-        assertEquals(target, viewModel.state.value.pendingReset)
-
         viewModel.effects.test {
             viewModel.onEvent(CountUpUiEvent.ConfirmReset(target.id))
             val snackbarEffect = awaitItem()
@@ -216,7 +213,6 @@ class CountUpViewModelTest {
 
         viewModel.state.test {
             val state = awaitItem()
-            assertNull(state.pendingReset)
             val resetItem = state.items.first { it.id == target.id }
             assertEquals(fixedToday.toEpochDay(), resetItem.epochDay)
         }
