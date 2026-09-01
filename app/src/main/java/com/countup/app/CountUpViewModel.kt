@@ -127,11 +127,20 @@ class CountUpViewModel(
                 _state.update { it.copy(pendingReset = null) }
             }
             is CountUpUiEvent.ConfirmReset -> {
+                val targetItem = _state.value.items.firstOrNull { it.id == event.id }
                 if (repository.resetTo(event.id, todayProvider().toEpochDay())) {
                     _state.update {
                         it.copy(
                             items = repository.getItems(),
                             pendingReset = null,
+                        )
+                    }
+                    if (targetItem != null) {
+                        emitEffect(
+                            CountUpUiEffect.ShowSnackbar(
+                                messageRes = R.string.widget_reset_toast,
+                                formatArg = targetItem.name,
+                            )
                         )
                     }
                     emitEffect(CountUpUiEffect.RefreshWidget)

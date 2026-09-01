@@ -66,4 +66,77 @@ class DaysSinceTest {
             org.junit.Assert.assertFalse("Day $day should NOT be a milestone", isMilestoneDay(day))
         }
     }
+
+    @Test
+    fun `TimeDisplayMode next cycles predictably`() {
+        assertEquals(TimeDisplayMode.ELAPSED_BREAKDOWN, TimeDisplayMode.DAYS.next())
+        assertEquals(TimeDisplayMode.TOTAL_WEEKS, TimeDisplayMode.ELAPSED_BREAKDOWN.next())
+        assertEquals(TimeDisplayMode.DAYS, TimeDisplayMode.TOTAL_WEEKS.next())
+    }
+
+    @Test
+    fun `decomposeTime formats DAYS mode correctly`() {
+        val anchor = LocalDate.of(2025, 1, 1)
+        val today = LocalDate.of(2026, 7, 1)
+        val result = decomposeTime(anchor, today, TimeDisplayMode.DAYS)
+        assertEquals("546", result.valueText)
+        assertEquals(R.string.unit_days, result.unitLabelRes)
+    }
+
+    @Test
+    fun `decomposeTime formats ELAPSED_BREAKDOWN mode for multi-year and partial intervals`() {
+        val today = LocalDate.of(2026, 7, 21)
+
+        // 1. Exact Today
+        val zeroRes = decomposeTime(today, today, TimeDisplayMode.ELAPSED_BREAKDOWN)
+        assertEquals("0", zeroRes.valueText)
+        assertEquals(R.string.unit_today, zeroRes.unitLabelRes)
+
+        // 2. 1 year, 3 months, 10 days
+        val past1 = LocalDate.of(2025, 4, 11)
+        val res1 = decomposeTime(past1, today, TimeDisplayMode.ELAPSED_BREAKDOWN)
+        assertEquals("1y 3m 10d", res1.valueText)
+        assertEquals(R.string.unit_elapsed, res1.unitLabelRes)
+
+        // 3. Less than a year (e.g. 5 months 9 days)
+        val past2 = LocalDate.of(2026, 2, 12)
+        val res2 = decomposeTime(past2, today, TimeDisplayMode.ELAPSED_BREAKDOWN)
+        assertEquals("5m 9d", res2.valueText)
+        assertEquals(R.string.unit_elapsed, res2.unitLabelRes)
+
+        // 4. Future target
+        val future = LocalDate.of(2026, 9, 25)
+        val futureRes = decomposeTime(future, today, TimeDisplayMode.ELAPSED_BREAKDOWN)
+        assertEquals("2m 4d", futureRes.valueText)
+        assertEquals(R.string.unit_until_short, futureRes.unitLabelRes)
+    }
+
+    @Test
+    fun `decomposeTime formats TOTAL_WEEKS mode correctly`() {
+        val today = LocalDate.of(2026, 7, 21)
+
+        // Exact 0 days
+        val zero = decomposeTime(today, today, TimeDisplayMode.TOTAL_WEEKS)
+        assertEquals("0", zero.valueText)
+        assertEquals(R.string.unit_weeks, zero.unitLabelRes)
+
+        // Exact weeks (28 days = 4w)
+        val fourWeeks = today.minusDays(28)
+        val res1 = decomposeTime(fourWeeks, today, TimeDisplayMode.TOTAL_WEEKS)
+        assertEquals("4w", res1.valueText)
+        assertEquals(R.string.unit_weeks, res1.unitLabelRes)
+
+        // Partial weeks (31 days = 4w 3d)
+        val fourWeeksThreeDays = today.minusDays(31)
+        val res2 = decomposeTime(fourWeeksThreeDays, today, TimeDisplayMode.TOTAL_WEEKS)
+        assertEquals("4w 3d", res2.valueText)
+        assertEquals(R.string.unit_weeks, res2.unitLabelRes)
+
+        // Future weeks (16 days until = 2w 2d UNTIL)
+        val future = today.plusDays(16)
+        val res3 = decomposeTime(future, today, TimeDisplayMode.TOTAL_WEEKS)
+        assertEquals("2w 2d", res3.valueText)
+        assertEquals(R.string.unit_until_short, res3.unitLabelRes)
+    }
 }
+

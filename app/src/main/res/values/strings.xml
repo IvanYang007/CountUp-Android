@@ -236,4 +236,12 @@
     <string name="shortcut_new_counter">New Counter</string>
     <string name="shortcut_new_counter_long">Create a new counter</string>
     <string name="cd_milestone_reached">Milestone reached: %1$d days</string>
+
+    <!-- Time Decomposition Units -->
+    <string name="unit_days">DAYS</string>
+    <string name="unit_today">TODAY</string>
+    <string name="unit_elapsed">ELAPSED</string>
+    <string name="unit_weeks">WEEKS</string>
+    <string name="unit_until_short">UNTIL</string>
+    <string name="cd_tap_to_decompose">Displaying %1$s. Tap to toggle time format.</string>
 </resources>

@@ -13,8 +13,6 @@ android {
         targetSdk = 37
         versionCode = 17
         versionName = "1.6.0"
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
 
     signingConfigs {
         create("release") {

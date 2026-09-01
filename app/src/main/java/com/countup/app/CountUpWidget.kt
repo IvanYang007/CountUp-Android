@@ -159,8 +159,9 @@ class ResetCountReceiver : BroadcastReceiver() {
         val item = store.items().firstOrNull { it.id == id } ?: return
 
         if (isArmed(id)) {
-            // Second tap confirmed: disarm and reset to today
+            // Second tap confirmed: disarm and reset to today with heavy tactile latch
             disarm()
+            performWidgetHaptic(context, isHeavy = true)
             val today = LocalDate.now().toEpochDay()
             if (store.resetTo(id, today)) {
                 // Push synchronously from the app process: the launcher redraws
@@ -175,21 +176,58 @@ class ResetCountReceiver : BroadcastReceiver() {
                 ).show()
             }
         } else {
-            // First tap: arm this cell and re-render widget to show "Tap again" / "0?"
-            arm(id)
+            // First tap: arm this cell and re-render widget to show "Tap again" / "0?" with crisp detent tick
+            arm(context, id)
+            performWidgetHaptic(context, isHeavy = false)
             pushWidgetUpdate(context)
             pushAllHeroWidgetsUpdate(context)
         }
     }
 
+    @android.annotation.SuppressLint("MissingPermission")
+    private fun performWidgetHaptic(context: Context, isHeavy: Boolean) {
+        try {
+            val vibrator = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? android.os.VibratorManager
+                vibratorManager?.defaultVibrator
+            } else {
+                @Suppress("DEPRECATION")
+                context.getSystemService(Context.VIBRATOR_SERVICE) as? android.os.Vibrator
+            } ?: return
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                val effectId = if (isHeavy) {
+                    android.os.VibrationEffect.EFFECT_HEAVY_CLICK
+                } else {
+                    android.os.VibrationEffect.EFFECT_CLICK
+                }
+                vibrator.vibrate(android.os.VibrationEffect.createPredefined(effectId))
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator.vibrate(if (isHeavy) 35L else 15L)
+            }
+        } catch (_: Exception) {
+            // Graceful fallback on emulator / non-vibration hardware / unit tests
+        }
+    }
+
     companion object {
         const val EXTRA_ITEM_ID = "com.countup.app.extra.ITEM_ID"
-        private const val ARMED_TIMEOUT_MS = 4000L
+        private const val ARMED_TIMEOUT_MS = 1500L
 
         @Volatile
         private var armedItemId: String? = null
         @Volatile
         private var armedTimestamp: Long = 0L
+
+        private val mainHandler by lazy {
+            try {
+                android.os.Handler(android.os.Looper.getMainLooper())
+            } catch (_: Exception) {
+                null
+            }
+        }
+        private var disarmRunnable: Runnable? = null
 
         internal var clock: () -> Long = { SystemClock.elapsedRealtime() }
 
@@ -199,11 +237,31 @@ class ResetCountReceiver : BroadcastReceiver() {
         }
 
         fun arm(id: String) {
+            arm(context = null, id = id)
+        }
+
+        fun arm(context: Context?, id: String) {
             armedItemId = id
             armedTimestamp = try { clock() } catch (_: Exception) { System.currentTimeMillis() }
+            disarmRunnable?.let { mainHandler?.removeCallbacks(it) }
+
+            if (context != null) {
+                val appContext = context.applicationContext
+                val runnable = Runnable {
+                    if (armedItemId == id) {
+                        disarm()
+                        pushWidgetUpdate(appContext)
+                        pushAllHeroWidgetsUpdate(appContext)
+                    }
+                }
+                disarmRunnable = runnable
+                mainHandler?.postDelayed(runnable, ARMED_TIMEOUT_MS)
+            }
         }
 
         fun disarm() {
+            disarmRunnable?.let { mainHandler?.removeCallbacks(it) }
+            disarmRunnable = null
             armedItemId = null
             armedTimestamp = 0L
         }
@@ -318,10 +376,14 @@ internal class WidgetViewsFactory(private val context: Context) : RemoteViewsSer
             }
         }
 
-        // Tapping this cell resets ONLY this item to today; the item id rides
+        // Tapping the count circle resets ONLY this item to today; the item id rides
         // the fill-in intent onto the grid's template PendingIntent.
         views.setOnClickFillInIntent(
-            R.id.cell_root,
+            R.id.cell_count_container,
+            Intent().putExtra(ResetCountReceiver.EXTRA_ITEM_ID, row.id),
+        )
+        views.setOnClickFillInIntent(
+            R.id.cell_count,
             Intent().putExtra(ResetCountReceiver.EXTRA_ITEM_ID, row.id),
         )
 

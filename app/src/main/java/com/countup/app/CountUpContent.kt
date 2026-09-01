@@ -2,6 +2,11 @@ package com.countup.app
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -15,6 +20,7 @@ import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,9 +54,12 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,8 +70,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -76,6 +89,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 /**
@@ -164,7 +182,7 @@ fun CountUpContent(
                                     item = item,
                                     onClick = { onEvent(CountUpUiEvent.OpenEditor(item)) },
                                     onDelete = { onEvent(CountUpUiEvent.RequestDelete(item)) },
-                                    onReset = { onEvent(CountUpUiEvent.RequestReset(item)) },
+                                    onReset = { onEvent(CountUpUiEvent.ConfirmReset(item.id)) },
                                     onToggleWidget = { onEvent(CountUpUiEvent.ToggleWidgetVisibility(item.id)) },
                                     modifier = if (reduceMotion) Modifier else Modifier.animateItem(),
                                     today = state.today,
@@ -514,6 +532,103 @@ private fun SubHeaderRow(
 }
 
 @Composable
+private fun MechanicalResetButton(
+    onResetConfirmed: () -> Unit,
+    contentDescription: String,
+    tint: Color,
+    modifier: Modifier = Modifier,
+    isDarkCard: Boolean = false,
+) {
+    var isPressed by remember { mutableStateOf(false) }
+    val haptic = LocalHapticFeedback.current
+    val holdProgress = remember { Animatable(0f) }
+
+    LaunchedEffect(isPressed) {
+        if (isPressed) {
+            try {
+                coroutineScope {
+                    val detentJob = launch {
+                        delay(300L)
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    }
+                    holdProgress.animateTo(
+                        targetValue = 1f,
+                        animationSpec = tween(durationMillis = 800, easing = LinearEasing),
+                    )
+                    detentJob.cancel()
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onResetConfirmed()
+                    holdProgress.snapTo(0f)
+                    isPressed = false
+                }
+            } finally {
+                withContext(NonCancellable) {
+                    if (holdProgress.value < 1f && holdProgress.value > 0f) {
+                        holdProgress.animateTo(0f, spring(stiffness = Spring.StiffnessMedium))
+                    }
+                }
+            }
+        } else {
+            if (holdProgress.value > 0f) {
+                holdProgress.animateTo(0f, spring(stiffness = Spring.StiffnessMedium))
+            }
+        }
+    }
+
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.86f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+        label = "resetScale",
+    )
+
+    val progress = holdProgress.value
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .size(24.dp)
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = {
+                        isPressed = true
+                        tryAwaitRelease()
+                        isPressed = false
+                    },
+                )
+            }
+            .semantics { this.contentDescription = contentDescription },
+    ) {
+        if (progress > 0.01f) {
+            Canvas(modifier = Modifier.size(22.dp)) {
+                val strokeWidth = 1.8.dp.toPx()
+                val sweepColor = if (isDarkCard) Color(0xFFDEB285) else Color(0xFFD97642)
+                drawArc(
+                    color = sweepColor,
+                    startAngle = -90f,
+                    sweepAngle = progress * 360f,
+                    useCenter = false,
+                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+                )
+            }
+        }
+        Icon(
+            painter = painterResource(R.drawable.ic_refresh),
+            contentDescription = null,
+            tint = tint,
+            modifier = Modifier
+                .size(15.dp)
+                .graphicsLayer {
+                    rotationZ = progress * 360f
+                },
+        )
+    }
+}
+
+@Composable
 fun ItemCard(
     item: CountUpItem,
     onClick: () -> Unit,
@@ -526,9 +641,16 @@ fun ItemCard(
 ) {
     val count = daysSince(LocalDate.ofEpochDay(item.epochDay), today)
     val cardInteraction = rememberPressSource()
-    val resetInteraction = rememberPressSource()
     val deleteInteraction = rememberPressSource()
     val widgetInteraction = rememberPressSource()
+    val countRowInteraction = rememberPressSource()
+    val haptic = LocalHapticFeedback.current
+    val localContext = LocalContext.current
+
+    var displayMode by rememberSaveable(item.id) { mutableStateOf(TimeDisplayMode.DAYS) }
+    val decomposed = remember(item.epochDay, today, displayMode) {
+        decomposeTime(LocalDate.ofEpochDay(item.epochDay), today, displayMode)
+    }
 
     val resetDesc = stringResource(R.string.reset)
     val deleteDesc = stringResource(R.string.delete)
@@ -547,7 +669,18 @@ fun ItemCard(
     val onAccent = if (arrivedFuture) ZenWhite else style.badgeTint
 
     val pluralSelector = kotlin.math.abs(count).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
-    val unitLabel = pluralStringResource(R.plurals.days_unit, pluralSelector, count)
+    val rawUnitLabel = pluralStringResource(R.plurals.days_unit, pluralSelector, count)
+    val currentUnitLabel = if (displayMode == TimeDisplayMode.DAYS) {
+        rawUnitLabel
+    } else {
+        stringResource(decomposed.unitLabelRes)
+    }
+
+    val fontSize = when (displayMode) {
+        TimeDisplayMode.DAYS -> 44.sp
+        TimeDisplayMode.ELAPSED_BREAKDOWN -> 34.sp
+        TimeDisplayMode.TOTAL_WEEKS -> 38.sp
+    }
 
     val cardShape = RoundedCornerShape(20.dp)
     val surfaceBrush = remember {
@@ -615,8 +748,7 @@ fun ItemCard(
                 onClick = onClick,
             )
             .pressScale(cardInteraction, 0.985f)
-            .padding(horizontal = 16.dp, vertical = 14.dp)
-            .semantics(mergeDescendants = true) {},
+            .padding(horizontal = 16.dp, vertical = 14.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
@@ -662,25 +794,12 @@ fun ItemCard(
                 )
             }
             Spacer(Modifier.width(4.dp))
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(24.dp)
-                    .clickable(
-                        interactionSource = resetInteraction,
-                        indication = LocalIndication.current,
-                        onClick = onReset,
-                    )
-                    .pressScale(resetInteraction)
-                    .semantics { contentDescription = resetDesc },
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_refresh),
-                    contentDescription = null,
-                    tint = if (isDarkCard) Color(0xFFFAF7F2) else MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(15.dp),
-                )
-            }
+            MechanicalResetButton(
+                onResetConfirmed = onReset,
+                contentDescription = resetDesc,
+                tint = if (isDarkCard) Color(0xFFFAF7F2) else MaterialTheme.colorScheme.primary,
+                isDarkCard = isDarkCard,
+            )
             Spacer(Modifier.width(4.dp))
             Box(
                 contentAlignment = Alignment.Center,
@@ -713,35 +832,48 @@ fun ItemCard(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f, fill = false)) {
-                // Tactile Zen mechanical odometer digit roll
-                Row(verticalAlignment = Alignment.Bottom) {
+                // Tactile Zen mechanical odometer digit roll with tap-to-decompose
+                Row(
+                    verticalAlignment = Alignment.Bottom,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable(
+                            interactionSource = countRowInteraction,
+                            indication = LocalIndication.current,
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                displayMode = displayMode.next()
+                            },
+                        )
+                        .pressScale(countRowInteraction, 0.98f)
+                        .semantics {
+                            contentDescription = localContext.getString(
+                                R.string.cd_tap_to_decompose,
+                                "${decomposed.valueText} $currentUnitLabel",
+                            )
+                        },
+                ) {
                     if (reduceMotion) {
                         Text(
-                            text = count.toString(),
-                            fontSize = 44.sp,
+                            text = decomposed.valueText,
+                            fontSize = fontSize,
                             fontFamily = FontFamily.SansSerif,
                             fontWeight = FontWeight.Bold,
                             color = if (arrivedFuture) ZenArrivedRed else primaryInk,
                         )
                     } else {
                         AnimatedContent(
-                            targetState = count,
+                            targetState = decomposed.valueText,
                             transitionSpec = {
-                                if (targetState > initialState) {
-                                    (slideInVertically(tween(220)) { height -> height } + fadeIn(tween(220))).togetherWith(
-                                        slideOutVertically(tween(220)) { height -> -height } + fadeOut(tween(220))
-                                    )
-                                } else {
-                                    (slideInVertically(tween(220)) { height -> -height } + fadeIn(tween(220))).togetherWith(
-                                        slideOutVertically(tween(220)) { height -> height } + fadeOut(tween(220))
-                                    )
-                                }.using(SizeTransform(clip = false))
+                                (slideInVertically(tween(220)) { height -> height } + fadeIn(tween(220))).togetherWith(
+                                    slideOutVertically(tween(220)) { height -> -height } + fadeOut(tween(220))
+                                ).using(SizeTransform(clip = false))
                             },
                             label = "day_odometer",
-                        ) { targetCount ->
+                        ) { targetText ->
                             Text(
-                                text = targetCount.toString(),
-                                fontSize = 44.sp,
+                                text = targetText,
+                                fontSize = fontSize,
                                 fontFamily = FontFamily.SansSerif,
                                 fontWeight = FontWeight.Bold,
                                 color = if (arrivedFuture) ZenArrivedRed else primaryInk,
@@ -750,8 +882,8 @@ fun ItemCard(
                     }
                     Spacer(Modifier.width(6.dp))
                     Text(
-                        text = unitLabel,
-                        fontSize = 16.sp,
+                        text = currentUnitLabel,
+                        fontSize = 15.sp,
                         fontFamily = FontFamily.SansSerif,
                         color = mutedInk,
                         modifier = Modifier.padding(bottom = 6.dp),

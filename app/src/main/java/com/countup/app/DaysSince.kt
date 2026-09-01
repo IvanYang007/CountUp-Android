@@ -1,7 +1,35 @@
 package com.countup.app
 
+import androidx.annotation.StringRes
+import androidx.compose.runtime.Immutable
 import java.time.LocalDate
+import java.time.Period
 import java.time.temporal.ChronoUnit
+import kotlin.math.abs
+
+/**
+ * Display modes for the tactile odometer on the item card.
+ */
+enum class TimeDisplayMode {
+    DAYS,
+    ELAPSED_BREAKDOWN,
+    TOTAL_WEEKS;
+
+    fun next(): TimeDisplayMode {
+        val all = entries
+        return all[(ordinal + 1) % all.size]
+    }
+}
+
+/**
+ * Encapsulates the formatted value and unit label resource for a decomposed time interval.
+ */
+@Immutable
+data class DecomposedTime(
+    val valueText: String,
+    @get:StringRes val unitLabelRes: Int,
+    val mode: TimeDisplayMode = TimeDisplayMode.DAYS,
+)
 
 /**
  * Pure calendar-day arithmetic shared by the app and the widget.
@@ -18,6 +46,80 @@ fun daysSince(anchorDate: LocalDate, today: LocalDate): Long {
 }
 
 /**
+ * Decomposes an anchor-to-today interval into natural, human-friendly units based on [mode].
+ */
+fun decomposeTime(
+    anchorDate: LocalDate,
+    today: LocalDate,
+    mode: TimeDisplayMode = TimeDisplayMode.DAYS,
+): DecomposedTime {
+    val totalDays = daysSince(anchorDate, today)
+    return when (mode) {
+        TimeDisplayMode.DAYS -> {
+            DecomposedTime(
+                valueText = totalDays.toString(),
+                unitLabelRes = R.string.unit_days,
+                mode = TimeDisplayMode.DAYS,
+            )
+        }
+        TimeDisplayMode.ELAPSED_BREAKDOWN -> {
+            if (totalDays == 0L) {
+                DecomposedTime(
+                    valueText = "0",
+                    unitLabelRes = R.string.unit_today,
+                    mode = TimeDisplayMode.ELAPSED_BREAKDOWN,
+                )
+            } else {
+                val isFuture = totalDays < 0
+                val (startDate, endDate) = if (isFuture) today to anchorDate else anchorDate to today
+                val period = Period.between(startDate, endDate)
+                val years = period.years
+                val months = period.months
+                val days = period.days
+
+                val parts = mutableListOf<String>()
+                if (years > 0) parts.add("${years}y")
+                if (months > 0) parts.add("${months}m")
+                if (days > 0 || parts.isEmpty()) parts.add("${days}d")
+
+                val text = parts.joinToString(" ")
+                DecomposedTime(
+                    valueText = text,
+                    unitLabelRes = if (isFuture) R.string.unit_until_short else R.string.unit_elapsed,
+                    mode = TimeDisplayMode.ELAPSED_BREAKDOWN,
+                )
+            }
+        }
+        TimeDisplayMode.TOTAL_WEEKS -> {
+            if (totalDays == 0L) {
+                DecomposedTime(
+                    valueText = "0",
+                    unitLabelRes = R.string.unit_weeks,
+                    mode = TimeDisplayMode.TOTAL_WEEKS,
+                )
+            } else {
+                val isFuture = totalDays < 0
+                val absDays = abs(totalDays)
+                val weeks = absDays / 7
+                val remDays = absDays % 7
+
+                val text = if (remDays == 0L) {
+                    "${weeks}w"
+                } else {
+                    "${weeks}w ${remDays}d"
+                }
+
+                DecomposedTime(
+                    valueText = text,
+                    unitLabelRes = if (isFuture) R.string.unit_until_short else R.string.unit_weeks,
+                    mode = TimeDisplayMode.TOTAL_WEEKS,
+                )
+            }
+        }
+    }
+}
+
+/**
  * Evaluates whether a given day count represents a landmark zen milestone.
  * Milestones: 7, 30, 50, 100, 200, 365, 500, 1000, and multiples of 1000.
  */
@@ -28,3 +130,4 @@ fun isMilestoneDay(count: Long): Boolean {
         else -> count % 1000L == 0L
     }
 }
+

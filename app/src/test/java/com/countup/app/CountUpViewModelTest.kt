@@ -208,8 +208,10 @@ class CountUpViewModelTest {
 
         viewModel.effects.test {
             viewModel.onEvent(CountUpUiEvent.ConfirmReset(target.id))
-            val effect = awaitItem()
-            assertTrue(effect is CountUpUiEffect.RefreshWidget)
+            val snackbarEffect = awaitItem()
+            assertTrue(snackbarEffect is CountUpUiEffect.ShowSnackbar)
+            val refreshEffect = awaitItem()
+            assertTrue(refreshEffect is CountUpUiEffect.RefreshWidget)
         }
 
         viewModel.state.test {

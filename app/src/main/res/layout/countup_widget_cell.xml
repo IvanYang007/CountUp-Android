@@ -38,6 +38,7 @@
     </LinearLayout>
 
     <FrameLayout
+        android:id="@+id/cell_count_container"
         android:layout_width="36dp"
         android:layout_height="36dp">
 

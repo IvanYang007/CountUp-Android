@@ -243,12 +243,12 @@ class EdgeCaseMatrixTest {
         assertTrue(ResetCountReceiver.isArmed(id1))
         assertFalse(ResetCountReceiver.isArmed(id2))
 
-        // At t=13000 (within 4000ms), item 1 is still armed
-        simulatedTime = 13000L
+        // At t=11000 (within 1500ms), item 1 is still armed
+        simulatedTime = 11000L
         assertTrue(ResetCountReceiver.isArmed(id1))
 
-        // At t=14500 (exceeded 4000ms), item 1 timed out
-        simulatedTime = 14500L
+        // At t=12000 (exceeded 1500ms), item 1 timed out
+        simulatedTime = 12000L
         assertFalse(ResetCountReceiver.isArmed(id1))
 
         // Arm item 2: switches armed target immediately
