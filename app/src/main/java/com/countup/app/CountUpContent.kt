@@ -74,6 +74,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
@@ -687,7 +688,15 @@ fun ItemCard(
         )
     }
 
+    val isFutureEvent = item.futureFlag && count < 0
+    val patina = remember(count, isDarkCard) { resolvePatina(count, isDark = isDarkCard) }
+
     val cardModifier = if (isCustomCardColor) {
+        val customBorder = if (isFutureEvent) {
+            Modifier.border(width = 1.5.dp, color = cardBorderColor(baseBgColor), shape = cardShape)
+        } else {
+            Modifier.border(width = 1.5.dp, brush = patina.borderBrush, shape = cardShape)
+        }
         modifier
             .fillMaxWidth()
             .shadow(
@@ -697,11 +706,7 @@ fun ItemCard(
                 ambientColor = Color(0x182C2416),
                 spotColor = Color(0x222C2416),
             )
-            .border(
-                width = 1.dp,
-                color = cardBorderColor(baseBgColor),
-                shape = cardShape,
-            )
+            .then(customBorder)
             .background(
                 color = baseBgColor,
                 shape = cardShape,
@@ -717,8 +722,8 @@ fun ItemCard(
                 spotColor = Color(0x222C2416),
             )
             .border(
-                width = 1.dp,
-                brush = borderBrush,
+                width = 1.5.dp,
+                brush = if (isFutureEvent) borderBrush else patina.borderBrush,
                 shape = cardShape,
             )
             .background(
@@ -751,13 +756,26 @@ fun ItemCard(
                 )
             }
             Spacer(Modifier.width(10.dp))
-            Text(
-                text = item.name.uppercase(),
-                style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 1.sp),
-                fontFamily = FontFamily.SansSerif,
-                color = mutedInk,
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.weight(1f),
-            )
+            ) {
+                Text(
+                    text = item.name.uppercase(),
+                    style = MaterialTheme.typography.labelLarge.copy(letterSpacing = 1.sp),
+                    fontFamily = FontFamily.SansSerif,
+                    color = mutedInk,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false),
+                )
+                if (count >= 0) {
+                    Spacer(Modifier.width(6.dp))
+                    PatinaBadge(
+                        patina = patina,
+                    )
+                }
+            }
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
@@ -1017,6 +1035,40 @@ private fun EmptyState(onNewItem: () -> Unit, modifier: Modifier = Modifier) {
         ) {
             Text(stringResource(R.string.new_item))
         }
+    }
+}
+
+/**
+ * Ambient Patina maturity badge reflecting time elapsed seasoning stage.
+ * Follows android-kotlin-compose 2026 guidelines for accessibility (clearAndSetSemantics)
+ * and typography scale tokens.
+ */
+@Composable
+fun PatinaBadge(
+    patina: PatinaData,
+    modifier: Modifier = Modifier,
+) {
+    val phaseName = stringResource(patina.phase.labelRes)
+    val warmthPercent = (patina.warmth * 100f).toInt()
+    val badgeCd = stringResource(R.string.cd_patina_badge, phaseName, warmthPercent)
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .clip(RoundedCornerShape(5.dp))
+            .background(patina.badgeBg)
+            .padding(horizontal = 6.dp, vertical = 2.dp)
+            .clearAndSetSemantics { contentDescription = badgeCd },
+    ) {
+        Text(
+            text = phaseName.uppercase(),
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.4.sp,
+                color = patina.badgeTextColor,
+            ),
+            textAlign = TextAlign.Center,
+        )
     }
 }
 

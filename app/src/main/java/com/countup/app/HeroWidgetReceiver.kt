@@ -228,6 +228,7 @@ private fun buildHero2x1RemoteViews(
         // Milestone Gold Accent Dot
         if (isMilestone) {
             views.setViewVisibility(R.id.hero_milestone_dot, View.VISIBLE)
+            views.setInt(R.id.hero_milestone_dot, "setColorFilter", getPatinaPrimaryColor(count).toArgb())
         } else {
             views.setViewVisibility(R.id.hero_milestone_dot, View.GONE)
         }

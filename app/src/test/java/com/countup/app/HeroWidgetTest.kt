@@ -85,4 +85,13 @@ class HeroWidgetTest {
         mode = mode.next()
         assertEquals(TimeDisplayMode.DAYS, mode)
     }
+
+    @Test
+    fun `hero widget milestone dot resolves correct patina primary color`() {
+        val color30 = getPatinaPrimaryColor(30L)
+        assertTrue(color30.red > 0.65f)
+
+        val color180 = getPatinaPrimaryColor(180L)
+        assertEquals(PatinaPigments.Gold.red, color180.red, 0.01f)
+    }
 }

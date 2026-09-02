@@ -123,4 +123,16 @@ class CountUpContractAndFlowTest {
             assertTrue("Badge tint should have non-zero alpha", style.badgeTint.alpha > 0f)
         }
     }
+
+    @Test
+    fun `items in state derive accurate patina seasoning tokens without mutation`() {
+        val pastItem = CountUpItem(id = "1", name = "Bonsai", epochDay = fixedToday.minusDays(185).toEpochDay())
+        val days = daysSince(LocalDate.ofEpochDay(pastItem.epochDay), fixedToday)
+        assertEquals(185L, days)
+
+        val patina = resolvePatina(days, isDark = false)
+        assertEquals(PatinaPhase.KINTSUGI, patina.phase)
+        assertEquals(1.0f, patina.warmth, 0.001f)
+        assertEquals(ZenInkBlack, patina.badgeTextColor)
+    }
 }

@@ -140,5 +140,5 @@ All release artifacts are located in `playstore_package/`:
    - Go to **Release** -> **Production**.
    - Click **Create new release**.
    - Upload [`playstore_package/app-release.aab`](file:///d:/Github/countUp/playstore_package/app-release.aab).
-   - Enter Release notes: `Release 1.9.0 (v20): High-performance architecture and UI refinement — offloaded disk persistence and widget updates to background coroutines with atomic MVI state mutations, bounded widget canvas memory footprint to strictly safeguard IPC Binder transactions, refined touch target ergonomics on micro-actions, perfected card touch boundary clipping, pruned unused resources, and verified full test suite coverage (160/160 passing unit tests).`
+   - Enter Release notes: `Release 2.0.0 (v21): Introduced Card Color Warmth Shift ("Patina") system — cards gracefully season across calendar days with dynamic piecewise gradient borders (Cool Sage -> Warm Sand -> Zen Ochre -> Deep Amber -> Kintsugi Gold) and bilingual maturity badges, TalkBack clearAndSetSemantics accessibility, WCAG AAA text contrast across light and dark themes, 2x1 Hero Milestone Widget integration, and 172/172 verified green unit tests.`
    - Click **Review release** -> **Start rollout to Production**.

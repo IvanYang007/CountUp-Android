@@ -239,4 +239,12 @@
     <string name="unit_weeks">周数</string>
     <string name="unit_until_short">尚余</string>
     <string name="cd_tap_to_decompose">当前显示 %1$s。点击切换时间格式。</string>
+
+    <!-- Card Color Warmth Shift (Patina) Phases -->
+    <string name="patina_phase_fresh">初青稚绿</string>
+    <string name="patina_phase_warming">温润浅砂</string>
+    <string name="patina_phase_grounded">沉淀赭黄</string>
+    <string name="patina_phase_seasoned">浓郁琥珀</string>
+    <string name="patina_phase_kintsugi">金缮圆满</string>
+    <string name="cd_patina_badge">岁月包浆阶段：%1$s，成色 %2$d%%</string>
 </resources>

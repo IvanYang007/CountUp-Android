@@ -239,4 +239,12 @@
     <string name="unit_weeks">WEEKS</string>
     <string name="unit_until_short">UNTIL</string>
     <string name="cd_tap_to_decompose">Displaying %1$s. Tap to toggle time format.</string>
+
+    <!-- Card Color Warmth Shift (Patina) Phases -->
+    <string name="patina_phase_fresh">Cool Sage</string>
+    <string name="patina_phase_warming">Warming</string>
+    <string name="patina_phase_grounded">Zen Ochre</string>
+    <string name="patina_phase_seasoned">Deep Amber</string>
+    <string name="patina_phase_kintsugi">Gold Patina</string>
+    <string name="cd_patina_badge">Patina seasoning: %1$s, warmth %2$d percent</string>
 </resources>

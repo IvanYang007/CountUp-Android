@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CountUp - Card Color Warmth Shift (Patina) Prototype</title>
+<style>
+  :root {
+    --zen-sage: #7D9D8B;
+    --zen-sand: #B5A88F;
+    --zen-ochre: #C88D58;
+    --zen-gold: #D6A848;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px 16px;
+    background: #0E100F;
+    color: #E2E8E4;
+  }
+  .container { width: 100%; max-width: 860px; display: flex; flex-direction: column; gap: 28px; }
+  header { text-align: center; }
+  header h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; color: #F0F4F1; }
+  header p { font-size: 14px; color: #8C9992; max-width: 620px; margin: 0 auto; line-height: 1.5; }
+  .sandbox-card {
+    background: #171A19; border: 1px solid #28302C; border-radius: 20px; padding: 28px;
+    box-shadow: 0 20px 48px rgba(0,0,0,0.5); display: flex; flex-direction: column; gap: 24px;
+  }
+  .controls-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 680px) { .controls-grid { grid-template-columns: 1fr; } }
+  .control-panel { display: flex; flex-direction: column; gap: 12px; }
+  .panel-title { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #7E8C85; }
+  .slider-box {
+    display: flex; align-items: center; gap: 16px; background: #1F2422; padding: 12px 16px;
+    border-radius: 12px; border: 1px solid #2D3531;
+  }
+  input[type="range"] { flex: 1; accent-color: #C88D58; cursor: pointer; }
+  .day-badge { font-size: 16px; font-weight: 700; color: #F0EBE1; min-width: 85px; text-align: right; font-variant-numeric: tabular-nums; }
+  .quick-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    background: #1F2422; border: 1px solid #2F3833; color: #A6B4AD; padding: 6px 12px;
+    border-radius: 10px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s ease;
+  }
+  .chip:hover, .chip.active { background: #313B35; color: #FFF; border-color: #C88D58; }
+  .segmented-row { display: flex; background: #1F2422; padding: 4px; border-radius: 10px; gap: 4px; border: 1px solid #2A322E; }
+  .segmented-btn {
+    flex: 1; background: transparent; border: none; color: #8C9992; padding: 8px 10px;
+    border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;
+  }
+  .segmented-btn.active { background: #303A34; color: #FFFFFF; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+  .stage-viewport {
+    background: #121413; border-radius: 18px; padding: 48px 24px; display: flex;
+    flex-direction: column; align-items: center; justify-content: center; gap: 24px;
+    border: 1px solid #232A26; transition: background 0.3s ease; position: relative; overflow: hidden;
+  }
+  .zen-card {
+    width: 340px; max-width: 100%; border-radius: 20px; padding: 24px 26px;
+    box-sizing: border-box; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .card-category { font-size: 11px; letter-spacing: 0.15em; font-weight: 700; text-transform: uppercase; }
+  .card-badge { font-size: 10px; padding: 3px 8px; border-radius: 6px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; }
+  .card-title { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 24px; line-height: 1.3; }
+  .card-metric-row { display: flex; align-items: baseline; gap: 10px; }
+  .card-count { font-size: 54px; font-weight: 700; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .card-unit { font-size: 15px; font-weight: 500; }
+  .card-divider { height: 1px; width: 100%; margin: 20px 0 14px 0; }
+  .card-footer { display: flex; justify-content: space-between; align-items: center; font-size: 11px; }
+  .telemetry-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; width: 100%; }
+  .telemetry-item { background: #171B19; border: 1px solid #27302B; border-radius: 10px; padding: 10px 14px; display: flex; flex-direction: column; gap: 4px; }
+  .telemetry-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #728079; font-weight: 600; }
+  .telemetry-val { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13px; font-weight: 600; color: #E2ECE5; }
+  .color-swatch-box { display: inline-flex; align-items: center; gap: 8px; }
+  .color-dot { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.2); }
+  .strip-section { display: flex; flex-direction: column; gap: 14px; }
+  .strip-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .mini-card {
+    border-radius: 14px; padding: 14px; background: #171A19; border: 1px solid #2B332E;
+    display: flex; flex-direction: column; gap: 8px; cursor: pointer; transition: transform 0.2s ease;
+  }
+  .mini-card:hover { transform: translateY(-2px); }
+  .mini-day { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+  .mini-count { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .mini-desc { font-size: 10px; color: #8C9992; line-height: 1.3; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>CountUp Card Patina Simulation</h1>
+    <p>Visualizing warmth aging: <em>Zen Sage (Fresh)</em> &rarr; <em>Zen Sand</em> &rarr; <em>Zen Ochre (Aged)</em> &rarr; <em>Kintsugi Gold (Complete)</em></p>
+  </header>
+  <div class="sandbox-card">
+    <div class="controls-grid">
+      <div class="control-panel">
+        <span class="panel-title">1. Time Elapsed (Days Since)</span>
+        <div class="slider-box">
+          <input type="range" id="daySlider" min="0" max="365" value="1">
+          <span class="day-badge" id="dayDisplay">1 day</span>
+        </div>
+        <div class="quick-chips">
+          <button class="chip active" onclick="setDays(1)">Day 1</button>
+          <button class="chip" onclick="setDays(15)">Day 15</button>
+          <button class="chip" onclick="setDays(30)">Day 30</button>
+          <button class="chip" onclick="setDays(60)">Day 60</button>
+          <button class="chip" onclick="setDays(90)">Day 90</button>
+          <button class="chip" onclick="setDays(180)">Day 180</button>
+          <button class="chip" onclick="setDays(365)">Day 365</button>
+        </div>
+      </div>
+      <div class="control-panel">
+        <span class="panel-title">2. Design Variance</span>
+        <div class="segmented-row">
+          <button class="segmented-btn" id="vA" onclick="setVariance('A')">A: Rim</button>
+          <button class="segmented-btn active" id="vB" onclick="setVariance('B')">B: Gradient</button>
+          <button class="segmented-btn" id="vC" onclick="setVariance('C')">C: Hearth</button>
+          <button class="segmented-btn" id="vD" onclick="setVariance('D')">D: Kintsugi</button>
+        </div>
+        <span class="panel-title" style="margin-top: 4px;">3. App Theme</span>
+        <div class="segmented-row">
+          <button class="segmented-btn active" id="darkBtn" onclick="setTheme('dark')">Zen Charcoal (Dark)</button>
+          <button class="segmented-btn" id="lightBtn" onclick="setTheme('light')">Washi Paper (Light)</button>
+        </div>
+      </div>
+    </div>
+    <div class="stage-viewport" id="stageViewport">
+      <div class="zen-card" id="previewCard">
+        <div class="card-top">
+          <span class="card-category" id="cardCategory">MEDITATION STREAK</span>
+          <span class="card-badge" id="cardBadge">COOL SAGE</span>
+        </div>
+        <div class="card-title" id="cardTitle">Quiet Morning Sitting</div>
+        <div class="card-metric-row">
+          <span class="card-count" id="cardCount">1</span>
+          <span class="card-unit" id="cardUnit">days since</span>
+        </div>
+        <div class="card-divider" id="cardDivider"></div>
+        <div class="card-footer">
+          <span id="patinaPhase" style="font-weight: 500;">Phase: Fresh Growth</span>
+          <span id="warmthValue" style="font-family: monospace; opacity: 0.85;">Warmth: 0.00</span>
+        </div>
+      </div>
+      <div class="telemetry-grid">
+        <div class="telemetry-item">
+          <span class="telemetry-label">Border Hue</span>
+          <div class="color-swatch-box"><span class="color-dot" id="dotColor"></span><span class="telemetry-val" id="hexBorder">#7D9D8B</span></div>
+        </div>
+        <div class="telemetry-item"><span class="telemetry-label">Perceptual Warmth</span><span class="telemetry-val" id="rawFraction">0.000</span></div>
+        <div class="telemetry-item"><span class="telemetry-label">Border Alpha</span><span class="telemetry-val" id="alphaValue">30%</span></div>
+        <div class="telemetry-item"><span class="telemetry-label">Curve Model</span><span class="telemetry-val">Logarithmic (180d)</span></div>
+      </div>
+    </div>
+    <div class="strip-section">
+      <span class="panel-title">Milestone Patina Progression at a Glance</span>
+      <div class="strip-grid">
+        <div class="mini-card" style="border-color: rgba(125, 157, 139, 0.4);" onclick="setDays(1)">
+          <span class="mini-day" style="color: #7D9D8B;">Day 1</span>
+          <span class="mini-count">1</span>
+          <span class="mini-desc">Zen Sage α30%<br>Cool, crisp morning freshness.</span>
+        </div>
+        <div class="mini-card" style="border-color: rgba(181, 168, 143, 0.45);" onclick="setDays(15)">
+          <span class="mini-day" style="color: #B5A88F;">Day 15</span>
+          <span class="mini-count">15</span>
+          <span class="mini-desc">Sage-Sand Blend<br>Early habit settling.</span>
+        </div>
+        <div class="mini-card" style="border-color: rgba(200, 141, 88, 0.55);" onclick="setDays(30)">
+          <span class="mini-day" style="color: #C88D58;">Day 30</span>
+          <span class="mini-count">30</span>
+          <span class="mini-desc">Zen Ochre α55%<br>Seasoned warmth, ritual formed.</span>
+        </div>
+        <div class="mini-card" style="border-color: rgba(207, 154, 79, 0.65);" onclick="setDays(90)">
+          <span class="mini-day" style="color: #CF9A4F;">Day 90</span>
+          <span class="mini-count">90</span>
+          <span class="mini-desc">Deep Amber α65%<br>Rich maturity, wood & tea.</span>
+        </div>
+        <div class="mini-card" style="border-color: rgba(214, 168, 72, 0.75);" onclick="setDays(180)">
+          <span class="mini-day" style="color: #D6A848;">Day 180+</span>
+          <span class="mini-count">180</span>
+          <span class="mini-desc">Kintsugi Gold α75%<br>Enduring milestone.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  let currentDays = 1, currentTheme = 'dark', currentVariance = 'B';
+  function calculateWarmth(days) {
+    if (days <= 0) return 0.0;
+    return Math.pow(Math.min(days / 180.0, 1.0), 0.72);
+  }
+  function lerpColor(c1, c2, factor) {
+    return [
+      Math.round(c1[0] + (c2[0] - c1[0]) * factor),
+      Math.round(c1[1] + (c2[1] - c1[1]) * factor),
+      Math.round(c1[2] + (c2[2] - c1[2]) * factor)
+    ];
+  }
+  function getPatinaRgb(warmth) {
+    const SAGE = [125, 157, 139], SAND = [181, 168, 143], OCHRE = [200, 141, 88], GOLD = [214, 168, 72];
+    if (warmth < 0.25) return lerpColor(SAGE, SAND, warmth / 0.25);
+    if (warmth < 0.75) return lerpColor(SAND, OCHRE, (warmth - 0.25) / 0.5);
+    return lerpColor(OCHRE, GOLD, (warmth - 0.75) / 0.25);
+  }
+  function update() {
+    const warmth = calculateWarmth(currentDays);
+    const rgb = getPatinaRgb(warmth);
+    const alpha = 0.28 + (warmth * 0.44);
+    const hex = '#' + rgb.map(x => x.toString(16).padStart(2, '0')).join('');
+    const borderColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${alpha.toFixed(2)})`;
+
+    document.getElementById('dayDisplay').innerText = currentDays === 1 ? '1 day' : `${currentDays} days`;
+    document.getElementById('cardCount').innerText = currentDays;
+    document.getElementById('rawFraction').innerText = warmth.toFixed(3);
+    document.getElementById('warmthValue').innerText = `Warmth: ${(warmth * 100).toFixed(0)}%`;
+    document.getElementById('hexBorder').innerText = hex.toUpperCase();
+    document.getElementById('dotColor').style.background = hex;
+    document.getElementById('alphaValue').innerText = `${Math.round(alpha * 100)}%`;
+
+    let phase = "Cool Sage (Fresh Growth)", badge = "COOL SAGE";
+    if (currentDays >= 180) { phase = "Kintsugi Gold (Complete)"; badge = "GOLD PATINA"; }
+    else if (currentDays >= 90) { phase = "Deep Amber (Seasoned)"; badge = "DEEP AMBER"; }
+    else if (currentDays >= 30) { phase = "Zen Ochre (Grounded)"; badge = "ZEN OCHRE"; }
+    else if (currentDays >= 15) { phase = "Sage-Sand Blend (Warming)"; badge = "WARMING"; }
+    document.getElementById('patinaPhase').innerText = phase;
+    document.getElementById('cardBadge').innerText = badge;
+
+    const stage = document.getElementById('stageViewport'), card = document.getElementById('previewCard');
+    const title = document.getElementById('cardTitle'), cat = document.getElementById('cardCategory');
+    const badgeEl = document.getElementById('cardBadge'), count = document.getElementById('cardCount');
+    const unit = document.getElementById('cardUnit'), divider = document.getElementById('cardDivider');
+
+    if (currentTheme === 'dark') {
+      stage.style.background = '#121413'; title.style.color = '#EDEDEC'; count.style.color = '#EDEDEC';
+      unit.style.color = '#8C9490'; cat.style.color = hex; badgeEl.style.color = hex;
+      badgeEl.style.background = `rgba(${rgb.join(',')}, 0.12)`; divider.style.background = 'rgba(255,255,255,0.07)';
+    } else {
+      stage.style.background = '#EDEAE4'; title.style.color = '#232826'; count.style.color = '#232826';
+      unit.style.color = '#707874'; cat.style.color = hex; badgeEl.style.color = hex;
+      badgeEl.style.background = `rgba(${rgb.join(',')}, 0.16)`; divider.style.background = 'rgba(0,0,0,0.06)';
+    }
+
+    card.style.boxShadow = 'none'; card.style.border = 'none'; card.style.backgroundImage = 'none';
+
+    if (currentVariance === 'A') {
+      card.style.background = currentTheme === 'dark' ? '#1A1D1C' : '#FFFFFF';
+      card.style.border = `1.5px solid ${borderColor}`;
+    } else if (currentVariance === 'B') {
+      const leadingRgb = getPatinaRgb(Math.min(warmth * 1.25, 1.0));
+      const trailingRgb = getPatinaRgb(warmth * 0.7);
+      const cardBg = currentTheme === 'dark' ? '#1A1D1C' : '#FFFFFF';
+      card.style.background = cardBg;
+      card.style.border = '1.5px solid transparent';
+      card.style.backgroundClip = 'padding-box, border-box';
+      card.style.backgroundImage = `linear-gradient(to bottom right, ${cardBg}, ${cardBg}), linear-gradient(135deg, rgba(${leadingRgb.join(',')}, ${alpha.toFixed(2)}), rgba(${trailingRgb.join(',')}, ${(alpha * 0.35).toFixed(2)}))`;
+    } else if (currentVariance === 'C') {
+      const bgTint = currentTheme === 'dark'
+        ? `radial-gradient(circle at top right, rgba(${rgb.join(',')}, ${0.12 * warmth}), #1A1D1C 75%)`
+        : `radial-gradient(circle at top right, rgba(${rgb.join(',')}, ${0.12 * warmth}), #FFFFFF 75%)`;
+      card.style.background = bgTint;
+      card.style.border = `1.5px solid ${borderColor}`;
+      if (warmth > 0.3) card.style.boxShadow = `0 12px 36px rgba(${rgb.join(',')}, ${(0.16 * warmth).toFixed(2)})`;
+    } else if (currentVariance === 'D') {
+      card.style.background = currentTheme === 'dark' ? '#1A1D1C' : '#FFFFFF';
+      card.style.border = `1.5px solid ${borderColor}`;
+      if (currentDays >= 30) {
+        const glow = Math.min((currentDays - 30) / 150, 1.0);
+        card.style.boxShadow = `inset 0 1.5px 0 0 rgba(214, 168, 72, ${0.4 + 0.5 * glow}), 0 4px 24px rgba(0,0,0,0.35)`;
+      }
+    }
+  }
+  document.getElementById('daySlider').addEventListener('input', (e) => {
+    currentDays = parseInt(e.target.value);
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    update();
+  });
+  function setDays(d) {
+    currentDays = d;
+    document.getElementById('daySlider').value = d;
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    const chips = Array.from(document.querySelectorAll('.chip'));
+    const match = chips.find(c => c.textContent.includes(`Day ${d}`));
+    if (match) match.classList.add('active');
+    update();
+  }
+  function setTheme(t) {
+    currentTheme = t;
+    document.getElementById('darkBtn').classList.toggle('active', t === 'dark');
+    document.getElementById('lightBtn').classList.toggle('active', t === 'light');
+    update();
+  }
+  function setVariance(v) {
+    currentVariance = v;
+    ['A','B','C','D'].forEach(name => {
+      document.getElementById('v' + name).classList.toggle('active', name === v);
+    });
+    update();
+  }
+  update();
+</script>
+</body>
+</html>
