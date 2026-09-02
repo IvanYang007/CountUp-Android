@@ -140,5 +140,5 @@ All release artifacts are located in `playstore_package/`:
    - Go to **Release** -> **Production**.
    - Click **Create new release**.
    - Upload [`playstore_package/app-release.aab`](file:///d:/Github/countUp/playstore_package/app-release.aab).
-   - Enter Release notes: `Release 1.8.0 (v19): Harmonized Poetic Ephemeris Odometer typography scale (36sp DAYS, 24sp ELAPSED, 28sp WEEKS) for calm optical balance, added in-place tap-to-decompose time mode cycling directly to the 2x1 Hero Milestone Widget with per-widget persistence, hardened static PendingIntents with FLAG_IMMUTABLE, and verified 145/145 green unit tests.`
+   - Enter Release notes: `Release 1.9.0 (v20): High-performance architecture and UI refinement — offloaded disk persistence and widget updates to background coroutines with atomic MVI state mutations, bounded widget canvas memory footprint to strictly safeguard IPC Binder transactions, refined touch target ergonomics on micro-actions, perfected card touch boundary clipping, pruned unused resources, and verified full test suite coverage (160/160 passing unit tests).`
    - Click **Review release** -> **Start rollout to Production**.
