@@ -77,24 +77,19 @@ internal fun buildBaseViews(context: Context, appWidgetOptions: android.os.Bundl
     val itemCount = widgetItems.size
     val rowCount = ((itemCount + 2) / 3).coerceIn(1, 5)
 
-    // Compute target canvas height from launcher options or row count
+    // Compute bounded canvas dimensions to keep bitmap parcel well within Android's 1MB Binder IPC limit
     val optionsHeightDp = appWidgetOptions?.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 0) ?: 0
-    val density = context.resources.displayMetrics.density
-    val targetHeight = if (optionsHeightDp > 100) {
-        (optionsHeightDp * density).toInt().coerceIn(180, 800)
-    } else {
-        when (rowCount) {
-            1 -> 200
-            2 -> 280
-            3 -> 400
-            4 -> 520
-            else -> 280 + (rowCount - 2) * 120
-        }
+    val targetWidth = 360
+    val targetHeight = when {
+        optionsHeightDp > 100 -> (optionsHeightDp * 0.6f).toInt().coerceIn(140, 260)
+        rowCount == 1 -> 160
+        rowCount == 2 -> 200
+        else -> 240
     }
 
     val bgBitmap = WidgetBackgroundRenderer.render(
         theme = theme,
-        width = 480,
+        width = targetWidth,
         height = targetHeight,
         isNight = night,
     )

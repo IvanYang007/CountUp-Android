@@ -5,12 +5,17 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Mid-century-modern multi-item screen container.
@@ -19,22 +24,22 @@ import androidx.lifecycle.viewmodel.compose.viewModel
  */
 class MainActivity : ComponentActivity() {
 
-    private lateinit var store: CountUpStore
-    private var activeViewModel: CountUpViewModel? = null
+    private val viewModel: CountUpViewModel by viewModels {
+        object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val store = CountUpStore(applicationContext)
+                return CountUpViewModel(DefaultCountUpRepository(store)) as T
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        store = CountUpStore(this)
-
         setContent {
             ZenTheme {
-                val viewModel: CountUpViewModel = viewModel {
-                    CountUpViewModel(DefaultCountUpRepository(store))
-                }
-                activeViewModel = viewModel
-
                 val state by viewModel.state.collectAsStateWithLifecycle()
                 val snackbarHostState = remember { SnackbarHostState() }
 
@@ -77,7 +82,7 @@ class MainActivity : ComponentActivity() {
         val isAdd = intent.action == ACTION_ADD_ITEM ||
             intent.data?.toString() == "countup://new"
         if (isAdd) {
-            activeViewModel?.onEvent(CountUpUiEvent.OpenEditor(target = null))
+            viewModel.onEvent(CountUpUiEvent.OpenEditor(target = null))
         } else if (intent.data?.toString() == "countup://pin_hero") {
             val manager = getSystemService(android.appwidget.AppWidgetManager::class.java)
             if (manager.isRequestPinAppWidgetSupported) {
@@ -89,14 +94,17 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        activeViewModel?.onEvent(CountUpUiEvent.Refresh)
+        viewModel.onEvent(CountUpUiEvent.Refresh)
         refreshWidget()
     }
 
     private fun refreshWidget() {
-        runCatching {
-            pushWidgetUpdate(this)
-            pushAllHeroWidgetsUpdate(this)
+        val appContext = applicationContext
+        lifecycleScope.launch(Dispatchers.Default) {
+            runCatching {
+                pushWidgetUpdate(appContext)
+                pushAllHeroWidgetsUpdate(appContext)
+            }
         }
     }
 }

@@ -336,6 +336,7 @@ private fun SubHeaderRow(
 
         val sortInteraction = rememberPressSource()
         val sortDescription = stringResource(R.string.cd_sort_search_pill, stringResource(sortOrder.labelRes))
+        val clearSearchDesc = stringResource(R.string.search_clear)
         val searchIconColor = MaterialTheme.colorScheme.onSurfaceVariant
 
         Box {
@@ -449,14 +450,15 @@ private fun SubHeaderRow(
                             Box(
                                 contentAlignment = Alignment.Center,
                                 modifier = Modifier
-                                    .size(18.dp)
+                                    .size(24.dp)
                                     .clip(CircleShape)
                                     .background(MaterialTheme.colorScheme.surfaceVariant)
-                                    .clickable(onClick = onClearSearch),
+                                    .clickable(onClick = onClearSearch)
+                                    .semantics { contentDescription = clearSearchDesc },
                             ) {
                                 Text(
                                     text = "✕",
-                                    fontSize = 10.sp,
+                                    fontSize = 11.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
@@ -578,7 +580,7 @@ private fun MechanicalResetButton(
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
-            .size(24.dp)
+            .size(30.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -595,7 +597,7 @@ private fun MechanicalResetButton(
             .semantics { this.contentDescription = contentDescription },
     ) {
         if (progress > 0.01f) {
-            Canvas(modifier = Modifier.size(22.dp)) {
+            Canvas(modifier = Modifier.size(24.dp)) {
                 val strokeWidth = 1.8.dp.toPx()
                 val sweepColor = if (isDarkCard) Color(0xFFDEB285) else Color(0xFFD97642)
                 drawArc(
@@ -612,7 +614,7 @@ private fun MechanicalResetButton(
             contentDescription = null,
             tint = tint,
             modifier = Modifier
-                .size(15.dp)
+                .size(16.dp)
                 .graphicsLayer {
                     rotationZ = progress * 360f
                 },
@@ -631,7 +633,8 @@ fun ItemCard(
     today: LocalDate = LocalDate.now(),
     reduceMotion: Boolean = false,
 ) {
-    val count = daysSince(LocalDate.ofEpochDay(item.epochDay), today)
+    val anchorDate = remember(item.epochDay) { LocalDate.ofEpochDay(item.epochDay) }
+    val count = remember(anchorDate, today) { daysSince(anchorDate, today) }
     val cardInteraction = rememberPressSource()
     val deleteInteraction = rememberPressSource()
     val widgetInteraction = rememberPressSource()
@@ -639,8 +642,8 @@ fun ItemCard(
     val haptic = LocalHapticFeedback.current
 
     var displayMode by rememberSaveable(item.id) { mutableStateOf(TimeDisplayMode.DAYS) }
-    val decomposed = remember(item.epochDay, today, displayMode) {
-        decomposeTime(LocalDate.ofEpochDay(item.epochDay), today, displayMode)
+    val decomposed = remember(anchorDate, today, displayMode) {
+        decomposeTime(anchorDate, today, displayMode)
     }
 
     val resetDesc = stringResource(R.string.reset)
@@ -732,6 +735,7 @@ fun ItemCard(
 
     Column(
         modifier = cardModifier
+            .clip(cardShape)
             .clickable(
                 interactionSource = cardInteraction,
                 indication = LocalIndication.current,
@@ -763,7 +767,8 @@ fun ItemCard(
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(30.dp)
+                    .clip(CircleShape)
                     .clickable(
                         interactionSource = widgetInteraction,
                         indication = LocalIndication.current,
@@ -780,21 +785,22 @@ fun ItemCard(
                     } else {
                         mutedInk.copy(alpha = 0.5f)
                     },
-                    modifier = Modifier.size(14.dp),
+                    modifier = Modifier.size(15.dp),
                 )
             }
-            Spacer(Modifier.width(4.dp))
+            Spacer(Modifier.width(2.dp))
             MechanicalResetButton(
                 onResetConfirmed = onReset,
                 contentDescription = resetDesc,
                 tint = if (isDarkCard) Color(0xFFFAF7F2) else MaterialTheme.colorScheme.primary,
                 isDarkCard = isDarkCard,
             )
-            Spacer(Modifier.width(4.dp))
+            Spacer(Modifier.width(2.dp))
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(30.dp)
+                    .clip(CircleShape)
                     .clickable(
                         interactionSource = deleteInteraction,
                         indication = LocalIndication.current,
@@ -805,7 +811,7 @@ fun ItemCard(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(width = 11.dp, height = 2.2.dp)
+                        .size(width = 12.dp, height = 2.4.dp)
                         .background(
                             if (isDarkCard) Color(0xFFE57A77)
                             else if (item.cardColor == "terracotta" || item.cardColor == "rose_clay") Color(0xFF6B1D19)
@@ -868,8 +874,8 @@ fun ItemCard(
                             },
                             label = "day_odometer",
                         ) { targetMode ->
-                            val targetDecomposed = remember(item.epochDay, today, targetMode) {
-                                decomposeTime(LocalDate.ofEpochDay(item.epochDay), today, targetMode)
+                            val targetDecomposed = remember(anchorDate, today, targetMode) {
+                                decomposeTime(anchorDate, today, targetMode)
                             }
                             val targetUnitLabel = stringResource(targetDecomposed.unitLabelRes)
                             val targetFontSize = when (targetMode) {
@@ -920,7 +926,7 @@ fun ItemCard(
                 Text(
                     text = formatAnchorDateSubLabel(
                         count = count,
-                        date = LocalDate.ofEpochDay(item.epochDay),
+                        date = anchorDate,
                         sinceTemplate = stringResource(R.string.since_label),
                         untilTemplate = stringResource(R.string.until_label),
                     ),

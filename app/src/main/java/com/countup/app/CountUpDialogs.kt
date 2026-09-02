@@ -73,6 +73,7 @@ fun ItemEditorDialog(
     today: LocalDate,
     onDismiss: () -> Unit,
     onSave: (ItemDraft) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var name by rememberSaveable { mutableStateOf(item?.name ?: "") }
     var comment by rememberSaveable { mutableStateOf(item?.comment ?: "") }
@@ -100,6 +101,7 @@ fun ItemEditorDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
+        modifier = modifier,
         containerColor = Color(0xFFFCF8F2),
         tonalElevation = 0.dp,
         shape = RoundedCornerShape(20.dp),
@@ -554,9 +556,11 @@ fun DeleteConfirmDialog(
     itemName: String,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
+        modifier = modifier,
         containerColor = Color(0xFFFCF8F2),
         tonalElevation = 0.dp,
         shape = RoundedCornerShape(20.dp),
@@ -614,6 +618,7 @@ fun DatePickerDialog(
     initialDate: LocalDate,
     onDismiss: () -> Unit,
     onDatePicked: (LocalDate) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val state = rememberDatePickerState(
         initialSelectedDateMillis = initialDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),
@@ -622,7 +627,7 @@ fun DatePickerDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false),
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp),
         containerColor = Color(0xFFFCF8F2),
         tonalElevation = 0.dp,
         shape = RoundedCornerShape(24.dp),

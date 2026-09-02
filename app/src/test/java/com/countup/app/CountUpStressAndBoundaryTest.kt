@@ -18,7 +18,7 @@ class CountUpStressAndBoundaryTest {
     private val fixedToday = LocalDate.of(2026, 8, 29)
 
     @Test
-    fun largeCollectionFilteringAndSortingExecutesDeterministically() {
+    fun largeCollectionFilteringAndSortingExecutesDeterministically() = runTest {
         val largeCount = 1000
         val items = (0 until largeCount).map { i ->
             CountUpItem(
@@ -30,7 +30,7 @@ class CountUpStressAndBoundaryTest {
         }
 
         val repo = FakeCountUpRepository(initialItems = items)
-        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday })
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
 
         assertEquals(largeCount, viewModel.state.value.items.size)
         assertEquals(largeCount, viewModel.state.value.displayItems.size)
@@ -54,7 +54,7 @@ class CountUpStressAndBoundaryTest {
         val specialComment = "Line 1 🍵\nLine 2 🏯"
 
         val repo = FakeCountUpRepository()
-        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday })
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
 
         viewModel.onEvent(CountUpUiEvent.SaveItem(name = specialName, epochDay = fixedToday.toEpochDay(), comment = specialComment))
 
@@ -86,7 +86,7 @@ class CountUpStressAndBoundaryTest {
         )
 
         val repo = FakeCountUpRepository(initialItems = items)
-        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday })
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
 
         val state = viewModel.state.value
         assertEquals(3, state.items.size)
@@ -103,7 +103,7 @@ class CountUpStressAndBoundaryTest {
     @Test
     fun rapidSequentialEventsMaintainSynchronizedStateTimeline() = runTest {
         val repo = FakeCountUpRepository()
-        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday })
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
 
         viewModel.state.test {
             val s0 = awaitItem()
