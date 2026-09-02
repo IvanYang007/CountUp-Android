@@ -84,9 +84,9 @@ adb exec-out screencap -p > artifacts/widget.png
 ## 5. Verification performed
 
 - Clean debug and release builds succeed with R8 minification and resource shrinking enabled (`isMinifyEnabled = true`, `isShrinkResources = true`).
-- **139 JVM unit tests** and instrumented tests pass, including: multi-item
+- **145 JVM unit tests** and instrumented tests pass, including: multi-item
   create/read/update/delete, migration of the legacy single value into one item,
-  Hero widget configuration and 1x1/2x1 rendering, two-tap in-place reset protocols,
+  Hero widget configuration and 2x1 Poetic Card tap-to-decompose rendering, two-tap in-place reset protocols,
   corrupt-data recovery, JSON round-trips, and widget row derivation.
 - `lintDebug`: **0 errors**.
 - Merged debug and release manifests request **zero permissions**; backup disabled.

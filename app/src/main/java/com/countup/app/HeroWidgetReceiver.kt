@@ -153,7 +153,7 @@ private fun buildHero2x1RemoteViews(
         context,
         appWidgetIdHashCode(item.id) + 4004,
         resetIntent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
 
     val launchIntent = Intent(context, MainActivity::class.java).apply {
@@ -249,7 +249,7 @@ private fun buildHero2x1RemoteViews(
             context,
             appWidgetId + 9009,
             cycleIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
         // Tap count container to cycle display mode (Days -> Elapsed Y/M/D -> Weeks)
