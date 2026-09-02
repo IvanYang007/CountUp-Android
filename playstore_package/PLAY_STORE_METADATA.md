@@ -140,5 +140,5 @@ All release artifacts are located in `playstore_package/`:
    - Go to **Release** -> **Production**.
    - Click **Create new release**.
    - Upload [`playstore_package/app-release.aab`](file:///d:/Github/countUp/playstore_package/app-release.aab).
-   - Enter Release notes: `Release 1.7.0 (v18): Added Poetic Ephemeris Odometer with synchronized number & unit roll transitions (tap to cycle between raw days, elapsed Y/M/D, and total weeks), 24dp in-card tactile mechanical spring hold reset with detent haptics, and dedicated 2x1 Poetic Card Hero Milestone Widget with drag-and-drop launcher placement and direct 1.5s hardware haptic in-place reset.`
+   - Enter Release notes: `Release 1.8.0 (v19): Harmonized Poetic Ephemeris Odometer typography scale (36sp DAYS, 24sp ELAPSED, 28sp WEEKS) for calm optical balance, added in-place tap-to-decompose time mode cycling directly to the 2x1 Hero Milestone Widget with per-widget persistence, hardened static PendingIntents with FLAG_IMMUTABLE, and verified 145/145 green unit tests.`
    - Click **Review release** -> **Start rollout to Production**.
