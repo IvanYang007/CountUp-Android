@@ -1,7 +1,0 @@
-<resources>
-    <!-- Bare unit word used after the big count number in the app card. -->
-    <plurals name="days_unit">
-        <item quantity="one">day</item>
-        <item quantity="other">days</item>
-    </plurals>
-</resources>

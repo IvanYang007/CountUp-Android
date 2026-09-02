@@ -63,10 +63,10 @@ Production Kotlin is flat under `app/src/main/java/com/countup/app/`:
 | (debug) `WidgetHostActivity.kt` | Debug-only activity to render the widget for screenshots (not in release) |
 
 Tests:
-- `app/src/test/...` (JVM): `CountUpViewModelTest` (Turbine), `HeroWidgetTest` (2x1 layout & reset verification), `CountUpStressAndBoundaryTest` (1k items, unicode, leap years), `CountUpRepositoryTest`, `CountUpItemTest`, `CountUpStoreTest`, `EdgeCaseMatrixTest`, `AbstractBackgroundTest`, `DateConversionTest`, `DaysSinceTest`, `ItemIconsTest`, `SortOrderTest`, `WidgetRowTest`, `WidgetBackgroundTest` → **143 JVM unit tests** (100% green)
+- `app/src/test/...` (JVM): `CountUpViewModelTest` (Turbine), `HeroWidgetTest` (2x1 layout & reset verification), `CountUpStressAndBoundaryTest` (1k items, unicode, leap years), `CountUpRepositoryTest`, `CountUpItemTest`, `CountUpStoreTest`, `EdgeCaseMatrixTest`, `AbstractBackgroundTest`, `DateConversionTest`, `DaysSinceTest`, `ItemIconsTest`, `SortOrderTest`, `WidgetRowTest`, `WidgetBackgroundTest`, `WidgetDimensionTest`, `CountUpContractAndFlowTest` → **160 JVM unit tests** (100% green)
 - `app/src/androidTest/...` (device): `ComposeUiSmokeTest` (stateless UI & a11y semantics), `CountUpStoreInstrumentedTest` (CRUD, migration, recovery)
 
-Resources: `res/values/strings.xml`, `plurals.xml` (`days_unit`), `themes.xml`, `colors.xml`; `res/drawable/ic_*.xml` (Material & Phosphor icons + `hero_milestone_dot`); `res/xml/haircut_widget_info.xml`, `res/xml/hero_widget_info.xml`, `data_extraction_rules.xml`, `backup_rules.xml`.
+Resources: `res/values/strings.xml`, `themes.xml`, `colors.xml`; `res/drawable/ic_*.xml` (Material & Phosphor icons + `hero_milestone_dot`); `res/xml/haircut_widget_info.xml`, `res/xml/hero_widget_info.xml`, `data_extraction_rules.xml`, `backup_rules.xml`.
 
 ---
 

@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Bare unit word used after the big count number in the app card. -->
-    <plurals name="days_unit">
-        <item quantity="other">天</item>
-    </plurals>
-</resources>

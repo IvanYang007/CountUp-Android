@@ -31,8 +31,6 @@
     <string name="item_comment">Comment</string>
     <string name="comment_placeholder">Optional note (max 2 lines)</string>
     <string name="anchor_date">Anchor date</string>
-    <string name="customize_style_and_icon">Customize style &amp; icon</string>
-    <string name="hide_customization">Hide style &amp; icon</string>
     <string name="cd_expand_customization">Expand style and icon customization options</string>
     <string name="cd_collapse_customization">Collapse style and icon customization options</string>
     <string name="save">Save</string>
@@ -132,7 +130,6 @@
     <string name="category_milestones">Life</string>
     <string name="category_social">Social</string>
     <string name="category_nature">Nature</string>
-    <string name="cd_icon_option">%1$s icon</string>
 
     <!-- Human-Friendly TalkBack Icon Descriptions -->
     <string name="cd_icon_spa">Lotus flower (Meditation)</string>
