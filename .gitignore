@@ -15,3 +15,6 @@ captures/
 
 # Signing — never commit key material
 keystore/
+
+# Local artifacts and test screenshots
+artifacts/
