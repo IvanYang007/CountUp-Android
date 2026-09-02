@@ -659,13 +659,7 @@ fun ItemCard(
     val accent = if (arrivedFuture) ZenArrivedGreen else style.badgeBg
     val onAccent = if (arrivedFuture) ZenWhite else style.badgeTint
 
-    val pluralSelector = kotlin.math.abs(count).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
-    val rawUnitLabel = pluralStringResource(R.plurals.days_unit, pluralSelector, count)
-    val currentUnitLabel = if (displayMode == TimeDisplayMode.DAYS) {
-        rawUnitLabel
-    } else {
-        stringResource(decomposed.unitLabelRes)
-    }
+    val currentUnitLabel = stringResource(decomposed.unitLabelRes)
 
     val tapToDecomposeDesc = stringResource(
         R.string.cd_tap_to_decompose,
@@ -673,9 +667,9 @@ fun ItemCard(
     )
 
     val fontSize = when (displayMode) {
-        TimeDisplayMode.DAYS -> 44.sp
-        TimeDisplayMode.ELAPSED_BREAKDOWN -> 34.sp
-        TimeDisplayMode.TOTAL_WEEKS -> 38.sp
+        TimeDisplayMode.DAYS -> 36.sp
+        TimeDisplayMode.ELAPSED_BREAKDOWN -> 24.sp
+        TimeDisplayMode.TOTAL_WEEKS -> 28.sp
     }
 
     val cardShape = RoundedCornerShape(20.dp)
@@ -857,10 +851,12 @@ fun ItemCard(
                         Spacer(Modifier.width(6.dp))
                         Text(
                             text = currentUnitLabel,
-                            fontSize = 15.sp,
+                            fontSize = 13.sp,
                             fontFamily = FontFamily.SansSerif,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 0.04.sp,
                             color = mutedInk,
-                            modifier = Modifier.padding(bottom = 6.dp),
+                            modifier = Modifier.padding(bottom = 5.dp),
                         )
                     } else {
                         AnimatedContent(
@@ -875,15 +871,11 @@ fun ItemCard(
                             val targetDecomposed = remember(item.epochDay, today, targetMode) {
                                 decomposeTime(LocalDate.ofEpochDay(item.epochDay), today, targetMode)
                             }
-                            val targetUnitLabel = if (targetMode == TimeDisplayMode.DAYS) {
-                                rawUnitLabel
-                            } else {
-                                stringResource(targetDecomposed.unitLabelRes)
-                            }
+                            val targetUnitLabel = stringResource(targetDecomposed.unitLabelRes)
                             val targetFontSize = when (targetMode) {
-                                TimeDisplayMode.DAYS -> 44.sp
-                                TimeDisplayMode.ELAPSED_BREAKDOWN -> 34.sp
-                                TimeDisplayMode.TOTAL_WEEKS -> 38.sp
+                                TimeDisplayMode.DAYS -> 36.sp
+                                TimeDisplayMode.ELAPSED_BREAKDOWN -> 24.sp
+                                TimeDisplayMode.TOTAL_WEEKS -> 28.sp
                             }
                             Row(verticalAlignment = Alignment.Bottom) {
                                 Text(
@@ -896,10 +888,12 @@ fun ItemCard(
                                 Spacer(Modifier.width(6.dp))
                                 Text(
                                     text = targetUnitLabel,
-                                    fontSize = 15.sp,
+                                    fontSize = 13.sp,
                                     fontFamily = FontFamily.SansSerif,
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 0.04.sp,
                                     color = mutedInk,
-                                    modifier = Modifier.padding(bottom = 6.dp),
+                                    modifier = Modifier.padding(bottom = 5.dp),
                                 )
                             }
                         }

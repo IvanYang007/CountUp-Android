@@ -56,9 +56,10 @@ fun decomposeTime(
     val totalDays = daysSince(anchorDate, today)
     return when (mode) {
         TimeDisplayMode.DAYS -> {
+            val isFuture = totalDays < 0
             DecomposedTime(
-                valueText = totalDays.toString(),
-                unitLabelRes = R.string.unit_days,
+                valueText = if (isFuture) kotlin.math.abs(totalDays).toString() else totalDays.toString(),
+                unitLabelRes = if (isFuture) R.string.unit_until_short else R.string.unit_days,
                 mode = TimeDisplayMode.DAYS,
             )
         }

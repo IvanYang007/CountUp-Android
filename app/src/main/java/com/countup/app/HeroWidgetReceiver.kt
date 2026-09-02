@@ -6,11 +6,9 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.os.Build
-import android.util.SizeF
+import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import java.time.LocalDate
 
@@ -24,6 +22,22 @@ class HeroWidgetReceiver : AppWidgetProvider() {
 
     companion object {
         const val EXTRA_TARGET_ITEM_ID = "EXTRA_TARGET_ITEM_ID"
+        const val ACTION_CYCLE_HERO_DISPLAY_MODE = "com.countup.app.ACTION_CYCLE_HERO_DISPLAY_MODE"
+        const val EXTRA_APP_WIDGET_ID = "EXTRA_APP_WIDGET_ID"
+    }
+
+    override fun onReceive(context: Context, intent: Intent) {
+        super.onReceive(context, intent)
+        if (intent.action == ACTION_CYCLE_HERO_DISPLAY_MODE) {
+            val appWidgetId = intent.getIntExtra(EXTRA_APP_WIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
+            if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                val store = CountUpStore(context)
+                val currentMode = store.getHeroWidgetDisplayMode(appWidgetId)
+                val nextMode = currentMode.next()
+                store.setHeroWidgetDisplayMode(appWidgetId, nextMode)
+                pushHeroWidgetUpdate(context, appWidgetId)
+            }
+        }
     }
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
@@ -72,7 +86,7 @@ fun pushHeroWidgetUpdate(context: Context, appWidgetId: Int) {
         ?: items.firstOrNull()
 
     val today = LocalDate.now()
-    val views = buildHero2x1RemoteViews(context, targetItem, today)
+    val views = buildHero2x1RemoteViews(context, targetItem, today, appWidgetId)
     manager.updateAppWidget(appWidgetId, views)
 }
 
@@ -81,6 +95,7 @@ private fun buildHero2x1RemoteViews(
     context: Context,
     item: CountUpItem?,
     today: LocalDate,
+    appWidgetId: Int,
 ): RemoteViews {
     val views = RemoteViews(context.packageName, R.layout.countup_hero_widget_2x1)
 
@@ -156,11 +171,14 @@ private fun buildHero2x1RemoteViews(
         // Armed state: visual confirmation prompt
         views.setTextViewText(R.id.hero_name, context.getString(R.string.hero_widget_reset_prompt).uppercase())
         views.setTextColor(R.id.hero_name, alertVermilion)
+
         views.setTextViewText(R.id.hero_count, "0?")
         views.setTextColor(R.id.hero_count, alertVermilion)
+        views.setTextViewTextSize(R.id.hero_count, TypedValue.COMPLEX_UNIT_SP, 24f)
 
         views.setTextViewText(R.id.hero_unit, context.getString(R.string.widget_reset_prompt).uppercase())
         views.setTextColor(R.id.hero_unit, alertVermilion)
+        views.setTextViewTextSize(R.id.hero_unit, TypedValue.COMPLEX_UNIT_SP, 10f)
 
         views.setViewVisibility(R.id.hero_milestone_dot, View.GONE)
 
@@ -178,15 +196,27 @@ private fun buildHero2x1RemoteViews(
         views.setOnClickPendingIntent(R.id.hero_badge_container, resetPendingIntent)
         views.setOnClickPendingIntent(R.id.hero_count_container, resetPendingIntent)
     } else {
-        // Normal active state
+        // Normal active state with tap-to-decompose ephemeris odometer
+        val store = CountUpStore(context)
+        val displayMode = store.getHeroWidgetDisplayMode(appWidgetId)
+        val decomposed = decomposeTime(LocalDate.ofEpochDay(item.epochDay), today, displayMode)
+
         views.setTextViewText(R.id.hero_name, item.name.uppercase())
         views.setTextColor(R.id.hero_name, if (isDark) 0xFFDEB285.toInt() else mutedInkInt)
 
-        views.setTextViewText(R.id.hero_count, count.toString())
+        views.setTextViewText(R.id.hero_count, decomposed.valueText)
         views.setTextColor(R.id.hero_count, primaryInkInt)
 
-        views.setTextViewText(R.id.hero_unit, context.getString(R.string.unit_days))
+        val (countTextSizeSp, unitTextSizeSp) = when (displayMode) {
+            TimeDisplayMode.DAYS -> 24f to 10f
+            TimeDisplayMode.ELAPSED_BREAKDOWN -> 18f to 9.5f
+            TimeDisplayMode.TOTAL_WEEKS -> 20f to 9.5f
+        }
+        views.setTextViewTextSize(R.id.hero_count, TypedValue.COMPLEX_UNIT_SP, countTextSizeSp)
+
+        views.setTextViewText(R.id.hero_unit, context.getString(decomposed.unitLabelRes))
         views.setTextColor(R.id.hero_unit, mutedInkInt)
+        views.setTextViewTextSize(R.id.hero_unit, TypedValue.COMPLEX_UNIT_SP, unitTextSizeSp)
 
         // Badge circle and icon
         views.setInt(R.id.hero_badge_circle, "setColorFilter", circleStyle.circleColor)
@@ -210,9 +240,25 @@ private fun buildHero2x1RemoteViews(
         views.setTextViewText(R.id.hero_sublabel, sublabel)
         views.setTextColor(R.id.hero_sublabel, mutedInkInt)
 
-        // Tap badge or count to arm reset; tap background/title to open MainActivity
+        // Cycle display mode pending intent (tapping the count container)
+        val cycleIntent = Intent(context, HeroWidgetReceiver::class.java).apply {
+            action = HeroWidgetReceiver.ACTION_CYCLE_HERO_DISPLAY_MODE
+            putExtra(HeroWidgetReceiver.EXTRA_APP_WIDGET_ID, appWidgetId)
+        }
+        val cyclePendingIntent = PendingIntent.getBroadcast(
+            context,
+            appWidgetId + 9009,
+            cycleIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE,
+        )
+
+        // Tap count container to cycle display mode (Days -> Elapsed Y/M/D -> Weeks)
+        views.setOnClickPendingIntent(R.id.hero_count_container, cyclePendingIntent)
+
+        // Tap badge circle to arm reset
         views.setOnClickPendingIntent(R.id.hero_badge_container, resetPendingIntent)
-        views.setOnClickPendingIntent(R.id.hero_count_container, resetPendingIntent)
+
+        // Tap card body / title to open MainActivity
         views.setOnClickPendingIntent(R.id.hero_widget_root, openAppPendingIntent)
     }
 

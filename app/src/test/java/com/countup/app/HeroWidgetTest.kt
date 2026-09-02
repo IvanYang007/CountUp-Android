@@ -57,4 +57,33 @@ class HeroWidgetTest {
         assertEquals(30L, daysSince(pastDate, today))
         assertEquals(-7L, daysSince(futureDate, today))
     }
+
+    @Test
+    fun `hero widget display mode decomposes time into human readable intervals`() {
+        val today = LocalDate.of(2026, 8, 31)
+        val pastDate = LocalDate.of(2025, 5, 11) // 1 year, 3 months, 20 days
+
+        val daysDecomposed = decomposeTime(pastDate, today, TimeDisplayMode.DAYS)
+        assertEquals("477", daysDecomposed.valueText)
+        assertEquals(R.string.unit_days, daysDecomposed.unitLabelRes)
+
+        val breakdownDecomposed = decomposeTime(pastDate, today, TimeDisplayMode.ELAPSED_BREAKDOWN)
+        assertEquals("1y 3m 20d", breakdownDecomposed.valueText)
+        assertEquals(R.string.unit_elapsed, breakdownDecomposed.unitLabelRes)
+
+        val weeksDecomposed = decomposeTime(pastDate, today, TimeDisplayMode.TOTAL_WEEKS)
+        assertEquals("68w 1d", weeksDecomposed.valueText)
+        assertEquals(R.string.unit_weeks, weeksDecomposed.unitLabelRes)
+    }
+
+    @Test
+    fun `hero widget display mode cycles properly across all 3 modes`() {
+        var mode = TimeDisplayMode.DAYS
+        mode = mode.next()
+        assertEquals(TimeDisplayMode.ELAPSED_BREAKDOWN, mode)
+        mode = mode.next()
+        assertEquals(TimeDisplayMode.TOTAL_WEEKS, mode)
+        mode = mode.next()
+        assertEquals(TimeDisplayMode.DAYS, mode)
+    }
 }

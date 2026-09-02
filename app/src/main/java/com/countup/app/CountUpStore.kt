@@ -281,10 +281,28 @@ class CountUpStore(context: Context) {
             .commit()
     }
 
+    /** Retrieves the saved [TimeDisplayMode] for a Hero Widget instance, defaulting to [TimeDisplayMode.DAYS]. */
+    fun getHeroWidgetDisplayMode(appWidgetId: Int): TimeDisplayMode {
+        val raw = prefs.getString(PREFIX_HERO_DISPLAY_MODE + appWidgetId, null)
+        return try {
+            if (raw != null) TimeDisplayMode.valueOf(raw) else TimeDisplayMode.DAYS
+        } catch (_: IllegalArgumentException) {
+            TimeDisplayMode.DAYS
+        }
+    }
+
+    /** Persists the [TimeDisplayMode] for a Hero Widget instance. */
+    fun setHeroWidgetDisplayMode(appWidgetId: Int, mode: TimeDisplayMode): Boolean {
+        return prefs.edit()
+            .putString(PREFIX_HERO_DISPLAY_MODE + appWidgetId, mode.name)
+            .commit()
+    }
+
     /** Removes the binding for a deleted Hero Widget instance. */
     fun removeHeroWidgetBinding(appWidgetId: Int): Boolean {
         return prefs.edit()
             .remove(PREFIX_HERO_BINDING + appWidgetId)
+            .remove(PREFIX_HERO_DISPLAY_MODE + appWidgetId)
             .commit()
     }
 
@@ -370,6 +388,7 @@ class CountUpStore(context: Context) {
         private const val LEGACY_KEY_EPOCH_DAY = "last_haircut_epoch_day"
         private const val BACKUP_FILE_NAME = "countup_backup.json"
         private const val PREFIX_HERO_BINDING = "hero_widget_binding_"
+        private const val PREFIX_HERO_DISPLAY_MODE = "hero_widget_mode_"
         private const val MAX_QUARANTINE_ENTRIES = 3
     }
 }
