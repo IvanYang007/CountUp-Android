@@ -2,6 +2,7 @@ package com.countup.app
 
 import app.cash.turbine.test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -246,7 +247,7 @@ class CountUpViewModelTest {
     fun `failed write emits error snackbar effect`() = runTest {
         val repo = FakeCountUpRepository(initialItems = sampleItems)
         repo.shouldFailWrite = true
-        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday })
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
 
         viewModel.effects.test {
             viewModel.onEvent(CountUpUiEvent.SaveItem("Fail Item", fixedToday.toEpochDay(), ""))
@@ -254,6 +255,147 @@ class CountUpViewModelTest {
             val effect = awaitItem()
             assertTrue(effect is CountUpUiEffect.ShowSnackbar)
             assertEquals(R.string.error_save_failed, (effect as CountUpUiEffect.ShowSnackbar).messageRes)
+        }
+    }
+
+    @Test
+    fun `ioDispatcher offloads repository mutations asynchronously`() = runTest {
+        val testDispatcher = StandardTestDispatcher(testScheduler)
+        val repo = FakeCountUpRepository(initialItems = emptyList())
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = testDispatcher,
+        )
+
+        viewModel.onEvent(
+            CountUpUiEvent.SaveItem(
+                name = "Async Habit",
+                epochDay = fixedToday.toEpochDay(),
+                comment = "",
+            )
+        )
+
+        // Before testDispatcher advances, the async write has NOT committed to state
+        assertEquals(0, viewModel.state.value.items.size)
+
+        // Advance dispatcher to execute pending IO coroutines
+        testDispatcher.scheduler.runCurrent()
+
+        // Now the write has completed
+        assertEquals(1, viewModel.state.value.items.size)
+        assertEquals("Async Habit", viewModel.state.value.items.first().name)
+    }
+
+    @Test
+    fun `failed update item emits error snackbar effect and keeps previous state`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = sampleItems)
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
+        val target = sampleItems.first()
+
+        viewModel.onEvent(CountUpUiEvent.OpenEditor(target))
+        repo.shouldFailWrite = true
+
+        viewModel.effects.test {
+            viewModel.onEvent(
+                CountUpUiEvent.SaveItem(
+                    name = "Will Fail",
+                    epochDay = target.epochDay,
+                    comment = "",
+                )
+            )
+
+            val effect = awaitItem()
+            assertTrue(effect is CountUpUiEffect.ShowSnackbar)
+            assertEquals(R.string.error_save_failed, (effect as CountUpUiEffect.ShowSnackbar).messageRes)
+        }
+
+        // Original item remains unchanged
+        assertEquals("Water Bonsai", viewModel.state.value.items.first().name)
+    }
+
+    @Test
+    fun `failed delete item emits error snackbar effect and clears pending delete`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = sampleItems)
+        repo.shouldFailWrite = true
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
+        val target = sampleItems.first()
+
+        viewModel.onEvent(CountUpUiEvent.RequestDelete(target))
+        assertEquals(target, viewModel.state.value.pendingDelete)
+
+        viewModel.effects.test {
+            viewModel.onEvent(CountUpUiEvent.ConfirmDelete(target.id))
+
+            val effect = awaitItem()
+            assertTrue(effect is CountUpUiEffect.ShowSnackbar)
+            assertEquals(R.string.error_save_failed, (effect as CountUpUiEffect.ShowSnackbar).messageRes)
+        }
+
+        // pendingDelete is cleared, and item was not deleted
+        assertNull(viewModel.state.value.pendingDelete)
+        assertEquals(3, viewModel.state.value.items.size)
+    }
+
+    @Test
+    fun `failed reset item emits error snackbar effect and retains original epoch day`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = sampleItems)
+        repo.shouldFailWrite = true
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
+        val target = sampleItems.first()
+        val originalEpoch = target.epochDay
+
+        viewModel.effects.test {
+            viewModel.onEvent(CountUpUiEvent.ConfirmReset(target.id))
+
+            val effect = awaitItem()
+            assertTrue(effect is CountUpUiEffect.ShowSnackbar)
+            assertEquals(R.string.error_save_failed, (effect as CountUpUiEffect.ShowSnackbar).messageRes)
+        }
+
+        assertEquals(originalEpoch, viewModel.state.value.items.first { it.id == target.id }.epochDay)
+    }
+
+    @Test
+    fun `failed toggle widget visibility emits error snackbar effect and retains previous visibility`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = sampleItems)
+        repo.shouldFailWrite = true
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
+        val target = sampleItems.first()
+        val originalVisibility = target.showInWidget
+
+        viewModel.effects.test {
+            viewModel.onEvent(CountUpUiEvent.ToggleWidgetVisibility(target.id))
+
+            val effect = awaitItem()
+            assertTrue(effect is CountUpUiEffect.ShowSnackbar)
+            assertEquals(R.string.error_save_failed, (effect as CountUpUiEffect.ShowSnackbar).messageRes)
+        }
+
+        assertEquals(originalVisibility, viewModel.state.value.items.first { it.id == target.id }.showInWidget)
+    }
+
+    @Test
+    fun `refresh event reloads modified repository state into ui state`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = sampleItems)
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
+
+        assertEquals(3, viewModel.state.value.items.size)
+
+        // Mutate repository directly (as would happen via Widget reset or external process)
+        repo.addItem("External Widget Item", fixedToday.toEpochDay(), "From Widget")
+        repo.setBackgroundTheme(BackgroundTheme.ZEN_BAMBOO)
+        repo.setSortOrder(SortOrder.NAME_ASC)
+
+        // Send refresh event
+        viewModel.onEvent(CountUpUiEvent.Refresh)
+
+        viewModel.state.test {
+            val refreshed = awaitItem()
+            assertEquals(4, refreshed.items.size)
+            assertTrue(refreshed.items.any { it.name == "External Widget Item" })
+            assertEquals(BackgroundTheme.ZEN_BAMBOO, refreshed.backgroundTheme)
+            assertEquals(SortOrder.NAME_ASC, refreshed.sortOrder)
         }
     }
 }

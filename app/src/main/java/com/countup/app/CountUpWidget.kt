@@ -60,6 +60,22 @@ fun pushWidgetUpdate(context: Context) {
     manager.notifyAppWidgetViewDataChanged(ids, R.id.widget_grid)
 }
 
+/**
+ * Calculates bounded canvas dimensions (width x height in px) for the widget background bitmap.
+ * Keeps the uncompressed ARGB_8888 bitmap parcel <= 375 KB, well below Android's 1MB
+ * Binder IPC transaction buffer limit (preventing TransactionTooLargeException).
+ */
+internal fun computeWidgetCanvasDimensions(optionsHeightDp: Int, rowCount: Int): Pair<Int, Int> {
+    val targetWidth = 360
+    val targetHeight = when {
+        optionsHeightDp > 100 -> (optionsHeightDp * 0.6f).toInt().coerceIn(140, 260)
+        rowCount == 1 -> 160
+        rowCount == 2 -> 200
+        else -> 240
+    }
+    return Pair(targetWidth, targetHeight)
+}
+
 /** Builds the widget frame: dynamic ink background, title, launch/reset intents, empty view. */
 @Suppress("DEPRECATION")
 internal fun buildBaseViews(context: Context, appWidgetOptions: android.os.Bundle? = null): RemoteViews {
@@ -79,13 +95,7 @@ internal fun buildBaseViews(context: Context, appWidgetOptions: android.os.Bundl
 
     // Compute bounded canvas dimensions to keep bitmap parcel well within Android's 1MB Binder IPC limit
     val optionsHeightDp = appWidgetOptions?.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 0) ?: 0
-    val targetWidth = 360
-    val targetHeight = when {
-        optionsHeightDp > 100 -> (optionsHeightDp * 0.6f).toInt().coerceIn(140, 260)
-        rowCount == 1 -> 160
-        rowCount == 2 -> 200
-        else -> 240
-    }
+    val (targetWidth, targetHeight) = computeWidgetCanvasDimensions(optionsHeightDp, rowCount)
 
     val bgBitmap = WidgetBackgroundRenderer.render(
         theme = theme,
