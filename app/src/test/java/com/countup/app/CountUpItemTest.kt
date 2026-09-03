@@ -270,4 +270,88 @@ class CountUpItemTest {
         assertEquals("spa", copyDraft.icon)
         assertEquals("sage_forest", copyDraft.cardColor)
     }
+
+    @Test
+    fun resetCountAndTotalResetDaysSurviveJsonRoundTrip() {
+        val item = CountUpItem(
+            id = "r1",
+            name = "Quit Smoking",
+            epochDay = 20000L,
+            resetCount = 4,
+            totalResetDays = 112L,
+        )
+        val decoded = decodeItems(encodeItems(listOf(item)))!!
+        assertEquals(1, decoded.size)
+        assertEquals(4, decoded[0].resetCount)
+        assertEquals(112L, decoded[0].totalResetDays)
+        assertEquals(28, decoded[0].averageResetDays)
+    }
+
+    @Test
+    fun missingResetFieldsDecodeWithSafeDefaults() {
+        val legacyJson = "[{\"id\":\"legacy1\",\"name\":\"Old Item\",\"epochDay\":19000}]"
+        val decoded = decodeItems(legacyJson)!!
+        assertEquals(1, decoded.size)
+        assertEquals(0, decoded[0].resetCount)
+        assertEquals(0L, decoded[0].totalResetDays)
+        assertEquals(0, decoded[0].averageResetDays)
+    }
+
+    @Test
+    fun negativeResetFieldsAreClampedToZero() {
+        val malformedJson = "[{\"id\":\"bad1\",\"name\":\"Bad Item\",\"epochDay\":19000,\"resetCount\":-5,\"totalResetDays\":-100}]"
+        val decoded = decodeItems(malformedJson)!!
+        assertEquals(1, decoded.size)
+        assertEquals(0, decoded[0].resetCount)
+        assertEquals(0L, decoded[0].totalResetDays)
+        assertEquals(0, decoded[0].averageResetDays)
+    }
+
+    @Test
+    fun averageResetDaysCalculatesCorrectlyWithMathematicalRounding() {
+        val maiden = CountUpItem(id = "m", name = "Maiden", epochDay = 20000L, resetCount = 0, totalResetDays = 0L)
+        assertEquals(0, maiden.averageResetDays)
+
+        val single = CountUpItem(id = "s", name = "Single", epochDay = 20000L, resetCount = 1, totalResetDays = 42L)
+        assertEquals(42, single.averageResetDays)
+
+        // 100 / 3 = 33.33 -> rounds to 33
+        val roundDown = CountUpItem(id = "rd", name = "Round Down", epochDay = 20000L, resetCount = 3, totalResetDays = 100L)
+        assertEquals(33, roundDown.averageResetDays)
+
+        // 101 / 3 = 33.67 -> rounds to 34
+        val roundUp = CountUpItem(id = "ru", name = "Round Up", epochDay = 20000L, resetCount = 3, totalResetDays = 101L)
+        assertEquals(34, roundUp.averageResetDays)
+    }
+
+    @Test
+    fun resetToDomainMethodAccumulatesCycleDaysCorrectly() {
+        val initial = CountUpItem(id = "habit", name = "Meditation", epochDay = 20000L)
+        assertEquals(0, initial.resetCount)
+        assertEquals(0L, initial.totalResetDays)
+
+        val firstReset = initial.resetTo(20030L)
+        assertEquals(20030L, firstReset.epochDay)
+        assertEquals(1, firstReset.resetCount)
+        assertEquals(30L, firstReset.totalResetDays)
+        assertEquals(30, firstReset.averageResetDays)
+        assertEquals(false, firstReset.futureFlag)
+
+        val secondReset = firstReset.resetTo(20050L)
+        assertEquals(20050L, secondReset.epochDay)
+        assertEquals(2, secondReset.resetCount)
+        assertEquals(50L, secondReset.totalResetDays) // 30 + 20
+        assertEquals(25, secondReset.averageResetDays) // 50 / 2
+    }
+
+    @Test
+    fun resetToOnFutureItemDoesNotAccumulateNegativeDays() {
+        val futureItem = CountUpItem(id = "f", name = "Future Event", epochDay = 20100L, futureFlag = true)
+        val resetItem = futureItem.resetTo(20050L)
+        assertEquals(20050L, resetItem.epochDay)
+        assertEquals(1, resetItem.resetCount)
+        assertEquals(0L, resetItem.totalResetDays)
+        assertEquals(0, resetItem.averageResetDays)
+        assertEquals(false, resetItem.futureFlag)
+    }
 }

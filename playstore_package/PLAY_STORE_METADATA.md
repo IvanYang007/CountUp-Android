@@ -140,5 +140,5 @@ All release artifacts are located in `playstore_package/`:
    - Go to **Release** -> **Production**.
    - Click **Create new release**.
    - Upload [`playstore_package/app-release.aab`](file:///d:/Github/countUp/playstore_package/app-release.aab).
-   - Enter Release notes: `Release 2.0.0 (v21): Introduced Card Color Warmth Shift ("Patina") system — cards gracefully season across calendar days with dynamic piecewise gradient borders (Cool Sage -> Warm Sand -> Zen Ochre -> Deep Amber -> Kintsugi Gold) and bilingual maturity badges, TalkBack clearAndSetSemantics accessibility, WCAG AAA text contrast across light and dark themes, 2x1 Hero Milestone Widget integration, and 172/172 verified green unit tests.`
+   - Enter Release notes: `Release 2.1.0 (v22): Introduced Reset Rhythm Badge (修持节奏) — minimalist Celestial Dot badge [ resets · avg days ] in Chinese Bronze Gold, Zen Paper Tooltip with full metrics breakdown, zero-reset negative space silence, mathematical rounding, and robust dual-storage persistence.`
    - Click **Review release** -> **Start rollout to Production**.

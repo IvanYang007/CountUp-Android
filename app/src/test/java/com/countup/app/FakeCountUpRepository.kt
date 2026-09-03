@@ -74,7 +74,8 @@ class FakeCountUpRepository(
         if (shouldFailWrite) return false
         val idx = itemsList.indexOfFirst { it.id == id }
         if (idx == -1) return false
-        itemsList[idx] = itemsList[idx].copy(epochDay = epochDay, futureFlag = false)
+        val current = itemsList[idx]
+        itemsList[idx] = current.resetTo(epochDay)
         return true
     }
 

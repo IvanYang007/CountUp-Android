@@ -246,5 +246,12 @@
     <string name="patina_phase_grounded">沉淀赭黄</string>
     <string name="patina_phase_seasoned">浓郁琥珀</string>
     <string name="patina_phase_kintsugi">金缮圆满</string>
-    <string name="cd_patina_badge">岁月包浆阶段：%1$s，成色 %2$d%%</string>
+
+    <!-- Reset Rhythm Badge -->
+    <string name="reset_rhythm_title">修持节奏</string>
+    <string name="reset_rhythm_dot">·</string>
+    <string name="reset_rhythm_single">总计重置 1 次 · 往期周期 %1$d 天</string>
+    <string name="reset_rhythm_multiple">总计重置 %1$d 次 · 平均间隔 %2$d 天 / 次</string>
+    <string name="cd_reset_rhythm_single">重置 1 次，往期周期 %1$d 天</string>
+    <string name="cd_reset_rhythm_multiple">重置 %1$d 次，平均周期 %2$d 天</string>
 </resources>

@@ -22,8 +22,42 @@ data class CountUpItem(
     val futureFlag: Boolean = false,
     /** True when this item appears in the home-screen widget. Defaults to open eye. */
     val showInWidget: Boolean = true,
-)
+    /** Total number of times this counter has been reset. */
+    val resetCount: Int = 0,
+    /** Cumulative days elapsed across all completed reset cycles. */
+    val totalResetDays: Long = 0L,
+) {
+    /** Mathematically-rounded average days per reset cycle. Returns 0 if never reset. */
+    val averageResetDays: Int
+        get() = if (resetCount > 0) {
+            kotlin.math.round(totalResetDays.toDouble() / resetCount.toDouble()).toInt()
+        } else {
+            0
+        }
 
+    /**
+     * Resets this counter to [newEpochDay].
+     *
+     * Clean domain transition:
+     * - Increments [resetCount].
+     * - Accumulates elapsed cycle days into [totalResetDays] only if the item was actively
+     *   counting up ([futureFlag] was false and [newEpochDay] > [epochDay]).
+     * - Resets [futureFlag] to false.
+     */
+    fun resetTo(newEpochDay: Long): CountUpItem {
+        val cycleDays = if (!futureFlag && newEpochDay > epochDay) {
+            newEpochDay - epochDay
+        } else {
+            0L
+        }
+        return copy(
+            epochDay = newEpochDay,
+            futureFlag = false,
+            resetCount = resetCount + 1,
+            totalResetDays = totalResetDays + cycleDays,
+        )
+    }
+}
 /**
  * Uncommitted draft payload representing user input in creation or edit dialogs.
  * Encapsulates the form fields to eliminate loose multi-primitive lambdas and prevent transposition bugs.
@@ -60,7 +94,9 @@ internal fun encodeItems(items: List<CountUpItem>): String {
                 .put("icon", item.icon)
                 .put("cardColor", item.cardColor)
                 .put("futureFlag", item.futureFlag)
-                .put("showInWidget", item.showInWidget),
+                .put("showInWidget", item.showInWidget)
+                .put("resetCount", item.resetCount)
+                .put("totalResetDays", item.totalResetDays),
         )
     }
     return arr.toString()
@@ -195,6 +231,8 @@ internal fun decodeElement(o: JSONObject?): CountUpItem? {
             cardColor = o.optString("cardColor", ""),
             futureFlag = o.optBoolean("futureFlag", false),
             showInWidget = o.optBoolean("showInWidget", true),
+            resetCount = o.optInt("resetCount", 0).coerceAtLeast(0),
+            totalResetDays = o.optLong("totalResetDays", 0L).coerceAtLeast(0L),
         )
     } catch (_: Exception) {
         null

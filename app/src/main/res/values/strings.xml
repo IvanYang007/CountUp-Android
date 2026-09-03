@@ -246,5 +246,12 @@
     <string name="patina_phase_grounded">Zen Ochre</string>
     <string name="patina_phase_seasoned">Deep Amber</string>
     <string name="patina_phase_kintsugi">Gold Patina</string>
-    <string name="cd_patina_badge">Patina seasoning: %1$s, warmth %2$d percent</string>
+
+    <!-- Reset Rhythm Badge -->
+    <string name="reset_rhythm_title">RESET RHYTHM</string>
+    <string name="reset_rhythm_dot">·</string>
+    <string name="reset_rhythm_single">1 reset · initial cycle %1$d days</string>
+    <string name="reset_rhythm_multiple">%1$d total resets · avg %2$d days / cycle</string>
+    <string name="cd_reset_rhythm_single">1 reset, initial cycle %1$d days</string>
+    <string name="cd_reset_rhythm_multiple">%1$d resets, average cycle %2$d days</string>
 </resources>

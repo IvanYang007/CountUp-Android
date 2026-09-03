@@ -258,4 +258,29 @@ class CountUpStoreTest {
         assertEquals("rocket_launch", items[0].icon)
         assertEquals("deep_ink", items[0].cardColor)
     }
+
+    @Test
+    fun resetToPersistsRhythmMetricsAcrossStoreReloads() {
+        val store1 = CountUpStore(testContext)
+        val item = store1.addItem("Meditation Streak", 20000L)!!
+        assertEquals(0, item.resetCount)
+        assertEquals(0L, item.totalResetDays)
+
+        // Reset to day 20040 (cycle of 40 days)
+        val success = store1.resetTo(item.id, 20040L)
+        assertTrue(success)
+
+        val updated1 = store1.items().first { it.id == item.id }
+        assertEquals(20040L, updated1.epochDay)
+        assertEquals(1, updated1.resetCount)
+        assertEquals(40L, updated1.totalResetDays)
+        assertEquals(40, updated1.averageResetDays)
+
+        // Re-open from disk
+        val store2 = CountUpStore(testContext)
+        val updated2 = store2.items().first { it.id == item.id }
+        assertEquals(1, updated2.resetCount)
+        assertEquals(40L, updated2.totalResetDays)
+        assertEquals(40, updated2.averageResetDays)
+    }
 }

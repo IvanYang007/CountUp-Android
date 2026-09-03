@@ -64,7 +64,13 @@ fun calculateWarmth(days: Long): Float {
  * Delegates to Compose's built-in [androidx.compose.ui.graphics.lerp].
  */
 fun lerpPatinaColor(c1: Color, c2: Color, factor: Float): Color {
-    return androidx.compose.ui.graphics.lerp(c1, c2, factor.coerceIn(0f, 1f))
+    val t = factor.coerceIn(0f, 1f)
+    return Color(
+        red = c1.red + (c2.red - c1.red) * t,
+        green = c1.green + (c2.green - c1.green) * t,
+        blue = c1.blue + (c2.blue - c1.blue) * t,
+        alpha = c1.alpha + (c2.alpha - c1.alpha) * t,
+    )
 }
 
 /**

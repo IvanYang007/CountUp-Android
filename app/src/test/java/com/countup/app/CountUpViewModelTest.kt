@@ -216,6 +216,9 @@ class CountUpViewModelTest {
             val state = awaitItem()
             val resetItem = state.items.first { it.id == target.id }
             assertEquals(fixedToday.toEpochDay(), resetItem.epochDay)
+            assertEquals(1, resetItem.resetCount)
+            assertEquals(5L, resetItem.totalResetDays)
+            assertEquals(5, resetItem.averageResetDays)
         }
     }
 

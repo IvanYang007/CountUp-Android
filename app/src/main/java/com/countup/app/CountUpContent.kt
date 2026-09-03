@@ -769,9 +769,11 @@ fun ItemCard(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f, fill = false),
                 )
-                if (count >= 0) {
+                if (count >= 0 && item.resetCount > 0) {
                     Spacer(Modifier.width(6.dp))
-                    PatinaBadge(
+                    ResetRhythmBadge(
+                        item = item,
+                        isDarkCard = isDarkCard,
                         patina = patina,
                     )
                 }
@@ -1035,40 +1037,6 @@ private fun EmptyState(onNewItem: () -> Unit, modifier: Modifier = Modifier) {
         ) {
             Text(stringResource(R.string.new_item))
         }
-    }
-}
-
-/**
- * Ambient Patina maturity badge reflecting time elapsed seasoning stage.
- * Follows android-kotlin-compose 2026 guidelines for accessibility (clearAndSetSemantics)
- * and typography scale tokens.
- */
-@Composable
-fun PatinaBadge(
-    patina: PatinaData,
-    modifier: Modifier = Modifier,
-) {
-    val phaseName = stringResource(patina.phase.labelRes)
-    val warmthPercent = (patina.warmth * 100f).toInt()
-    val badgeCd = stringResource(R.string.cd_patina_badge, phaseName, warmthPercent)
-
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
-            .clip(RoundedCornerShape(5.dp))
-            .background(patina.badgeBg)
-            .padding(horizontal = 6.dp, vertical = 2.dp)
-            .clearAndSetSemantics { contentDescription = badgeCd },
-    ) {
-        Text(
-            text = phaseName.uppercase(),
-            style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 0.4.sp,
-                color = patina.badgeTextColor,
-            ),
-            textAlign = TextAlign.Center,
-        )
     }
 }
 

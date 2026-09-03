@@ -167,9 +167,7 @@ class CountUpStore(context: Context) {
             val list = items().toMutableList()
             val index = list.indexOfFirst { it.id == id }
             if (index < 0) return false
-            val current = list[index]
-            if (current.epochDay == epochDay && !current.futureFlag) return true // no change needed
-            list[index] = current.copy(epochDay = epochDay, futureFlag = false)
+            list[index] = list[index].resetTo(epochDay)
             persist(list)
         }
     }
