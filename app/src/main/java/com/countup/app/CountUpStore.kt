@@ -153,21 +153,49 @@ class CountUpStore(context: Context) {
         return synchronized(lock) {
             val list = items()
             if (list.none { it.id == id }) return false
-            persist(list.filterNot { it.id == id })
+            val deleted = persist(list.filterNot { it.id == id })
+            if (deleted) {
+                val pending = getPendingWidgetResets().filterNot { it.itemId == id }
+                persistWidgetResets(pending)
+            }
+            deleted
         }
     }
 
     /**
      * Resets the item with [id] to a new anchor [epochDay] (e.g. today), keeping
      * its name and id. Resetting is not a future-date edit, so the future flag
-     * clears. @return false if not found or the write failed.
+     * clears. @return false if not found, already 0 accumulated days, or the write failed.
      */
     fun resetTo(id: String, epochDay: Long): Boolean {
         return synchronized(lock) {
             val list = items().toMutableList()
             val index = list.indexOfFirst { it.id == id }
             if (index < 0) return false
-            list[index] = list[index].resetTo(epochDay)
+            val current = list[index]
+            if (!current.isResettableOn(epochDay)) return false
+            val updated = current.resetTo(epochDay)
+            if (updated === current) return false
+            list[index] = updated
+            persist(list)
+        }
+    }
+
+    /**
+     * Restores an item's anchor day and cycle metrics from [snapshot].
+     * Used by undo actions in-app and from widget resets.
+     * @return false if [id] was not found or the write failed.
+     */
+    fun restoreReset(
+        id: String,
+        snapshot: ResetSnapshot,
+    ): Boolean {
+        return synchronized(lock) {
+            val list = items().toMutableList()
+            val index = list.indexOfFirst { it.id == id }
+            if (index < 0) return false
+            val current = list[index]
+            list[index] = current.restoreFrom(snapshot)
             persist(list)
         }
     }
@@ -318,6 +346,93 @@ class CountUpStore(context: Context) {
         return result
     }
 
+    /**
+     * Records a widget-triggered counter reset so opening the app can present an undo whisper stack.
+     * Stacks up to 3 newest widget resets.
+     */
+    fun recordWidgetReset(record: WidgetResetRecord): Boolean {
+        return synchronized(lock) {
+            val current = getPendingWidgetResets().filterNot { it.id == record.id }
+            val updated = (listOf(record) + current).take(MAX_PENDING_WIDGET_RESETS)
+            persistWidgetResets(updated)
+        }
+    }
+
+    /** Retrieves all pending widget resets (stacks up to 3 newest). */
+    fun getPendingWidgetResets(): List<WidgetResetRecord> {
+        return synchronized(lock) {
+            val raw = prefs.getString(KEY_PENDING_WIDGET_RESETS, null)
+            if (raw.isNullOrBlank()) return@synchronized emptyList()
+            decodeWidgetResets(raw)
+        }
+    }
+
+    /** Dismisses a pending widget reset record after restoration or user dismissal. */
+    fun dismissWidgetReset(recordId: String): Boolean {
+        return synchronized(lock) {
+            val current = getPendingWidgetResets()
+            val updated = current.filterNot { it.id == recordId }
+            persistWidgetResets(updated)
+        }
+    }
+
+    private fun persistWidgetResets(records: List<WidgetResetRecord>): Boolean {
+        val arr = org.json.JSONArray()
+        for (r in records) {
+            val obj = org.json.JSONObject()
+                .put("id", r.id)
+                .put("itemId", r.itemId)
+                .put("itemName", r.itemName)
+                .put("previousEpochDay", r.snapshot.epochDay)
+                .put("previousResetCount", r.snapshot.resetCount)
+                .put("previousTotalResetDays", r.snapshot.totalResetDays)
+                .put("previousFutureFlag", r.snapshot.futureFlag)
+                .put("releasedDays", r.releasedDays)
+                .put("timestampMillis", r.timestampMillis)
+            arr.put(obj)
+        }
+        return prefs.edit().putString(KEY_PENDING_WIDGET_RESETS, arr.toString()).commit()
+    }
+
+    private fun decodeWidgetResets(raw: String): List<WidgetResetRecord> {
+        return try {
+            val arr = org.json.JSONArray(raw)
+            val out = ArrayList<WidgetResetRecord>(arr.length())
+            for (i in 0 until arr.length()) {
+                val o = arr.optJSONObject(i) ?: continue
+                val id = o.optString("id", "")
+                val itemId = o.optString("itemId", "")
+                val itemName = o.optString("itemName", "")
+                val previousEpochDay = o.optLong("previousEpochDay", 0L)
+                val previousResetCount = o.optInt("previousResetCount", 0)
+                val previousTotalResetDays = o.optLong("previousTotalResetDays", 0L)
+                val previousFutureFlag = o.optBoolean("previousFutureFlag", false)
+                val releasedDays = o.optLong("releasedDays", 0L)
+                val timestampMillis = o.optLong("timestampMillis", 0L)
+                if (itemId.isNotBlank()) {
+                    out.add(
+                        WidgetResetRecord(
+                            id = id.ifBlank { UUID.randomUUID().toString() },
+                            itemId = itemId,
+                            itemName = itemName,
+                            snapshot = ResetSnapshot(
+                                epochDay = previousEpochDay,
+                                resetCount = previousResetCount,
+                                totalResetDays = previousTotalResetDays,
+                                futureFlag = previousFutureFlag,
+                            ),
+                            releasedDays = releasedDays,
+                            timestampMillis = timestampMillis,
+                        )
+                    )
+                }
+            }
+            out
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
     private fun persist(items: List<CountUpItem>): Boolean {
         val encoded = encodeItems(items)
         writeBackup(encoded)
@@ -388,5 +503,7 @@ class CountUpStore(context: Context) {
         private const val PREFIX_HERO_BINDING = "hero_widget_binding_"
         private const val PREFIX_HERO_DISPLAY_MODE = "hero_widget_mode_"
         private const val MAX_QUARANTINE_ENTRIES = 3
+        private const val KEY_PENDING_WIDGET_RESETS = "pending_widget_resets_v1"
+        private const val MAX_PENDING_WIDGET_RESETS = 3
     }
 }

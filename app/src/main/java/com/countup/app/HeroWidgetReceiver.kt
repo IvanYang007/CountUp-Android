@@ -181,6 +181,7 @@ private fun buildHero2x1RemoteViews(
         views.setTextViewTextSize(R.id.hero_unit, TypedValue.COMPLEX_UNIT_SP, 10f)
 
         views.setViewVisibility(R.id.hero_milestone_dot, View.GONE)
+        views.setViewVisibility(R.id.hero_reset_badge, View.GONE)
 
         views.setTextViewText(R.id.hero_sublabel, context.getString(R.string.hero_widget_reset_sublabel))
         views.setTextColor(R.id.hero_sublabel, alertVermilion)
@@ -204,6 +205,14 @@ private fun buildHero2x1RemoteViews(
         views.setTextViewText(R.id.hero_name, item.name.uppercase())
         views.setTextColor(R.id.hero_name, if (isDark) 0xFFDEB285.toInt() else mutedInkInt)
 
+        if (item.resetCount > 0) {
+            views.setViewVisibility(R.id.hero_reset_badge, View.VISIBLE)
+            views.setTextViewText(R.id.hero_reset_badge, context.getString(R.string.widget_reset_count_badge, item.resetCount))
+            views.setTextColor(R.id.hero_reset_badge, if (isDark) WIDGET_RESET_BADGE_NIGHT else WIDGET_RESET_BADGE_DAY)
+        } else {
+            views.setViewVisibility(R.id.hero_reset_badge, View.GONE)
+        }
+
         views.setTextViewText(R.id.hero_count, decomposed.valueText)
         views.setTextColor(R.id.hero_count, primaryInkInt)
 
@@ -225,10 +234,11 @@ private fun buildHero2x1RemoteViews(
         views.setImageViewResource(R.id.hero_badge_icon, iconDrawableRes)
         views.setInt(R.id.hero_badge_icon, "setColorFilter", circleStyle.textInk)
 
-        // Milestone Gold Accent Dot
+        // Milestone Accent Dot
         if (isMilestone) {
             views.setViewVisibility(R.id.hero_milestone_dot, View.VISIBLE)
-            views.setInt(R.id.hero_milestone_dot, "setColorFilter", getPatinaPrimaryColor(count).toArgb())
+            val milestoneColor = if (isDark) 0xFFC88D58.toInt() else 0xFFC2410C.toInt()
+            views.setInt(R.id.hero_milestone_dot, "setColorFilter", milestoneColor)
         } else {
             views.setViewVisibility(R.id.hero_milestone_dot, View.GONE)
         }

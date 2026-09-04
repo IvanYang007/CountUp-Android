@@ -67,16 +67,54 @@ class FakeCountUpRepository(
 
     override fun deleteItem(id: String): Boolean {
         if (shouldFailWrite) return false
-        return itemsList.removeIf { it.id == id }
+        val removed = itemsList.removeIf { it.id == id }
+        if (removed) {
+            pendingWidgetResets.removeIf { it.itemId == id }
+        }
+        return removed
     }
+
+    private val pendingWidgetResets = mutableListOf<WidgetResetRecord>()
 
     override fun resetTo(id: String, epochDay: Long): Boolean {
         if (shouldFailWrite) return false
         val idx = itemsList.indexOfFirst { it.id == id }
         if (idx == -1) return false
         val current = itemsList[idx]
-        itemsList[idx] = current.resetTo(epochDay)
+        if (!current.isResettableOn(epochDay)) return false
+        val updated = current.resetTo(epochDay)
+        if (updated === current) return false
+        itemsList[idx] = updated
         return true
+    }
+
+    override fun restoreReset(
+        id: String,
+        snapshot: ResetSnapshot,
+    ): Boolean {
+        if (shouldFailWrite) return false
+        val idx = itemsList.indexOfFirst { it.id == id }
+        if (idx == -1) return false
+        val current = itemsList[idx]
+        itemsList[idx] = current.restoreFrom(snapshot)
+        return true
+    }
+
+    override fun recordWidgetReset(record: WidgetResetRecord): Boolean {
+        if (shouldFailWrite) return false
+        pendingWidgetResets.removeAll { it.id == record.id }
+        pendingWidgetResets.add(0, record)
+        while (pendingWidgetResets.size > 3) {
+            pendingWidgetResets.removeAt(pendingWidgetResets.lastIndex)
+        }
+        return true
+    }
+
+    override fun getPendingWidgetResets(): List<WidgetResetRecord> = pendingWidgetResets.toList()
+
+    override fun dismissWidgetReset(recordId: String): Boolean {
+        if (shouldFailWrite) return false
+        return pendingWidgetResets.removeAll { it.id == recordId }
     }
 
     override fun setWidgetVisibility(id: String, showInWidget: Boolean): Boolean {

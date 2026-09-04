@@ -5,6 +5,16 @@ import androidx.compose.runtime.Immutable
 import java.time.LocalDate
 
 /**
+ * Active in-card undo whisper for a recently reset item.
+ */
+@Immutable
+data class CardResetWhisper(
+    val itemId: String,
+    val releasedDays: Long,
+    val snapshot: ResetSnapshot,
+)
+
+/**
  * Single immutable state snapshot for the CountUp main screen.
  * Follows 2026 MVI / Unidirectional Data Flow guidelines with @Immutable for Compose skipping.
  */
@@ -19,6 +29,8 @@ data class CountUpUiState(
     val isSearchSortMenuOpen: Boolean = false,
     val pendingDelete: CountUpItem? = null,
     val today: LocalDate = LocalDate.now(),
+    val cardWhispers: Map<String, CardResetWhisper> = emptyMap(),
+    val pendingWidgetResets: List<WidgetResetRecord> = emptyList(),
 ) {
     /**
      * Instant derived filtered & sorted list of items matching [searchQuery] in [sortOrder].
@@ -67,9 +79,13 @@ sealed interface CountUpUiEvent {
     data object DismissDelete : CountUpUiEvent
     data class ConfirmDelete(val id: String) : CountUpUiEvent
     data class ConfirmReset(val id: String) : CountUpUiEvent
+    data class UndoReset(val id: String) : CountUpUiEvent
+    data class RestoreWidgetReset(val record: WidgetResetRecord) : CountUpUiEvent
+    data class DismissWidgetReset(val recordId: String) : CountUpUiEvent
     data class ToggleWidgetVisibility(val id: String) : CountUpUiEvent
     data class SetSearchSortMenuOpen(val open: Boolean) : CountUpUiEvent
     data object Refresh : CountUpUiEvent
+    data object CheckMidnight : CountUpUiEvent
 }
 
 /**

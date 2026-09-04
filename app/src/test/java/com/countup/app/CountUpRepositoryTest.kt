@@ -155,4 +155,50 @@ class CountUpRepositoryTest {
         assertEquals("rocket_launch", updated.icon)
         assertEquals("dusty_indigo", updated.cardColor)
     }
+
+    @Test
+    fun restoreResetAndWidgetResetRepositoryDelegation() {
+        val pastDay = LocalDate.now().minusDays(30).toEpochDay()
+        val item = repository.addItem(name = "Habit", epochDay = pastDay)!!
+
+        // Reset
+        val today = LocalDate.now().toEpochDay()
+        assertTrue(repository.resetTo(item.id, today))
+
+        // Restore
+        assertTrue(
+            repository.restoreReset(
+                id = item.id,
+                snapshot = ResetSnapshot(
+                    epochDay = pastDay,
+                    resetCount = 0,
+                    totalResetDays = 0L,
+                    futureFlag = false,
+                ),
+            )
+        )
+        val restored = repository.getItems().first { it.id == item.id }
+        assertEquals(pastDay, restored.epochDay)
+
+        // Widget reset record queue
+        val record = WidgetResetRecord(
+            id = "w1",
+            itemId = item.id,
+            itemName = item.name,
+            snapshot = ResetSnapshot(
+                epochDay = pastDay,
+                resetCount = 0,
+                totalResetDays = 0L,
+                futureFlag = false,
+            ),
+            releasedDays = 30L,
+            timestampMillis = System.currentTimeMillis(),
+        )
+        assertTrue(repository.recordWidgetReset(record))
+        assertEquals(1, repository.getPendingWidgetResets().size)
+        assertEquals("w1", repository.getPendingWidgetResets().first().id)
+
+        assertTrue(repository.dismissWidgetReset("w1"))
+        assertTrue(repository.getPendingWidgetResets().isEmpty())
+    }
 }

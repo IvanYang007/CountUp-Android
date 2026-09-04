@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -74,8 +75,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -84,9 +88,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
@@ -105,6 +111,13 @@ fun CountUpContent(
     val localContext = LocalContext.current
     val reduceMotion = remember(localContext) { isReducedMotion(localContext) }
     val displayItems = state.displayItems
+
+    LaunchedEffect(Unit) {
+        while (isActive) {
+            kotlinx.coroutines.delay(60_000L)
+            onEvent(CountUpUiEvent.CheckMidnight)
+        }
+    }
 
     Box(
         modifier = modifier
@@ -527,13 +540,14 @@ private fun MechanicalResetButton(
     tint: Color,
     modifier: Modifier = Modifier,
     isDarkCard: Boolean = false,
+    enabled: Boolean = true,
 ) {
     var isPressed by remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
     val holdProgress = remember { Animatable(0f) }
 
-    LaunchedEffect(isPressed) {
-        if (isPressed) {
+    LaunchedEffect(isPressed, enabled) {
+        if (isPressed && enabled) {
             try {
                 coroutineScope {
                     val detentJob = launch {
@@ -565,36 +579,72 @@ private fun MechanicalResetButton(
     }
 
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.86f else 1f,
+        targetValue = if (isPressed && enabled) 0.86f else 1f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
         label = "resetScale",
     )
 
-    val progress = holdProgress.value
+    val effectiveTint = if (enabled) tint else tint.copy(alpha = 0.35f)
 
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
-            .size(30.dp)
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-            .pointerInput(Unit) {
+            .zIndex(if (isPressed) 1f else 0f)
+            .minimumInteractiveComponentSize()
+            .pointerInput(enabled) {
+                if (!enabled) return@pointerInput
                 detectTapGestures(
                     onPress = {
                         isPressed = true
-                        tryAwaitRelease()
-                        isPressed = false
+                        try {
+                            tryAwaitRelease()
+                        } finally {
+                            isPressed = false
+                        }
                     },
                 )
             }
-            .semantics { this.contentDescription = contentDescription },
+            .semantics {
+                this.contentDescription = contentDescription
+                if (!enabled) {
+                    disabled()
+                } else {
+                    customActions = listOf(
+                        CustomAccessibilityAction(
+                            label = contentDescription,
+                            action = {
+                                onResetConfirmed()
+                                true
+                            },
+                        ),
+                    )
+                }
+            },
     ) {
-        if (progress > 0.01f) {
-            Canvas(modifier = Modifier.size(24.dp)) {
-                val strokeWidth = 1.8.dp.toPx()
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(30.dp)
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                },
+        ) {
+            Canvas(modifier = Modifier.requiredSize(72.dp)) {
+                val progress = holdProgress.value
+                if (progress <= 0.01f) return@Canvas
+                val strokeWidth = 3.dp.toPx()
                 val sweepColor = if (isDarkCard) Color(0xFFDEB285) else Color(0xFFD97642)
+                val trackColor = sweepColor.copy(alpha = 0.22f)
+                // Background track ring
+                drawArc(
+                    color = trackColor,
+                    startAngle = 0f,
+                    sweepAngle = 360f,
+                    useCenter = false,
+                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
+                )
+                // Active progression sweep
                 drawArc(
                     color = sweepColor,
                     startAngle = -90f,
@@ -603,17 +653,17 @@ private fun MechanicalResetButton(
                     style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
                 )
             }
+            Icon(
+                painter = painterResource(R.drawable.ic_refresh),
+                contentDescription = null,
+                tint = effectiveTint,
+                modifier = Modifier
+                    .size(16.dp)
+                    .graphicsLayer {
+                        rotationZ = holdProgress.value * 360f
+                    },
+            )
         }
-        Icon(
-            painter = painterResource(R.drawable.ic_refresh),
-            contentDescription = null,
-            tint = tint,
-            modifier = Modifier
-                .size(16.dp)
-                .graphicsLayer {
-                    rotationZ = progress * 360f
-                },
-        )
     }
 }
 
@@ -741,7 +791,7 @@ fun ItemCard(
                 onClick = onClick,
             )
             .pressScale(cardInteraction, 0.985f)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 14.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
@@ -781,58 +831,70 @@ fun ItemCard(
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .size(30.dp)
-                    .clip(CircleShape)
+                    .minimumInteractiveComponentSize()
                     .clickable(
                         interactionSource = widgetInteraction,
-                        indication = LocalIndication.current,
+                        indication = null,
                         onClick = onToggleWidget,
                     )
                     .pressScale(widgetInteraction)
                     .semantics { contentDescription = widgetDesc },
             ) {
-                Icon(
-                    painter = painterResource(if (widgetVisible) R.drawable.ic_widget_grid_filled else R.drawable.ic_widget_grid_outline),
-                    contentDescription = null,
-                    tint = if (widgetVisible) {
-                        if (isDarkCard) ZenOchre else MaterialTheme.colorScheme.primary
-                    } else {
-                        mutedInk.copy(alpha = 0.5f)
-                    },
-                    modifier = Modifier.size(15.dp),
-                )
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(30.dp)
+                        .clip(CircleShape),
+                ) {
+                    Icon(
+                        painter = painterResource(if (widgetVisible) R.drawable.ic_widget_grid_filled else R.drawable.ic_widget_grid_outline),
+                        contentDescription = null,
+                        tint = if (widgetVisible) {
+                            if (isDarkCard) ZenOchre else MaterialTheme.colorScheme.primary
+                        } else {
+                            mutedInk.copy(alpha = 0.5f)
+                        },
+                        modifier = Modifier.size(15.dp),
+                    )
+                }
             }
-            Spacer(Modifier.width(2.dp))
+            val canReset = item.isResettableOn(today)
             MechanicalResetButton(
                 onResetConfirmed = onReset,
-                contentDescription = resetDesc,
+                contentDescription = if (canReset) resetDesc else stringResource(R.string.cd_reset_cannot_reset_zero),
                 tint = if (isDarkCard) Color(0xFFFAF7F2) else MaterialTheme.colorScheme.primary,
                 isDarkCard = isDarkCard,
+                enabled = canReset,
             )
-            Spacer(Modifier.width(2.dp))
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .size(30.dp)
-                    .clip(CircleShape)
+                    .minimumInteractiveComponentSize()
                     .clickable(
                         interactionSource = deleteInteraction,
-                        indication = LocalIndication.current,
+                        indication = null,
                         onClick = onDelete,
                     )
                     .pressScale(deleteInteraction)
                     .semantics { contentDescription = deleteDesc },
             ) {
                 Box(
+                    contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .size(width = 12.dp, height = 2.4.dp)
-                        .background(
-                            if (isDarkCard) Color(0xFFE57A77)
-                            else if (item.cardColor == "terracotta" || item.cardColor == "rose_clay") Color(0xFF6B1D19)
-                            else MaterialTheme.colorScheme.error,
-                            RoundedCornerShape(1.dp),
-                        ),
-                )
+                        .size(30.dp)
+                        .clip(CircleShape),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(width = 12.dp, height = 2.4.dp)
+                            .background(
+                                if (isDarkCard) Color(0xFFE57A77)
+                                else if (item.cardColor == "terracotta" || item.cardColor == "rose_clay") Color(0xFF6B1D19)
+                                else MaterialTheme.colorScheme.error,
+                                RoundedCornerShape(1.dp),
+                            ),
+                    )
+                }
             }
         }
 

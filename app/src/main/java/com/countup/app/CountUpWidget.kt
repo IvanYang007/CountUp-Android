@@ -12,9 +12,9 @@ import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.StyleSpan
 import android.os.SystemClock
+import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
-import android.widget.Toast
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import java.time.LocalDate
@@ -163,56 +163,36 @@ class ResetCountReceiver : BroadcastReceiver() {
         val store = CountUpStore(context)
         val item = store.items().firstOrNull { it.id == id } ?: return
 
+        val todayLocalDate = LocalDate.now()
+        val today = todayLocalDate.toEpochDay()
+        val releasedDays = daysSince(LocalDate.ofEpochDay(item.epochDay), todayLocalDate)
+        if (!item.isResettableOn(todayLocalDate)) {
+            // Stop trigger reset when the accumulate date is already 0
+            return
+        }
+
         if (isArmed(id)) {
-            // Second tap confirmed: disarm and reset to today with heavy tactile latch
+            // Second tap confirmed: disarm and reset to today
             disarm()
-            performWidgetHaptic(context, isHeavy = true)
-            val today = LocalDate.now().toEpochDay()
+            val record = WidgetResetRecord(
+                itemId = item.id,
+                itemName = item.name,
+                snapshot = item.toResetSnapshot(),
+                releasedDays = kotlin.math.abs(releasedDays),
+                timestampMillis = System.currentTimeMillis(),
+            )
             if (store.resetTo(id, today)) {
+                store.recordWidgetReset(record)
                 // Push synchronously from the app process: the launcher redraws
                 // immediately, no composition pipeline in between.
                 pushWidgetUpdate(context)
                 pushAllHeroWidgetsUpdate(context)
-                // In-place instant feedback: toast notification if supported by launcher
-                Toast.makeText(
-                    context.applicationContext,
-                    context.getString(R.string.widget_reset_toast, item.name),
-                    Toast.LENGTH_SHORT,
-                ).show()
             }
         } else {
-            // First tap: arm this cell and re-render widget to show "Tap again" / "0?" with crisp detent tick
+            // First tap: arm this cell and re-render widget to show "Tap again" / "0?"
             arm(context, id)
-            performWidgetHaptic(context, isHeavy = false)
             pushWidgetUpdate(context)
             pushAllHeroWidgetsUpdate(context)
-        }
-    }
-
-    @android.annotation.SuppressLint("MissingPermission")
-    private fun performWidgetHaptic(context: Context, isHeavy: Boolean) {
-        try {
-            val vibrator = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? android.os.VibratorManager
-                vibratorManager?.defaultVibrator
-            } else {
-                @Suppress("DEPRECATION")
-                context.getSystemService(Context.VIBRATOR_SERVICE) as? android.os.Vibrator
-            } ?: return
-
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                val effectId = if (isHeavy) {
-                    android.os.VibrationEffect.EFFECT_HEAVY_CLICK
-                } else {
-                    android.os.VibrationEffect.EFFECT_CLICK
-                }
-                vibrator.vibrate(android.os.VibrationEffect.createPredefined(effectId))
-            } else {
-                @Suppress("DEPRECATION")
-                vibrator.vibrate(if (isHeavy) 35L else 15L)
-            }
-        } catch (_: Exception) {
-            // Graceful fallback on emulator / non-vibration hardware / unit tests
         }
     }
 
@@ -286,6 +266,7 @@ internal data class WidgetRowData(
     val futureFlag: Boolean,
     val icon: String = DEFAULT_ICON,
     val cardColor: String = "",
+    val resetCount: Int = 0,
 )
 
 /** Pure derivation shared by the widget (and unit-tested on the JVM). */
@@ -298,6 +279,7 @@ internal fun widgetRows(items: List<CountUpItem>, today: LocalDate): List<Widget
             futureFlag = item.futureFlag,
             icon = item.icon,
             cardColor = item.cardColor,
+            resetCount = item.resetCount,
         )
     }
 
@@ -358,6 +340,7 @@ internal class WidgetViewsFactory(private val context: Context) : RemoteViewsSer
             // Confirmation state: visual double-tap prompt directly on the widget
             views.setTextViewText(R.id.cell_name, context.getString(R.string.widget_reset_prompt))
             views.setTextColor(R.id.cell_name, textInk)
+            views.setViewVisibility(R.id.cell_reset_count, View.GONE)
             views.setTextViewText(R.id.cell_count, "0?")
             views.setTextColor(R.id.cell_count, WHITE)
             views.setImageViewResource(R.id.cell_circle, R.drawable.ic_circle_orange)
@@ -365,6 +348,15 @@ internal class WidgetViewsFactory(private val context: Context) : RemoteViewsSer
         } else {
             views.setTextViewText(R.id.cell_name, row.name)
             views.setTextColor(R.id.cell_name, textInk)
+
+            if (row.resetCount > 0) {
+                views.setViewVisibility(R.id.cell_reset_count, View.VISIBLE)
+                views.setTextViewText(R.id.cell_reset_count, context.getString(R.string.widget_reset_count_badge, row.resetCount))
+                views.setTextColor(R.id.cell_reset_count, if (night) WIDGET_RESET_BADGE_NIGHT else WIDGET_RESET_BADGE_DAY)
+            } else {
+                views.setViewVisibility(R.id.cell_reset_count, View.GONE)
+            }
+
             val arrived = arrivedFuture(row)
             views.setTextViewText(R.id.cell_count, widgetCountText(row.count, arrived))
             if (arrived) {
@@ -454,6 +446,10 @@ private val NIGHT_MUTED: Int = 0xFFC4B291.toInt()
 private val WHITE: Int = 0xFFFFFFFF.toInt()
 private val DIVIDER: Int = 0x66E3D3B8
 private val NIGHT_DIVIDER: Int = 0x40D9C6A6
+
+// Reset badge gold palette (mirrors @color/widget_reset_count_text)
+internal val WIDGET_RESET_BADGE_DAY: Int = 0xFF785D2A.toInt()
+internal val WIDGET_RESET_BADGE_NIGHT: Int = 0xFFD4B87C.toInt()
 
 // Arrived-future styling: solid green plate with a dark red bold count.
 private val ARRIVED_NUMBER: Int = 0xFFB71C1C.toInt()

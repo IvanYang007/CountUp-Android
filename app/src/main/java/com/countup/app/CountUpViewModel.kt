@@ -121,10 +121,13 @@ class CountUpViewModel(
                 viewModelScope.launch(ioDispatcher) {
                     if (repository.deleteItem(event.id)) {
                         val updatedItems = repository.getItems()
+                        val pending = repository.getPendingWidgetResets()
                         _state.update {
                             it.copy(
                                 items = updatedItems,
                                 pendingDelete = null,
+                                pendingWidgetResets = pending,
+                                cardWhispers = it.cardWhispers - event.id,
                             )
                         }
                         emitEffect(CountUpUiEffect.RefreshWidget)
@@ -135,27 +138,80 @@ class CountUpViewModel(
                 }
             }
             is CountUpUiEvent.ConfirmReset -> {
-                val targetItem = _state.value.items.firstOrNull { it.id == event.id }
+                val targetItem = _state.value.items.firstOrNull { it.id == event.id } ?: return
+                val todayLocalDate = todayProvider()
+                val todayEpochDay = todayLocalDate.toEpochDay()
+                val releasedDays = daysSince(LocalDate.ofEpochDay(targetItem.epochDay), todayLocalDate)
+                // Stop trigger reset when the accumulate date is already 0
+                if (!targetItem.isResettableOn(todayLocalDate)) {
+                    return
+                }
+
                 viewModelScope.launch(ioDispatcher) {
-                    if (repository.resetTo(event.id, todayProvider().toEpochDay())) {
+                    if (repository.resetTo(event.id, todayEpochDay)) {
                         val updatedItems = repository.getItems()
+                        val whisper = CardResetWhisper(
+                            itemId = targetItem.id,
+                            releasedDays = kotlin.math.abs(releasedDays),
+                            snapshot = targetItem.toResetSnapshot(),
+                        )
                         _state.update {
                             it.copy(
                                 items = updatedItems,
-                            )
-                        }
-                        if (targetItem != null) {
-                            emitEffect(
-                                CountUpUiEffect.ShowSnackbar(
-                                    messageRes = R.string.widget_reset_toast,
-                                    formatArg = targetItem.name,
-                                )
+                                cardWhispers = it.cardWhispers + (event.id to whisper),
                             )
                         }
                         emitEffect(CountUpUiEffect.RefreshWidget)
+
+                        // Whisper line auto-dismiss after 5,000 ms
+                        launch {
+                            kotlinx.coroutines.delay(5000L)
+                            _state.update { current ->
+                                if (current.cardWhispers[event.id] == whisper) {
+                                    current.copy(cardWhispers = current.cardWhispers - event.id)
+                                } else {
+                                    current
+                                }
+                            }
+                        }
                     } else {
                         emitEffect(CountUpUiEffect.ShowSnackbar(R.string.error_save_failed))
                     }
+                }
+            }
+            is CountUpUiEvent.UndoReset -> {
+                val whisper = _state.value.cardWhispers[event.id] ?: return
+                viewModelScope.launch(ioDispatcher) {
+                    performRestore(whisper.itemId, whisper.snapshot) { updatedItems ->
+                        _state.update {
+                            it.copy(
+                                items = updatedItems,
+                                cardWhispers = it.cardWhispers - event.id,
+                            )
+                        }
+                    }
+                }
+            }
+            is CountUpUiEvent.RestoreWidgetReset -> {
+                val record = event.record
+                viewModelScope.launch(ioDispatcher) {
+                    performRestore(record.itemId, record.snapshot, recordId = record.id) { updatedItems ->
+                        repository.dismissWidgetReset(record.id)
+                        val pending = repository.getPendingWidgetResets()
+                        _state.update {
+                            it.copy(
+                                items = updatedItems,
+                                pendingWidgetResets = pending,
+                            )
+                        }
+                    }
+                }
+            }
+            is CountUpUiEvent.DismissWidgetReset -> {
+                viewModelScope.launch(ioDispatcher) {
+                    repository.dismissWidgetReset(event.recordId)
+                    val pending = repository.getPendingWidgetResets()
+                    _state.update { it.copy(pendingWidgetResets = pending) }
                 }
             }
             is CountUpUiEvent.ToggleWidgetVisibility -> {
@@ -183,6 +239,15 @@ class CountUpViewModel(
                     refreshState()
                 }
             }
+            CountUpUiEvent.CheckMidnight -> {
+                val currentToday = todayProvider()
+                if (currentToday != _state.value.today) {
+                    viewModelScope.launch(ioDispatcher) {
+                        refreshState()
+                        emitEffect(CountUpUiEffect.RefreshWidget)
+                    }
+                }
+            }
         }
     }
 
@@ -191,12 +256,14 @@ class CountUpViewModel(
         val items = repository.getItems()
         val sortOrder = repository.getSortOrder()
         val backgroundTheme = repository.getBackgroundTheme()
+        val pendingWidgetResets = repository.getPendingWidgetResets()
         _state.update {
             it.copy(
                 items = items,
                 sortOrder = sortOrder,
                 backgroundTheme = backgroundTheme,
                 today = today,
+                pendingWidgetResets = pendingWidgetResets,
             )
         }
     }
@@ -204,6 +271,27 @@ class CountUpViewModel(
     private fun emitEffect(effect: CountUpUiEffect) {
         viewModelScope.launch {
             _effects.send(effect)
+        }
+    }
+
+    private suspend fun performRestore(
+        itemId: String,
+        snapshot: ResetSnapshot,
+        recordId: String? = null,
+        onSuccess: suspend (List<CountUpItem>) -> Unit,
+    ) {
+        if (repository.restoreReset(itemId, snapshot)) {
+            val updatedItems = repository.getItems()
+            onSuccess(updatedItems)
+            emitEffect(CountUpUiEffect.RefreshWidget)
+        } else {
+            val exists = repository.getItems().any { it.id == itemId }
+            if (!exists && recordId != null) {
+                repository.dismissWidgetReset(recordId)
+                val pending = repository.getPendingWidgetResets()
+                _state.update { it.copy(pendingWidgetResets = pending) }
+            }
+            emitEffect(CountUpUiEffect.ShowSnackbar(R.string.error_save_failed))
         }
     }
 }

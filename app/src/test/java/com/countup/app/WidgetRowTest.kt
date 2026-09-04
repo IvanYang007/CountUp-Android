@@ -131,6 +131,32 @@ class WidgetRowTest {
     }
 
     @Test
+    fun widgetRowsCarriesResetCount() {
+        val items = listOf(
+            CountUpItem(id = "1", name = "Reset Once", epochDay = today.toEpochDay() - 10, resetCount = 1),
+            CountUpItem(id = "2", name = "Never Reset", epochDay = today.toEpochDay() - 5, resetCount = 0),
+        )
+        val rows = widgetRows(items, today)
+        assertEquals(1, rows[0].resetCount)
+        assertEquals(0, rows[1].resetCount)
+    }
+
+    @Test
+    fun widgetRowsCarriesResetCountForFutureAndArrivedFutureItems() {
+        val items = listOf(
+            CountUpItem(id = "future", name = "Future Countdown", epochDay = today.toEpochDay() + 10, futureFlag = true, resetCount = 2),
+            CountUpItem(id = "arrived", name = "Arrived Future", epochDay = today.toEpochDay() - 3, futureFlag = true, resetCount = 5),
+        )
+        val rows = widgetRows(items, today)
+        assertEquals(2, rows.size)
+        assertEquals(-10L, rows[0].count)
+        assertEquals(2, rows[0].resetCount)
+        assertEquals(3L, rows[1].count)
+        assertEquals(5, rows[1].resetCount)
+        assertTrue(arrivedFuture(rows[1]))
+    }
+
+    @Test
     fun widgetCircleStyleProvidesDifferentColorsForDefaultedCards() {
         val row1 = WidgetRowData(id = "item1", name = "Item 1", count = 5, futureFlag = false, cardColor = "")
         val row2 = WidgetRowData(id = "item2", name = "Item 2", count = 10, futureFlag = false, cardColor = "")

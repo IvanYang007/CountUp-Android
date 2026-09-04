@@ -61,7 +61,6 @@ fun calculateWarmth(days: Long): Float {
 
 /**
  * Linearly interpolates RGB channels between two colors with a normalized factor in [0f, 1f].
- * Delegates to Compose's built-in [androidx.compose.ui.graphics.lerp].
  */
 fun lerpPatinaColor(c1: Color, c2: Color, factor: Float): Color {
     val t = factor.coerceIn(0f, 1f)

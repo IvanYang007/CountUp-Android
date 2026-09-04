@@ -36,20 +36,48 @@ data class CountUpItem(
         }
 
     /**
-     * Resets this counter to [newEpochDay].
+     * Snapshot of this item's metrics prior to a reset operation.
+     */
+    fun toResetSnapshot(): ResetSnapshot = ResetSnapshot(
+        epochDay = epochDay,
+        resetCount = resetCount,
+        totalResetDays = totalResetDays,
+        futureFlag = futureFlag,
+    )
+
+    /**
+     * Restores this counter's metrics from [snapshot].
+     */
+    fun restoreFrom(snapshot: ResetSnapshot): CountUpItem = copy(
+        epochDay = snapshot.epochDay,
+        resetCount = snapshot.resetCount,
+        totalResetDays = snapshot.totalResetDays,
+        futureFlag = snapshot.futureFlag,
+    )
+
+    /**
+     * Determines whether this counter can be reset on [todayEpochDay].
+     * Returns false if the anchor epochDay is already today, preventing redundant zero-day reset cycles.
+     */
+    fun isResettableOn(todayEpochDay: Long): Boolean = epochDay != todayEpochDay
+
+    /**
+     * Determines whether this counter can be reset on [today].
+     */
+    fun isResettableOn(today: LocalDate): Boolean = isResettableOn(today.toEpochDay())
+
+    /**
+     * Resets this counter to [newEpochDay] (typically today's date), updating the streak metrics.
      *
      * Clean domain transition:
+     * - Stops trigger reset when accumulated date is 0 (or already reset today), returning unchanged item.
      * - Increments [resetCount].
-     * - Accumulates elapsed cycle days into [totalResetDays] only if the item was actively
-     *   counting up ([futureFlag] was false and [newEpochDay] > [epochDay]).
+     * - Accumulates elapsed cycle days into [totalResetDays].
      * - Resets [futureFlag] to false.
      */
     fun resetTo(newEpochDay: Long): CountUpItem {
-        val cycleDays = if (!futureFlag && newEpochDay > epochDay) {
-            newEpochDay - epochDay
-        } else {
-            0L
-        }
+        if (!isResettableOn(newEpochDay)) return this
+        val cycleDays = kotlin.math.abs(newEpochDay - epochDay)
         return copy(
             epochDay = newEpochDay,
             futureFlag = false,
@@ -58,6 +86,18 @@ data class CountUpItem(
         )
     }
 }
+
+/**
+ * Snapshot of an item's pre-reset state to support atomic undo/restore operations.
+ */
+@Immutable
+data class ResetSnapshot(
+    val epochDay: Long,
+    val resetCount: Int,
+    val totalResetDays: Long,
+    val futureFlag: Boolean = false,
+)
+
 /**
  * Uncommitted draft payload representing user input in creation or edit dialogs.
  * Encapsulates the form fields to eliminate loose multi-primitive lambdas and prevent transposition bugs.
@@ -70,6 +110,21 @@ data class ItemDraft(
     val icon: String = "",
     val cardColor: String = "",
 )
+
+/**
+ * Record of a counter reset triggered via the home-screen widget, preserved so that
+ * opening the app can present an undo whisper stack.
+ */
+@Immutable
+data class WidgetResetRecord(
+    val id: String = UUID.randomUUID().toString(),
+    val itemId: String,
+    val itemName: String,
+    val snapshot: ResetSnapshot,
+    val releasedDays: Long,
+    val timestampMillis: Long,
+)
+
 
 /** Default name used when a name is left blank. */
 const val DEFAULT_ITEM_NAME: String = "Item"

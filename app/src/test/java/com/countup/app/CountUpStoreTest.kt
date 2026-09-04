@@ -283,4 +283,149 @@ class CountUpStoreTest {
         assertEquals(40L, updated2.totalResetDays)
         assertEquals(40, updated2.averageResetDays)
     }
+
+    @Test
+    fun resetToDoesNotTriggerWhenTargetEpochDayMatchesCurrent() {
+        val store = CountUpStore(testContext)
+        val item = store.addItem("Reading", 20500L)!!
+
+        val success = store.resetTo(item.id, 20500L)
+        assertFalse(success)
+
+        val retrieved = store.items().first { it.id == item.id }
+        assertEquals(0, retrieved.resetCount)
+        assertEquals(0L, retrieved.totalResetDays)
+        assertEquals(20500L, retrieved.epochDay)
+    }
+
+    @Test
+    fun resetToSucceedsOnNegativeDayItemAndPersistsAbsCycleDays() {
+        val store1 = CountUpStore(testContext)
+        // Item anchored in future (20100)
+        val item = store1.addItem("Future Trip", 20100L)!!
+
+        // Reset to today (20050) -> day count was -50
+        val success = store1.resetTo(item.id, 20050L)
+        assertTrue(success)
+
+        // Verify in-memory state
+        val updated1 = store1.items().first { it.id == item.id }
+        assertEquals(20050L, updated1.epochDay)
+        assertEquals(1, updated1.resetCount)
+        assertEquals(50L, updated1.totalResetDays)
+        assertEquals(50, updated1.averageResetDays)
+        assertFalse(updated1.futureFlag)
+
+        // Re-read from disk in new store instance
+        val store2 = CountUpStore(testContext)
+        val updated2 = store2.items().first { it.id == item.id }
+        assertEquals(20050L, updated2.epochDay)
+        assertEquals(1, updated2.resetCount)
+        assertEquals(50L, updated2.totalResetDays)
+        assertEquals(50, updated2.averageResetDays)
+        assertFalse(updated2.futureFlag)
+    }
+
+    @Test
+    fun resetToWhenItemIsArrivedFutureClearsFutureFlagAndPersists() {
+        val store1 = CountUpStore(testContext)
+        // Item anchored in past with futureFlag = true
+        val item = store1.addItem("Passed Launch", 20040L)!!
+        val flaggedItem = item.copy(futureFlag = true)
+        // Persist the arrived future item
+        val storeField = store1.javaClass.getDeclaredMethod("persist", List::class.java).apply { isAccessible = true }
+        storeField.invoke(store1, listOf(flaggedItem))
+
+        val success = store1.resetTo(item.id, 20050L)
+        assertTrue(success)
+
+        val store2 = CountUpStore(testContext)
+        val reloaded = store2.items().first { it.id == item.id }
+        assertEquals(20050L, reloaded.epochDay)
+        assertEquals(1, reloaded.resetCount)
+        assertEquals(10L, reloaded.totalResetDays)
+        assertEquals(10, reloaded.averageResetDays)
+        assertFalse(reloaded.futureFlag)
+    }
+
+    @Test
+    fun restoreResetRestoresPreviousMetricsAndPersists() {
+        val store1 = CountUpStore(testContext)
+        val item = store1.addItem("Workout", 20000L)!!
+
+        // Reset to 20050
+        assertTrue(store1.resetTo(item.id, 20050L))
+        val afterReset = store1.items().first { it.id == item.id }
+        assertEquals(1, afterReset.resetCount)
+        assertEquals(50L, afterReset.totalResetDays)
+
+        // Restore back to original
+        val restored = store1.restoreReset(
+            id = item.id,
+            snapshot = ResetSnapshot(
+                epochDay = 20000L,
+                resetCount = 0,
+                totalResetDays = 0L,
+                futureFlag = false,
+            ),
+        )
+        assertTrue(restored)
+
+        val store2 = CountUpStore(testContext)
+        val afterRestore = store2.items().first { it.id == item.id }
+        assertEquals(20000L, afterRestore.epochDay)
+        assertEquals(0, afterRestore.resetCount)
+        assertEquals(0L, afterRestore.totalResetDays)
+        assertFalse(afterRestore.futureFlag)
+    }
+
+    @Test
+    fun widgetResetQueueCapsAtThreeNewestAndDismissesCorrectly() {
+        val store = CountUpStore(testContext)
+        assertTrue(store.getPendingWidgetResets().isEmpty())
+
+        val snap = ResetSnapshot(epochDay = 20000L, resetCount = 0, totalResetDays = 0L, futureFlag = false)
+        val rec1 = WidgetResetRecord(id = "r1", itemId = "i1", itemName = "Item 1", snapshot = snap, releasedDays = 10L, timestampMillis = 1000L)
+        val rec2 = WidgetResetRecord(id = "r2", itemId = "i2", itemName = "Item 2", snapshot = snap, releasedDays = 20L, timestampMillis = 2000L)
+        val rec3 = WidgetResetRecord(id = "r3", itemId = "i3", itemName = "Item 3", snapshot = snap, releasedDays = 30L, timestampMillis = 3000L)
+        val rec4 = WidgetResetRecord(id = "r4", itemId = "i4", itemName = "Item 4", snapshot = snap, releasedDays = 40L, timestampMillis = 4000L)
+
+        store.recordWidgetReset(rec1)
+        store.recordWidgetReset(rec2)
+        store.recordWidgetReset(rec3)
+        assertEquals(3, store.getPendingWidgetResets().size)
+
+        // Adding 4th should pop oldest (rec1), keeping rec4, rec3, rec2
+        store.recordWidgetReset(rec4)
+        val current = store.getPendingWidgetResets()
+        assertEquals(3, current.size)
+        assertEquals(listOf("r4", "r3", "r2"), current.map { it.id })
+
+        // Dismiss middle record
+        assertTrue(store.dismissWidgetReset("r3"))
+        val afterDismiss = store.getPendingWidgetResets()
+        assertEquals(2, afterDismiss.size)
+        assertEquals(listOf("r4", "r2"), afterDismiss.map { it.id })
+    }
+
+    @Test
+    fun deleteItemPurgesMatchingPendingWidgetResets() {
+        val store = CountUpStore(testContext)
+        val item = store.addItem(name = "To Delete", epochDay = 20000L)!!
+
+        val snap = ResetSnapshot(epochDay = 20000L, resetCount = 0, totalResetDays = 0L, futureFlag = false)
+        val record = WidgetResetRecord(
+            id = "rec_del",
+            itemId = item.id,
+            itemName = item.name,
+            snapshot = snap,
+            releasedDays = 15L,
+            timestampMillis = 5000L,
+        )
+        store.recordWidgetReset(record)
+        assertEquals(1, store.getPendingWidgetResets().size)
+
+        assertTrue(store.deleteItem(item.id))
+        assertTrue(store.getPendingWidgetResets().isEmpty())
+    }
 }

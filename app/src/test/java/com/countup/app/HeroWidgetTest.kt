@@ -94,4 +94,29 @@ class HeroWidgetTest {
         val color180 = getPatinaPrimaryColor(180L)
         assertEquals(PatinaPigments.Gold.red, color180.red, 0.01f)
     }
+
+    @Test
+    fun `hero widget row data carries resetCount`() {
+        val row = WidgetRowData(
+            id = "hero_row",
+            name = "Sobriety",
+            count = 120,
+            futureFlag = false,
+            resetCount = 3,
+        )
+        assertEquals(3, row.resetCount)
+    }
+
+    @Test
+    fun `hero item with resetCount exposes cadence for badge and average days`() {
+        val item = CountUpItem(
+            id = "hero_cadence",
+            name = "Meditation",
+            epochDay = LocalDate.of(2026, 8, 1).toEpochDay(),
+            resetCount = 4,
+            totalResetDays = 120L,
+        )
+        assertEquals(4, item.resetCount)
+        assertEquals(30, item.averageResetDays)
+    }
 }

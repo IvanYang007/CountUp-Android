@@ -254,4 +254,24 @@
     <string name="reset_rhythm_multiple">%1$d total resets · avg %2$d days / cycle</string>
     <string name="cd_reset_rhythm_single">1 reset, initial cycle %1$d days</string>
     <string name="cd_reset_rhythm_multiple">%1$d resets, average cycle %2$d days</string>
+
+    <!-- Reset as Ink Drop & Whispers -->
+    <string name="reset_arm_confirm">0? Confirm</string>
+    <string name="cd_reset_arm_confirm">Confirm reset to 0</string>
+    <string name="cd_reset_cannot_reset_zero">Counter is already at 0 days</string>
+    <string name="whisper_days_released_single">1 day released</string>
+    <string name="whisper_days_released_multiple">%1$d days released</string>
+    <string name="whisper_dot">·</string>
+    <string name="whisper_action_undo">Undo</string>
+    <string name="cd_whisper_undo">Undo reset and restore %1$d days</string>
+    <string name="widget_whisper_summary">“%1$s” reset from widget %2$s</string>
+    <string name="widget_whisper_restore">Restore %1$d</string>
+    <string name="cd_widget_whisper_restore">Restore %1$s to %2$d days</string>
+    <string name="widget_whisper_dismiss">Dismiss</string>
+    <string name="cd_widget_whisper_dismiss">Dismiss widget reset notice for %1$s</string>
+    <string name="time_just_now">just now</string>
+    <string name="time_minutes_ago">%1$dm ago</string>
+    <string name="time_hours_ago">%1$dh ago</string>
+    <string name="time_days_ago">%1$dd ago</string>
+    <string name="widget_reset_count_badge">×%1$d</string>
 </resources>

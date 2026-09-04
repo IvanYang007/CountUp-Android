@@ -25,6 +25,10 @@ interface CountUpRepository {
     ): Boolean
     fun deleteItem(id: String): Boolean
     fun resetTo(id: String, epochDay: Long = LocalDate.now().toEpochDay()): Boolean
+    fun restoreReset(id: String, snapshot: ResetSnapshot): Boolean
+    fun recordWidgetReset(record: WidgetResetRecord): Boolean
+    fun getPendingWidgetResets(): List<WidgetResetRecord>
+    fun dismissWidgetReset(recordId: String): Boolean
     fun setWidgetVisibility(id: String, showInWidget: Boolean): Boolean
     fun getBackgroundTheme(): BackgroundTheme
     fun setBackgroundTheme(theme: BackgroundTheme): Boolean
@@ -65,6 +69,18 @@ class DefaultCountUpRepository(
 
     override fun resetTo(id: String, epochDay: Long): Boolean =
         store.resetTo(id, epochDay)
+
+    override fun restoreReset(id: String, snapshot: ResetSnapshot): Boolean =
+        store.restoreReset(id, snapshot)
+
+    override fun recordWidgetReset(record: WidgetResetRecord): Boolean =
+        store.recordWidgetReset(record)
+
+    override fun getPendingWidgetResets(): List<WidgetResetRecord> =
+        store.getPendingWidgetResets()
+
+    override fun dismissWidgetReset(recordId: String): Boolean =
+        store.dismissWidgetReset(recordId)
 
     override fun setWidgetVisibility(id: String, showInWidget: Boolean): Boolean =
         store.setWidgetVisibility(id, showInWidget)

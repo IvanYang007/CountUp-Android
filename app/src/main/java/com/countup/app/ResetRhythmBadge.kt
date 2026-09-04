@@ -2,11 +2,11 @@ package com.countup.app
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,6 +15,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -24,8 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -73,7 +74,7 @@ fun ResetRhythmBadge(
     }
 
     val avgDays = item.averageResetDays
-    val bg = patina?.badgeBg ?: if (isDarkCard) Color(0x22FFFFFF) else Color(0x14000000)
+    val bg = patina?.badgeBg ?: if (isDarkCard) ZenWhite.copy(alpha = 0.13f) else ZenInkBlack.copy(alpha = 0.08f)
     val fontColor = if (isDarkCard) ZenBronzeTokens.BronzeGoldSilk else ZenBronzeTokens.BronzeGoldDeep
 
     val a11yText = if (resets == 1) {
@@ -109,42 +110,49 @@ fun ResetRhythmBadge(
         state = tooltipState,
         modifier = modifier,
     ) {
+        val badgeInteraction = rememberPressSource()
         Box(
             modifier = Modifier
-                .height(16.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .background(bg)
+                .minimumInteractiveComponentSize()
                 .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
+                    interactionSource = badgeInteraction,
                     indication = null,
                 ) {
                     scope.launch {
                         tooltipState.show()
                     }
                 }
-                .padding(horizontal = 5.5.dp)
-                .clearAndSetSemantics { contentDescription = a11yText },
+                .pressScale(badgeInteraction)
+                .semantics { contentDescription = a11yText },
             contentAlignment = Alignment.Center,
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(3.dp),
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(bg)
+                    .padding(horizontal = 6.dp, vertical = 2.dp),
+                contentAlignment = Alignment.Center,
             ) {
-                Text(
-                    text = resets.toString(),
-                    style = digitStyle,
-                )
-                Text(
-                    text = stringResource(R.string.reset_rhythm_dot),
-                    style = digitStyle.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = fontColor.copy(alpha = 0.55f),
-                    ),
-                )
-                Text(
-                    text = avgDays.toString(),
-                    style = digitStyle,
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(3.dp),
+                ) {
+                    Text(
+                        text = resets.toString(),
+                        style = digitStyle,
+                    )
+                    Text(
+                        text = stringResource(R.string.reset_rhythm_dot),
+                        style = digitStyle.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = fontColor.copy(alpha = 0.55f),
+                        ),
+                    )
+                    Text(
+                        text = avgDays.toString(),
+                        style = digitStyle,
+                    )
+                }
             }
         }
     }

@@ -2,4 +2,5 @@
 <resources>
     <!-- Warm paper background matching icon_512x512.jpg -->
     <color name="ic_launcher_background">#F6EDDE</color>
+    <color name="widget_reset_count_text">#785D2A</color>
 </resources>

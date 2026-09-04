@@ -1,9 +1,11 @@
 package com.countup.app
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.time.LocalDate
 
 class CountUpItemTest {
 
@@ -345,13 +347,130 @@ class CountUpItemTest {
     }
 
     @Test
-    fun resetToOnFutureItemDoesNotAccumulateNegativeDays() {
+    fun resetToOnNegativeDayItemSucceedsAndUsesAbsDaysForCycleAverage() {
         val futureItem = CountUpItem(id = "f", name = "Future Event", epochDay = 20100L, futureFlag = true)
         val resetItem = futureItem.resetTo(20050L)
         assertEquals(20050L, resetItem.epochDay)
         assertEquals(1, resetItem.resetCount)
-        assertEquals(0L, resetItem.totalResetDays)
-        assertEquals(0, resetItem.averageResetDays)
+        assertEquals(50L, resetItem.totalResetDays)
+        assertEquals(50, resetItem.averageResetDays)
         assertEquals(false, resetItem.futureFlag)
+    }
+
+    @Test
+    fun resetToWhenEpochDayEqualsNewEpochDayReturnsSameItemWithoutIncrementingResetCount() {
+        val item = CountUpItem(
+            id = "same_day",
+            name = "Same Day Event",
+            epochDay = 20500L,
+            resetCount = 3,
+            totalResetDays = 90L,
+        )
+        val result = item.resetTo(20500L)
+        assertEquals(item, result)
+        assertEquals(3, result.resetCount)
+        assertEquals(90L, result.totalResetDays)
+        assertEquals(30, result.averageResetDays)
+    }
+
+    @Test
+    fun toResetSnapshotCapturesCurrentState() {
+        val item = CountUpItem(
+            id = "s1",
+            name = "Snapshot Test",
+            epochDay = 20000L,
+            resetCount = 2,
+            totalResetDays = 40L,
+            futureFlag = false,
+        )
+        val snap = item.toResetSnapshot()
+        assertEquals(20000L, snap.epochDay)
+        assertEquals(2, snap.resetCount)
+        assertEquals(40L, snap.totalResetDays)
+        assertEquals(false, snap.futureFlag)
+    }
+
+    @Test
+    fun resetToOnNegativeDayItemCalculatesRoundedAverageCorrectlyOverMultipleCycles() {
+        // Cycle 1: Started 15 days in future (anchor = 20065). Reset on day 20050.
+        // Elapsed cycle = abs(20050 - 20065) = 15. Average = 15 / 1 = 15.
+        val initial = CountUpItem(id = "cycle_test", name = "Future Project", epochDay = 20065L, futureFlag = true)
+        val reset1 = initial.resetTo(20050L)
+        assertEquals(20050L, reset1.epochDay)
+        assertEquals(1, reset1.resetCount)
+        assertEquals(15L, reset1.totalResetDays)
+        assertEquals(15, reset1.averageResetDays)
+        assertEquals(false, reset1.futureFlag)
+
+        // Cycle 2: Advanced 30 days (anchor is now 20050, resetting on day 20080).
+        // Cycle = abs(20080 - 20050) = 30. Total = 15 + 30 = 45. Average = round(45 / 2 = 22.5) -> rounds half to even 22.
+        val reset2 = reset1.resetTo(20080L)
+        assertEquals(20080L, reset2.epochDay)
+        assertEquals(2, reset2.resetCount)
+        assertEquals(45L, reset2.totalResetDays)
+        assertEquals(22, reset2.averageResetDays)
+
+        // Cycle 3: Advanced 40 days (resetting on day 20120).
+        // Cycle = abs(20120 - 20080) = 40. Total = 45 + 40 = 85. Average = round(85 / 3) = 28.
+        val reset3 = reset2.resetTo(20120L)
+        assertEquals(20120L, reset3.epochDay)
+        assertEquals(3, reset3.resetCount)
+        assertEquals(85L, reset3.totalResetDays)
+        assertEquals(28, reset3.averageResetDays)
+    }
+
+    @Test
+    fun resetToOnArrivedFutureItemClearsFutureFlagAndAccumulatesPositiveDays() {
+        // Item was created with futureFlag, but the target date was 5 days ago (anchor = 20045, today = 20050).
+        val arrivedItem = CountUpItem(id = "arr", name = "Arrived Birthday", epochDay = 20045L, futureFlag = true)
+        val resetItem = arrivedItem.resetTo(20050L)
+        assertEquals(20050L, resetItem.epochDay)
+        assertEquals(1, resetItem.resetCount)
+        assertEquals(5L, resetItem.totalResetDays)
+        assertEquals(5, resetItem.averageResetDays)
+        assertEquals(false, resetItem.futureFlag)
+    }
+
+    @Test
+    fun restoreFromSnapshotRestoresNegativeItemStateAccurately() {
+        val original = CountUpItem(
+            id = "neg_restore",
+            name = "Trip Countdown",
+            epochDay = 20100L,
+            futureFlag = true,
+            resetCount = 0,
+            totalResetDays = 0L,
+        )
+        val snapshot = original.toResetSnapshot()
+        val afterReset = original.resetTo(20050L)
+        assertEquals(1, afterReset.resetCount)
+        assertEquals(50L, afterReset.totalResetDays)
+        assertEquals(false, afterReset.futureFlag)
+
+        val restored = afterReset.restoreFrom(snapshot)
+        assertEquals(original.epochDay, restored.epochDay)
+        assertEquals(original.futureFlag, restored.futureFlag)
+        assertEquals(original.resetCount, restored.resetCount)
+        assertEquals(original.totalResetDays, restored.totalResetDays)
+        assertEquals(original, restored)
+    }
+
+    @Test
+    fun isResettableOnReturnsFalseWhenItemEpochDayMatchesToday() {
+        val item = CountUpItem(id = "same_day", name = "Test", epochDay = 20050L)
+        assertFalse(item.isResettableOn(20050L))
+        assertFalse(item.isResettableOn(LocalDate.ofEpochDay(20050L)))
+    }
+
+    @Test
+    fun isResettableOnReturnsTrueWhenItemEpochDayIsPastOrFuture() {
+        val pastItem = CountUpItem(id = "past", name = "Past", epochDay = 20040L)
+        val futureItem = CountUpItem(id = "future", name = "Future", epochDay = 20060L, futureFlag = true)
+        val today = LocalDate.ofEpochDay(20050L)
+
+        assertTrue(pastItem.isResettableOn(20050L))
+        assertTrue(pastItem.isResettableOn(today))
+        assertTrue(futureItem.isResettableOn(20050L))
+        assertTrue(futureItem.isResettableOn(today))
     }
 }

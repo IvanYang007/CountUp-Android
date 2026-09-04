@@ -28,13 +28,25 @@
 
         <TextView
             android:id="@+id/cell_name"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:gravity="center"
             android:maxLines="1"
             android:ellipsize="end"
             android:letterSpacing="0.03"
             android:textSize="10.8sp" />
+
+        <TextView
+            android:id="@+id/cell_reset_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="2dp"
+            android:gravity="center"
+            android:maxLines="1"
+            android:textStyle="bold"
+            android:textSize="8.5sp"
+            android:visibility="gone" />
     </LinearLayout>
 
     <FrameLayout
