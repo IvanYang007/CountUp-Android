@@ -255,8 +255,6 @@
     <string name="cd_reset_rhythm_single">重置 1 次，往期周期 %1$d 天</string>
     <string name="cd_reset_rhythm_multiple">重置 %1$d 次，平均周期 %2$d 天</string>
     <!-- Reset as Ink Drop & Whispers -->
-    <string name="reset_arm_confirm">0? 确认</string>
-    <string name="cd_reset_arm_confirm">确认归零</string>
     <string name="cd_reset_cannot_reset_zero">计数已处于0天，无需归零</string>
     <string name="whisper_days_released_single">已释放 1 天</string>
     <string name="whisper_days_released_multiple">已释放 %1$d 天</string>

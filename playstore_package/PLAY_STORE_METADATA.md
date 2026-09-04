@@ -140,5 +140,5 @@ All release artifacts are located in `playstore_package/`:
    - Go to **Release** -> **Production**.
    - Click **Create new release**.
    - Upload [`playstore_package/app-release.aab`](file:///d:/Github/countUp/playstore_package/app-release.aab).
-   - Enter Release notes: `Release 2.1.0 (v22): Introduced Reset Rhythm Badge (修持节奏) — minimalist Celestial Dot badge [ resets · avg days ] in Chinese Bronze Gold, Zen Paper Tooltip with full metrics breakdown, zero-reset negative space silence, mathematical rounding, and robust dual-storage persistence.`
+    - Enter Release notes: `Release 2.3.0 (v24): Hardened Reset Mechanics with mechanical hold gesture cancellation safety, WCAG 2.2 accessibility (single-tap TalkBack action, 48dp hit targets), unified domain reset eligibility invariants, remote views widget night-mode color badge support, and midnight auto-invalidation ticker.`
    - Click **Review release** -> **Start rollout to Production**.

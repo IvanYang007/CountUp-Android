@@ -256,8 +256,6 @@
     <string name="cd_reset_rhythm_multiple">%1$d resets, average cycle %2$d days</string>
 
     <!-- Reset as Ink Drop & Whispers -->
-    <string name="reset_arm_confirm">0? Confirm</string>
-    <string name="cd_reset_arm_confirm">Confirm reset to 0</string>
     <string name="cd_reset_cannot_reset_zero">Counter is already at 0 days</string>
     <string name="whisper_days_released_single">1 day released</string>
     <string name="whisper_days_released_multiple">%1$d days released</string>
