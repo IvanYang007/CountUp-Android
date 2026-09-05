@@ -900,7 +900,6 @@ fun ItemCard(
     val deleteInteraction = rememberPressSource()
     val widgetInteraction = rememberPressSource()
     val countRowInteraction = rememberPressSource()
-    val haptic = LocalHapticFeedback.current
 
     val canShowWeeks = abs(count) >= 7L
     var displayMode by rememberSaveable(item.id) { mutableStateOf(TimeDisplayMode.DAYS) }
@@ -1300,7 +1299,6 @@ private fun WidgetResetNoticeCard(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val haptic = LocalHapticFeedback.current
     val restoreInteraction = rememberPressSource()
     val dismissInteraction = rememberPressSource()
     val zenColors = LocalZenColors.current
