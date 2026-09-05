@@ -140,5 +140,5 @@ All release artifacts are located in `playstore_package/`:
    - Go to **Release** -> **Production**.
    - Click **Create new release**.
    - Upload [`playstore_package/app-release.aab`](file:///d:/Github/countUp/playstore_package/app-release.aab).
-    - Enter Release notes: `Release 2.3.0 (v24): Hardened Reset Mechanics with mechanical hold gesture cancellation safety, WCAG 2.2 accessibility (single-tap TalkBack action, 48dp hit targets), unified domain reset eligibility invariants, remote views widget night-mode color badge support, and midnight auto-invalidation ticker.`
+   - Enter Release notes: `Release 2.8.0 (v30): Introduced 24 Solar Terms (二十四节气) capsule chip subtitle dynamically tracking astronomical seasons in traditional Zen literary serif, and uncluttered time breakdown odometer display removing redundant suffixes for spacious comment notes.`
    - Click **Review release** -> **Start rollout to Production**.
