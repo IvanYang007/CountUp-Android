@@ -23,8 +23,42 @@ data class CardColorPreset(
     val isDark: Boolean = false,
 )
 
+/**
+ * Card Style Category for grouping presets into tactile Zen themes (Washi, Earth, Sumi).
+ */
+@Immutable
+data class CardColorCategory(
+    val id: String,
+    @get:StringRes val labelRes: Int,
+    val presetIds: List<String>,
+)
+
 /** The default card preset ID (Classic Paper White with Ochre Gold / 沉金 badge). */
 const val DEFAULT_CARD_COLOR: String = ""
+
+/**
+ * 3 Curated Zen Categories:
+ * - Washi (宣纸): 4 Light Paper variations (Gold, Sage, Terracotta, Lapis)
+ * - Earth (泥陶): 4 Organic Nature variations (Celadon Bamboo, Linen Sandalwood, Forest Sage, Ochre Sage)
+ * - Sumi (夜墨): 4 Deep Contemplative variations (Gold, Jade, Crimson, Night Mist)
+ */
+val CARD_COLOR_CATEGORIES: List<CardColorCategory> = listOf(
+    CardColorCategory(
+        id = "washi",
+        labelRes = R.string.color_category_washi,
+        presetIds = listOf(DEFAULT_CARD_COLOR, "paper_sage", "paper_terracotta", "paper_indigo"),
+    ),
+    CardColorCategory(
+        id = "earth",
+        labelRes = R.string.color_category_earth,
+        presetIds = listOf("celadon_bamboo", "linen_sandalwood", "sage_forest", "sage_ochre"),
+    ),
+    CardColorCategory(
+        id = "sumi",
+        labelRes = R.string.color_category_sumi,
+        presetIds = listOf("ink_gold", "ink_jade", "ink_crimson", "night_mist"),
+    ),
+)
 
 /**
  * The 3 curated Paper White card presets (Gold, Terracotta, Sage badges)
@@ -42,13 +76,14 @@ val DEFAULT_WHITE_CARD_COLOR_IDS: List<String> = listOf(
 fun randomWhiteCardColor(): String = DEFAULT_WHITE_CARD_COLOR_IDS.random()
 
 /**
- * 9 Curated Zen combinations:
- * - 4 Paper White variations (Gold, Terracotta, Sage, Lapis Indigo badges)
- * - 2 Willow Sage variations (Forest, Ochre badges)
- * - 3 Sumi Ink variations (Gold, Jade, Crimson badges)
+ * 12 Curated Zen combinations:
+ * - 4 Washi variations (Gold, Sage, Terracotta, Mineral Lapis)
+ * - 4 Earth variations (Celadon Bamboo, Linen Sandalwood, Forest, Ochre)
+ * - 4 Sumi variations (Gold, Jade, Crimson, Night Mist)
  */
 val CARD_COLOR_PRESETS: List<CardColorPreset> = listOf(
-    // 1. Paper White + Ochre Gold badge (Default - 宣白 · 沉金 / 金边)
+    // --- SUITE I: WASHI (宣纸) ---
+    // 1. Paper White + Ochre Gold badge (Default - 宣白 · 沉金)
     CardColorPreset(
         id = "",
         nameRes = R.string.color_paper_gold,
@@ -59,18 +94,7 @@ val CARD_COLOR_PRESETS: List<CardColorPreset> = listOf(
         mutedInk = ZenInkMuted,
         isDark = false,
     ),
-    // 2. Paper White + Terracotta badge
-    CardColorPreset(
-        id = "paper_terracotta",
-        nameRes = R.string.color_paper_terracotta,
-        cardBg = Color(0xFFFAFAF7),
-        badgeBg = Color(0xFFD87A4F),
-        badgeTint = Color.White,
-        primaryInk = ZenInkBlack,
-        mutedInk = ZenInkMuted,
-        isDark = false,
-    ),
-    // 3. Paper White + Willow Sage badge
+    // 2. Paper White + Willow Sage badge (宣白 · 柳叶)
     CardColorPreset(
         id = "paper_sage",
         nameRes = R.string.color_paper_sage,
@@ -81,18 +105,53 @@ val CARD_COLOR_PRESETS: List<CardColorPreset> = listOf(
         mutedInk = ZenInkMuted,
         isDark = false,
     ),
-    // 4. Paper White + Lapis Indigo badge
+    // 3. Paper White + Terracotta badge (素白 · 陶土)
     CardColorPreset(
-        id = "paper_indigo",
-        nameRes = R.string.color_paper_indigo,
-        cardBg = Color(0xFFFFFFFF),
-        badgeBg = Color(0xFF344C5C),
+        id = "paper_terracotta",
+        nameRes = R.string.color_paper_terracotta,
+        cardBg = Color(0xFFFBF9F5),
+        badgeBg = Color(0xFFD87A4F),
         badgeTint = Color.White,
         primaryInk = ZenInkBlack,
         mutedInk = ZenInkMuted,
         isDark = false,
     ),
-    // 5. Willow Sage + Deep Forest badge
+    // 4. Paper White + Mineral Lapis badge (宣白 · 黛蓝)
+    CardColorPreset(
+        id = "paper_indigo",
+        nameRes = R.string.color_paper_indigo,
+        cardBg = Color(0xFFFFFFFF),
+        badgeBg = Color(0xFF425B6C),
+        badgeTint = Color.White,
+        primaryInk = ZenInkBlack,
+        mutedInk = ZenInkMuted,
+        isDark = false,
+    ),
+
+    // --- SUITE II: EARTH (泥陶) ---
+    // 5. Celadon Mist + Deep Bamboo badge (天青 · 墨竹)
+    CardColorPreset(
+        id = "celadon_bamboo",
+        nameRes = R.string.color_celadon_bamboo,
+        cardBg = Color(0xFFE1E9E4),
+        badgeBg = Color(0xFF3B5B46),
+        badgeTint = Color.White,
+        primaryInk = Color(0xFF203126),
+        mutedInk = Color(0xFF55695C),
+        isDark = false,
+    ),
+    // 6. Raw Linen + Sandalwood badge (素麻 · 白檀)
+    CardColorPreset(
+        id = "linen_sandalwood",
+        nameRes = R.string.color_linen_sandalwood,
+        cardBg = Color(0xFFECE4D5),
+        badgeBg = Color(0xFF8A6B4E),
+        badgeTint = Color.White,
+        primaryInk = ZenInkBlack,
+        mutedInk = ZenInkMuted,
+        isDark = false,
+    ),
+    // 7. Willow Sage + Deep Forest badge (柳绿 · 幽森)
     CardColorPreset(
         id = "sage_forest",
         nameRes = R.string.color_sage_forest,
@@ -103,7 +162,7 @@ val CARD_COLOR_PRESETS: List<CardColorPreset> = listOf(
         mutedInk = Color(0xFFD6E4DB),
         isDark = true,
     ),
-    // 6. Willow Sage + Ochre Gold badge
+    // 8. Willow Sage + Ochre Gold badge (柳绿 · 赭石)
     CardColorPreset(
         id = "sage_ochre",
         nameRes = R.string.color_sage_ochre,
@@ -114,7 +173,9 @@ val CARD_COLOR_PRESETS: List<CardColorPreset> = listOf(
         mutedInk = Color(0xFFD6E4DB),
         isDark = true,
     ),
-    // 7. Sumi Ink + Ochre Gold badge
+
+    // --- SUITE III: SUMI (夜墨) ---
+    // 9. Sumi Ink + Pure Gold badge (墨黑 · 沉金)
     CardColorPreset(
         id = "ink_gold",
         nameRes = R.string.color_ink_gold,
@@ -125,7 +186,7 @@ val CARD_COLOR_PRESETS: List<CardColorPreset> = listOf(
         mutedInk = Color(0xFFD6C8B7),
         isDark = true,
     ),
-    // 8. Sumi Ink + Jade Green badge
+    // 10. Sumi Ink + River Jade badge (墨黑 · 碧翠)
     CardColorPreset(
         id = "ink_jade",
         nameRes = R.string.color_ink_jade,
@@ -136,7 +197,7 @@ val CARD_COLOR_PRESETS: List<CardColorPreset> = listOf(
         mutedInk = Color(0xFFD6C8B7),
         isDark = true,
     ),
-    // 9. Sumi Ink + Japanese Vermilion badge
+    // 11. Sumi Ink + Cinnabar Seal badge (墨黑 · 辰砂)
     CardColorPreset(
         id = "ink_crimson",
         nameRes = R.string.color_ink_crimson,
@@ -145,6 +206,17 @@ val CARD_COLOR_PRESETS: List<CardColorPreset> = listOf(
         badgeTint = Color.White,
         primaryInk = Color(0xFFFAF7F2),
         mutedInk = Color(0xFFD6C8B7),
+        isDark = true,
+    ),
+    // 12. Midnight Indigo + Silver Mist badge (暮夜 · 银霜)
+    CardColorPreset(
+        id = "night_mist",
+        nameRes = R.string.color_night_mist,
+        cardBg = Color(0xFF1F262E),
+        badgeBg = Color(0xFF7A91A1),
+        badgeTint = Color.White,
+        primaryInk = Color(0xFFFAF7F2),
+        mutedInk = Color(0xFFCCD7E0),
         isDark = true,
     ),
 )

@@ -140,15 +140,21 @@
 
     <!-- Card & Badge Style Presets (White, Green, Blackish) -->
     <string name="card_color_label">卡片样式</string>
+    <string name="color_category_washi">宣纸</string>
+    <string name="color_category_earth">泥陶</string>
+    <string name="color_category_sumi">夜墨</string>
     <string name="color_paper_gold">宣白 · 沉金</string>
     <string name="color_paper_sage">宣白 · 柳叶</string>
     <string name="color_paper_terracotta">宣白 · 陶土</string>
     <string name="color_paper_indigo">宣白 · 黛蓝</string>
+    <string name="color_celadon_bamboo">天青 · 墨竹</string>
+    <string name="color_linen_sandalwood">素麻 · 白檀</string>
     <string name="color_sage_forest">柳绿 · 幽森</string>
     <string name="color_sage_ochre">柳绿 · 赭石</string>
     <string name="color_ink_gold">墨黑 · 沉金</string>
     <string name="color_ink_jade">墨黑 · 碧翠</string>
     <string name="color_ink_crimson">墨黑 · 辰砂</string>
+    <string name="color_night_mist">暮夜 · 银霜</string>
     <string name="cd_color_default">默认（宣白 · 沉金）卡片样式</string>
     <string name="cd_color_option">%1$s 卡片样式</string>
 

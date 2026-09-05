@@ -94,6 +94,11 @@ fun ItemEditorDialog(
         mutableStateOf(item != null && (item.cardColor.isNotBlank() || item.icon.isNotBlank()))
     }
     var hasCustomizedManually by rememberSaveable { mutableStateOf(false) }
+    var selectedColorCategoryIndex by rememberSaveable {
+        val initialPresetId = resolveCardStyle(if (item != null) item.cardColor else DEFAULT_CARD_COLOR).id
+        val idx = CARD_COLOR_CATEGORIES.indexOfFirst { cat -> cat.presetIds.contains(initialPresetId) }
+        mutableIntStateOf(if (idx >= 0) idx else 0)
+    }
     var selectedCategoryIndex by rememberSaveable { mutableIntStateOf(0) }
     var showPicker by rememberSaveable { mutableStateOf(false) }
 
@@ -277,7 +282,7 @@ fun ItemEditorDialog(
                     exit = fadeOut() + shrinkVertically(),
                 ) {
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        // Section 1: Card Background Color Selection (Fixed 4x2 Grid, No Nested Scrolling)
+                        // Section 1: Card Style Selection with Zen Categorized Tabs (Washi, Earth, Sumi)
                         Spacer(Modifier.padding(top = 14.dp))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -292,85 +297,120 @@ fun ItemEditorDialog(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                             val activePreset = CARD_COLOR_PRESETS.firstOrNull { it.id == selectedCardColor }
-                            if (activePreset != null) {
-                                Text(
-                                    text = stringResource(activePreset.nameRes),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.SemiBold,
-                                )
+                                ?: resolveCardStyle(selectedCardColor)
+                            Text(
+                                text = stringResource(activePreset.nameRes),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.SemiBold,
+                            )
+                        }
+                        Spacer(Modifier.padding(top = 6.dp))
+
+                        // Category Tabs (Washi, Earth, Sumi)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        ) {
+                            CARD_COLOR_CATEGORIES.forEachIndexed { index, category ->
+                                val isCatSelected = selectedColorCategoryIndex == index
+                                val catInteraction = rememberPressSource()
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(
+                                            if (isCatSelected) MaterialTheme.colorScheme.tertiary
+                                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f),
+                                        )
+                                        .clickable(
+                                            interactionSource = catInteraction,
+                                            indication = LocalIndication.current,
+                                            onClick = { selectedColorCategoryIndex = index },
+                                        )
+                                        .pressScale(catInteraction)
+                                        .padding(horizontal = 10.dp, vertical = 5.dp),
+                                ) {
+                                    Text(
+                                        text = stringResource(category.labelRes),
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontSize = 11.sp,
+                                            fontWeight = if (isCatSelected) FontWeight.Bold else FontWeight.Normal,
+                                        ),
+                                        color = if (isCatSelected) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onSurface,
+                                    )
+                                }
                             }
                         }
+
                         Spacer(Modifier.padding(top = 8.dp))
-                        val colorRows = CARD_COLOR_PRESETS.chunked(4)
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
+
+                        // Single clean row of 4 chips for active category
+                        val activeColorCategory = CARD_COLOR_CATEGORIES.getOrElse(selectedColorCategoryIndex) { CARD_COLOR_CATEGORIES[0] }
+                        val currentCategoryPresets = activeColorCategory.presetIds.map { resolveCardStyle(it) }
+
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.fillMaxWidth(),
                         ) {
-                            colorRows.forEach { rowPresets ->
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth(),
-                                ) {
-                                    rowPresets.forEach { preset ->
-                                        val isSelected = selectedCardColor == preset.id
-                                        val colorInteraction = rememberPressSource()
-                                        val colorName = stringResource(preset.nameRes)
-                                        val colorDescription = if (preset.id == DEFAULT_CARD_COLOR) {
-                                            stringResource(R.string.cd_color_default)
-                                        } else {
-                                            stringResource(R.string.cd_color_option, colorName)
-                                        }
+                            currentCategoryPresets.forEach { preset ->
+                                val isSelected = resolveCardStyle(selectedCardColor).id == preset.id
+                                val colorInteraction = rememberPressSource()
+                                val colorName = stringResource(preset.nameRes)
+                                val colorDescription = if (preset.id == DEFAULT_CARD_COLOR) {
+                                    stringResource(R.string.cd_color_default)
+                                } else {
+                                    stringResource(R.string.cd_color_option, colorName)
+                                }
 
-                                        Box(
-                                            contentAlignment = Alignment.Center,
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .minimumInteractiveComponentSize()
-                                                .height(38.dp)
-                                                .clip(RoundedCornerShape(10.dp))
-                                                .background(preset.cardBg)
-                                                .border(
-                                                    width = if (isSelected) 2.5.dp else 1.dp,
-                                                    color = if (isSelected) {
-                                                        if (preset.isDark) Color(0xFFDEB285) else MaterialTheme.colorScheme.primary
-                                                    } else {
-                                                        if (preset.isDark) Color(0x44FFFFFF) else Color(0x332C2416)
-                                                    },
-                                                    shape = RoundedCornerShape(10.dp),
-                                                )
-                                                .clickable(
-                                                    interactionSource = colorInteraction,
-                                                    indication = LocalIndication.current,
-                                                    onClick = {
-                                                        selectedCardColor = preset.id
-                                                        hasCustomizedManually = true
-                                                    },
-                                                )
-                                                .pressScale(colorInteraction)
-                                                .semantics { contentDescription = colorDescription },
-                                        ) {
-                                            // Mini badge circle representing the coupled icon badge
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .minimumInteractiveComponentSize()
+                                        .height(38.dp)
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .background(preset.cardBg)
+                                        .border(
+                                            width = if (isSelected) 2.5.dp else 1.dp,
+                                            color = if (isSelected) {
+                                                if (preset.isDark) Color(0xFFDEB285) else MaterialTheme.colorScheme.primary
+                                            } else {
+                                                if (preset.isDark) Color(0x44FFFFFF) else Color(0x332C2416)
+                                            },
+                                            shape = RoundedCornerShape(10.dp),
+                                        )
+                                        .clickable(
+                                            interactionSource = colorInteraction,
+                                            indication = LocalIndication.current,
+                                            onClick = {
+                                                selectedCardColor = preset.id
+                                                hasCustomizedManually = true
+                                            },
+                                        )
+                                        .pressScale(colorInteraction)
+                                        .semantics { contentDescription = colorDescription },
+                                ) {
+                                    // Mini badge circle representing the coupled icon badge
+                                    Box(
+                                        contentAlignment = Alignment.Center,
+                                        modifier = Modifier
+                                            .size(15.dp)
+                                            .background(preset.badgeBg, CircleShape)
+                                            .border(
+                                                width = 0.5.dp,
+                                                color = if (preset.isDark) Color(0x33FFFFFF) else Color(0x22000000),
+                                                shape = CircleShape,
+                                            ),
+                                    ) {
+                                        if (isSelected) {
                                             Box(
-                                                contentAlignment = Alignment.Center,
                                                 modifier = Modifier
-                                                    .size(15.dp)
-                                                    .background(preset.badgeBg, CircleShape)
-                                                    .border(
-                                                        width = 0.5.dp,
-                                                        color = if (preset.isDark) Color(0x33FFFFFF) else Color(0x22000000),
-                                                        shape = CircleShape,
-                                                    ),
-                                            ) {
-                                                if (isSelected) {
-                                                    Box(
-                                                        modifier = Modifier
-                                                            .size(5.dp)
-                                                            .background(preset.badgeTint, CircleShape),
-                                                    )
-                                                }
-                                            }
+                                                    .size(5.dp)
+                                                    .background(preset.badgeTint, CircleShape),
+                                            )
                                         }
                                     }
                                 }

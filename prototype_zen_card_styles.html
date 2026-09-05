@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CountUp — Zen Card Styles & Color Harmony Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Noto+Serif+SC:wght@400;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --zen-paper-bg: #F5E6D3;
+    --zen-paper-surface: #EBDCC3;
+    --zen-ink-black: #2C2416;
+    --zen-ink-muted: #6B5D4F;
+    --zen-hairline: #E3D3B8;
+    --zen-vermilion: #D97642;
+    --zen-sage: #4A7C59;
+    --zen-ochre: #DEB285;
+    --zen-gold-patina: #D4A574;
+    --ui-dark: #12141A;
+    --ui-card: #1A1D26;
+    --ui-border: #2B3245;
+    --ui-text: #F1F5F9;
+    --ui-muted: #94A3B8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    background: var(--ui-dark);
+    color: var(--ui-text);
+    min-height: 100vh;
+    padding: 24px 20px 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Header */
+  header {
+    max-width: 1100px;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 14px;
+    background: rgba(222, 178, 133, 0.12);
+    border: 1px solid rgba(222, 178, 133, 0.35);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--zen-ochre);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+  }
+  header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 32px;
+    letter-spacing: 1px;
+    color: #FFFFFF;
+    margin-bottom: 8px;
+  }
+  header p {
+    color: var(--ui-muted);
+    font-size: 15px;
+    max-width: 680px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* Stage Container */
+  .stage-container {
+    display: grid;
+    grid-template-columns: 440px 1fr;
+    gap: 36px;
+    max-width: 1180px;
+    width: 100%;
+    align-items: start;
+  }
+
+  @media (max-width: 960px) {
+    .stage-container {
+      grid-template-columns: 1fr;
+      justify-items: center;
+    }
+  }
+
+  /* Phone Mockup Canvas */
+  .phone-frame {
+    width: 410px;
+    min-height: 780px;
+    background: var(--zen-paper-bg);
+    border-radius: 40px;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 0 10px #242938, 0 0 0 12px #3A4259;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    color: var(--zen-ink-black);
+    user-select: none;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  /* Subtle Rice Paper Texture */
+  .phone-frame::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.035;
+    pointer-events: none;
+    background-image: radial-gradient(#2C2416 1px, transparent 1px);
+    background-size: 12px 12px;
+  }
+
+  /* Android System Bar */
+  .system-bar {
+    height: 38px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 24px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--zen-ink-muted);
+    z-index: 10;
+  }
+  .system-icons {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  /* App Top Bar */
+  .app-header {
+    padding: 6px 20px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(44, 36, 22, 0.06);
+  }
+  .app-title {
+    font-family: 'Cinzel', serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--zen-ink-black);
+  }
+  .app-subtitle {
+    font-size: 11px;
+    color: var(--zen-ink-muted);
+    letter-spacing: 0.5px;
+  }
+
+  /* Feed Area */
+  .card-feed {
+    flex: 1;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow-y: auto;
+  }
+
+  /* Full-Size Live CountUp Card */
+  .zen-card {
+    border-radius: 20px;
+    padding: 18px 18px 16px;
+    position: relative;
+    box-shadow: 0 6px 18px rgba(44, 36, 22, 0.08), 0 1px 3px rgba(44, 36, 22, 0.04);
+    transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    cursor: pointer;
+  }
+  .zen-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(44, 36, 22, 0.12);
+  }
+  .zen-card.patina-milestone {
+    border-width: 1.5px;
+    border-style: solid;
+    box-shadow: 0 8px 22px rgba(222, 178, 133, 0.22), 0 1px 4px rgba(44, 36, 22, 0.06);
+  }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .card-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .badge-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    border: 0.5px solid rgba(0,0,0,0.08);
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .badge-circle svg {
+    width: 22px;
+    height: 22px;
+  }
+  .card-titles {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .card-name {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    line-height: 1.2;
+  }
+  .card-anchor {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+  }
+
+  .card-days-box {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  .card-days-number {
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -1px;
+  }
+  .card-days-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+
+  .card-note {
+    font-size: 12px;
+    line-height: 1.4;
+    padding-top: 8px;
+    border-top: 1px solid rgba(0,0,0,0.06);
+    font-style: italic;
+  }
+
+  /* Dialog Bottom Sheet (The Picker) */
+  .dialog-sheet {
+    background: #FFFFFF;
+    border-radius: 28px 28px 0 0;
+    box-shadow: 0 -10px 30px rgba(44, 36, 22, 0.16);
+    padding: 18px 20px 22px;
+    border-top: 1px solid rgba(222, 178, 133, 0.4);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 20;
+  }
+  .sheet-handle {
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: #D9CBB6;
+    margin: 0 auto 4px;
+  }
+
+  .picker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .picker-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--zen-ink-muted);
+  }
+  .picker-active-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--zen-vermilion);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: 'Noto Serif SC', serif;
+  }
+  .picker-active-name span.en {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    opacity: 0.85;
+  }
+
+  /* Grid of Color Chips */
+  .picker-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .color-chip {
+    height: 40px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    border: 1px solid rgba(44, 36, 22, 0.15);
+    transition: all 0.18s cubic-bezier(0.2, 0, 0, 1);
+  }
+  .color-chip:hover {
+    transform: scale(1.04);
+  }
+  .color-chip:active {
+    transform: scale(0.95);
+  }
+  .color-chip.dark {
+    border-color: rgba(255, 255, 255, 0.22);
+  }
+
+  /* Selected State */
+  .color-chip.selected {
+    border-width: 2.5px !important;
+    border-color: var(--zen-vermilion) !important;
+    box-shadow: 0 3px 8px rgba(217, 118, 66, 0.25);
+  }
+  .color-chip.dark.selected {
+    border-color: var(--zen-ochre) !important;
+    box-shadow: 0 3px 10px rgba(222, 178, 133, 0.35);
+  }
+
+  .chip-circle {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+    border: 0.5px solid rgba(0,0,0,0.15);
+  }
+  .chip-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    display: none;
+  }
+  .color-chip.selected .chip-dot {
+    display: block;
+  }
+
+  /* Tabbed Picker for Variant C */
+  .tab-bar {
+    display: flex;
+    background: #F2E8DC;
+    padding: 3px;
+    border-radius: 10px;
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+  .tab-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 6px 0;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 8px;
+    color: var(--zen-ink-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: #FFFFFF;
+    color: var(--zen-ink-black);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+  }
+
+  /* Right Side: Philosophy & Specs Inspector */
+  .inspector-col {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .panel-card {
+    background: var(--ui-card);
+    border: 1px solid var(--ui-border);
+    border-radius: 20px;
+    padding: 22px 24px;
+  }
+  .panel-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--zen-ochre);
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* Active Color Card Details */
+  .color-hero {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .color-swatch-large {
+    width: 68px;
+    height: 68px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid rgba(255,255,255,0.15);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+    flex-shrink: 0;
+  }
+  .swatch-inner-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  }
+  .hero-meta h2 {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin-bottom: 2px;
+  }
+  .hero-meta .en-title {
+    font-size: 14px;
+    color: var(--zen-ochre);
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .hero-meta .feeling-quote {
+    font-size: 13px;
+    color: var(--ui-muted);
+    line-height: 1.4;
+    font-style: italic;
+  }
+
+  /* Specs Grid */
+  .specs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .spec-item {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .spec-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--ui-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .spec-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #FFFFFF;
+  }
+  .color-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.2);
+    display: inline-block;
+  }
+
+  /* Code Block */
+  .code-container {
+    position: relative;
+    background: #0E1015;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #E2E8F0;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #252D3B;
+    border: 1px solid #3E4C63;
+    color: #F8FAFC;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .copy-btn:hover {
+    background: var(--zen-ochre);
+    color: #1A1D26;
+    border-color: var(--zen-ochre);
+  }
+
+  /* Floating Bottom Switcher (Mandatory prototype UI bar) */
+  .floating-switcher {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1E2330;
+    border: 1.5px solid #3E4B66;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 1000;
+    backdrop-filter: blur(12px);
+  }
+  .nav-arrow {
+    background: #2A3347;
+    border: none;
+    color: #FFFFFF;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.18s ease;
+  }
+  .nav-arrow:hover {
+    background: var(--zen-ochre);
+    color: #1A1D26;
+    transform: scale(1.08);
+  }
+  .variant-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 250px;
+    text-align: center;
+  }
+  .variant-key {
+    font-size: 13px;
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: 0.5px;
+  }
+  .variant-sub {
+    font-size: 11px;
+    color: var(--ui-muted);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-badge">Design Simulation & Prototype</div>
+  <h1>Zen Minimalist Card Styles</h1>
+  <p>Exploring harmonious surface and circle badge combinations for CountUp. Grounded in the philosophy of <em>Ku</em> (Emptiness), <em>Wabi-Sabi</em>, and tactile rice paper.</p>
+</header>
+
+<div class="stage-container">
+  <!-- LEFT: Interactive Phone Frame -->
+  <div class="phone-frame" id="phoneMock">
+    <!-- Android Status Bar -->
+    <div class="system-bar">
+      <span>09:41</span>
+      <div class="system-icons">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 18.25A.996.996 0 0 0 5 20h14a1 1 0 0 0 .65-1.75l-.62-.64C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+      </div>
+    </div>
+
+    <!-- App Header -->
+    <div class="app-header">
+      <div>
+        <div class="app-title">COUNTUP</div>
+        <div class="app-subtitle">Days in Stillness & Time</div>
+      </div>
+      <div style="font-size: 13px; font-weight: 600; color: var(--zen-ink-muted);">SEP 5</div>
+    </div>
+
+    <!-- Card Feed (3 Real Contextual Habits/Milestones) -->
+    <div class="card-feed">
+      <!-- Card 1: Currently Selected Style Preview -->
+      <div class="zen-card" id="cardHero">
+        <div class="card-top">
+          <div class="card-info">
+            <div class="badge-circle" id="badgeHero">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
+            </div>
+            <div class="card-titles">
+              <div class="card-name" id="cardHeroName">Morning Meditation</div>
+              <div class="card-anchor" id="cardHeroAnchor">Since Jul 19, 2026</div>
+            </div>
+          </div>
+          <div class="card-days-box">
+            <div class="card-days-number" id="cardHeroNumber">48</div>
+            <div class="card-days-label" id="cardHeroDaysLabel">DAYS</div>
+          </div>
+        </div>
+        <div class="card-note" id="cardHeroNote">“Breath, tea, silence before the world wakes.”</div>
+      </div>
+
+      <!-- Card 2: 1-Year Milestone with Patina Border -->
+      <div class="zen-card patina-milestone" id="cardMilestone" style="background: #FFFFFF; border-color: rgba(212, 165, 116, 0.85); color: #2C2416;">
+        <div class="card-top">
+          <div class="card-info">
+            <div class="badge-circle" style="background: #DEB285; color: #2C2416;">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            </div>
+            <div class="card-titles">
+              <div class="card-name">Sobriety Vow</div>
+              <div class="card-anchor" style="color: #6B5D4F;">Since Sep 5, 2025</div>
+            </div>
+          </div>
+          <div class="card-days-box">
+            <div class="card-days-number">365</div>
+            <div class="card-days-label" style="color: #D4A574;">1 YEAR PATINA</div>
+          </div>
+        </div>
+        <div class="card-note" style="color: #6B5D4F;">“One year of clear mind and renewed spirit.”</div>
+      </div>
+
+      <!-- Card 3: Future Countdown -->
+      <div class="zen-card" id="cardFuture" style="background: #FAFAF7; border: 1px solid rgba(44, 36, 22, 0.12); color: #2C2416;">
+        <div class="card-top">
+          <div class="card-info">
+            <div class="badge-circle" style="background: #3E5668; color: #FFFFFF;">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg>
+            </div>
+            <div class="card-titles">
+              <div class="card-name">Kyoto Temple Journey</div>
+              <div class="card-anchor" style="color: #6B5D4F;">Target: Sep 23, 2026</div>
+            </div>
+          </div>
+          <div class="card-days-box">
+            <div class="card-days-number">18</div>
+            <div class="card-days-label" style="color: #D97642;">DAYS UNTIL</div>
+          </div>
+        </div>
+        <div class="card-note" style="color: #6B5D4F;">“Autumn moss, bamboo groves, and wooden bells.”</div>
+      </div>
+    </div>
+
+    <!-- Bottom Sheet Dialog: Card Style Selector -->
+    <div class="dialog-sheet">
+      <div class="sheet-handle"></div>
+      
+      <div class="picker-header">
+        <div class="picker-label">Card Style</div>
+        <div class="picker-active-name" id="pickerActiveTitle">
+          <span id="headerZh">宣白 · 沉金</span>
+          <span class="en" id="headerEn">Paper & Gold</span>
+        </div>
+      </div>
+
+      <!-- Variant C Tab Bar (Only visible in Variant C) -->
+      <div class="tab-bar" id="categoryTabBar" style="display: none;">
+        <button class="tab-btn active" onclick="setTab('washi')">宣纸 · 浅色</button>
+        <button class="tab-btn" onclick="setTab('earth')">泥陶 · 自然</button>
+        <button class="tab-btn" onclick="setTab('sumi')">墨砚 · 夜色</button>
+      </div>
+
+      <!-- Color Chips Grid -->
+      <div class="picker-grid" id="pickerGrid">
+        <!-- Rendered by JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Detailed Color Spec & Kotlin Export Panel -->
+  <div class="inspector-col">
+    <!-- Active Style Philosophy -->
+    <div class="panel-card">
+      <div class="panel-title">
+        <span>Selected Zen Combination</span>
+        <span id="wcagBadge" style="font-size: 11px; padding: 2px 8px; border-radius: 6px; background: rgba(74, 124, 89, 0.2); color: #68D391; border: 1px solid rgba(74, 124, 89, 0.4);">WCAG AAA</span>
+      </div>
+
+      <div class="color-hero">
+        <div class="color-swatch-large" id="heroSwatchCard">
+          <div class="swatch-inner-circle" id="heroSwatchBadge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" id="heroSwatchIcon"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
+          </div>
+        </div>
+        <div class="hero-meta">
+          <h2 id="metaZhName">宣白 · 沉金</h2>
+          <div class="en-title" id="metaEnName">Paper & Ochre Gold</div>
+          <div class="feeling-quote" id="metaFeeling">“Sunlight warming unbleached washi paper. Evokes gentle beginnings and clear intention.”</div>
+        </div>
+      </div>
+
+      <!-- Specs Grid -->
+      <div class="specs-grid">
+        <div class="spec-item">
+          <div class="spec-label">Card Surface (cardBg)</div>
+          <div class="spec-value">
+            <span class="color-dot" id="dotCardBg"></span>
+            <span id="textCardBg">#FFFFFF</span>
+          </div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-label">Circle Badge (badgeBg)</div>
+          <div class="spec-value">
+            <span class="color-dot" id="dotBadgeBg"></span>
+            <span id="textBadgeBg">#DEB285</span>
+          </div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-label">Badge Icon Tint (badgeTint)</div>
+          <div class="spec-value">
+            <span class="color-dot" id="dotBadgeTint"></span>
+            <span id="textBadgeTint">#2C2416</span>
+          </div>
+        </div>
+        <div class="spec-item">
+          <div class="spec-label">Primary Text Ink (primaryInk)</div>
+          <div class="spec-value">
+            <span class="color-dot" id="dotPrimaryInk"></span>
+            <span id="textPrimaryInk">#2C2416</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kotlin Preset Code Ready to Paste -->
+      <div style="margin-top: 14px;">
+        <div style="font-size: 11px; font-weight: 600; color: var(--ui-muted); text-transform: uppercase; margin-bottom: 8px;">Kotlin Code Snippet (ItemColors.kt)</div>
+        <div class="code-container" id="kotlinCodeBlock">
+          <button class="copy-btn" onclick="copyCode()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+            <span id="copyBtnText">Copy Code</span>
+          </button>
+<span id="codeContent"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Designer Principles Reference -->
+    <div class="panel-card" style="font-size: 13px; line-height: 1.6; color: var(--ui-muted);">
+      <div class="panel-title">Zen Minimalist Aesthetic Rules</div>
+      <p style="margin-bottom: 8px;">• <strong style="color: #FFFFFF;">The Principle of Ku (空 / Emptiness):</strong> Cards are breathable vessels. Avoid saturated neon tones; draw instead from raw clay, mineral ores, steamed rice, and soot.</p>
+      <p style="margin-bottom: 8px;">• <strong style="color: #FFFFFF;">The Ensō Circle (円相):</strong> The icon badge serves as the red seal (印章) or dew drop on an ink wash scroll, drawing the eye gently to the anchor.</p>
+      <p>• <strong style="color: #FFFFFF;">Rice Paper Dialogue:</strong> Every card surface must complement <code style="color: var(--zen-ochre);">#F5E6D3</code>. Soft celadon and ecru linen eliminate screen fatigue.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Floating Switcher (Mandatory Prototype UI Bar) -->
+<div class="floating-switcher">
+  <button class="nav-arrow" onclick="cycleVariant(-1)" title="Previous Variant (←)">←</button>
+  <div class="variant-info">
+    <div class="variant-key" id="currentVariantTitle">Variant A (12-Card Golden Grid)</div>
+    <div class="variant-sub" id="currentVariantDesc">3 Rows × 4 Columns • Balanced Core Zen</div>
+  </div>
+  <button class="nav-arrow" onclick="cycleVariant(1)" title="Next Variant (→)">→</button>
+</div>
+
+<script>
+// --- MASTER PALETTE DATABASE ---
+const ALL_PRESETS = [
+  // SUITE I: WASHI & EARTH
+  {
+    id: "paper_gold",
+    zh: "宣白 · 沉金",
+    en: "Paper & Ochre Gold",
+    cardBg: "#FFFFFF",
+    badgeBg: "#DEB285",
+    badgeTint: "#2C2416",
+    primaryInk: "#2C2416",
+    mutedInk: "#6B5D4F",
+    isDark: false,
+    category: "washi",
+    feeling: "Sunlight warming unbleached washi paper. Optimistic beginnings and joyful milestones.",
+    iconPath: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"
+  },
+  {
+    id: "paper_sage",
+    zh: "宣白 · 柳叶",
+    en: "Paper & Willow Sage",
+    cardBg: "#FFFFFF",
+    badgeBg: "#5E8C6D",
+    badgeTint: "#FFFFFF",
+    primaryInk: "#2C2416",
+    mutedInk: "#6B5D4F",
+    isDark: false,
+    category: "washi",
+    feeling: "Morning dew on fresh willow leaves. Vitality, health, and clean breath.",
+    iconPath: "M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75C7 8 17 8 17 8z"
+  },
+  {
+    id: "paper_terracotta",
+    zh: "素白 · 陶土",
+    en: "Paper & Terracotta",
+    cardBg: "#FBF9F5",
+    badgeBg: "#D87A4F",
+    badgeTint: "#FFFFFF",
+    primaryInk: "#2C2416",
+    mutedInk: "#6B5D4F",
+    isDark: false,
+    category: "washi",
+    feeling: "Sun-baked pottery and kitchen hearth. Warm friendship, cooking, and everyday devotion.",
+    iconPath: "M20 3H4v10c0 2.21 1.79 4 4 4h6c2.21 0 4-1.79 4-4v-3h2c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 5h-2V5h2v3zM4 19h16v2H4z"
+  },
+  {
+    id: "paper_indigo",
+    zh: "宣白 · 黛蓝",
+    en: "Paper & Mineral Lapis",
+    cardBg: "#FFFFFF",
+    badgeBg: "#425B6C",
+    badgeTint: "#FFFFFF",
+    primaryInk: "#2C2416",
+    mutedInk: "#6B5D4F",
+    isDark: false,
+    category: "washi",
+    feeling: "Distant mountain mist and washed mineral lapis. Deep focus, scholarship, and clarity.",
+    iconPath: "M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"
+  },
+
+  // SUITE II: TEA CHAMBER & CELADON
+  {
+    id: "celadon_bamboo",
+    zh: "天青 · 墨竹",
+    en: "Celadon & Deep Bamboo",
+    cardBg: "#E1E9E4",
+    badgeBg: "#3B5B46",
+    badgeTint: "#FFFFFF",
+    primaryInk: "#203126",
+    mutedInk: "#55695C",
+    isDark: false,
+    category: "earth",
+    feeling: "“Rain clearing over the clouds” (雨过天青). Soft celadon glaze resting quietly on rice paper.",
+    iconPath: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"
+  },
+  {
+    id: "linen_sandalwood",
+    zh: "素麻 · 白檀",
+    en: "Raw Linen & Sandalwood",
+    cardBg: "#ECE4D5",
+    badgeBg: "#8A6B4E",
+    badgeTint: "#FFFFFF",
+    primaryInk: "#2C2416",
+    mutedInk: "#6B5D4F",
+    isDark: false,
+    category: "earth",
+    feeling: "Unbleached natural flax and warm sandalwood. Deeply grounding, organic, and timeless.",
+    iconPath: "M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 18.25A.996.996 0 0 0 5 20h14a1 1 0 0 0 .65-1.75l-.62-.64C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"
+  },
+  {
+    id: "sage_forest",
+    zh: "柳绿 · 幽森",
+    en: "Willow Sage & Deep Forest",
+    cardBg: "#5E8C6D",
+    badgeBg: "#2D4836",
+    badgeTint: "#FFFFFF",
+    primaryInk: "#FAF7F2",
+    mutedInk: "#D6E4DB",
+    isDark: true,
+    category: "earth",
+    feeling: "Stepping barefoot into deep moss and cedar forests. Complete restoration and peace.",
+    iconPath: "M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75C7 8 17 8 17 8z"
+  },
+  {
+    id: "sage_ochre",
+    zh: "柳绿 · 赭石",
+    en: "Willow Sage & Sand Gold",
+    cardBg: "#5E8C6D",
+    badgeBg: "#DEB285",
+    badgeTint: "#2C2416",
+    primaryInk: "#FAF7F2",
+    mutedInk: "#D6E4DB",
+    isDark: true,
+    category: "earth",
+    feeling: "Golden sunlight piercing through willow canopy. Creative flow and harvest.",
+    iconPath: "M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+  },
+
+  // SUITE III: SUMI INK & LACQUER
+  {
+    id: "ink_gold",
+    zh: "墨黑 · 沉金",
+    en: "Sumi Ink & Pure Gold",
+    cardBg: "#24201A",
+    badgeBg: "#DEB285",
+    badgeTint: "#24201A",
+    primaryInk: "#FAF7F2",
+    mutedInk: "#D6C8B7",
+    isDark: true,
+    category: "sumi",
+    feeling: "A brass lantern illuminating a midnight garden. Dignity, reverence, and milestone endurance.",
+    iconPath: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"
+  },
+  {
+    id: "ink_jade",
+    zh: "墨黑 · 碧翠",
+    en: "Sumi Ink & River Jade",
+    cardBg: "#24201A",
+    badgeBg: "#4D7A58",
+    badgeTint: "#FFFFFF",
+    primaryInk: "#FAF7F2",
+    mutedInk: "#D6C8B7",
+    isDark: true,
+    category: "sumi",
+    feeling: "Carved imperial jade resting on dark lacquered wood. Serene endurance and inner resilience.",
+    iconPath: "M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 18.25A.996.996 0 0 0 5 20h14a1 1 0 0 0 .65-1.75l-.62-.64C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"
+  },
+  {
+    id: "ink_crimson",
+    zh: "墨黑 · 辰砂",
+    en: "Sumi Ink & Cinnabar Seal",
+    cardBg: "#24201A",
+    badgeBg: "#C45249",
+    badgeTint: "#FFFFFF",
+    primaryInk: "#FAF7F2",
+    mutedInk: "#D6C8B7",
+    isDark: true,
+    category: "sumi",
+    feeling: "An artist’s cinnabar seal stamped on deep ink. Unbreakable vows, passionate resolve, and love.",
+    iconPath: "M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+  },
+  {
+    id: "night_mist",
+    zh: "暮夜 · 银霜",
+    en: "Midnight Indigo & Silver Mist",
+    cardBg: "#1F262E",
+    badgeBg: "#7A91A1",
+    badgeTint: "#1F262E",
+    primaryInk: "#FAF7F2",
+    mutedInk: "#CCD7E0",
+    isDark: true,
+    category: "sumi",
+    feeling: "Gazing at the starlit sky through pine boughs. Memorials, contemplative peace, and remembrance.",
+    iconPath: "M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z"
+  },
+
+  // SUITE IV: EXTENDED 4 SEASONS (Used in Variant B)
+  {
+    id: "stone_wisteria",
+    zh: "溪石 · 紫烟",
+    en: "River Stone & Wisteria",
+    cardBg: "#E5E3DF",
+    badgeBg: "#6F6878",
+    badgeTint: "#FFFFFF",
+    primaryInk: "#28252C",
+    mutedInk: "#655F6D",
+    isDark: false,
+    category: "earth",
+    feeling: "Tumbled granite river stone with smoky wisteria blossom. Poetic quietude and unhurried grace.",
+    iconPath: "M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 18.25A.996.996 0 0 0 5 20h14a1 1 0 0 0 .65-1.75l-.62-.64C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"
+  },
+  {
+    id: "hojicha_amber",
+    zh: "焙茶 · 琥珀",
+    en: "Roasted Tea & Amber",
+    cardBg: "#D9CAB8",
+    badgeBg: "#9C5B3D",
+    badgeTint: "#FAF7F2",
+    primaryInk: "#2C2416",
+    mutedInk: "#6E5B47",
+    isDark: false,
+    category: "earth",
+    feeling: "Warm ceramic bowl filled with freshly roasted hojicha. Comfort, hospitality, and winter hearth.",
+    iconPath: "M20 3H4v10c0 2.21 1.79 4 4 4h6c2.21 0 4-1.79 4-4v-3h2c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 5h-2V5h2v3zM4 19h16v2H4z"
+  },
+  {
+    id: "pine_sun",
+    zh: "苍松 · 朝阳",
+    en: "Ancient Pine & Dawn Sun",
+    cardBg: "#2C3B34",
+    badgeBg: "#D89B54",
+    badgeTint: "#2C2416",
+    primaryInk: "#FAF7F2",
+    mutedInk: "#D1DDD7",
+    isDark: true,
+    category: "sumi",
+    feeling: "Early morning winter sun piercing evergreen boughs. Unwavering patience and renewed vigor.",
+    iconPath: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"
+  },
+  {
+    id: "rosewood_lotus",
+    zh: "绛檀 · 浅荷",
+    en: "Rosewood & Dried Petal",
+    cardBg: "#3A2B2D",
+    badgeBg: "#C49B99",
+    badgeTint: "#2A1E20",
+    primaryInk: "#FAF7F2",
+    mutedInk: "#D9C7C8",
+    isDark: true,
+    category: "sumi",
+    feeling: "An antique rosewood chest holding dried lotus flowers. Gentle nostalgia and tender memories.",
+    iconPath: "M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+  }
+];
+
+// --- VARIANT DEFINITIONS ---
+const VARIANTS = [
+  {
+    key: "A",
+    title: "Variant A (12-Card Golden Grid)",
+    desc: "3 Rows × 4 Columns • Balanced Core Zen Essentials",
+    presetCount: 12,
+    hasTabs: false
+  },
+  {
+    key: "B",
+    title: "Variant B (16-Card Four Seasons)",
+    desc: "4 Rows × 4 Columns • Full Wabi-Sabi Mineral Spectrum",
+    presetCount: 16,
+    hasTabs: false
+  },
+  {
+    key: "C",
+    title: "Variant C (Zen Categorized Tabs)",
+    desc: "Washi / Earth / Sumi Tabs • 1-Row Compact Footprint",
+    presetCount: 12,
+    hasTabs: true
+  }
+];
+
+// --- APPLICATION STATE ---
+let currentVariantIndex = 0;
+let selectedPresetId = "paper_gold";
+let currentTab = "washi";
+
+// Initialize based on URL search param
+function init() {
+  const params = new URLSearchParams(window.location.search);
+  const v = params.get("variant") || "A";
+  const foundIdx = VARIANTS.findIndex(item => item.key === v.toUpperCase());
+  currentVariantIndex = foundIdx !== -1 ? foundIdx : 0;
+  render();
+}
+
+function cycleVariant(direction) {
+  currentVariantIndex = (currentVariantIndex + direction + VARIANTS.length) % VARIANTS.length;
+  const current = VARIANTS[currentVariantIndex];
+  
+  // Update URL search params without reload
+  const url = new URL(window.location);
+  url.searchParams.set("variant", current.key);
+  window.history.replaceState({}, "", url);
+  
+  render();
+}
+
+function setTab(tabName) {
+  currentTab = tabName;
+  document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+  event.target.classList.add("active");
+  renderGrid();
+}
+
+function selectPreset(id) {
+  selectedPresetId = id;
+  renderSelection();
+}
+
+function render() {
+  const current = VARIANTS[currentVariantIndex];
+  
+  // Update floating switcher text
+  document.getElementById("currentVariantTitle").textContent = current.title;
+  document.getElementById("currentVariantDesc").textContent = current.desc;
+
+  // Toggle Tab Bar
+  const tabBar = document.getElementById("categoryTabBar");
+  if (current.hasTabs) {
+    tabBar.style.display = "flex";
+  } else {
+    tabBar.style.display = "none";
+  }
+
+  renderGrid();
+  renderSelection();
+}
+
+function getActivePresetsList() {
+  const current = VARIANTS[currentVariantIndex];
+  if (current.hasTabs) {
+    return ALL_PRESETS.filter(p => p.category === currentTab);
+  }
+  return ALL_PRESETS.slice(0, current.presetCount);
+}
+
+function renderGrid() {
+  const grid = document.getElementById("pickerGrid");
+  grid.innerHTML = "";
+  
+  const presets = getActivePresetsList();
+  
+  presets.forEach(p => {
+    const isSelected = p.id === selectedPresetId;
+    const chip = document.createElement("div");
+    chip.className = `color-chip ${p.isDark ? 'dark' : ''} ${isSelected ? 'selected' : ''}`;
+    chip.style.backgroundColor = p.cardBg;
+    chip.onclick = () => selectPreset(p.id);
+
+    // Inner Circle Badge
+    const circle = document.createElement("div");
+    circle.className = "chip-circle";
+    circle.style.backgroundColor = p.badgeBg;
+    
+    // Dot inside circle for selected state
+    const dot = document.createElement("div");
+    dot.className = "chip-dot";
+    dot.style.backgroundColor = p.badgeTint;
+    circle.appendChild(dot);
+
+    chip.appendChild(circle);
+    grid.appendChild(chip);
+  });
+}
+
+function renderSelection() {
+  const preset = ALL_PRESETS.find(p => p.id === selectedPresetId) || ALL_PRESETS[0];
+
+  // Update chips selected classes
+  document.querySelectorAll(".color-chip").forEach((chip, i) => {
+    const list = getActivePresetsList();
+    if (list[i]) {
+      if (list[i].id === selectedPresetId) {
+        chip.classList.add("selected");
+      } else {
+        chip.classList.remove("selected");
+      }
+    }
+  });
+
+  // Update Dialog Sheet Title
+  document.getElementById("headerZh").textContent = preset.zh;
+  document.getElementById("headerEn").textContent = preset.en;
+
+  // Update Live Card in Feed (cardHero)
+  const card = document.getElementById("cardHero");
+  card.style.backgroundColor = preset.cardBg;
+  card.style.color = preset.primaryInk;
+  card.style.borderColor = preset.isDark ? "rgba(255,255,255,0.18)" : "rgba(44, 36, 22, 0.12)";
+
+  document.getElementById("cardHeroAnchor").style.color = preset.mutedInk;
+  document.getElementById("cardHeroDaysLabel").style.color = preset.mutedInk;
+  document.getElementById("cardHeroNote").style.color = preset.mutedInk;
+  document.getElementById("cardHeroNote").style.borderColor = preset.isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.06)";
+
+  const badge = document.getElementById("badgeHero");
+  badge.style.backgroundColor = preset.badgeBg;
+  badge.style.color = preset.badgeTint;
+
+  // Update Inspector Swatches & Meta
+  document.getElementById("heroSwatchCard").style.backgroundColor = preset.cardBg;
+  document.getElementById("heroSwatchBadge").style.backgroundColor = preset.badgeBg;
+  document.getElementById("heroSwatchIcon").style.color = preset.badgeTint;
+
+  document.getElementById("metaZhName").textContent = preset.zh;
+  document.getElementById("metaEnName").textContent = preset.en;
+  document.getElementById("metaFeeling").textContent = `“${preset.feeling}”`;
+
+  // Update Specs
+  document.getElementById("dotCardBg").style.backgroundColor = preset.cardBg;
+  document.getElementById("textCardBg").textContent = preset.cardBg;
+
+  document.getElementById("dotBadgeBg").style.backgroundColor = preset.badgeBg;
+  document.getElementById("textBadgeBg").textContent = preset.badgeBg;
+
+  document.getElementById("dotBadgeTint").style.backgroundColor = preset.badgeTint;
+  document.getElementById("textBadgeTint").textContent = preset.badgeTint;
+
+  document.getElementById("dotPrimaryInk").style.backgroundColor = preset.primaryInk;
+  document.getElementById("textPrimaryInk").textContent = preset.primaryInk;
+
+  // Update Code
+  const kotlin = `CardColorPreset(
+    id = "${preset.id}",
+    nameRes = R.string.color_${preset.id},
+    cardBg = Color(${hexToKotlin(preset.cardBg)}),
+    badgeBg = Color(${hexToKotlin(preset.badgeBg)}),
+    badgeTint = Color(${hexToKotlin(preset.badgeTint)}),
+    primaryInk = Color(${hexToKotlin(preset.primaryInk)}),
+    mutedInk = Color(${hexToKotlin(preset.mutedInk)}),
+    isDark = ${preset.isDark},
+)`;
+  document.getElementById("codeContent").textContent = kotlin;
+}
+
+function hexToKotlin(hex) {
+  const clean = hex.replace("#", "").toUpperCase();
+  return `0xFF${clean}`;
+}
+
+function copyCode() {
+  const code = document.getElementById("codeContent").textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.getElementById("copyBtnText");
+    btn.textContent = "Copied!";
+    setTimeout(() => { btn.textContent = "Copy Code"; }, 1800);
+  });
+}
+
+// Keyboard Navigation (← and →)
+window.addEventListener("keydown", (e) => {
+  if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+  if (e.key === "ArrowLeft") cycleVariant(-1);
+  if (e.key === "ArrowRight") cycleVariant(1);
+});
+
+// Run on load
+window.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
+

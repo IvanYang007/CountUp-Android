@@ -140,15 +140,21 @@
 
     <!-- Card & Badge Style Presets (White, Green, Blackish) -->
     <string name="card_color_label">Card Style</string>
+    <string name="color_category_washi">Washi</string>
+    <string name="color_category_earth">Earth</string>
+    <string name="color_category_sumi">Sumi</string>
     <string name="color_paper_gold">Paper &amp; Gold</string>
     <string name="color_paper_sage">Paper &amp; Sage</string>
     <string name="color_paper_terracotta">Paper &amp; Terracotta</string>
     <string name="color_paper_indigo">Paper &amp; Lapis</string>
+    <string name="color_celadon_bamboo">Celadon &amp; Bamboo</string>
+    <string name="color_linen_sandalwood">Linen &amp; Sandalwood</string>
     <string name="color_sage_forest">Sage &amp; Forest</string>
     <string name="color_sage_ochre">Sage &amp; Ochre</string>
     <string name="color_ink_gold">Ink &amp; Gold</string>
     <string name="color_ink_jade">Ink &amp; Jade</string>
     <string name="color_ink_crimson">Ink &amp; Crimson</string>
+    <string name="color_night_mist">Night &amp; Mist</string>
     <string name="cd_color_default">Default (Paper &amp; Gold) card style</string>
     <string name="cd_color_option">%1$s card style</string>
 

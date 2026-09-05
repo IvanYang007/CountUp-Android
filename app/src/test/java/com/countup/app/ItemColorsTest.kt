@@ -10,8 +10,8 @@ import org.junit.Test
 class ItemColorsTest {
 
     @Test
-    fun `all 9 curated presets have valid cardBg, badgeBg, and nameRes`() {
-        assertEquals(9, CARD_COLOR_PRESETS.size)
+    fun `all 12 curated presets have valid cardBg, badgeBg, and nameRes`() {
+        assertEquals(12, CARD_COLOR_PRESETS.size)
         CARD_COLOR_PRESETS.forEach { preset ->
             assertNotNull(preset.id)
             assertTrue(preset.nameRes > 0)
@@ -21,6 +21,27 @@ class ItemColorsTest {
             assertNotNull(preset.primaryInk)
             assertNotNull(preset.mutedInk)
         }
+    }
+
+    @Test
+    fun `zen categories contain exactly 4 presets each and partition the 12 presets`() {
+        assertEquals(3, CARD_COLOR_CATEGORIES.size)
+        val categoryIds = CARD_COLOR_CATEGORIES.map { it.id }
+        assertEquals(listOf("washi", "earth", "sumi"), categoryIds)
+
+        CARD_COLOR_CATEGORIES.forEach { category ->
+            assertTrue(category.labelRes > 0)
+            assertEquals(4, category.presetIds.size)
+            category.presetIds.forEach { presetId ->
+                val preset = resolveCardStyle(presetId)
+                assertNotNull(preset)
+                assertTrue(CARD_COLOR_PRESETS.any { it.id == preset.id })
+            }
+        }
+
+        val allCategorizedIds = CARD_COLOR_CATEGORIES.flatMap { it.presetIds }
+        assertEquals(12, allCategorizedIds.size)
+        assertEquals(12, allCategorizedIds.distinct().size)
     }
 
     @Test
