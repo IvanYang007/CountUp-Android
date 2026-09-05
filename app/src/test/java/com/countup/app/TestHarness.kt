@@ -1,6 +1,5 @@
 package com.countup.app
 
-import android.content.Context
 import android.content.SharedPreferences
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap

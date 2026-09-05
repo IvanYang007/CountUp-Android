@@ -10,14 +10,8 @@ import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
 import androidx.compose.ui.graphics.toArgb
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 import kotlin.math.abs
-
-internal val heroWidgetReceiverScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
 /**
  * Focused Hero Milestone Widget provider (2x1 Poetic Card).
@@ -47,39 +41,29 @@ class HeroWidgetReceiver : AppWidgetProvider() {
                 if (info == null || info.provider.packageName != context.packageName) {
                     return
                 }
-                val pendingResult = try { goAsync() } catch (_: Exception) { null }
                 val appContext = context.applicationContext
-                heroWidgetReceiverScope.launch {
-                    try {
-                        val store = CountUpStore(appContext)
-                        val boundItemId = store.getHeroWidgetBinding(appWidgetId)
-                        val items = store.items()
-                        val targetItem = items.firstOrNull { it.id == boundItemId }
-                            ?: items.firstOrNull { it.showInWidget }
-                            ?: items.firstOrNull()
-                        val count = targetItem?.let { daysSince(LocalDate.ofEpochDay(it.epochDay), LocalDate.now()) } ?: 0L
-                        val currentMode = store.getHeroWidgetDisplayMode(appWidgetId)
-                        val nextMode = currentMode.next(count)
-                        store.setHeroWidgetDisplayMode(appWidgetId, nextMode)
-                        pushHeroWidgetUpdate(appContext, appWidgetId)
-                    } finally {
-                        pendingResult?.finish()
-                    }
+                launchAsync {
+                    val store = CountUpStore(appContext)
+                    val boundItemId = store.getHeroWidgetBinding(appWidgetId)
+                    val items = store.items()
+                    val targetItem = items.firstOrNull { it.id == boundItemId }
+                        ?: items.firstOrNull { it.showInWidget }
+                        ?: items.firstOrNull()
+                    val count = targetItem?.let { daysSince(LocalDate.ofEpochDay(it.epochDay), LocalDate.now()) } ?: 0L
+                    val currentMode = store.getHeroWidgetDisplayMode(appWidgetId)
+                    val nextMode = currentMode.next(count)
+                    store.setHeroWidgetDisplayMode(appWidgetId, nextMode)
+                    pushHeroWidgetUpdate(appContext, appWidgetId)
                 }
             }
         }
     }
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
-        val pendingResult = try { goAsync() } catch (_: Exception) { null }
         val appContext = context.applicationContext
-        heroWidgetReceiverScope.launch {
-            try {
-                for (appWidgetId in appWidgetIds) {
-                    pushHeroWidgetUpdate(appContext, appWidgetId)
-                }
-            } finally {
-                pendingResult?.finish()
+        launchAsync {
+            for (appWidgetId in appWidgetIds) {
+                pushHeroWidgetUpdate(appContext, appWidgetId)
             }
         }
     }
@@ -90,28 +74,18 @@ class HeroWidgetReceiver : AppWidgetProvider() {
         appWidgetId: Int,
         newOptions: android.os.Bundle?,
     ) {
-        val pendingResult = try { goAsync() } catch (_: Exception) { null }
         val appContext = context.applicationContext
-        heroWidgetReceiverScope.launch {
-            try {
-                pushHeroWidgetUpdate(appContext, appWidgetId)
-            } finally {
-                pendingResult?.finish()
-            }
+        launchAsync {
+            pushHeroWidgetUpdate(appContext, appWidgetId)
         }
     }
 
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {
-        val pendingResult = try { goAsync() } catch (_: Exception) { null }
         val appContext = context.applicationContext
-        heroWidgetReceiverScope.launch {
-            try {
-                val store = CountUpStore(appContext)
-                for (id in appWidgetIds) {
-                    store.removeHeroWidgetBinding(id)
-                }
-            } finally {
-                pendingResult?.finish()
+        launchAsync {
+            val store = CountUpStore(appContext)
+            for (id in appWidgetIds) {
+                store.removeHeroWidgetBinding(id)
             }
         }
     }
