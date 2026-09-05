@@ -59,6 +59,15 @@ val ZenError = Color(0xFFA64942)
 val ZenWhite = Color(0xFFFFFFFF)
 val ZenArrivedGreen = Color(0xFF66BB6A)
 val ZenArrivedRed = Color(0xFFB71C1C)
+val ZenSealInk = Color(0xFF5A4D41)
+
+fun getSeasonColor(seasonRes: Int, zenColors: ZenColorScheme): Color = when (seasonRes) {
+    R.string.season_spring -> zenColors.willowSage
+    R.string.season_summer -> zenColors.ochreGold
+    R.string.season_autumn -> zenColors.cinnabarVermilion
+    R.string.season_winter -> zenColors.dustyIndigo
+    else -> zenColors.cinnabarVermilion
+}
 
 fun lightZenColors() = ZenColorScheme(
     paperBackground = ZenPaperBackground,

@@ -5,8 +5,12 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -40,6 +44,7 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -62,6 +67,7 @@ import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -274,66 +280,228 @@ fun CountUpContent(
 @Composable
 private fun SolarTermCapsule(
     solarTerm: SolarTerm,
+    today: LocalDate,
     modifier: Modifier = Modifier,
 ) {
     val zenColors = LocalZenColors.current
+    val context = LocalContext.current
+    val reduceMotion = remember(context) { isReducedMotion(context) }
+    var morphStep by rememberSaveable { mutableIntStateOf(0) }
+    val capsuleInteraction = rememberPressSource()
 
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
+    LaunchedEffect(morphStep) {
+        if (morphStep != 0) {
+            delay(4500L)
+            morphStep = 0
+        }
+    }
+
+    val seasonColor = remember(solarTerm.seasonRes, zenColors) {
+        getSeasonColor(solarTerm.seasonRes, zenColors)
+    }
+
+    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
+    val pulseAlpha by infiniteTransition.animateFloat(
+        initialValue = if (reduceMotion) 0.7f else 0.35f,
+        targetValue = if (reduceMotion) 0.7f else 0.95f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(if (reduceMotion) 0 else 1750, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "pulseAlpha",
+    )
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = if (reduceMotion) 1f else 0.85f,
+        targetValue = if (reduceMotion) 1f else 1.25f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(if (reduceMotion) 0 else 1750, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "pulseScale",
+    )
+
+    val celestialCountdown = remember(today) {
+        SolarTermCalendar.getNextCardinalAnchor(today)
+    }
+
+    val degreeText = stringResource(R.string.solar_term_degree, solarTerm.degree)
+    val countdownTarget = stringResource(celestialCountdown.targetNameRes)
+    val countdownText = stringResource(R.string.solar_term_countdown, celestialCountdown.days, countdownTarget)
+    val whisperLine1 = stringResource(solarTerm.line1Res)
+    val whisperLine2 = stringResource(solarTerm.line2Res)
+    val seasonName = stringResource(solarTerm.seasonRes)
+    val termName = stringResource(solarTerm.nameRes)
+
+    val contentDesc = when (morphStep) {
+        0 -> "$seasonName, $termName"
+        1 -> "$degreeText, $countdownText"
+        else -> "$whisperLine1, $whisperLine2"
+    }
+
+    Box(
         modifier = modifier
-            .clip(RoundedCornerShape(4.5.dp))
-            .background(zenColors.paperSurface)
-            .border(
-                BorderStroke(0.8.dp, zenColors.hairlineRuleVariant),
-                RoundedCornerShape(4.5.dp),
+            .clip(RoundedCornerShape(4.dp))
+            .clickable(
+                interactionSource = capsuleInteraction,
+                indication = null,
+                onClick = { morphStep = (morphStep + 1) % 3 },
             )
-            .padding(horizontal = 7.dp, vertical = 2.5.dp),
+            .pressScale(capsuleInteraction, targetScale = ZenTactileHierarchy.Level1Card)
+            .semantics { contentDescription = contentDesc }
+            .widthIn(max = 220.dp)
+            .padding(vertical = 2.dp),
     ) {
-        Text(
-            text = stringResource(solarTerm.seasonRes),
-            style = TextStyle(
-                fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.Bold,
-                fontSize = 10.5.sp,
-                letterSpacing = 0.8.sp,
-                fontStyle = FontStyle.Normal,
-                platformStyle = PlatformTextStyle(includeFontPadding = false),
-                lineHeightStyle = LineHeightStyle(
-                    alignment = LineHeightStyle.Alignment.Center,
-                    trim = LineHeightStyle.Trim.Both,
-                ),
-            ),
-            color = zenColors.cinnabarVermilion,
-        )
+        AnimatedContent(
+            targetState = morphStep,
+            transitionSpec = {
+                if (reduceMotion) {
+                    fadeIn(animationSpec = tween(0)) togetherWith fadeOut(animationSpec = tween(0))
+                } else {
+                    (fadeIn(animationSpec = tween(180, easing = LinearEasing)) +
+                        slideInVertically(animationSpec = tween(180)) { height -> -height / 4 })
+                        .togetherWith(
+                            fadeOut(animationSpec = tween(150, easing = LinearEasing)) +
+                                slideOutVertically(animationSpec = tween(150)) { height -> height / 4 },
+                        )
+                }
+            },
+            label = "solarTermMorph",
+        ) { step ->
+            when (step) {
+                0 -> {
+                    // State 0 (Resting Seal): Marcellus 10.5sp, season in seasonal vermilion/ochre/sage/indigo, hairline pipe, term name, breathing pulse dot
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = seasonName,
+                            style = TextStyle(
+                                fontFamily = MarcellusFontFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 10.5.sp,
+                                letterSpacing = 1.1.sp,
+                                platformStyle = PlatformTextStyle(includeFontPadding = false),
+                                lineHeightStyle = LineHeightStyle(
+                                    alignment = LineHeightStyle.Alignment.Center,
+                                    trim = LineHeightStyle.Trim.Both,
+                                ),
+                            ),
+                            color = seasonColor,
+                        )
 
-        Spacer(Modifier.width(6.dp))
+                        Text(
+                            text = "|",
+                            style = TextStyle(
+                                fontFamily = FontFamily.SansSerif,
+                                fontWeight = FontWeight.Light,
+                                fontSize = 10.5.sp,
+                                platformStyle = PlatformTextStyle(includeFontPadding = false),
+                            ),
+                            color = zenColors.hairlineRuleVariant,
+                            modifier = Modifier.padding(horizontal = 4.5.dp),
+                        )
 
-        Box(
-            modifier = Modifier
-                .width(1.dp)
-                .height(10.dp)
-                .background(zenColors.hairlineRuleVariant),
-        )
+                        Text(
+                            text = termName,
+                            style = TextStyle(
+                                fontFamily = MarcellusFontFamily,
+                                fontWeight = FontWeight.Normal,
+                                fontSize = 10.5.sp,
+                                letterSpacing = 0.9.sp,
+                                platformStyle = PlatformTextStyle(includeFontPadding = false),
+                                lineHeightStyle = LineHeightStyle(
+                                    alignment = LineHeightStyle.Alignment.Center,
+                                    trim = LineHeightStyle.Trim.Both,
+                                ),
+                            ),
+                            color = ZenSealInk,
+                        )
 
-        Spacer(Modifier.width(6.dp))
-
-        Text(
-            text = stringResource(solarTerm.nameRes),
-            style = TextStyle(
-                fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.Medium,
-                fontSize = 12.sp,
-                lineHeight = 16.sp,
-                letterSpacing = 1.5.sp,
-                fontStyle = FontStyle.Normal,
-                platformStyle = PlatformTextStyle(includeFontPadding = false),
-                lineHeightStyle = LineHeightStyle(
-                    alignment = LineHeightStyle.Alignment.Center,
-                    trim = LineHeightStyle.Trim.Both,
-                ),
-            ),
-            color = MaterialTheme.colorScheme.onBackground,
-        )
+                        Box(
+                            modifier = Modifier
+                                .padding(start = 5.dp)
+                                .size(3.5.dp)
+                                .graphicsLayer {
+                                    scaleX = pulseScale
+                                    scaleY = pulseScale
+                                    alpha = pulseAlpha
+                                }
+                                .clip(CircleShape)
+                                .background(seasonColor),
+                        )
+                    }
+                }
+                1 -> {
+                    // State 1 (Tap 1 Reveal): 100% ONE SINGLE UNIFORM INK COLOR (ZenSealInk)
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(1.5.dp),
+                    ) {
+                        Text(
+                            text = degreeText,
+                            style = TextStyle(
+                                fontFamily = MarcellusFontFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 9.5.sp,
+                                letterSpacing = 0.9.sp,
+                                platformStyle = PlatformTextStyle(includeFontPadding = false),
+                            ),
+                            color = ZenSealInk,
+                        )
+                        Text(
+                            text = countdownText,
+                            style = TextStyle(
+                                fontFamily = NotoSerifItalicFontFamily,
+                                fontStyle = FontStyle.Italic,
+                                fontWeight = FontWeight.Normal,
+                                fontSize = 10.5.sp,
+                                letterSpacing = 0.2.sp,
+                                platformStyle = PlatformTextStyle(includeFontPadding = false),
+                            ),
+                            color = ZenSealInk,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
+                else -> {
+                    // State 2 (Tap 2 Reveal: Soft & Small Whisper haiku in 2 lines): 100% ONE SINGLE UNIFORM INK COLOR (ZenSealInk)
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        Text(
+                            text = whisperLine1,
+                            style = TextStyle(
+                                fontFamily = NotoSerifItalicFontFamily,
+                                fontStyle = FontStyle.Italic,
+                                fontWeight = FontWeight.Normal,
+                                fontSize = 10.5.sp,
+                                letterSpacing = 0.15.sp,
+                                lineHeight = 14.5.sp,
+                                platformStyle = PlatformTextStyle(includeFontPadding = false),
+                            ),
+                            color = ZenSealInk,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            text = whisperLine2,
+                            style = TextStyle(
+                                fontFamily = NotoSerifItalicFontFamily,
+                                fontStyle = FontStyle.Italic,
+                                fontWeight = FontWeight.Normal,
+                                fontSize = 10.5.sp,
+                                letterSpacing = 0.15.sp,
+                                lineHeight = 14.5.sp,
+                                platformStyle = PlatformTextStyle(includeFontPadding = false),
+                            ),
+                            color = ZenSealInk,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -352,7 +520,7 @@ private fun HeaderRow(
     val activeSolarTerm = remember(today) { SolarTermCalendar.getActiveSolarTerm(today) }
 
     Row(
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.Top,
         modifier = modifier.fillMaxWidth(),
     ) {
         Box(
@@ -385,11 +553,12 @@ private fun HeaderRow(
                 color = MaterialTheme.colorScheme.onBackground,
             )
             Spacer(Modifier.height(3.dp))
-            SolarTermCapsule(solarTerm = activeSolarTerm)
+            SolarTermCapsule(solarTerm = activeSolarTerm, today = today)
         }
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
+                .padding(top = 2.dp)
                 .minimumInteractiveComponentSize()
                 .size(44.dp)
                 .clip(CircleShape)

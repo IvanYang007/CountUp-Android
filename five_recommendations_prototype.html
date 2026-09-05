@@ -580,7 +580,7 @@
             <div class="phone-title">CountUp</div>
             <div class="phone-solar-term" id="headerSolarTerm">
               <span class="solar-term-dot"></span>
-              <span id="solarTermLabel">Start of Autumn · 立秋</span>
+              <span id="solarTermLabel">Beginning of Autumn · 立秋</span>
             </div>
           </div>
           <div class="phone-header-actions">
@@ -833,7 +833,7 @@ data class CountUpItem(
         <div class="control-row">
           <span class="control-label">Select 24 Solar Term:</span>
           <select id="solarTermSelect" onchange="handleSolarTermChange(this.value)" style="background: #1C211F; color: #FFF; border: 1px solid #2F3934; padding: 8px 12px; border-radius: 8px; font-size: 13px;">
-            <option value="立秋">Start of Autumn · 立秋 (Autumn Pool)</option>
+            <option value="立秋">Beginning of Autumn · 立秋 (Autumn Pool)</option>
             <option value="处暑">End of Heat · 处暑 (Autumn Pool)</option>
             <option value="白露">White Dew · 白露 (Autumn Pool)</option>
             <option value="秋分">Autumn Equinox · 秋分 (Autumn Pool)</option>
@@ -957,7 +957,7 @@ data class CountUpItem(
     hasNote: false,
     isResetArmed: false,
     undoTimer: null,
-    solarTerm: "Start of Autumn · 立秋",
+    solarTerm: "Beginning of Autumn · 立秋",
     hour: 14,
     milestoneHairlineDrawn: false,
     widgetStale: false,
@@ -1160,7 +1160,7 @@ data class CountUpItem(
   }
 
   function cycleSeasonTheme() {
-    const terms = ["Start of Autumn · 立秋", "White Dew · 白露", "Winter Solstice · 冬至", "Beginning of Spring · 立春", "Summer Solstice · 夏至"];
+    const terms = ["Beginning of Autumn · 立秋", "White Dew · 白露", "Winter Solstice · 冬至", "Beginning of Spring · 立春", "Summer Solstice · 夏至"];
     const idx = (terms.indexOf(document.getElementById('solarTermLabel').innerText) + 1) % terms.length;
     document.getElementById('solarTermLabel').innerText = terms[idx];
   }

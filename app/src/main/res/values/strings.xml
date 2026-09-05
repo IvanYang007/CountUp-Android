@@ -43,6 +43,59 @@
     <string name="solar_term_winter_solstice">Winter Solstice</string>
     <string name="solar_term_minor_cold">Minor Cold</string>
     <string name="solar_term_major_cold">Major Cold</string>
+
+    <!-- Solar Term Tap Reveals & Whispers -->
+    <string name="solar_term_degree">%1$d° SOLAR</string>
+    <string name="solar_term_countdown">%1$dd to %2$s</string>
+
+    <string name="solar_term_whisper_1_line1">Gentle east winds thaw the soil</string>
+    <string name="solar_term_whisper_1_line2">Fish rise toward melting ice</string>
+    <string name="solar_term_whisper_2_line1">Spring showers nourish grasses</string>
+    <string name="solar_term_whisper_2_line2">Wild geese fly northward</string>
+    <string name="solar_term_whisper_3_line1">Thunder stirs dormant earth</string>
+    <string name="solar_term_whisper_3_line2">Peach blossoms begin to open</string>
+    <string name="solar_term_whisper_4_line1">Day and night in calm balance</string>
+    <string name="solar_term_whisper_4_line2">Swallows return to nest</string>
+    <string name="solar_term_whisper_5_line1">Clear skies and fresh breezes</string>
+    <string name="solar_term_whisper_5_line2">Willow catkins drift like snow</string>
+    <string name="solar_term_whisper_6_line1">Soaking mist nourishes seedlings</string>
+    <string name="solar_term_whisper_6_line2">Tree peonies burst into flower</string>
+    <string name="solar_term_whisper_7_line1">Warm wind arrives in fields</string>
+    <string name="solar_term_whisper_7_line2">Green leaves cast deep shade</string>
+    <string name="solar_term_whisper_8_line1">Wheat grains gently plump</string>
+    <string name="solar_term_whisper_8_line2">Summer herbs begin to flower</string>
+    <string name="solar_term_whisper_9_line1">Plump awned grains sway in sun</string>
+    <string name="solar_term_whisper_9_line2">Shrikes sing from bamboo groves</string>
+    <string name="solar_term_whisper_10_line1">Longest light of all the year</string>
+    <string name="solar_term_whisper_10_line2">Cicadas chorus at high noon</string>
+    <string name="solar_term_whisper_11_line1">Warm breezes blow over lakes</string>
+    <string name="solar_term_whisper_11_line2">Crickets nestle in stone walls</string>
+    <string name="solar_term_whisper_12_line1">Fireflies float in dusk mist</string>
+    <string name="solar_term_whisper_12_line2">Warm soil steams after rain</string>
+    <string name="solar_term_whisper_13_line1">First evening cool arrives</string>
+    <string name="solar_term_whisper_13_line2">Clear dew settles on reeds</string>
+    <string name="solar_term_whisper_14_line1">Summer heat retreats to hills</string>
+    <string name="solar_term_whisper_14_line2">Dragonflies dart at twilight</string>
+    <string name="solar_term_whisper_15_line1">Chilly night air forms pale dew</string>
+    <string name="solar_term_whisper_15_line2">Wild geese fly southward in line</string>
+    <string name="solar_term_whisper_16_line1">Equal hours of day and dusk</string>
+    <string name="solar_term_whisper_16_line2">Thunder ceases until spring</string>
+    <string name="solar_term_whisper_17_line1">Dew glistens cold on branches</string>
+    <string name="solar_term_whisper_17_line2">Yellow chrysanthemums bloom</string>
+    <string name="solar_term_whisper_18_line1">Crisp frost silvers dry grass</string>
+    <string name="solar_term_whisper_18_line2">Crimson leaves flutter down</string>
+    <string name="solar_term_whisper_19_line1">Water freezes in morning shade</string>
+    <string name="solar_term_whisper_19_line2">Earth hardens under quiet sky</string>
+    <string name="solar_term_whisper_20_line1">First flurries dust mountain pines</string>
+    <string name="solar_term_whisper_20_line2">Rainbows hide until spring</string>
+    <string name="solar_term_whisper_21_line1">Snow blankets quiet valleys</string>
+    <string name="solar_term_whisper_21_line2">Songbirds fall silent in woods</string>
+    <string name="solar_term_whisper_22_line1">Deepest dark turns toward sun</string>
+    <string name="solar_term_whisper_22_line2">Subterranean springs stir</string>
+    <string name="solar_term_whisper_23_line1">Magpies weave bare twigs</string>
+    <string name="solar_term_whisper_23_line2">Wild geese fly northward early</string>
+    <string name="solar_term_whisper_24_line1">Coldest breath of ancient earth</string>
+    <string name="solar_term_whisper_24_line2">Hens begin to brood in calm</string>
     <string name="new_item">New item</string>
     <string name="empty_heading">Nothing here yet</string>
     <string name="empty_body">Add your first count-up to start tracking days.</string>
@@ -302,4 +355,7 @@
     <string name="widget_reset_notice_body" tools:ignore="PluralsCandidate">“%1$s” was reset to today on the home screen (%2$d days released).</string>
     <string name="action_restore">Restore</string>
     <string name="action_dismiss">Dismiss</string>
+
+    <!-- Zen Loading -->
+    <string name="loading_zen">Loading…</string>
 </resources>

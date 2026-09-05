@@ -1,0 +1,1777 @@
+<!DOCTYPE html>
+<!--
+  CountUp — 24 Solar Terms Zen Typographic Prototype (Seal & Whisper Contrast)
+  
+  Design Pillars:
+  1. State 0: "Hard Small Seal" — Compact, firm, stone-carved seal imprint (Cinzel, 10.5px, bold tracking)
+     Preserves [ AUTUMN | End of Heat ] with vermilion color on AUTUMN and hairline pipe "|".
+  2. State 2: "Soft & Small Whisper" — Delicate, quiet, intimate nature poetry (Newsreader Italic, 10.5px)
+     Broken into 2 lines in 100% single calming ink color (#5A4D41).
+  3. State 1: Astronomical anchor in single uniform ink.
+  4. Background: Completely seamless with canvas (transparent, zero box border, zero pill background).
+  5. Official Standard: 处暑 = "End of Heat" (Beijing 2022 Winter Olympics & National Terminology Committee).
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CountUp — Hard Small Seal & Soft Whisper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Marcellus&family=Newsreader:ital,opsz,wght@0,6..72,400;1,6..72,400;1,6..72,500&family=Noto+Serif:ital,wght@0,500;0,600;0,700;1,400;1,500&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=EB+Garamond:ital,wght@0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Exact CountUp Zen Palette tokens from Android ZenTheme.kt */
+    --zen-paper-bg: #F5E6D3;
+    --zen-paper-surface: #EBDCC3;
+    --zen-paper-card: #FFFFFF;
+    --zen-ink-black: #2C2416;
+    --zen-ink-muted: #6B5D4F;
+    --zen-ink-subtle: #8C7E70;
+    --zen-hairline: #E3D3B8;
+    --zen-hairline-variant: #D9C6A6;
+    --zen-vermilion: #D97642;
+    --zen-sage: #4A7C59;
+    --zen-ochre: #D4A574;
+    --zen-indigo: #7D9BA8;
+    
+    /* Hard Small Seal Typography (State 0: Compact, firm stone chop) */
+    --seal-font-family: 'Cinzel', serif;
+    --seal-font-size: 10.5px;
+    --seal-letter-spacing: 0.9px;
+    --seal-font-weight: 700;
+
+    /* Soft Small Whisper Typography (State 2: Soft, small, breathing haiku) */
+    --whisper-font-family: 'Newsreader', serif;
+    --whisper-font-size: 10.5px;
+    --whisper-line-height: 1.4;
+    --whisper-letter-spacing: 0.15px;
+
+    /* Single ink color for revealed states (Zero color clashing) */
+    --capsule-single-color: #5A4D41;
+    --capsule-bg: transparent;
+
+    /* Workbench styling */
+    --workbench-bg: #121518;
+    --workbench-panel: #1A1F26;
+    --workbench-panel-subtle: #14181E;
+    --workbench-border: #2A323D;
+    --workbench-text: #E6EDF3;
+    --workbench-muted: #8B949E;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    background: var(--workbench-bg);
+    color: var(--workbench-text);
+    min-height: 100vh;
+    padding: 24px 20px 110px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Top Workbench Header */
+  .workbench-header {
+    max-width: 1240px;
+    width: 100%;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--workbench-border);
+    padding-bottom: 18px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .brand-group {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .brand-badge {
+    padding: 5px 12px;
+    background: rgba(217, 118, 66, 0.18);
+    border: 1px solid rgba(217, 118, 66, 0.35);
+    color: var(--zen-vermilion);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+  }
+  .brand-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #FFF;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .brand-subtitle {
+    font-size: 13px;
+    color: var(--workbench-muted);
+    margin-top: 2px;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .toggle-baseline-btn {
+    padding: 8px 16px;
+    background: #222832;
+    border: 1px solid var(--workbench-border);
+    color: var(--workbench-text);
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .toggle-baseline-btn:hover {
+    background: #2D3643;
+    border-color: #4A586D;
+  }
+  .toggle-baseline-btn.active {
+    background: var(--zen-vermilion);
+    border-color: var(--zen-vermilion);
+    color: #FFF;
+  }
+
+  /* Main Two-Column Stage */
+  .main-stage {
+    max-width: 1240px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 36px;
+    align-items: start;
+  }
+
+  @media (max-width: 980px) {
+    .main-stage {
+      grid-template-columns: 1fr;
+      justify-items: center;
+    }
+  }
+
+  /* Phone Chassis Container */
+  .phone-viewport-container {
+    position: sticky;
+    top: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .phone-frame {
+    width: 390px;
+    height: 790px;
+    background: #191E1C;
+    border-radius: 46px;
+    padding: 11px;
+    box-shadow: 0 25px 65px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    position: relative;
+    user-select: none;
+    overflow: hidden;
+  }
+
+  .phone-screen {
+    width: 100%;
+    height: 100%;
+    border-radius: 36px;
+    background: var(--zen-paper-bg);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 16px 20px 24px;
+  }
+
+  /* Diagonal Soft Paper Fold at bottom right */
+  .phone-screen::after {
+    content: '';
+    position: absolute;
+    bottom: -60px;
+    right: -60px;
+    width: 260px;
+    height: 260px;
+    background: linear-gradient(135deg, rgba(235, 220, 195, 0) 40%, rgba(235, 220, 195, 0.75) 41%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Status Bar */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--zen-ink-black);
+    margin-bottom: 12px;
+    padding: 0 4px;
+    z-index: 5;
+  }
+  .status-time {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .camera-punch {
+    width: 13px;
+    height: 13px;
+    background: #000;
+    border-radius: 50%;
+  }
+  .status-icons {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+  }
+
+  /* App Header */
+  .app-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    z-index: 5;
+    position: relative;
+    min-height: 52px;
+  }
+  .header-left {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+  }
+  
+  /* Ensō circle button */
+  .enso-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .enso-btn:active { transform: scale(0.92); }
+  .enso-ring {
+    width: 36px;
+    height: 36px;
+    border: 5px solid var(--zen-vermilion);
+    border-radius: 50%;
+    position: relative;
+    box-sizing: border-box;
+  }
+  .enso-dot {
+    width: 7px;
+    height: 7px;
+    background: var(--zen-vermilion);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .header-titles {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    max-width: 220px;
+    flex-shrink: 0;
+  }
+  .app-title {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--zen-ink-black);
+    line-height: 1.1;
+  }
+
+  /* Add button (+) */
+  .add-item-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--zen-sage);
+    color: #FFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 400;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(74, 124, 89, 0.25);
+    transition: transform 0.15s ease;
+    flex-shrink: 0;
+    margin-top: 1px;
+    margin-left: 10px;
+  }
+  .add-item-btn:active { transform: scale(0.92); }
+
+  /* Subheader Row */
+  .subheader-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    z-index: 5;
+  }
+  .item-count-label {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--zen-ink-muted);
+  }
+  .sort-pill-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    background: var(--zen-paper-surface);
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--zen-ink-muted);
+  }
+  .sort-highlight {
+    color: var(--zen-vermilion);
+    font-weight: 700;
+  }
+
+  /* CountUp Card */
+  .countup-card {
+    background: var(--zen-paper-card);
+    border-radius: 20px;
+    padding: 18px 20px 22px;
+    box-shadow: 0 6px 20px rgba(44, 36, 22, 0.05), 0 1px 3px rgba(44, 36, 22, 0.03);
+    z-index: 5;
+    position: relative;
+    border: 1px solid rgba(227, 211, 184, 0.5);
+  }
+  .card-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .card-identity {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .card-icon-bubble {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #DEB285;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #4A3A2C;
+  }
+  .card-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #5A4D41;
+  }
+  .card-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #B45B3A;
+    font-size: 15px;
+    cursor: pointer;
+  }
+  .count-hero {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .count-number {
+    font-size: 44px;
+    font-weight: 800;
+    color: var(--zen-ink-black);
+    line-height: 1;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .count-unit {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    color: var(--zen-ink-muted);
+  }
+  .count-subtitle {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--zen-ink-subtle);
+  }
+
+  /* -------------------------------------------------------------
+     CAPSULE CONTAINER:
+     - Pure paper canvas (no pill container, no border)
+     - State 0: Hard small seal (Cinzel stone-carved, compact)
+     - State 2: Soft small whisper (Newsreader Italic, breathing haiku)
+  ------------------------------------------------------------- */
+  .breathing-capsule-container {
+    position: relative;
+    display: inline-block;
+  }
+
+  .zen-capsule-btn {
+    display: inline-flex;
+    align-items: flex-start;
+    padding: 3px 0px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    margin-top: 4px;
+    cursor: pointer;
+    user-select: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    max-width: 220px;
+    text-align: left;
+  }
+  .zen-capsule-btn:active {
+    opacity: 0.55;
+    transform: scale(0.98);
+  }
+
+  /* Morphing transition */
+  .capsule-content-flipper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    transition: opacity 0.18s cubic-bezier(0.25, 1, 0.5, 1), transform 0.18s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+  .capsule-content-flipper.morphing {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+
+  /* State 0: HARD SMALL SEAL (Compact, Chiseled Stone Seal Imprint) */
+  .seal-resting-row {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    font-family: var(--seal-font-family);
+    font-size: var(--seal-font-size);
+    letter-spacing: var(--seal-letter-spacing);
+  }
+  .seal-season-text {
+    color: var(--season-accent-color, var(--zen-vermilion)); /* AUTUMN vermilion */
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.1px;
+    font-size: calc(var(--seal-font-size) - 0.5px);
+  }
+  .seal-hairline-pipe {
+    color: var(--zen-hairline-variant, #D9C6A6);
+    margin: 0 5px;
+    font-weight: 300;
+    font-size: 10.5px;
+    opacity: 0.85;
+    user-select: none;
+  }
+  .seal-term-text {
+    color: var(--capsule-single-color);
+    font-weight: var(--seal-font-weight);
+    letter-spacing: var(--seal-letter-spacing);
+    text-transform: uppercase;
+    font-size: calc(var(--seal-font-size) - 0.5px);
+  }
+  .seal-pulse-dot {
+    width: 3.5px;
+    height: 3.5px;
+    border-radius: 50%;
+    background: var(--season-accent-color, var(--zen-vermilion));
+    opacity: 0.7;
+    margin-left: 5px;
+    animation: tranquilPulse 3.5s infinite ease-in-out;
+  }
+  @keyframes tranquilPulse {
+    0%, 100% { opacity: 0.3; transform: scale(0.85); }
+    50% { opacity: 0.95; transform: scale(1.3); }
+  }
+
+  /* State 1: 150° SOLAR | 18d to Autumn Equinox (ONE SINGLE CALM INK COLOR) */
+  .tap1-two-line-box {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5px;
+    text-align: left;
+    color: var(--capsule-single-color);
+  }
+  .tap1-line-deg {
+    font-family: var(--seal-font-family);
+    font-size: calc(var(--seal-font-size) - 0.5px);
+    font-weight: 700;
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
+    color: var(--capsule-single-color);
+    opacity: 0.9;
+  }
+  .tap1-line-countdown {
+    font-family: var(--whisper-font-family);
+    font-size: var(--whisper-font-size);
+    font-style: italic;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    color: var(--capsule-single-color);
+  }
+  .tap1-single-line-box {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    color: var(--capsule-single-color);
+  }
+
+  /* State 2: SOFT & SMALL WHISPER LINE (Quiet, Intimate Nature Haiku) */
+  .whisper-two-line-box {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    text-align: left;
+    color: var(--capsule-single-color);
+  }
+  .whisper-line-1 {
+    font-family: var(--whisper-font-family);
+    font-style: italic;
+    font-size: var(--whisper-font-size);
+    color: var(--capsule-single-color);
+    line-height: var(--whisper-line-height);
+    letter-spacing: var(--whisper-letter-spacing);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 215px;
+    opacity: 0.92;
+  }
+  .whisper-line-2 {
+    font-family: var(--whisper-font-family);
+    font-style: italic;
+    font-size: var(--whisper-font-size);
+    color: var(--capsule-single-color);
+    line-height: var(--whisper-line-height);
+    letter-spacing: var(--whisper-letter-spacing);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 215px;
+    opacity: 0.88;
+  }
+
+  /* Baseline Overlay on Screen */
+  .baseline-image-overlay {
+    position: absolute;
+    inset: 0;
+    background-image: url('current_solar_term_status.png');
+    background-size: cover;
+    background-position: center;
+    z-index: 90;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .baseline-image-overlay.active {
+    opacity: 0.95;
+    pointer-events: auto;
+  }
+
+  /* -------------------------------------------------------------
+     RIGHT COLUMN: EXPLORATION LAB & TYPOGRAPHY STUDIO
+  ------------------------------------------------------------- */
+  .lab-panel {
+    background: var(--workbench-panel);
+    border: 1px solid var(--workbench-border);
+    border-radius: 20px;
+    padding: 26px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .lab-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--workbench-border);
+    padding-bottom: 14px;
+  }
+  .lab-variant-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--zen-vermilion);
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .lab-variant-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: #FFF;
+    margin-top: 2px;
+  }
+
+  /* Typographic Contrast Matrix Card */
+  .contrast-matrix-box {
+    background: #15181E;
+    border: 1px solid var(--workbench-border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .matrix-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--workbench-muted);
+  }
+  .matrix-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .matrix-card {
+    background: #1E242D;
+    border-radius: 10px;
+    padding: 12px 14px;
+    border-left: 3px solid #FFF;
+  }
+  .matrix-card.seal {
+    border-left-color: var(--zen-vermilion);
+  }
+  .matrix-card.whisper {
+    border-left-color: #8C7E70;
+  }
+  .matrix-card-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #FFF;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .matrix-card-desc {
+    font-size: 11.5px;
+    color: #A0AAB6;
+    line-height: 1.45;
+  }
+
+  /* Live Telemetry Card */
+  .spatial-telemetry-box {
+    background: var(--workbench-panel-subtle);
+    border: 1px solid var(--workbench-border);
+    border-radius: 14px;
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .telemetry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .telemetry-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--workbench-muted);
+  }
+  .telemetry-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(74, 124, 89, 0.2);
+    color: #58D68D;
+    border: 1px solid rgba(74, 124, 89, 0.4);
+  }
+
+  .telemetry-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .metric-tile {
+    background: #191E25;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 8px 10px;
+  }
+  .metric-label {
+    font-size: 10px;
+    color: var(--workbench-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
+  }
+  .metric-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: #FFF;
+  }
+  .metric-value.accent {
+    color: #FFB38A;
+  }
+
+  /* Auto-revert countdown progress bar */
+  .revert-progress-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 2px;
+  }
+  .revert-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .revert-progress-track {
+    width: 100%;
+    height: 6px;
+    background: #252D37;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .revert-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #D97642, #5A4D41);
+    border-radius: 999px;
+    transition: width 0.05s linear;
+  }
+
+  /* Typography Studio Box */
+  .studio-section {
+    background: #161A20;
+    border: 1px solid var(--workbench-border);
+    border-radius: 14px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .studio-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .studio-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--workbench-muted);
+    display: flex;
+    justify-content: space-between;
+  }
+  .studio-pill-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .studio-pill-btn {
+    padding: 6px 12px;
+    background: #232B36;
+    border: 1px solid var(--workbench-border);
+    color: var(--workbench-text);
+    border-radius: 7px;
+    font-size: 11.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .studio-pill-btn:hover {
+    background: #2E3846;
+    border-color: #4A596E;
+  }
+  .studio-pill-btn.active {
+    background: rgba(217, 118, 66, 0.25);
+    border-color: var(--zen-vermilion);
+    color: #FFB38A;
+    font-weight: 700;
+  }
+
+  /* State step switcher pill buttons */
+  .step-pill-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .step-pill-btn {
+    padding: 8px 12px;
+    background: #232B36;
+    border: 1px solid var(--workbench-border);
+    color: var(--workbench-text);
+    border-radius: 8px;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .step-pill-btn:hover {
+    background: #2D3745;
+    border-color: #4B5A6E;
+  }
+  .step-pill-btn.active {
+    background: rgba(217, 118, 66, 0.25);
+    border-color: var(--zen-vermilion);
+    color: #FFB38A;
+  }
+
+  /* Season scrubber */
+  .season-scrubber-select {
+    width: 100%;
+    padding: 10px 12px;
+    background: #252C36;
+    border: 1px solid var(--workbench-border);
+    color: #FFF;
+    border-radius: 10px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  /* Action buttons */
+  .variant-action-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .action-chip-btn {
+    padding: 9px 15px;
+    background: #252C36;
+    border: 1px solid var(--workbench-border);
+    color: #E6EDF3;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .action-chip-btn:hover {
+    background: #313A47;
+    border-color: #4C596C;
+  }
+  .action-chip-btn.highlight {
+    background: rgba(217, 118, 66, 0.25);
+    border-color: var(--zen-vermilion);
+    color: #FFB38A;
+  }
+</style>
+</head>
+<body>
+
+<!-- Top Workbench Header -->
+<header class="workbench-header">
+  <div class="brand-group">
+    <div class="brand-badge">Zen Typography Studio</div>
+    <div>
+      <div class="brand-title">CountUp — Hard Small Seal & Soft Whisper Contrast</div>
+      <div class="brand-subtitle">Compact carved seal for [ AUTUMN | END OF HEAT ] · Soft small whisper haiku for tap reveals</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="toggle-baseline-btn" id="baselineToggleBtn" onclick="toggleBaselineOverlay()">
+      <span>📷 Compare with Current UI</span>
+    </button>
+  </div>
+</header>
+
+<!-- Main Two-Column Stage -->
+<main class="main-stage">
+
+  <!-- Left: Phone Chassis Viewport -->
+  <div class="phone-viewport-container">
+    <div class="phone-frame">
+      <div class="phone-screen" id="phoneScreen">
+        
+        <!-- Baseline Image Overlay -->
+        <div class="baseline-image-overlay" id="baselineOverlay"></div>
+
+        <!-- Android Status Bar -->
+        <div class="status-bar">
+          <div class="status-time">
+            <span>12:18</span>
+            <span>🛡️</span>
+            <span>⟡</span>
+          </div>
+          <div class="camera-punch"></div>
+          <div class="status-icons">
+            <span>📶</span>
+            <span>🔋</span>
+          </div>
+        </div>
+
+        <!-- App Header -->
+        <div class="app-header">
+          <div class="header-left">
+            <div class="enso-btn" title="Cycle Zen Palette">
+              <div class="enso-ring">
+                <div class="enso-dot"></div>
+              </div>
+            </div>
+            <div class="header-titles">
+              <div class="app-title">CountUp</div>
+              
+              <!-- PURE TYPOGRAPHIC SOLAR TERM CONTAINER -->
+              <div id="solarTermSlot"></div>
+
+            </div>
+          </div>
+          <div class="add-item-btn" id="addItemBtn" title="Add item">+</div>
+        </div>
+
+        <!-- Subheader Row -->
+        <div class="subheader-row">
+          <div class="item-count-label">1 item</div>
+          <div class="sort-pill-btn">
+            <span>Sort:</span>
+            <span class="sort-highlight">Days ↓</span>
+            <span>· 🔍</span>
+          </div>
+        </div>
+
+        <!-- Live Sample Card (TEA CEREMONY) -->
+        <div class="countup-card">
+          <div class="card-top-row">
+            <div class="card-identity">
+              <div class="card-icon-bubble">🎸</div>
+              <div class="card-title">Tea Ceremony</div>
+            </div>
+            <div class="card-actions">
+              <span>⠶</span>
+              <span>↻</span>
+              <span>—</span>
+            </div>
+          </div>
+
+          <div class="count-hero">
+            <div class="count-number">0</div>
+            <div class="count-unit">DAYS</div>
+          </div>
+
+          <div class="count-subtitle" id="cardSubtitle">Since Sep 5, 2026</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Exploration Lab & Typography Studio -->
+  <section class="lab-panel">
+    <div class="lab-title-row">
+      <div>
+        <div class="lab-variant-tag">Interactive Evaluation</div>
+        <div class="lab-variant-name">Hard Small Seal & Soft Whisper</div>
+      </div>
+    </div>
+
+    <!-- Contrast Matrix Card -->
+    <div class="contrast-matrix-box">
+      <div class="matrix-header">
+        <span>Typographic Duality (Hard Seal vs Soft Whisper)</span>
+      </div>
+      <div class="matrix-grid">
+        <div class="matrix-card seal">
+          <div class="matrix-card-title">🪨 State 0: Hard Small Seal</div>
+          <div class="matrix-card-desc">
+            <strong>Cinzel 10.5px</strong> · Firm, compact stone chop. Disciplined tracking, chiselled capitals. <em>AUTUMN</em> in vermilion, pipe <em>|</em> divider, <em>END OF HEAT</em> in charcoal.
+          </div>
+        </div>
+        <div class="matrix-card whisper">
+          <div class="matrix-card-title">🍃 State 2: Soft & Small Whisper</div>
+          <div class="matrix-card-desc">
+            <strong>Newsreader 10.5px Italic</strong> · Flowing, breathing haiku. Gentle line-height (1.4), single calm sumi ink with zero chromatic distraction.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Telemetry & Spatial Collision Audit -->
+    <div class="spatial-telemetry-box" id="telemetrySection">
+      <div class="telemetry-header">
+        <span class="telemetry-title">Spatial & Collision Monitor</span>
+        <span class="telemetry-badge" id="collisionBadge">✓ ZERO OVERFLOW · SAFE</span>
+      </div>
+
+      <div class="telemetry-metrics-grid">
+        <div class="metric-tile">
+          <div class="metric-label">Active State</div>
+          <div class="metric-value accent" id="metricActiveState">Step 0 (Hard Seal)</div>
+        </div>
+        <div class="metric-tile">
+          <div class="metric-label">Distance to '+' Button</div>
+          <div class="metric-value" id="metricDistanceAdd">-- px</div>
+        </div>
+        <div class="metric-tile">
+          <div class="metric-label">'+' Button Displacement</div>
+          <div class="metric-value" id="metricShiftAdd">0.0 px (Locked)</div>
+        </div>
+      </div>
+
+      <!-- Live 4.5s Auto-Revert Progress Bar -->
+      <div class="revert-progress-container" id="revertBarContainer">
+        <div class="revert-label-row">
+          <span style="color:var(--workbench-muted)">4.5s Auto-Revert Breath Timer</span>
+          <span id="revertTimerText" style="color:var(--zen-vermilion); font-weight:700;">Idle (Resting)</span>
+        </div>
+        <div class="revert-progress-track">
+          <div class="revert-progress-fill" id="revertProgressFill"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Typography Studio (Interactive Type & Size Tester) -->
+    <div class="studio-section">
+      <div class="studio-label">
+        <span>State 0 Seal Font (Hard & Compact · MIT / SIL OFL)</span>
+        <span id="currentSealFontBadge" style="color:#FFF;">Cinzel (Stone Seal)</span>
+      </div>
+      <div class="studio-pill-group">
+        <button class="studio-pill-btn active" id="sealCinzel" onclick="setSealFontFamily('Cinzel')">
+          🪨 Cinzel (Stone-Carved Seal)
+        </button>
+        <button class="studio-pill-btn" id="sealMarcellus" onclick="setSealFontFamily('Marcellus')">
+          🏛️ Marcellus (Lapidary Flared)
+        </button>
+        <button class="studio-pill-btn" id="sealNoto" onclick="setSealFontFamily('Noto Serif')">
+          🖋️ Noto Serif (Classic Humanist)
+        </button>
+        <button class="studio-pill-btn" id="sealSans" onclick="setSealFontFamily('Plus Jakarta Sans')">
+          📐 Plus Jakarta Sans (Modernist)
+        </button>
+      </div>
+
+      <div class="studio-row" style="margin-top: 6px;">
+        <div class="studio-label">
+          <span>State 2 Whisper Font (Soft & Small · MIT / SIL OFL)</span>
+          <span id="currentWhisperFontBadge" style="color:#FFF;">Newsreader Italic</span>
+        </div>
+        <div class="studio-pill-group">
+          <button class="studio-pill-btn active" id="wNewsreader" onclick="setWhisperFontFamily('Newsreader')">
+            🍃 Newsreader (Literary Soft)
+          </button>
+          <button class="studio-pill-btn" id="wNoto" onclick="setWhisperFontFamily('Noto Serif')">
+            🌾 Noto Serif (Natural Italic)
+          </button>
+          <button class="studio-pill-btn" id="wGaramond" onclick="setWhisperFontFamily('EB Garamond')">
+            📜 EB Garamond (Ancient Delicate)
+          </button>
+        </div>
+      </div>
+
+      <div class="studio-row" style="margin-top: 6px;">
+        <div class="studio-label">
+          <span>Seal Size (State 0)</span>
+          <span id="currentSealSizeBadge" style="color:#FFF;">10.5px (Compact Seal)</span>
+        </div>
+        <div class="studio-pill-group">
+          <button class="studio-pill-btn" id="sealSize95" onclick="setSealFontSize('9.5px')">
+            9.5px (Miniature Chop)
+          </button>
+          <button class="studio-pill-btn active" id="sealSize105" onclick="setSealFontSize('10.5px')">
+            10.5px (Compact Seal — Ideal)
+          </button>
+          <button class="studio-pill-btn" id="sealSize115" onclick="setSealFontSize('11.5px')">
+            11.5px (Prominent)
+          </button>
+        </div>
+      </div>
+
+      <div class="studio-row" style="margin-top: 6px;">
+        <div class="studio-label">
+          <span>Whisper Size (State 2)</span>
+          <span id="currentWhisperSizeBadge" style="color:#FFF;">10.5px (Soft & Small)</span>
+        </div>
+        <div class="studio-pill-group">
+          <button class="studio-pill-btn" id="wSize95" onclick="setWhisperFontSize('9.5px')">
+            9.5px (Faint Haiku)
+          </button>
+          <button class="studio-pill-btn active" id="wSize105" onclick="setWhisperFontSize('10.5px')">
+            10.5px (Soft & Small — Ideal)
+          </button>
+          <button class="studio-pill-btn" id="wSize115" onclick="setWhisperFontSize('11.5px')">
+            11.5px (Readable)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Step Controllers (Direct Step Jump) -->
+    <div class="control-section">
+      <div class="studio-label"><span>Live Interaction Step Jump</span></div>
+      <div class="step-pill-group">
+        <button class="step-pill-btn active" id="btnStep0" onclick="applyMorphStep(0)">
+          <span>0️⃣</span>
+          <span>State 0: Hard Small Seal [ AUTUMN | END OF HEAT ]</span>
+        </button>
+        <button class="step-pill-btn" id="btnStep1" onclick="applyMorphStep(1)">
+          <span>1️⃣</span>
+          <span>Tap 1: Solar Degree & Countdown (1 Color)</span>
+        </button>
+        <button class="step-pill-btn" id="btnStep2" onclick="applyMorphStep(2)">
+          <span>2️⃣</span>
+          <span>Tap 2: Soft & Small 2-Line Whisper (1 Color)</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Interactive Action Chips -->
+    <div class="variant-action-row">
+      <button class="action-chip-btn highlight" onclick="onCapsuleClicked()">👆 Tap Screen Subtitle (Cycle 0 → 1 → 2 → 0)</button>
+      <button class="action-chip-btn" onclick="applyMorphStep(0)">🔄 Breathe Back to Hard Seal</button>
+    </div>
+
+    <!-- Interactive Term Scrubber -->
+    <div class="control-section">
+      <div class="studio-label"><span>Test Across All 24 Solar Terms</span></div>
+      <select class="season-scrubber-select" id="termSelect" onchange="onSelectTerm(this.value)">
+        <!-- 24 Solar terms injected here -->
+      </select>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // -------------------------------------------------------------
+  // DATA: 24 Solar Terms with Astronomical & Sensory Phenology
+  // -------------------------------------------------------------
+  const SOLAR_TERMS = [
+  {
+    "id": 1,
+    "season": "SPRING",
+    "name": "Beginning of Spring",
+    "hanzi": "\u7acb\u6625",
+    "pinyin": "L\u00ecch\u016bn",
+    "deg": 315,
+    "countdown": "44d to Spring Equinox",
+    "line1": "Gentle east winds thaw the soil",
+    "line2": "Fish rise toward melting ice"
+  },
+  {
+    "id": 2,
+    "season": "SPRING",
+    "name": "Rain Water",
+    "hanzi": "\u96e8\u6c34",
+    "pinyin": "Y\u01d4shu\u01d0",
+    "deg": 330,
+    "countdown": "29d to Spring Equinox",
+    "line1": "Spring showers nourish grasses",
+    "line2": "Wild geese fly northward"
+  },
+  {
+    "id": 3,
+    "season": "SPRING",
+    "name": "Awakening of Insects",
+    "hanzi": "\u60ca\u86f0",
+    "pinyin": "J\u012bngzh\u00e9",
+    "deg": 345,
+    "countdown": "15d to Spring Equinox",
+    "line1": "Thunder stirs dormant earth",
+    "line2": "Peach blossoms begin to open"
+  },
+  {
+    "id": 4,
+    "season": "SPRING",
+    "name": "Spring Equinox",
+    "hanzi": "\u6625\u5206",
+    "pinyin": "Ch\u016bnf\u0113n",
+    "deg": 0,
+    "countdown": "92d to Summer Solstice",
+    "line1": "Day and night in calm balance",
+    "line2": "Swallows return to nest"
+  },
+  {
+    "id": 5,
+    "season": "SPRING",
+    "name": "Pure Brightness",
+    "hanzi": "\u6e05\u660e",
+    "pinyin": "Q\u012bngm\u00edng",
+    "deg": 15,
+    "countdown": "77d to Summer Solstice",
+    "line1": "Clear skies and fresh breezes",
+    "line2": "Willow catkins drift like snow"
+  },
+  {
+    "id": 6,
+    "season": "SPRING",
+    "name": "Grain Rain",
+    "hanzi": "\u8c37\u96e8",
+    "pinyin": "G\u01d4y\u01d4",
+    "deg": 30,
+    "countdown": "62d to Summer Solstice",
+    "line1": "Soaking mist nourishes seedlings",
+    "line2": "Tree peonies burst into flower"
+  },
+  {
+    "id": 7,
+    "season": "SUMMER",
+    "name": "Beginning of Summer",
+    "hanzi": "\u7acb\u590f",
+    "pinyin": "L\u00ecxi\u00e0",
+    "deg": 45,
+    "countdown": "46d to Summer Solstice",
+    "line1": "Warm wind arrives in fields",
+    "line2": "Green leaves cast deep shade"
+  },
+  {
+    "id": 8,
+    "season": "SUMMER",
+    "name": "Grain Buds",
+    "hanzi": "\u5c0f\u6ee1",
+    "pinyin": "Xi\u01ceom\u01cen",
+    "deg": 60,
+    "countdown": "31d to Summer Solstice",
+    "line1": "Wheat grains gently plump",
+    "line2": "Summer herbs begin to flower"
+  },
+  {
+    "id": 9,
+    "season": "SUMMER",
+    "name": "Grain in Ear",
+    "hanzi": "\u8292\u79cd",
+    "pinyin": "M\u00e1ngzh\u00f2ng",
+    "deg": 75,
+    "countdown": "16d to Summer Solstice",
+    "line1": "Plump awned grains sway in sun",
+    "line2": "Shrikes sing from bamboo groves"
+  },
+  {
+    "id": 10,
+    "season": "SUMMER",
+    "name": "Summer Solstice",
+    "hanzi": "\u590f\u81f3",
+    "pinyin": "Xi\u00e0zh\u00ec",
+    "deg": 90,
+    "countdown": "93d to Autumn Equinox",
+    "line1": "Longest light of all the year",
+    "line2": "Cicadas chorus at high noon"
+  },
+  {
+    "id": 11,
+    "season": "SUMMER",
+    "name": "Minor Heat",
+    "hanzi": "\u5c0f\u6691",
+    "pinyin": "Xi\u01ceosh\u01d4",
+    "deg": 105,
+    "countdown": "77d to Autumn Equinox",
+    "line1": "Warm breezes blow over lakes",
+    "line2": "Crickets nestle in stone walls"
+  },
+  {
+    "id": 12,
+    "season": "SUMMER",
+    "name": "Major Heat",
+    "hanzi": "\u5927\u6691",
+    "pinyin": "D\u00e0sh\u01d4",
+    "deg": 120,
+    "countdown": "62d to Autumn Equinox",
+    "line1": "Fireflies float in dusk mist",
+    "line2": "Warm soil steams after rain"
+  },
+  {
+    "id": 13,
+    "season": "AUTUMN",
+    "name": "Beginning of Autumn",
+    "hanzi": "\u7acb\u79cb",
+    "pinyin": "L\u00ecqi\u016b",
+    "deg": 135,
+    "countdown": "46d to Autumn Equinox",
+    "line1": "First evening cool arrives",
+    "line2": "Clear dew settles on reeds"
+  },
+  {
+    "id": 14,
+    "season": "AUTUMN",
+    "name": "End of Heat",
+    "hanzi": "\u5904\u6691",
+    "pinyin": "Ch\u01d4sh\u01d4",
+    "deg": 150,
+    "countdown": "18d to Autumn Equinox",
+    "line1": "Summer heat retreats to hills",
+    "line2": "Dragonflies dart at twilight"
+  },
+  {
+    "id": 15,
+    "season": "AUTUMN",
+    "name": "White Dew",
+    "hanzi": "\u767d\u9732",
+    "pinyin": "B\u00e1il\u00f9",
+    "deg": 165,
+    "countdown": "15d to Autumn Equinox",
+    "line1": "Chilly night air forms pale dew",
+    "line2": "Wild geese fly southward in line"
+  },
+  {
+    "id": 16,
+    "season": "AUTUMN",
+    "name": "Autumn Equinox",
+    "hanzi": "\u79cb\u5206",
+    "pinyin": "Qi\u016bf\u0113n",
+    "deg": 180,
+    "countdown": "90d to Winter Solstice",
+    "line1": "Equal hours of day and dusk",
+    "line2": "Thunder ceases until spring"
+  },
+  {
+    "id": 17,
+    "season": "AUTUMN",
+    "name": "Cold Dew",
+    "hanzi": "\u5bd2\u9732",
+    "pinyin": "H\u00e1nl\u00f9",
+    "deg": 195,
+    "countdown": "74d to Winter Solstice",
+    "line1": "Dew glistens cold on branches",
+    "line2": "Yellow chrysanthemums bloom"
+  },
+  {
+    "id": 18,
+    "season": "AUTUMN",
+    "name": "Frost\u2019s Descent",
+    "hanzi": "\u971c\u964d",
+    "pinyin": "Shu\u0101ngji\u00e0ng",
+    "deg": 210,
+    "countdown": "59d to Winter Solstice",
+    "line1": "Crisp frost silvers dry grass",
+    "line2": "Crimson leaves flutter down"
+  },
+  {
+    "id": 19,
+    "season": "WINTER",
+    "name": "Beginning of Winter",
+    "hanzi": "\u7acb\u51ac",
+    "pinyin": "L\u00ecd\u014dng",
+    "deg": 225,
+    "countdown": "44d to Winter Solstice",
+    "line1": "Water freezes in morning shade",
+    "line2": "Earth hardens under quiet sky"
+  },
+  {
+    "id": 20,
+    "season": "WINTER",
+    "name": "Minor Snow",
+    "hanzi": "\u5c0f\u96ea",
+    "pinyin": "Xi\u01ceoxu\u011b",
+    "deg": 240,
+    "countdown": "29d to Winter Solstice",
+    "line1": "First flurries dust mountain pines",
+    "line2": "Rainbows hide until spring"
+  },
+  {
+    "id": 21,
+    "season": "WINTER",
+    "name": "Major Snow",
+    "hanzi": "\u5927\u96ea",
+    "pinyin": "D\u00e0xu\u011b",
+    "deg": 255,
+    "countdown": "14d to Winter Solstice",
+    "line1": "Snow blankets quiet valleys",
+    "line2": "Songbirds fall silent in woods"
+  },
+  {
+    "id": 22,
+    "season": "WINTER",
+    "name": "Winter Solstice",
+    "hanzi": "\u51ac\u81f3",
+    "pinyin": "D\u014dngzh\u00ec",
+    "deg": 270,
+    "countdown": "89d to Spring Equinox",
+    "line1": "Deepest dark turns toward sun",
+    "line2": "Subterranean springs stir"
+  },
+  {
+    "id": 23,
+    "season": "WINTER",
+    "name": "Minor Cold",
+    "hanzi": "\u5c0f\u5bd2",
+    "pinyin": "Xi\u01ceoh\u00e1n",
+    "deg": 285,
+    "countdown": "74d to Spring Equinox",
+    "line1": "Magpies weave bare twigs",
+    "line2": "Wild geese fly northward early"
+  },
+  {
+    "id": 24,
+    "season": "WINTER",
+    "name": "Major Cold",
+    "hanzi": "\u5927\u5bd2",
+    "pinyin": "D\u00e0h\u00e1n",
+    "deg": 300,
+    "countdown": "59d to Spring Equinox",
+    "line1": "Coldest breath of ancient earth",
+    "line2": "Hens begin to brood in calm"
+  }
+];
+
+  // Seasonal Color Accents for State 0 Seal
+  const SEASON_COLORS = {
+    SPRING: '#4A7C59', // Sage green
+    SUMMER: '#D4A574', // Warm ochre
+    AUTUMN: '#D97642', // Signature vermilion for Autumn
+    WINTER: '#7D9BA8'  // Indigo mist
+  };
+
+  let currentTermIndex = 13; // Term 14: End of Heat (處暑) matches current date & screenshot
+  
+  // State machine: 0 = Hard Seal, 1 = Solar Degree & Countdown, 2 = Soft 2-Line Whisper
+  let morphStep = 0;
+  let tap1Mode = 'two-line';
+  let autoRevertTimer = null;
+  let revertCountdownInterval = null;
+  const AUTO_REVERT_DURATION_MS = 4500;
+  let revertStartTime = null;
+
+  // Typography state
+  let currentSealFont = 'Cinzel';
+  let currentSealSize = '10.5px';
+  let currentWhisperFont = 'Newsreader';
+  let currentWhisperSize = '10.5px';
+  let currentSingleColor = '#5A4D41';
+
+  function renderSolarTermSlot() {
+    const term = SOLAR_TERMS[currentTermIndex];
+    const slot = document.getElementById('solarTermSlot');
+    const seasonColor = SEASON_COLORS[term.season] || '#D97642';
+    document.documentElement.style.setProperty('--season-accent-color', seasonColor);
+
+    slot.innerHTML = `
+      <div class="breathing-capsule-container">
+        <div class="zen-capsule-btn" id="zenCapsuleBtn" onclick="onCapsuleClicked()" title="Tap to morph (Step 0 → Step 1 → Step 2 → Step 0)">
+          <div class="capsule-content-flipper" id="capsuleFlipper">
+            ${getMorphContentHtml(term, morphStep)}
+          </div>
+        </div>
+      </div>
+    `;
+
+    requestAnimationFrame(auditSpatialCollisions);
+  }
+
+  // -------------------------------------------------------------
+  // THREE-STATE MORPH LOGIC:
+  // - State 0: Hard Small Seal [ AUTUMN | END OF HEAT ] (Cinzel, compact, firm)
+  // - State 1: Astronomical Degree & Countdown (1 Color)
+  // - State 2: Soft & Small Whisper haiku (Newsreader Italic, 2 lines, 1 Color)
+  // -------------------------------------------------------------
+
+  function getMorphContentHtml(term, step) {
+    if (step === 0) {
+      // State 0 (Resting): Hard small seal feeling
+      return `
+        <div class="seal-resting-row">
+          <span class="seal-season-text">${term.season}</span>
+          <span class="seal-hairline-pipe">|</span>
+          <span class="seal-term-text">${term.name}</span>
+          <span class="seal-pulse-dot"></span>
+        </div>
+      `;
+    } else if (step === 1) {
+      // State 1 (1st Tap): 100% ONE SINGLE UNIFORM COLOR
+      if (tap1Mode === 'two-line') {
+        return `
+          <div class="tap1-two-line-box">
+            <div class="tap1-line-deg">${term.deg}° SOLAR</div>
+            <div class="tap1-line-countdown">${term.countdown}</div>
+          </div>
+        `;
+      } else {
+        return `
+          <div class="tap1-single-line-box">
+            <span class="tap1-line-deg">${term.deg}° SOLAR</span>
+            <span class="seal-hairline-pipe">|</span>
+            <span class="tap1-line-countdown">${term.countdown}</span>
+          </div>
+        `;
+      }
+    } else if (step === 2) {
+      // State 2 (2nd Tap): Soft and Small Whisper haiku in 2 lines
+      return `
+        <div class="whisper-two-line-box">
+          <div class="whisper-line-1">${term.line1}</div>
+          <div class="whisper-line-2">${term.line2}</div>
+        </div>
+      `;
+    }
+    return '';
+  }
+
+  function onCapsuleClicked() {
+    const nextStep = (morphStep + 1) % 3;
+    applyMorphStep(nextStep);
+  }
+
+  function applyMorphStep(step) {
+    morphStep = step;
+    const flipper = document.getElementById('capsuleFlipper');
+    const capsule = document.getElementById('zenCapsuleBtn');
+    
+    clearAutoRevertTimers();
+
+    if (!flipper || !capsule) {
+      renderSolarTermSlot();
+      return;
+    }
+
+    flipper.classList.add('morphing');
+
+    setTimeout(() => {
+      flipper.innerHTML = getMorphContentHtml(SOLAR_TERMS[currentTermIndex], morphStep);
+      flipper.classList.remove('morphing');
+
+      updateStepButtonsUI();
+      auditSpatialCollisions();
+
+      if (morphStep > 0) {
+        startAutoRevertCountdown(AUTO_REVERT_DURATION_MS);
+      } else {
+        resetRevertProgressBar();
+      }
+    }, 150);
+  }
+
+  function clearAutoRevertTimers() {
+    if (autoRevertTimer) {
+      clearTimeout(autoRevertTimer);
+      autoRevertTimer = null;
+    }
+    if (revertCountdownInterval) {
+      clearInterval(revertCountdownInterval);
+      revertCountdownInterval = null;
+    }
+  }
+
+  function startAutoRevertCountdown(durationMs) {
+    clearAutoRevertTimers();
+    revertStartTime = Date.now();
+    const progressFill = document.getElementById('revertProgressFill');
+    const timerText = document.getElementById('revertTimerText');
+
+    revertCountdownInterval = setInterval(() => {
+      const elapsed = Date.now() - revertStartTime;
+      const remaining = Math.max(0, durationMs - elapsed);
+      const pct = (elapsed / durationMs) * 100;
+
+      if (progressFill) progressFill.style.width = `${Math.min(100, pct)}%`;
+      if (timerText) timerText.innerText = `${(remaining / 1000).toFixed(1)}s left to breathe back`;
+
+      if (remaining <= 0) {
+        clearAutoRevertTimers();
+      }
+    }, 40);
+
+    autoRevertTimer = setTimeout(() => {
+      applyMorphStep(0);
+    }, durationMs);
+  }
+
+  function resetRevertProgressBar() {
+    clearAutoRevertTimers();
+    const progressFill = document.getElementById('revertProgressFill');
+    const timerText = document.getElementById('revertTimerText');
+    if (progressFill) progressFill.style.width = '0%';
+    if (timerText) timerText.innerText = 'Idle (Resting in State 0)';
+  }
+
+  function updateStepButtonsUI() {
+    [0, 1, 2].forEach(s => {
+      const btn = document.getElementById(`btnStep${s}`);
+      if (btn) {
+        if (s === morphStep) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      }
+    });
+
+    const stateLabels = ['Step 0: Hard Seal [ AUTUMN | END OF HEAT ]', 'Step 1: Solar & Countdown (1 Color)', 'Step 2: Soft Small Whisper (1 Color)'];
+    const activeLabelEl = document.getElementById('metricActiveState');
+    if (activeLabelEl) activeLabelEl.innerText = stateLabels[morphStep];
+  }
+
+  // -------------------------------------------------------------
+  // TYPOGRAPHY STUDIO CONTROLS (Live Tuning)
+  // -------------------------------------------------------------
+
+  function setSealFontFamily(font) {
+    currentSealFont = font;
+    document.documentElement.style.setProperty('--seal-font-family', `'${font}', serif`);
+    document.getElementById('currentSealFontBadge').innerText = `${font} (Hard Seal)`;
+
+    ['Cinzel', 'Marcellus', 'Noto', 'Sans'].forEach(name => {
+      const b = document.getElementById(`seal${name}`);
+      if (b) b.classList.remove('active');
+    });
+
+    if (font === 'Cinzel') document.getElementById('sealCinzel').classList.add('active');
+    else if (font === 'Marcellus') document.getElementById('sealMarcellus').classList.add('active');
+    else if (font === 'Noto Serif') document.getElementById('sealNoto').classList.add('active');
+    else if (font === 'Plus Jakarta Sans') document.getElementById('sealSans').classList.add('active');
+
+    renderSolarTermSlot();
+  }
+
+  function setWhisperFontFamily(font) {
+    currentWhisperFont = font;
+    document.documentElement.style.setProperty('--whisper-font-family', `'${font}', serif`);
+    document.getElementById('currentWhisperFontBadge').innerText = `${font} Italic (Soft Whisper)`;
+
+    ['Newsreader', 'Noto', 'Garamond'].forEach(name => {
+      const b = document.getElementById(`w${name}`);
+      if (b) b.classList.remove('active');
+    });
+
+    if (font === 'Newsreader') document.getElementById('wNewsreader').classList.add('active');
+    else if (font === 'Noto Serif') document.getElementById('wNoto').classList.add('active');
+    else if (font === 'EB Garamond') document.getElementById('wGaramond').classList.add('active');
+
+    renderSolarTermSlot();
+  }
+
+  function setSealFontSize(size) {
+    currentSealSize = size;
+    document.documentElement.style.setProperty('--seal-font-size', size);
+    document.getElementById('currentSealSizeBadge').innerText = `${size} (${size === '10.5px' ? 'Compact Seal' : size === '9.5px' ? 'Miniature' : 'Prominent'})`;
+
+    ['95', '105', '115'].forEach(s => {
+      const b = document.getElementById(`sealSize${s}`);
+      if (b) b.classList.remove('active');
+    });
+
+    const btn = document.getElementById(`sealSize${size.replace('.', '')}`);
+    if (btn) btn.classList.add('active');
+
+    renderSolarTermSlot();
+  }
+
+  function setWhisperFontSize(size) {
+    currentWhisperSize = size;
+    document.documentElement.style.setProperty('--whisper-font-size', size);
+    document.getElementById('currentWhisperSizeBadge').innerText = `${size} (${size === '10.5px' ? 'Soft & Small' : size === '9.5px' ? 'Faint' : 'Readable'})`;
+
+    ['95', '105', '115'].forEach(s => {
+      const b = document.getElementById(`wSize${s}`);
+      if (b) b.classList.remove('active');
+    });
+
+    const btn = document.getElementById(`wSize${size.replace('.', '')}`);
+    if (btn) btn.classList.add('active');
+
+    renderSolarTermSlot();
+  }
+
+  // -------------------------------------------------------------
+  // SPATIAL TELEMETRY & ZERO COLLISION AUDIT
+  // -------------------------------------------------------------
+  function auditSpatialCollisions() {
+    const capsule = document.getElementById('zenCapsuleBtn');
+    const addBtn = document.getElementById('addItemBtn');
+    const distEl = document.getElementById('metricDistanceAdd');
+    const shiftEl = document.getElementById('metricShiftAdd');
+    const badgeEl = document.getElementById('collisionBadge');
+
+    if (!capsule || !addBtn) return;
+
+    const capRect = capsule.getBoundingClientRect();
+    const addRect = addBtn.getBoundingClientRect();
+
+    const distancePx = Math.round(addRect.left - capRect.right);
+    
+    if (distEl) distEl.innerText = `${distancePx} px`;
+    if (shiftEl) shiftEl.innerText = `0.0 px (Locked at top)`;
+
+    if (badgeEl) {
+      if (distancePx >= 30) {
+        badgeEl.className = 'telemetry-badge';
+        badgeEl.innerText = `✓ ZERO OVERFLOW (${distancePx}px SAFE GAP)`;
+      } else if (distancePx > 0) {
+        badgeEl.className = 'telemetry-badge';
+        badgeEl.style.color = '#F39C12';
+        badgeEl.innerText = `⚠️ TIGHT GAP (${distancePx}px)`;
+      } else {
+        badgeEl.className = 'telemetry-badge';
+        badgeEl.style.color = '#E74C3C';
+        badgeEl.innerText = `✕ COLLISION DETECTED`;
+      }
+    }
+  }
+
+  function onSelectTerm(val) {
+    currentTermIndex = parseInt(val, 10);
+    document.getElementById('termSelect').value = currentTermIndex;
+    renderSolarTermSlot();
+  }
+
+  function populateTermSelect() {
+    const sel = document.getElementById('termSelect');
+    sel.innerHTML = SOLAR_TERMS.map((t, idx) => `
+      <option value="${idx}" ${idx === currentTermIndex ? 'selected' : ''}>
+        ${t.id}. ${t.name} (${t.hanzi}) · ${t.deg}° · ${t.season}
+      </option>
+    `).join('');
+  }
+
+  // Toggle baseline comparison screenshot overlay
+  function toggleBaselineOverlay() {
+    const overlay = document.getElementById('baselineOverlay');
+    const btn = document.getElementById('baselineToggleBtn');
+    const isActive = overlay.classList.toggle('active');
+    btn.classList.toggle('active', isActive);
+    btn.innerHTML = isActive ? '<span>✕ Close Baseline Overlay</span>' : '<span>📷 Compare with Current UI</span>';
+  }
+
+  window.addEventListener('resize', auditSpatialCollisions);
+
+  window.addEventListener('DOMContentLoaded', () => {
+    populateTermSelect();
+    renderSolarTermSlot();
+  });
+</script>
+
+</body>
+</html>

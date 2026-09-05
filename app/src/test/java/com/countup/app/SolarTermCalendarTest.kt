@@ -97,7 +97,49 @@ class SolarTermCalendarTest {
             assertTrue(term.day in 1..31)
             assertTrue(term.seasonRes != 0)
             assertTrue(term.nameRes != 0)
+            assertTrue(term.degree in 0..345)
+            assertEquals(0, term.degree % 15)
+            assertTrue(term.line1Res != 0)
+            assertTrue(term.line2Res != 0)
         }
+    }
+
+    @Test
+    fun getActiveSolarTerm_endOfHeat_hasCorrectDegreeAndLines() {
+        val date = LocalDate.of(2026, 9, 5)
+        val term = SolarTermCalendar.getActiveSolarTerm(date)
+
+        assertEquals(14, term.id)
+        assertEquals(150, term.degree)
+        assertEquals(R.string.solar_term_whisper_14_line1, term.line1Res)
+        assertEquals(R.string.solar_term_whisper_14_line2, term.line2Res)
+    }
+
+    @Test
+    fun getNextCardinalAnchor_onSeptember5_resolves18DaysToAutumnalEquinox() {
+        val date = LocalDate.of(2026, 9, 5)
+        val countdown = SolarTermCalendar.getNextCardinalAnchor(date)
+
+        assertEquals(18L, countdown.days)
+        assertEquals(R.string.solar_term_autumnal_equinox, countdown.targetNameRes)
+    }
+
+    @Test
+    fun getNextCardinalAnchor_onAutumnalEquinox_resolvesToWinterSolstice() {
+        val date = LocalDate.of(2026, 9, 23)
+        val countdown = SolarTermCalendar.getNextCardinalAnchor(date)
+
+        assertEquals(89L, countdown.days)
+        assertEquals(R.string.solar_term_winter_solstice, countdown.targetNameRes)
+    }
+
+    @Test
+    fun getNextCardinalAnchor_onDecember25_resolvesToSpringEquinoxNextYear() {
+        val date = LocalDate.of(2026, 12, 25)
+        val countdown = SolarTermCalendar.getNextCardinalAnchor(date)
+
+        assertEquals(85L, countdown.days)
+        assertEquals(R.string.solar_term_spring_equinox, countdown.targetNameRes)
     }
 }
 
