@@ -428,4 +428,61 @@ class CountUpStoreTest {
         assertTrue(store.deleteItem(item.id))
         assertTrue(store.getPendingWidgetResets().isEmpty())
     }
+
+    @Test
+    fun partialSalvageDoesNotClobberCompleteDiskBackup() {
+        val store1 = CountUpStore(testContext)
+        val item1 = store1.addItem("Habit 1", 20001L)!!
+        val item2 = store1.addItem("Habit 2", 20002L)!!
+        val item3 = store1.addItem("Habit 3", 20003L)!!
+        assertEquals(3, store1.items().size)
+
+        // Verify backup file exists and has 3 items
+        val backupFile = File(tempDir, "countup_backup.json")
+        assertTrue(backupFile.exists())
+
+        // Corrupt primary preferences such that salvage can only recover 1 item
+        val prefs = testContext.getSharedPreferences("countup_prefs", Context.MODE_PRIVATE)
+        val partiallyCorrupted = "[{\"id\":\"c1\",\"name\":\"Salvaged Habit\",\"epochDay\":19000},{\"id\":\"broken_json"
+        prefs.edit().putString("items_v1", partiallyCorrupted).commit()
+
+        // Create a new store instance; items() must prioritize the 3 intact backup items over the 1 salvaged item
+        val store2 = CountUpStore(testContext)
+        val recovered = store2.items()
+        assertEquals(3, recovered.size)
+        assertEquals(setOf(item1.id, item2.id, item3.id), recovered.map { it.id }.toSet())
+
+        // Verify backup file still contains all 3 items and was not clobbered
+        val backupContentAfter = backupFile.readText(Charsets.UTF_8)
+        assertTrue(backupContentAfter.contains("Habit 1"))
+        assertTrue(backupContentAfter.contains("Habit 2"))
+        assertTrue(backupContentAfter.contains("Habit 3"))
+    }
+
+    @Test
+    fun concurrentMultiInstanceMutationsPreserveAllItems() {
+        val threadCount = 10
+        val itemsPerThread = 5
+        val latch = java.util.concurrent.CountDownLatch(threadCount)
+        val executor = java.util.concurrent.Executors.newFixedThreadPool(threadCount)
+
+        for (t in 0 until threadCount) {
+            executor.execute {
+                try {
+                    val threadStore = CountUpStore(testContext)
+                    for (i in 0 until itemsPerThread) {
+                        threadStore.addItem("Item_${t}_$i", 20000L + t * 10 + i)
+                    }
+                } finally {
+                    latch.countDown()
+                }
+            }
+        }
+        latch.await(10, java.util.concurrent.TimeUnit.SECONDS)
+        executor.shutdown()
+
+        val finalStore = CountUpStore(testContext)
+        val finalItems = finalStore.items()
+        assertEquals(threadCount * itemsPerThread, finalItems.size)
+    }
 }

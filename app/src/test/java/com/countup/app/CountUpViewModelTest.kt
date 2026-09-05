@@ -717,4 +717,150 @@ class CountUpViewModelTest {
 
         assertEquals(fixedToday, viewModel.state.value.today)
     }
+
+    @Test
+    fun `confirmReset creates whisper and updates item to today`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = sampleItems)
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+
+        val target = sampleItems.first()
+        viewModel.onEvent(CountUpUiEvent.ConfirmReset(target.id))
+
+        viewModel.state.test {
+            val state = awaitItem()
+            val resetItem = state.items.first { it.id == target.id }
+            assertEquals(fixedToday.toEpochDay(), resetItem.epochDay)
+            assertEquals(1, resetItem.resetCount)
+
+            val whisper = state.cardWhispers[target.id]
+            assertNotNull(whisper)
+            assertEquals(5L, whisper?.releasedDays)
+            assertEquals(target.epochDay, whisper?.snapshot?.epochDay)
+        }
+    }
+
+    @Test
+    fun `undoReset restores original item snapshot and clears whisper`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = sampleItems)
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+
+        val target = sampleItems.first()
+        viewModel.onEvent(CountUpUiEvent.ConfirmReset(target.id))
+        assertTrue(viewModel.state.value.cardWhispers.containsKey(target.id))
+
+        viewModel.onEvent(CountUpUiEvent.UndoReset(target.id))
+
+        viewModel.state.test {
+            val state = awaitItem()
+            val restoredItem = state.items.first { it.id == target.id }
+            assertEquals(target.epochDay, restoredItem.epochDay)
+            assertEquals(target.resetCount, restoredItem.resetCount)
+            assertFalse(state.cardWhispers.containsKey(target.id))
+        }
+    }
+
+    @Test
+    fun `undoReset does not clobber newer manual edit when item date changed`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = sampleItems)
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+
+        val target = sampleItems.first()
+        viewModel.onEvent(CountUpUiEvent.ConfirmReset(target.id))
+
+        // Simulate user subsequently manually editing the item's date
+        val manualDate = fixedToday.minusDays(100).toEpochDay()
+        repo.updateItem(
+            id = target.id,
+            name = target.name,
+            epochDay = manualDate,
+            comment = target.comment,
+            icon = target.icon,
+            cardColor = target.cardColor,
+        )
+
+        // Attempt stale undo
+        viewModel.onEvent(CountUpUiEvent.UndoReset(target.id))
+
+        viewModel.state.test {
+            val state = awaitItem()
+            // Verify the manual edit was preserved, not overwritten by stale undo snapshot
+            val itemInRepo = repo.getItems().first { it.id == target.id }
+            assertEquals(manualDate, itemInRepo.epochDay)
+            // Verify whisper was cleared
+            assertFalse(state.cardWhispers.containsKey(target.id))
+        }
+    }
+
+    @Test
+    fun `restoreWidgetReset restores snapshot and removes pending widget reset record`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = sampleItems)
+        val target = sampleItems.first()
+        val record = WidgetResetRecord(
+            itemId = target.id,
+            itemName = target.name,
+            snapshot = target.toResetSnapshot(),
+            releasedDays = 5L,
+            timestampMillis = 1000L,
+        )
+        repo.recordWidgetReset(record)
+        repo.resetTo(target.id, fixedToday.toEpochDay())
+
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+
+        assertEquals(1, viewModel.state.value.pendingWidgetResets.size)
+
+        viewModel.onEvent(CountUpUiEvent.RestoreWidgetReset(record))
+
+        viewModel.state.test {
+            val state = awaitItem()
+            assertEquals(0, state.pendingWidgetResets.size)
+            val restored = state.items.first { it.id == target.id }
+            assertEquals(target.epochDay, restored.epochDay)
+        }
+    }
+
+    @Test
+    fun `dismissWidgetReset removes pending record from repository and state`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = sampleItems)
+        val target = sampleItems.first()
+        val record = WidgetResetRecord(
+            itemId = target.id,
+            itemName = target.name,
+            snapshot = target.toResetSnapshot(),
+            releasedDays = 5L,
+            timestampMillis = 1000L,
+        )
+        repo.recordWidgetReset(record)
+
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+
+        assertEquals(1, viewModel.state.value.pendingWidgetResets.size)
+
+        viewModel.onEvent(CountUpUiEvent.DismissWidgetReset(record.id))
+
+        viewModel.state.test {
+            val state = awaitItem()
+            assertEquals(0, state.pendingWidgetResets.size)
+        }
+    }
 }

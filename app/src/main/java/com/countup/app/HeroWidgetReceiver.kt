@@ -32,6 +32,15 @@ class HeroWidgetReceiver : AppWidgetProvider() {
         if (intent.action == ACTION_CYCLE_HERO_DISPLAY_MODE) {
             val appWidgetId = intent.getIntExtra(EXTRA_APP_WIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
             if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                val appWidgetManager = AppWidgetManager.getInstance(context)
+                val info = try {
+                    appWidgetManager.getAppWidgetInfo(appWidgetId)
+                } catch (_: Exception) {
+                    null
+                }
+                if (info == null || info.provider.packageName != context.packageName) {
+                    return
+                }
                 val store = CountUpStore(context)
                 val boundItemId = store.getHeroWidgetBinding(appWidgetId)
                 val items = store.items()

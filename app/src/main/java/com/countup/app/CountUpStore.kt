@@ -28,12 +28,9 @@ class CountUpStore(context: Context) {
     private val backupFile: File = File(filesDir, BACKUP_FILE_NAME)
     private val backupTempFile: File = File(filesDir, "$BACKUP_FILE_NAME.tmp")
 
-    /** Serializes read-modify-write mutations so concurrent writers cannot lose updates. */
-    private val lock = Any()
-
     /** Current items, never null; guarantees zero data loss via multi-tier fallback. */
     fun items(): List<CountUpItem> {
-        return synchronized(lock) {
+        return synchronized(globalStoreLock) {
             // Tier 1: Primary SharedPreferences read
             val raw = try {
                 prefs.getString(KEY_ITEMS, null)
@@ -46,12 +43,34 @@ class CountUpStore(context: Context) {
                     ensureBackupInSync(raw)
                     return@synchronized decoded
                 }
-                // Corrupted raw: attempt salvage and quarantine
+
+                // Corrupted raw detected. Before persisting partial salvaged data,
+                // inspect the secondary disk backup snapshot to prevent partial data from
+                // superseding a more complete backup.
                 val salvaged = salvageItems(raw)
-                if (salvaged.isNotEmpty()) {
-                    quarantineRawPayload(raw)
+                val backupRaw = readBackup()
+                val backupDecoded = if (!backupRaw.isNullOrBlank()) decodeItems(backupRaw) else null
+                val backupCount = backupDecoded?.size ?: 0
+
+                quarantineRawPayload(raw)
+
+                if (backupDecoded != null && backupCount >= salvaged.size && backupCount > 0) {
+                    // Backup has equal or more items than salvage: self-heal from backup snapshot
+                    prefs.edit()
+                        .putString(KEY_ITEMS, backupRaw)
+                        .putBoolean(KEY_MIGRATED, true)
+                        .commit()
+                    return@synchronized backupDecoded
+                } else if (salvaged.isNotEmpty()) {
+                    // Salvage recovered valid items and backup had fewer or none: persist salvaged
                     persist(salvaged)
                     return@synchronized salvaged
+                } else if (backupDecoded != null && backupCount > 0) {
+                    prefs.edit()
+                        .putString(KEY_ITEMS, backupRaw)
+                        .putBoolean(KEY_MIGRATED, true)
+                        .commit()
+                    return@synchronized backupDecoded
                 }
             }
 
@@ -111,7 +130,7 @@ class CountUpStore(context: Context) {
             cardColor = cardColor.trim(),
             futureFlag = epochDay > LocalDate.now().toEpochDay(),
         )
-        return synchronized(lock) {
+        return synchronized(globalStoreLock) {
             val updated = items() + item
             if (persist(updated)) item else null
         }
@@ -132,7 +151,7 @@ class CountUpStore(context: Context) {
         cardColor: String = "",
     ): Boolean {
         val trimmed = name.trim()
-        return synchronized(lock) {
+        return synchronized(globalStoreLock) {
             val list = items().toMutableList()
             val index = list.indexOfFirst { it.id == id }
             if (index < 0) return false
@@ -152,7 +171,7 @@ class CountUpStore(context: Context) {
 
     /** Removes the item with [id]. @return false if not found or the write failed. */
     fun deleteItem(id: String): Boolean {
-        return synchronized(lock) {
+        return synchronized(globalStoreLock) {
             val list = items()
             if (list.none { it.id == id }) return false
             val deleted = persist(list.filterNot { it.id == id })
@@ -170,7 +189,7 @@ class CountUpStore(context: Context) {
      * clears. @return false if not found, already 0 accumulated days, or the write failed.
      */
     fun resetTo(id: String, epochDay: Long): Boolean {
-        return synchronized(lock) {
+        return synchronized(globalStoreLock) {
             val list = items().toMutableList()
             val index = list.indexOfFirst { it.id == id }
             if (index < 0) return false
@@ -192,7 +211,7 @@ class CountUpStore(context: Context) {
         id: String,
         snapshot: ResetSnapshot,
     ): Boolean {
-        return synchronized(lock) {
+        return synchronized(globalStoreLock) {
             val list = items().toMutableList()
             val index = list.indexOfFirst { it.id == id }
             if (index < 0) return false
@@ -208,7 +227,7 @@ class CountUpStore(context: Context) {
      * @return false if [id] was not found or the write failed.
      */
     fun setWidgetVisibility(id: String, visible: Boolean): Boolean {
-        return synchronized(lock) {
+        return synchronized(globalStoreLock) {
             val list = items().toMutableList()
             val index = list.indexOfFirst { it.id == id }
             if (index < 0) return false
@@ -353,7 +372,7 @@ class CountUpStore(context: Context) {
      * Stacks up to 3 newest widget resets.
      */
     fun recordWidgetReset(record: WidgetResetRecord): Boolean {
-        return synchronized(lock) {
+        return synchronized(globalStoreLock) {
             val current = getPendingWidgetResets().filterNot { it.id == record.id }
             val updated = (listOf(record) + current).take(MAX_PENDING_WIDGET_RESETS)
             persistWidgetResets(updated)
@@ -362,7 +381,7 @@ class CountUpStore(context: Context) {
 
     /** Retrieves all pending widget resets (stacks up to 3 newest). */
     fun getPendingWidgetResets(): List<WidgetResetRecord> {
-        return synchronized(lock) {
+        return synchronized(globalStoreLock) {
             val raw = prefs.getString(KEY_PENDING_WIDGET_RESETS, null)
             if (raw.isNullOrBlank()) return@synchronized emptyList()
             decodeWidgetResets(raw)
@@ -371,7 +390,7 @@ class CountUpStore(context: Context) {
 
     /** Dismisses a pending widget reset record after restoration or user dismissal. */
     fun dismissWidgetReset(recordId: String): Boolean {
-        return synchronized(lock) {
+        return synchronized(globalStoreLock) {
             val current = getPendingWidgetResets()
             val updated = current.filterNot { it.id == recordId }
             persistWidgetResets(updated)
@@ -447,21 +466,28 @@ class CountUpStore(context: Context) {
     private fun writeBackup(encodedJson: String) {
         try {
             if (!filesDir.exists()) filesDir.mkdirs()
+            val bytes = encodedJson.toByteArray(Charsets.UTF_8)
             java.io.FileOutputStream(backupTempFile).use { fos ->
-                fos.write(encodedJson.toByteArray(Charsets.UTF_8))
+                fos.write(bytes)
                 fos.flush()
                 fos.fd.sync()
             }
             if (backupTempFile.exists()) {
-                if (backupFile.exists()) backupFile.delete()
-                val renamed = backupTempFile.renameTo(backupFile)
-                if (!renamed) {
-                    java.io.FileOutputStream(backupFile).use { fos ->
-                        fos.write(encodedJson.toByteArray(Charsets.UTF_8))
-                        fos.flush()
-                        fos.fd.sync()
-                    }
-                    backupTempFile.delete()
+                val targetPath = backupFile.toPath()
+                val tempPath = backupTempFile.toPath()
+                try {
+                    java.nio.file.Files.move(
+                        tempPath,
+                        targetPath,
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                        java.nio.file.StandardCopyOption.ATOMIC_MOVE,
+                    )
+                } catch (_: Exception) {
+                    java.nio.file.Files.move(
+                        tempPath,
+                        targetPath,
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                    )
                 }
             }
         } catch (_: Exception) {
@@ -473,6 +499,8 @@ class CountUpStore(context: Context) {
         return try {
             if (backupFile.exists() && backupFile.isFile) {
                 backupFile.readText(Charsets.UTF_8)
+            } else if (backupTempFile.exists() && backupTempFile.isFile) {
+                backupTempFile.readText(Charsets.UTF_8)
             } else null
         } catch (_: Exception) {
             null
@@ -492,6 +520,9 @@ class CountUpStore(context: Context) {
     private fun newId(): String = UUID.randomUUID().toString()
 
     companion object {
+        /** Serializes read-modify-write mutations across all store instances in the application process. */
+        private val globalStoreLock = Any()
+
         private const val PREFS_NAME = "countup_prefs"
         private const val KEY_ITEMS = "items_v1"
         private const val KEY_ITEMS_QUARANTINE = "items_v1_quarantine"

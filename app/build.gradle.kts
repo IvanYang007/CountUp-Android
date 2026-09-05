@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -18,7 +21,14 @@ android {
     signingConfigs {
         create("release") {
             storeFile = file("../keystore/countup-release.jks")
+            val localProps = Properties().apply {
+                val propFile = rootProject.file("local.properties")
+                if (propFile.exists()) {
+                    FileInputStream(propFile).use { load(it) }
+                }
+            }
             val pass = System.getenv("COUNTUP_KEYSTORE_PASS")
+                ?: localProps.getProperty("countup.keystore.pass")
                 ?: file("../keystore/keystore-pass.txt").takeIf { it.exists() }?.readText()?.trim()
                 ?: ""
             storePassword = pass

@@ -47,7 +47,7 @@
 
         <receiver
             android:name=".CountUpWidgetReceiver"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -59,7 +59,7 @@
         <!-- Focused Hero Milestone Widget (2x1) -->
         <receiver
             android:name=".HeroWidgetReceiver"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="android.appwidget.action.APPWIDGET_DELETED" />

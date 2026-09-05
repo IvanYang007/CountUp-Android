@@ -280,6 +280,24 @@ class CountUpViewModel(
         recordId: String? = null,
         onSuccess: suspend (List<CountUpItem>) -> Unit,
     ) {
+        val currentItems = repository.getItems()
+        val currentItem = currentItems.firstOrNull { it.id == itemId }
+        if (currentItem == null) {
+            if (recordId != null) {
+                repository.dismissWidgetReset(recordId)
+                val pending = repository.getPendingWidgetResets()
+                _state.update { it.copy(pendingWidgetResets = pending) }
+            }
+            emitEffect(CountUpUiEffect.ShowSnackbar(R.string.error_save_failed))
+            return
+        }
+
+        val todayEpochDay = todayProvider().toEpochDay()
+        if (recordId == null && currentItem.epochDay != todayEpochDay) {
+            _state.update { it.copy(cardWhispers = it.cardWhispers - itemId) }
+            return
+        }
+
         if (repository.restoreReset(itemId, snapshot)) {
             val updatedItems = repository.getItems()
             onSuccess(updatedItems)
