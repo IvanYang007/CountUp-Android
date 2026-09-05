@@ -93,10 +93,10 @@ class PatinaTest {
 
     @Test
     fun `getPatinaColor hits exact milestone pigment coordinates`() {
-        val sage = getPatinaColor(0f)
-        assertEquals(PatinaPigments.Sage.red, sage.red, 0.001f)
-        assertEquals(PatinaPigments.Sage.green, sage.green, 0.001f)
-        assertEquals(PatinaPigments.Sage.blue, sage.blue, 0.001f)
+        val goldLight = getPatinaColor(0f)
+        assertEquals(PatinaPigments.GoldLight.red, goldLight.red, 0.001f)
+        assertEquals(PatinaPigments.GoldLight.green, goldLight.green, 0.001f)
+        assertEquals(PatinaPigments.GoldLight.blue, goldLight.blue, 0.001f)
 
         val sand = getPatinaColor(0.25f)
         assertEquals(PatinaPigments.Sand.red, sand.red, 0.001f)

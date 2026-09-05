@@ -408,10 +408,10 @@ internal data class WidgetCircleStyle(
  * these rich, harmonious colors to ensure visual variety across home screen cells.
  */
 internal val DEFAULT_WIDGET_PALETTE = listOf(
+    WidgetCircleStyle(circleColor = 0xFFDEB285.toInt(), textInk = 0xFF2C2416.toInt()), // Ochre Gold (沉金)
     WidgetCircleStyle(circleColor = 0xFF5E8C6D.toInt(), textInk = 0xFFFFFFFF.toInt()), // Willow Sage
     WidgetCircleStyle(circleColor = 0xFFD87A4F.toInt(), textInk = 0xFFFFFFFF.toInt()), // Warm Terracotta
-    WidgetCircleStyle(circleColor = 0xFF5A7B8C.toInt(), textInk = 0xFFFFFFFF.toInt()), // Slate Indigo
-    WidgetCircleStyle(circleColor = 0xFFDEB285.toInt(), textInk = 0xFF2C2416.toInt()), // Ochre Gold
+    WidgetCircleStyle(circleColor = 0xFF344C5C.toInt(), textInk = 0xFFFFFFFF.toInt()), // Lapis Indigo
     WidgetCircleStyle(circleColor = 0xFFC45249.toInt(), textInk = 0xFFFFFFFF.toInt()), // Japanese Vermilion
     WidgetCircleStyle(circleColor = 0xFF33523D.toInt(), textInk = 0xFFFFFFFF.toInt()), // Deep Forest
     WidgetCircleStyle(circleColor = 0xFF4D7A58.toInt(), textInk = 0xFFFFFFFF.toInt()), // Jade Green

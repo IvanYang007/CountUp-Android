@@ -8,14 +8,14 @@ import androidx.compose.ui.graphics.Color
 import kotlin.math.pow
 
 /**
- * Curated Zen pigments representing the natural aging stages of materials (Sage -> Sand -> Ochre -> Gold).
- * Directly grounded in patina_prototype.html.
+ * Curated Zen pigments representing the natural aging stages of materials (Gold -> Sand -> Ochre -> Kintsugi Gold).
+ * Directly grounded in patina_prototype.html with a luxurious "金边 / 沉金" palette.
  */
 object PatinaPigments {
-    val Sage = Color(0xFF7D9D8B) // Cool morning growth (RGB: 125, 157, 139)
-    val Sand = Color(0xFFB5A88F) // Warm paper settling (RGB: 181, 168, 143)
-    val Ochre = Color(0xFFC88D58) // Grounded ritual warmth (RGB: 200, 141, 88)
-    val Gold = Color(0xFFD6A848) // Enduring Kintsugi gold (RGB: 214, 168, 72)
+    val GoldLight = Color(0xFFDEB285) // Delicate Gold Filigree / 金边 (Ochre Gold: RGB 222, 178, 133)
+    val Sand = Color(0xFFD4B87C)      // Warm Silk Paper settling (泥金: RGB 212, 184, 124)
+    val Ochre = Color(0xFFC88D58)     // Grounded ritual warmth (赭石金: RGB 200, 141, 88)
+    val Gold = Color(0xFFD6A848)      // Enduring Kintsugi gold (沉金: RGB 214, 168, 72)
 }
 
 /**
@@ -74,12 +74,12 @@ fun lerpPatinaColor(c1: Color, c2: Color, factor: Float): Color {
 
 /**
  * Maps warmth [0.0f, 1.0f] to the piecewise continuous Zen pigment gradient:
- * Sage [0.0] -> Sand [0.25] -> Ochre [0.75] -> Gold [1.0]
+ * GoldLight [0.0] -> Sand [0.25] -> Ochre [0.75] -> Gold [1.0]
  */
 fun getPatinaColor(warmth: Float): Color {
     val w = warmth.coerceIn(0f, 1f)
     return when {
-        w < 0.25f -> androidx.compose.ui.graphics.lerp(PatinaPigments.Sage, PatinaPigments.Sand, w / 0.25f)
+        w < 0.25f -> androidx.compose.ui.graphics.lerp(PatinaPigments.GoldLight, PatinaPigments.Sand, w / 0.25f)
         w < 0.75f -> androidx.compose.ui.graphics.lerp(PatinaPigments.Sand, PatinaPigments.Ochre, (w - 0.25f) / 0.50f)
         else -> androidx.compose.ui.graphics.lerp(PatinaPigments.Ochre, PatinaPigments.Gold, (w - 0.75f) / 0.25f)
     }

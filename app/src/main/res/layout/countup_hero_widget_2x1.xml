@@ -98,6 +98,8 @@
                 android:textSize="26sp"
                 android:textStyle="bold"
                 android:includeFontPadding="false"
+                android:singleLine="true"
+                android:ellipsize="end"
                 android:textColor="#2C2416"
                 android:text="120" />
 

@@ -96,7 +96,8 @@ class CountUpContractAndFlowTest {
         assertTrue("Breakdown mode should indicate year/month/day components", breakdownMode.valueText.isNotEmpty())
 
         val weeksMode = decomposeTime(anchorDate, fixedToday, TimeDisplayMode.TOTAL_WEEKS)
-        assertTrue("Weeks mode should contain 'w' unit suffix or representation", weeksMode.valueText.contains("w") || weeksMode.valueText.isNotEmpty())
+        assertTrue("Weeks mode should contain WEEKS representation", weeksMode.valueText.contains("WEEKS"))
+        assertEquals(R.string.unit_none, weeksMode.unitLabelRes)
     }
 
     @Test
@@ -104,11 +105,12 @@ class CountUpContractAndFlowTest {
         val futureDate = fixedToday.plusDays(45)
 
         val daysMode = decomposeTime(futureDate, fixedToday, TimeDisplayMode.DAYS)
-        assertEquals(R.string.unit_until_short, daysMode.unitLabelRes)
+        assertEquals(R.string.unit_days, daysMode.unitLabelRes)
         assertEquals("45", daysMode.valueText)
 
         val weeksMode = decomposeTime(futureDate, fixedToday, TimeDisplayMode.TOTAL_WEEKS)
-        assertTrue(weeksMode.valueText.isNotEmpty())
+        assertEquals(R.string.unit_none, weeksMode.unitLabelRes)
+        assertTrue(weeksMode.valueText.contains("WEEKS"))
     }
 
     @Test
@@ -134,5 +136,28 @@ class CountUpContractAndFlowTest {
         assertEquals(PatinaPhase.KINTSUGI, patina.phase)
         assertEquals(1.0f, patina.warmth, 0.001f)
         assertEquals(ZenInkBlack, patina.badgeTextColor)
+    }
+
+    @Test
+    fun `time toggle format Option A allows days and elapsed for small counts but skips weeks`() {
+        // Counts under 7 days (< 7L) toggle between DAYS and ELAPSED_BREAKDOWN, skipping TOTAL_WEEKS
+        for (day in 0L..6L) {
+            val count = day
+            val mode1 = TimeDisplayMode.DAYS
+            val mode2 = mode1.next(count)
+            assertEquals(TimeDisplayMode.ELAPSED_BREAKDOWN, mode2)
+            val mode3 = mode2.next(count)
+            assertEquals("Counts under 7 days must skip TOTAL_WEEKS and return to DAYS", TimeDisplayMode.DAYS, mode3)
+        }
+
+        // Counts 7 days or above (>= 7L) cycle across all 3 modes
+        val count = 10L
+        val m1 = TimeDisplayMode.DAYS
+        val m2 = m1.next(count)
+        assertEquals(TimeDisplayMode.ELAPSED_BREAKDOWN, m2)
+        val m3 = m2.next(count)
+        assertEquals(TimeDisplayMode.TOTAL_WEEKS, m3)
+        val m4 = m3.next(count)
+        assertEquals(TimeDisplayMode.DAYS, m4)
     }
 }

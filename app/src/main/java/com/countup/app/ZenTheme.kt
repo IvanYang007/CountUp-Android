@@ -2,6 +2,7 @@ package com.countup.app
 
 import android.content.Context
 import android.provider.Settings
+
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -58,16 +59,6 @@ val ZenError = Color(0xFFA64942)
 val ZenWhite = Color(0xFFFFFFFF)
 val ZenArrivedGreen = Color(0xFF66BB6A)
 val ZenArrivedRed = Color(0xFFB71C1C)
-
-// Deterministic item accent chips for card tags
-val ZenDayAccents = listOf(
-    Color(0xFFD97642),
-    Color(0xFFD4A574),
-    Color(0xFF4A7C59),
-    Color(0xFF7D9BA8),
-    Color(0xFFE57A77),
-    Color(0xFF8B7355),
-)
 
 fun lightZenColors() = ZenColorScheme(
     paperBackground = ZenPaperBackground,

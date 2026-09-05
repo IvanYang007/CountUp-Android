@@ -77,7 +77,7 @@ class ItemIconsTest {
         assertEquals(KeywordStyleMatch("directions_car", "ink_gold"), oil)
 
         val reading = matchKeywordStyle("Read 30 pages a day")
-        assertEquals(KeywordStyleMatch("book", "paper_indigo"), reading)
+        assertEquals(KeywordStyleMatch("book", ""), reading)
 
         val gym = matchKeywordStyle("Morning Gym Routine")
         assertEquals(KeywordStyleMatch("fitness_center", "ink_crimson"), gym)
@@ -90,7 +90,7 @@ class ItemIconsTest {
 
         // New concrete habit & life keywords (English)
         val dental = matchKeywordStyle("Visit Dentist")
-        assertEquals(KeywordStyleMatch("tooth", "paper_indigo"), dental)
+        assertEquals(KeywordStyleMatch("tooth", "paper_sage"), dental)
 
         val pill = matchKeywordStyle("Daily Vitamin D")
         assertEquals(KeywordStyleMatch("pill", "paper_terracotta"), pill)
@@ -102,7 +102,7 @@ class ItemIconsTest {
         assertEquals(KeywordStyleMatch("bicycle", "paper_terracotta"), bike)
 
         val laundry = matchKeywordStyle("Do Laundry")
-        assertEquals(KeywordStyleMatch("washing_machine", "paper_indigo"), laundry)
+        assertEquals(KeywordStyleMatch("washing_machine", "paper_sage"), laundry)
 
         val mountain = matchKeywordStyle("Mountain hiking trip")
         assertEquals(KeywordStyleMatch("mountains", "sage_forest"), mountain)
@@ -121,7 +121,7 @@ class ItemIconsTest {
         assertEquals(KeywordStyleMatch("smoke_free", "paper_terracotta"), quitSmokingZh)
 
         val toothZh = matchKeywordStyle("早起刷牙")
-        assertEquals(KeywordStyleMatch("tooth", "paper_indigo"), toothZh)
+        assertEquals(KeywordStyleMatch("tooth", "paper_sage"), toothZh)
 
         val guitarZh = matchKeywordStyle("练琴吉他")
         assertEquals(KeywordStyleMatch("guitar", "paper_terracotta"), guitarZh)
@@ -130,7 +130,7 @@ class ItemIconsTest {
         assertEquals(KeywordStyleMatch("bicycle", "paper_terracotta"), bikeZh)
 
         val laundryZh = matchKeywordStyle("洗衣服")
-        assertEquals(KeywordStyleMatch("washing_machine", "paper_indigo"), laundryZh)
+        assertEquals(KeywordStyleMatch("washing_machine", "paper_sage"), laundryZh)
 
         val mountainZh = matchKeywordStyle("周末爬山")
         assertEquals(KeywordStyleMatch("mountains", "sage_forest"), mountainZh)

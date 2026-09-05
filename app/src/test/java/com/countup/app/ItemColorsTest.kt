@@ -10,8 +10,8 @@ import org.junit.Test
 class ItemColorsTest {
 
     @Test
-    fun `all 8 curated presets have valid cardBg, badgeBg, and nameRes`() {
-        assertEquals(8, CARD_COLOR_PRESETS.size)
+    fun `all 9 curated presets have valid cardBg, badgeBg, and nameRes`() {
+        assertEquals(9, CARD_COLOR_PRESETS.size)
         CARD_COLOR_PRESETS.forEach { preset ->
             assertNotNull(preset.id)
             assertTrue(preset.nameRes > 0)
@@ -24,18 +24,18 @@ class ItemColorsTest {
     }
 
     @Test
-    fun `empty id resolves to default Paper and Sage style`() {
+    fun `empty id resolves to default Paper and Gold style`() {
         val style = resolveCardStyle("")
         assertEquals(Color(0xFFFFFFFF), style.cardBg)
-        assertEquals(Color(0xFF5E8C6D), style.badgeBg)
-        assertEquals(Color.White, style.badgeTint)
+        assertEquals(Color(0xFFDEB285), style.badgeBg)
+        assertEquals(ZenInkBlack, style.badgeTint)
     }
 
     @Test
-    fun `null id resolves to default Paper and Sage style`() {
+    fun `null id resolves to default Paper and Gold style`() {
         val style = resolveCardStyle(null)
         assertEquals(Color(0xFFFFFFFF), style.cardBg)
-        assertEquals(Color(0xFF5E8C6D), style.badgeBg)
+        assertEquals(Color(0xFFDEB285), style.badgeBg)
     }
 
     @Test
@@ -78,7 +78,7 @@ class ItemColorsTest {
     @Test
     fun `cardBadgeColor resolves badge color from preset`() {
         val defaultBadge = cardBadgeColor("")
-        assertEquals(Color(0xFF5E8C6D), defaultBadge)
+        assertEquals(Color(0xFFDEB285), defaultBadge)
 
         val inkGoldBadge = cardBadgeColor("ink_gold")
         assertEquals(Color(0xFFDEB285), inkGoldBadge)
@@ -99,7 +99,7 @@ class ItemColorsTest {
     @Test
     fun `default white card presets contain only light paper background styles`() {
         assertEquals(3, DEFAULT_WHITE_CARD_COLOR_IDS.size)
-        assertEquals(listOf("", "paper_terracotta", "paper_indigo"), DEFAULT_WHITE_CARD_COLOR_IDS)
+        assertEquals(listOf("", "paper_terracotta", "paper_sage"), DEFAULT_WHITE_CARD_COLOR_IDS)
 
         DEFAULT_WHITE_CARD_COLOR_IDS.forEach { id ->
             val style = resolveCardStyle(id)

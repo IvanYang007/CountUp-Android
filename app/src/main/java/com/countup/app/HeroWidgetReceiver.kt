@@ -11,6 +11,7 @@ import android.view.View
 import android.widget.RemoteViews
 import androidx.compose.ui.graphics.toArgb
 import java.time.LocalDate
+import kotlin.math.abs
 
 /**
  * Focused Hero Milestone Widget provider (2x1 Poetic Card).
@@ -32,8 +33,14 @@ class HeroWidgetReceiver : AppWidgetProvider() {
             val appWidgetId = intent.getIntExtra(EXTRA_APP_WIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
             if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
                 val store = CountUpStore(context)
+                val boundItemId = store.getHeroWidgetBinding(appWidgetId)
+                val items = store.items()
+                val targetItem = items.firstOrNull { it.id == boundItemId }
+                    ?: items.firstOrNull { it.showInWidget }
+                    ?: items.firstOrNull()
+                val count = targetItem?.let { daysSince(LocalDate.ofEpochDay(it.epochDay), LocalDate.now()) } ?: 0L
                 val currentMode = store.getHeroWidgetDisplayMode(appWidgetId)
-                val nextMode = currentMode.next()
+                val nextMode = currentMode.next(count)
                 store.setHeroWidgetDisplayMode(appWidgetId, nextMode)
                 pushHeroWidgetUpdate(context, appWidgetId)
             }
@@ -199,7 +206,9 @@ private fun buildHero2x1RemoteViews(
     } else {
         // Normal active state with tap-to-decompose ephemeris odometer
         val store = CountUpStore(context)
-        val displayMode = store.getHeroWidgetDisplayMode(appWidgetId)
+        val canShowWeeks = abs(count) >= 7L
+        val rawMode = store.getHeroWidgetDisplayMode(appWidgetId)
+        val displayMode = if (!canShowWeeks && rawMode == TimeDisplayMode.TOTAL_WEEKS) TimeDisplayMode.DAYS else rawMode
         val decomposed = decomposeTime(LocalDate.ofEpochDay(item.epochDay), today, displayMode)
 
         views.setTextViewText(R.id.hero_name, item.name.uppercase())
@@ -218,14 +227,16 @@ private fun buildHero2x1RemoteViews(
 
         val (countTextSizeSp, unitTextSizeSp) = when (displayMode) {
             TimeDisplayMode.DAYS -> 24f to 10f
-            TimeDisplayMode.ELAPSED_BREAKDOWN -> 18f to 9.5f
-            TimeDisplayMode.TOTAL_WEEKS -> 20f to 9.5f
+            TimeDisplayMode.ELAPSED_BREAKDOWN -> 15f to 9.5f
+            TimeDisplayMode.TOTAL_WEEKS -> 16f to 9.5f
         }
         views.setTextViewTextSize(R.id.hero_count, TypedValue.COMPLEX_UNIT_SP, countTextSizeSp)
 
-        views.setTextViewText(R.id.hero_unit, context.getString(decomposed.unitLabelRes))
+        val unitText = if (decomposed.unitLabelRes != 0) context.getString(decomposed.unitLabelRes) else ""
+        views.setTextViewText(R.id.hero_unit, unitText)
         views.setTextColor(R.id.hero_unit, mutedInkInt)
         views.setTextViewTextSize(R.id.hero_unit, TypedValue.COMPLEX_UNIT_SP, unitTextSizeSp)
+        views.setViewVisibility(R.id.hero_unit, if (unitText.isEmpty()) View.GONE else View.VISIBLE)
 
         // Badge circle and icon
         views.setInt(R.id.hero_badge_circle, "setColorFilter", circleStyle.circleColor)
@@ -263,7 +274,7 @@ private fun buildHero2x1RemoteViews(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
-        // Tap count container to cycle display mode (Days -> Elapsed Y/M/D -> Weeks)
+        // Tap count container to cycle display mode (skips weeks if < 7 days)
         views.setOnClickPendingIntent(R.id.hero_count_container, cyclePendingIntent)
 
         // Tap badge circle to arm reset

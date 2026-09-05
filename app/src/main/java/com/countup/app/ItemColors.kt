@@ -23,17 +23,17 @@ data class CardColorPreset(
     val isDark: Boolean = false,
 )
 
-/** The default card preset ID (Classic Paper White with Willow Sage icon badge). */
+/** The default card preset ID (Classic Paper White with Ochre Gold / 沉金 badge). */
 const val DEFAULT_CARD_COLOR: String = ""
 
 /**
- * The 3 curated Paper White card presets (Sage, Terracotta, Indigo badges)
+ * The 3 curated Paper White card presets (Gold, Terracotta, Sage badges)
  * used for initial random selection when creating a new item.
  */
 val DEFAULT_WHITE_CARD_COLOR_IDS: List<String> = listOf(
     DEFAULT_CARD_COLOR,
     "paper_terracotta",
-    "paper_indigo",
+    "paper_sage",
 )
 
 /**
@@ -42,19 +42,19 @@ val DEFAULT_WHITE_CARD_COLOR_IDS: List<String> = listOf(
 fun randomWhiteCardColor(): String = DEFAULT_WHITE_CARD_COLOR_IDS.random()
 
 /**
- * 8 Curated Zen combinations:
- * - 3 Paper White variations (Sage, Terracotta, Indigo badges)
+ * 9 Curated Zen combinations:
+ * - 4 Paper White variations (Gold, Terracotta, Sage, Lapis Indigo badges)
  * - 2 Willow Sage variations (Forest, Ochre badges)
  * - 3 Sumi Ink variations (Gold, Jade, Crimson badges)
  */
 val CARD_COLOR_PRESETS: List<CardColorPreset> = listOf(
-    // 1. Paper White + Sage badge (Default)
+    // 1. Paper White + Ochre Gold badge (Default - 宣白 · 沉金 / 金边)
     CardColorPreset(
         id = "",
-        nameRes = R.string.color_paper_sage,
+        nameRes = R.string.color_paper_gold,
         cardBg = Color(0xFFFFFFFF),
-        badgeBg = Color(0xFF5E8C6D),
-        badgeTint = Color.White,
+        badgeBg = Color(0xFFDEB285),
+        badgeTint = ZenInkBlack,
         primaryInk = ZenInkBlack,
         mutedInk = ZenInkMuted,
         isDark = false,
@@ -70,18 +70,29 @@ val CARD_COLOR_PRESETS: List<CardColorPreset> = listOf(
         mutedInk = ZenInkMuted,
         isDark = false,
     ),
-    // 3. Paper White + Slate Indigo badge
+    // 3. Paper White + Willow Sage badge
     CardColorPreset(
-        id = "paper_indigo",
-        nameRes = R.string.color_paper_indigo,
+        id = "paper_sage",
+        nameRes = R.string.color_paper_sage,
         cardBg = Color(0xFFFFFFFF),
-        badgeBg = Color(0xFF5A7B8C),
+        badgeBg = Color(0xFF5E8C6D),
         badgeTint = Color.White,
         primaryInk = ZenInkBlack,
         mutedInk = ZenInkMuted,
         isDark = false,
     ),
-    // 4. Willow Sage + Deep Forest badge
+    // 4. Paper White + Lapis Indigo badge
+    CardColorPreset(
+        id = "paper_indigo",
+        nameRes = R.string.color_paper_indigo,
+        cardBg = Color(0xFFFFFFFF),
+        badgeBg = Color(0xFF344C5C),
+        badgeTint = Color.White,
+        primaryInk = ZenInkBlack,
+        mutedInk = ZenInkMuted,
+        isDark = false,
+    ),
+    // 5. Willow Sage + Deep Forest badge
     CardColorPreset(
         id = "sage_forest",
         nameRes = R.string.color_sage_forest,
@@ -92,7 +103,7 @@ val CARD_COLOR_PRESETS: List<CardColorPreset> = listOf(
         mutedInk = Color(0xFFD6E4DB),
         isDark = true,
     ),
-    // 5. Willow Sage + Ochre Gold badge
+    // 6. Willow Sage + Ochre Gold badge
     CardColorPreset(
         id = "sage_ochre",
         nameRes = R.string.color_sage_ochre,
@@ -103,7 +114,7 @@ val CARD_COLOR_PRESETS: List<CardColorPreset> = listOf(
         mutedInk = Color(0xFFD6E4DB),
         isDark = true,
     ),
-    // 6. Sumi Ink + Ochre Gold badge
+    // 7. Sumi Ink + Ochre Gold badge
     CardColorPreset(
         id = "ink_gold",
         nameRes = R.string.color_ink_gold,
@@ -114,7 +125,7 @@ val CARD_COLOR_PRESETS: List<CardColorPreset> = listOf(
         mutedInk = Color(0xFFD6C8B7),
         isDark = true,
     ),
-    // 7. Sumi Ink + Jade Green badge
+    // 8. Sumi Ink + Jade Green badge
     CardColorPreset(
         id = "ink_jade",
         nameRes = R.string.color_ink_jade,
@@ -125,7 +136,7 @@ val CARD_COLOR_PRESETS: List<CardColorPreset> = listOf(
         mutedInk = Color(0xFFD6C8B7),
         isDark = true,
     ),
-    // 8. Sumi Ink + Japanese Vermilion badge
+    // 9. Sumi Ink + Japanese Vermilion badge
     CardColorPreset(
         id = "ink_crimson",
         nameRes = R.string.color_ink_crimson,

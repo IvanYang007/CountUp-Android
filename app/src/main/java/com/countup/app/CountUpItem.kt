@@ -5,6 +5,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.time.LocalDate
 import java.util.UUID
+import kotlin.math.abs
 
 /**
  * A single count-up item: a human-readable [name] anchored to a calendar day
@@ -77,7 +78,7 @@ data class CountUpItem(
      */
     fun resetTo(newEpochDay: Long): CountUpItem {
         if (!isResettableOn(newEpochDay)) return this
-        val cycleDays = kotlin.math.abs(newEpochDay - epochDay)
+        val cycleDays = abs(newEpochDay - epochDay)
         return copy(
             epochDay = newEpochDay,
             futureFlag = false,
