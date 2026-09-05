@@ -161,5 +161,37 @@ class DaysSinceTest {
         assertEquals("10", result.valueText)
         assertEquals(R.string.unit_days, result.unitLabelRes)
     }
+
+    @Test
+    fun `decomposeTime formats Simplified Chinese correctly`() {
+        val today = LocalDate.of(2026, 7, 21)
+        val past = LocalDate.of(2025, 4, 11)
+        val localeZh = java.util.Locale.SIMPLIFIED_CHINESE
+
+        val breakdown = decomposeTime(past, today, TimeDisplayMode.ELAPSED_BREAKDOWN, localeZh)
+        assertEquals("1 年 3 个月 10 天", breakdown.valueText)
+
+        val weeks = decomposeTime(today.minusDays(31), today, TimeDisplayMode.TOTAL_WEEKS, localeZh)
+        assertEquals("4 周 3 天", weeks.valueText)
+
+        val zero = decomposeTime(today, today, TimeDisplayMode.ELAPSED_BREAKDOWN, localeZh)
+        assertEquals("0 天", zero.valueText)
+    }
+
+    @Test
+    fun `decomposeTime formats Traditional Chinese correctly`() {
+        val today = LocalDate.of(2026, 7, 21)
+        val past = LocalDate.of(2025, 4, 11)
+        val localeTw = java.util.Locale.TRADITIONAL_CHINESE
+
+        val breakdown = decomposeTime(past, today, TimeDisplayMode.ELAPSED_BREAKDOWN, localeTw)
+        assertEquals("1 年 3 個月 10 天", breakdown.valueText)
+
+        val weeks = decomposeTime(today.minusDays(31), today, TimeDisplayMode.TOTAL_WEEKS, localeTw)
+        assertEquals("4 週 3 天", weeks.valueText)
+
+        val zero = decomposeTime(today, today, TimeDisplayMode.ELAPSED_BREAKDOWN, localeTw)
+        assertEquals("0 天", zero.valueText)
+    }
 }
 

@@ -1,0 +1,304 @@
+<resources>
+    <string name="app_name">CountUp</string>
+
+    <!-- App screen -->
+    <string name="cancel">取消</string>
+
+    <!-- Date picker dialog -->
+    <string name="pick_date_title">选择日期</string>
+    <string name="pick_date_confirm">确认日期</string>
+
+    <!-- Errors -->
+    <string name="error_save_failed">保存失败，请重试。</string>
+
+    <!-- Multi-item list -->
+
+    <!-- 24 节气与四季 -->
+    <string name="season_spring">春</string>
+    <string name="season_summer">夏</string>
+    <string name="season_autumn">秋</string>
+    <string name="season_winter">冬</string>
+
+    <string name="solar_term_beginning_of_spring">立春</string>
+    <string name="solar_term_rain_water">雨水</string>
+    <string name="solar_term_awakening_of_insects">惊蛰</string>
+    <string name="solar_term_spring_equinox">春分</string>
+    <string name="solar_term_pure_brightness">清明</string>
+    <string name="solar_term_grain_rain">谷雨</string>
+    <string name="solar_term_beginning_of_summer">立夏</string>
+    <string name="solar_term_grain_buds">小满</string>
+    <string name="solar_term_grain_in_ear">芒种</string>
+    <string name="solar_term_summer_solstice">夏至</string>
+    <string name="solar_term_minor_heat">小暑</string>
+    <string name="solar_term_major_heat">大暑</string>
+    <string name="solar_term_beginning_of_autumn">立秋</string>
+    <string name="solar_term_end_of_heat">处暑</string>
+    <string name="solar_term_white_dew">白露</string>
+    <string name="solar_term_autumnal_equinox">秋分</string>
+    <string name="solar_term_cold_dew">寒露</string>
+    <string name="solar_term_frosts_descent">霜降</string>
+    <string name="solar_term_beginning_of_winter">立冬</string>
+    <string name="solar_term_minor_snow">小雪</string>
+    <string name="solar_term_major_snow">大雪</string>
+    <string name="solar_term_winter_solstice">冬至</string>
+    <string name="solar_term_minor_cold">小寒</string>
+    <string name="solar_term_major_cold">大寒</string>
+    <string name="new_item">新建记录</string>
+    <string name="empty_heading">暂无记录</string>
+    <string name="empty_body">添加你的第一条天数记录，开启专注生活。</string>
+    <string name="since_label">自 %1$s 起</string>
+    <string name="until_label">距离 %1$s 还有</string>
+    <string name="delete">删除</string>
+    <string name="reset">重置</string>
+    <string name="widget_hide">在微件中隐藏</string>
+    <string name="widget_show">在微件中显示</string>
+
+    <!-- Item editor -->
+    <string name="add_title">新建事项</string>
+    <string name="edit_title">编辑事项</string>
+    <string name="item_name">名称</string>
+    <string name="name_placeholder">例如：上次理发</string>
+    <string name="item_comment">备注</string>
+    <string name="comment_placeholder">选填备注（最多2行）</string>
+    <string name="anchor_date">起始日期</string>
+    <string name="cd_expand_customization">展开样式与图标自定义选项</string>
+    <string name="cd_collapse_customization">收起样式与图标自定义选项</string>
+    <string name="save">保存</string>
+
+    <!-- Delete confirm -->
+    <string name="delete_title">删除记录？</string>
+    <string name="delete_message">确定要删除“%1$s”吗？此操作无法撤销。</string>
+
+    <!-- Widget: Overview Grid -->
+    <string name="widget_label">全部计数（网格概览）</string>
+    <string name="widget_description">以网格概览显示记录以来的天数</string>
+    <string name="widget_empty">在应用中添加记录后即可在此查看。</string>
+    <string name="widget_reset_prompt">再次点击重置</string>
+    <string name="widget_reset_toast">已将“%1$s”重置为今天</string>
+    <string name="toast_hidden_from_widget">已在微件中隐藏“%1$s”</string>
+    <string name="toast_shown_in_widget">已在微件中显示“%1$s”</string>
+
+    <!-- Widget: Hero Milestone (2x1) -->
+    <string name="hero_widget_label">焦点里程碑（单项纪念）</string>
+    <string name="hero_widget_description">专注展示单个核心目标与达成里程碑</string>
+    <string name="hero_widget_empty">点击选择计数器</string>
+    <string name="hero_widget_configure_title">选择焦点计数器</string>
+    <string name="hero_widget_configure_subtitle">选择在此微件上重点展示的目标</string>
+    <string name="hero_widget_reset_prompt">重置为今天？</string>
+    <string name="hero_widget_reset_sublabel">再次点击重置计数</string>
+
+    <!-- Background Themes (30大古典诗意与水墨意境) -->
+    <string name="bg_auto_daily">每日意境</string>
+    <string name="bg_mountain">远山含黛</string>
+    <string name="bg_sand_dunes">平沙落雁</string>
+    <string name="bg_sea_horizon">烟波浩渺</string>
+    <string name="bg_solitary_isle">太湖石秀</string>
+    <string name="bg_willow_leaves">柳浪闻莺</string>
+    <string name="bg_zen_bamboo">幽竹虚心</string>
+    <string name="bg_dream_boat">满船清梦压星河</string>
+    <string name="bg_clear_spring">清泉石上流</string>
+    <string name="bg_desert_sunset">长河落日圆</string>
+    <string name="bg_egrets_ascending">一行白鹭上青天</string>
+    <string name="bg_plum_shadow">疏影横斜水清浅</string>
+    <string name="bg_ancient_road">古道西风瘦马</string>
+    <string name="bg_spring_rain">斜风细雨不须归</string>
+    <string name="bg_lotus_dragonfly">小荷才露尖尖角，早有蜻蜓立上头</string>
+    <string name="bg_crisp_spring_rain">天街小雨润如酥</string>
+    <string name="bg_solitary_sail_river">孤帆远影碧空尽，唯见长江天际流</string>
+    <string name="bg_ocean_moon_tide">海上明月共潮生</string>
+    <string name="bg_wild_sky_river_moon">野旷天低树，江清月近人</string>
+    <string name="bg_green_hills_sail">两岸青山相对出，孤帆一片日边来</string>
+    <string name="bg_stars_fall_river_flow">星垂平野阔，月涌大江流</string>
+    <string name="bg_clouds_cottage">白云生处有人家</string>
+    <string name="bg_wine_spring_moon">酒浓春入梦，窗破月寻人</string>
+    <string name="bg_apricot_rain">红杏开时，一霎清明雨</string>
+    <string name="bg_deep_forest_deer">树深时见鹿</string>
+    <string name="bg_pear_blossom_willow">梨花淡白柳深青，柳絮飞时花满城</string>
+    <string name="bg_spring_water_sleep">半篙春水一蓑烟，抱月怀中枕斗眠</string>
+    <string name="bg_reading_lamp_moon">吹灭读书灯，一身都是月</string>
+    <string name="bg_moon_in_hand_wind">揖让月在手，动摇风满怀</string>
+    <string name="bg_moss_courtyard_plantain">绿芜墙绕青苔院，中庭日淡芭蕉卷</string>
+    <string name="bg_fish_jumping_duckweed">小鱼跳出绿萍中</string>
+    <string name="bg_switched_toast">背景切换为：%1$s</string>
+
+    <!-- Sort & Search -->
+    <string name="sort_prefix">排序：</string>
+    <string name="sort_days_desc">天数 ↓</string>
+    <string name="sort_date_desc">日期 ↓</string>
+    <string name="sort_name_asc">名称 A–Z</string>
+    <string name="cd_sort_days_desc">按已过天数排序</string>
+    <string name="cd_sort_date_desc">按最新日期排序</string>
+    <string name="cd_sort_name_asc">按名称首字母排序</string>
+    <string name="items_count">%1$d 项记录</string>
+    <string name="items_count_one">1 项记录</string>
+    <string name="search_placeholder">搜索记录或备注…</string>
+    <string name="search_no_matches">未找到匹配的记录</string>
+    <string name="search_no_matches_sub">请尝试其他关键词或清除搜索。</string>
+    <string name="search_clear">清除搜索</string>
+    <string name="sort_section_title">排序方式</string>
+    <string name="cd_sort_search_pill">排序与搜索选项。当前按 %1$s 排序。点击进行搜索或更改排序。</string>
+
+    <!-- Card & Badge Style Presets (White, Green, Blackish) -->
+    <string name="card_color_label">卡片样式</string>
+    <string name="color_paper_gold">宣白 · 沉金</string>
+    <string name="color_paper_sage">宣白 · 柳叶</string>
+    <string name="color_paper_terracotta">宣白 · 陶土</string>
+    <string name="color_paper_indigo">宣白 · 黛蓝</string>
+    <string name="color_sage_forest">柳绿 · 幽森</string>
+    <string name="color_sage_ochre">柳绿 · 赭石</string>
+    <string name="color_ink_gold">墨黑 · 沉金</string>
+    <string name="color_ink_jade">墨黑 · 碧翠</string>
+    <string name="color_ink_crimson">墨黑 · 辰砂</string>
+    <string name="cd_color_default">默认（宣白 · 沉金）卡片样式</string>
+    <string name="cd_color_option">%1$s 卡片样式</string>
+
+    <!-- Icon Categories & Selection -->
+    <string name="icon_label">图标</string>
+    <string name="category_all">全部</string>
+    <string name="category_health">健康</string>
+    <string name="category_habits">习惯</string>
+    <string name="category_work">工作</string>
+    <string name="category_milestones">生活</string>
+    <string name="category_social">社交</string>
+    <string name="category_nature">自然</string>
+
+    <!-- Human-Friendly TalkBack Icon Descriptions -->
+    <string name="cd_icon_spa">莲花（冥想）</string>
+    <string name="cd_icon_self_improvement">太极阴阳（专注）</string>
+    <string name="cd_icon_fitness_center">哑铃（健身）</string>
+    <string name="cd_icon_directions_walk">足迹（步行）</string>
+    <string name="cd_icon_water_drop">水滴（饮水）</string>
+    <string name="cd_icon_bed">睡床（睡眠）</string>
+    <string name="cd_icon_local_hospital">急救箱（健康医疗）</string>
+    <string name="cd_icon_content_cut">剪刀（理发）</string>
+    <string name="cd_icon_smoke_free">戒烟（自律习惯）</string>
+    <string name="cd_icon_local_cafe">咖啡杯（咖啡）</string>
+    <string name="cd_icon_local_bar">酒杯（饮品）</string>
+    <string name="cd_icon_restaurant">刀叉（用餐）</string>
+    <string name="cd_icon_book">书本（阅读）</string>
+    <string name="cd_icon_school">学位帽（学业进修）</string>
+    <string name="cd_icon_pets">爪印（宠物）</string>
+    <string name="cd_icon_terminal">终端命令行（编程）</string>
+    <string name="cd_icon_business_center">公文包（工作职场）</string>
+    <string name="cd_icon_task_alt">对勾印章（目标达成）</string>
+    <string name="cd_icon_timer">计时器（专注冲刺）</string>
+    <string name="cd_icon_lightbulb">灯泡（灵感创意）</string>
+    <string name="cd_icon_payments">货币符号（财务储蓄）</string>
+    <string name="cd_icon_rocket_launch">火箭（产品发布）</string>
+    <string name="cd_icon_palette">画笔（艺术创作）</string>
+    <string name="cd_icon_cake">蛋糕（生日纪念）</string>
+    <string name="cd_icon_celebration">礼花碎屑（庆祝盛典）</string>
+    <string name="cd_icon_child_care">婴儿（家庭育儿）</string>
+    <string name="cd_icon_home">房屋（乔迁新居）</string>
+    <string name="cd_icon_flight">飞机（旅行度假）</string>
+    <string name="cd_icon_directions_car">汽车（自驾出行）</string>
+    <string name="cd_icon_luggage">行李箱（度假出游）</string>
+    <string name="cd_icon_emoji_events">奖杯（荣誉成就）</string>
+    <string name="cd_icon_person">人物（默认）</string>
+    <string name="cd_icon_group">双人（群体社区）</string>
+    <string name="cd_icon_face">笑脸（情绪）</string>
+    <string name="cd_icon_favorite">爱心（喜爱）</string>
+    <string name="cd_icon_thumb_up">点赞（认可）</string>
+    <string name="cd_icon_share">分享（连接）</string>
+    <string name="cd_icon_public">地球（世界）</string>
+    <string name="cd_icon_mood">星芒（美好）</string>
+    <string name="cd_icon_sentiment_satisfied">微笑</string>
+    <string name="cd_icon_sentiment_very_satisfied">眨眼笑脸</string>
+    <string name="cd_icon_sentiment_neutral">平静表情</string>
+    <string name="cd_icon_sentiment_dissatisfied">难过表情</string>
+    <string name="cd_icon_recommend">认证印章</string>
+    <string name="cd_icon_star">星标（精选）</string>
+    <string name="cd_icon_emoji_emotions">爱心笑脸</string>
+    <string name="cd_icon_person_add">添加成员</string>
+    <string name="cd_icon_notification_important">提醒铃铛</string>
+    <string name="cd_icon_party_mode">相机（记录回忆）</string>
+    <string name="cd_icon_visibility">眼睛（查看）</string>
+    <string name="cd_icon_group_add">三人团队</string>
+    <string name="cd_icon_park">树木（公园自然）</string>
+    <string name="cd_icon_yard">盆栽植物（园艺）</string>
+    <string name="cd_icon_sunny">太阳（日光）</string>
+    <string name="cd_icon_bedtime">弯月（夜晚）</string>
+    <string name="cd_icon_local_florist">花朵（花卉）</string>
+    <string name="cd_icon_sailing">帆船（扬帆启航）</string>
+    <string name="cd_icon_music_note">音符（音乐）</string>
+    <string name="cd_icon_eco">绿叶（生态环保）</string>
+
+    <!-- Expanded Tangible Life & Habit Icons -->
+    <string name="cd_icon_tooth">牙齿（口腔护理）</string>
+    <string name="cd_icon_pill">药丸（服药与维生素）</string>
+    <string name="cd_icon_sneaker">跑鞋（慢跑与健身）</string>
+    <string name="cd_icon_shower">淋浴（个人卫生）</string>
+    <string name="cd_icon_scales">体重秤（饮食与体重）</string>
+    <string name="cd_icon_heartbeat">心率（有氧与心跳）</string>
+    <string name="cd_icon_guitar">吉他（乐器练习）</string>
+    <string name="cd_icon_game_controller">游戏手柄（电竞娱乐）</string>
+    <string name="cd_icon_bicycle">自行车（骑行与通勤）</string>
+    <string name="cd_icon_cooking_pot">炖锅（烹饪料理）</string>
+    <string name="cd_icon_knife">主厨刀（厨房备料）</string>
+    <string name="cd_icon_washing_machine">洗衣机（衣物洗涤）</string>
+    <string name="cd_icon_broom">扫帚（清扫保洁）</string>
+    <string name="cd_icon_yarn">毛线球（编织手工）</string>
+    <string name="cd_icon_wrench">扳手（工具与维修）</string>
+    <string name="cd_icon_identification_card">证件卡（资质与执照）</string>
+    <string name="cd_icon_piggy_bank">存钱罐（储蓄与理财）</string>
+    <string name="cd_icon_newspaper">报纸（阅读资讯）</string>
+    <string name="cd_icon_target">靶心（目标与准心）</string>
+    <string name="cd_icon_key">钥匙（乔迁新居）</string>
+    <string name="cd_icon_ticket">门票（演出与赛事）</string>
+    <string name="cd_icon_baby_carriage">婴儿车（育儿成长）</string>
+    <string name="cd_icon_medal">奖牌（赛事与完赛）</string>
+    <string name="cd_icon_crown">皇冠（里程碑荣耀）</string>
+    <string name="cd_icon_handshake">握手（约定与合作）</string>
+    <string name="cd_icon_gift">礼盒（礼物与心意）</string>
+    <string name="cd_icon_envelope">信封（书信与邮件）</string>
+    <string name="cd_icon_mountains">山脉（登山与远足）</string>
+    <string name="cd_icon_campfire">篝火（露营与野趣）</string>
+    <string name="cd_icon_tent">帐篷（户外徒步）</string>
+    <string name="cd_icon_compass">指南针（导航与探索）</string>
+    <string name="cd_icon_camera">照相机（摄影记录）</string>
+
+    <!-- Quick Add & Shortcuts -->
+    <string name="cd_widget_add">添加新计数器</string>
+    <string name="shortcut_new_counter">新建计数</string>
+    <string name="shortcut_new_counter_long">创建新的倒数/正数天</string>
+    <string name="cd_milestone_reached">已达成里程碑：%1$d 天</string>
+
+    <!-- Time Decomposition Units -->
+    <string name="unit_none"></string>
+    <string name="unit_days">天</string>
+    <string name="unit_today">今日</string>
+    <string name="unit_weeks">周数</string>
+    <string name="cd_tap_to_decompose">当前显示 %1$s。点击切换时间格式。</string>
+
+    <!-- Card Color Warmth Shift (Patina) Phases -->
+    <string name="patina_phase_fresh">初青稚绿</string>
+    <string name="patina_phase_warming">温润浅砂</string>
+    <string name="patina_phase_grounded">沉淀赭黄</string>
+    <string name="patina_phase_seasoned">浓郁琥珀</string>
+    <string name="patina_phase_kintsugi">金缮圆满</string>
+
+    <!-- Reset Rhythm Badge -->
+    <string name="reset_rhythm_title">修持节奏</string>
+    <string name="reset_rhythm_dot">·</string>
+    <string name="reset_rhythm_single">总计重置 1 次 · 往期周期 %1$d 天</string>
+    <string name="reset_rhythm_multiple">总计重置 %1$d 次 · 平均间隔 %2$d 天 / 次</string>
+    <string name="cd_reset_rhythm_single">重置 1 次，往期周期 %1$d 天</string>
+    <string name="cd_reset_rhythm_multiple">重置 %1$d 次，平均周期 %2$d 天</string>
+    <!-- Reset as Ink Drop & Whispers -->
+    <string name="cd_reset_cannot_reset_zero">计数已处于0天，无需归零</string>
+    <string name="whisper_days_released_single">已释放 1 天</string>
+    <string name="whisper_days_released_multiple">已释放 %1$d 天</string>
+    <string name="whisper_dot">·</string>
+    <string name="whisper_action_undo">撤销</string>
+    <string name="cd_whisper_undo">撤销归零并恢复 %1$d 天</string>
+    <string name="widget_whisper_summary">“%1$s” 已在小组件重置 %2$s</string>
+    <string name="widget_whisper_restore">恢复 %1$d</string>
+    <string name="cd_widget_whisper_restore">恢复 %1$s 至 %2$d 天</string>
+    <string name="widget_whisper_dismiss">关闭</string>
+    <string name="cd_widget_whisper_dismiss">忽略 %1$s 的小组件重置提示</string>
+    <string name="time_just_now">刚刚</string>
+    <string name="time_minutes_ago">%1$d分钟前</string>
+    <string name="time_hours_ago">%1$d小时前</string>
+    <string name="time_days_ago">%1$d天前</string>
+    <string name="widget_reset_count_badge">×%1$d</string>
+</resources>

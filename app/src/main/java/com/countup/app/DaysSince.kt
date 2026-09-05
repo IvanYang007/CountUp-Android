@@ -61,8 +61,17 @@ fun decomposeTime(
     anchorDate: LocalDate,
     today: LocalDate,
     mode: TimeDisplayMode = TimeDisplayMode.DAYS,
+    locale: java.util.Locale = java.util.Locale.getDefault(),
 ): DecomposedTime {
     val totalDays = daysSince(anchorDate, today)
+    val isChinese = locale.language.equals("zh", ignoreCase = true)
+    val isTraditional = isChinese && (
+        locale.country.equals("TW", ignoreCase = true) ||
+        locale.country.equals("HK", ignoreCase = true) ||
+        locale.country.equals("MO", ignoreCase = true) ||
+        locale.script.equals("Hant", ignoreCase = true)
+    )
+
     return when (mode) {
         TimeDisplayMode.DAYS -> {
             DecomposedTime(
@@ -74,7 +83,7 @@ fun decomposeTime(
         TimeDisplayMode.ELAPSED_BREAKDOWN -> {
             if (totalDays == 0L) {
                 DecomposedTime(
-                    valueText = "0 DAYS",
+                    valueText = if (isChinese) "0 天" else "0 DAYS",
                     unitLabelRes = R.string.unit_today,
                     mode = TimeDisplayMode.ELAPSED_BREAKDOWN,
                 )
@@ -87,9 +96,16 @@ fun decomposeTime(
                 val days = period.days
 
                 val parts = mutableListOf<String>()
-                if (years > 0) parts.add(if (years == 1) "1 YEAR" else "$years YEARS")
-                if (months > 0) parts.add(if (months == 1) "1 MONTH" else "$months MONTHS")
-                if (days > 0 || parts.isEmpty()) parts.add(if (days == 1) "1 DAY" else "$days DAYS")
+                if (isChinese) {
+                    val monthUnit = if (isTraditional) "個月" else "个月"
+                    if (years > 0) parts.add("$years 年")
+                    if (months > 0) parts.add("$months $monthUnit")
+                    if (days > 0 || parts.isEmpty()) parts.add("$days 天")
+                } else {
+                    if (years > 0) parts.add(if (years == 1) "1 YEAR" else "$years YEARS")
+                    if (months > 0) parts.add(if (months == 1) "1 MONTH" else "$months MONTHS")
+                    if (days > 0 || parts.isEmpty()) parts.add(if (days == 1) "1 DAY" else "$days DAYS")
+                }
 
                 val text = parts.joinToString(" ")
                 DecomposedTime(
@@ -101,8 +117,13 @@ fun decomposeTime(
         }
         TimeDisplayMode.TOTAL_WEEKS -> {
             if (totalDays == 0L) {
+                val zeroText = if (isChinese) {
+                    if (isTraditional) "0 週" else "0 周"
+                } else {
+                    "0 WEEKS"
+                }
                 DecomposedTime(
-                    valueText = "0 WEEKS",
+                    valueText = zeroText,
                     unitLabelRes = R.string.unit_none,
                     mode = TimeDisplayMode.TOTAL_WEEKS,
                 )
@@ -111,10 +132,19 @@ fun decomposeTime(
                 val weeks = absDays / 7
                 val remDays = absDays % 7
 
-                val text = if (remDays == 0L) {
-                    "$weeks WEEKS"
+                val text = if (isChinese) {
+                    val weekUnit = if (isTraditional) "週" else "周"
+                    if (remDays == 0L) {
+                        "$weeks $weekUnit"
+                    } else {
+                        "$weeks $weekUnit $remDays 天"
+                    }
                 } else {
-                    "$weeks WEEKS $remDays DAYS"
+                    if (remDays == 0L) {
+                        "$weeks WEEKS"
+                    } else {
+                        "$weeks WEEKS $remDays DAYS"
+                    }
                 }
 
                 DecomposedTime(
