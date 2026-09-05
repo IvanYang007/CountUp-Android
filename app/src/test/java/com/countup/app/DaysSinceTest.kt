@@ -89,26 +89,26 @@ class DaysSinceTest {
 
         // 1. Exact Today
         val zeroRes = decomposeTime(today, today, TimeDisplayMode.ELAPSED_BREAKDOWN)
-        assertEquals("0", zeroRes.valueText)
+        assertEquals("0 DAYS", zeroRes.valueText)
         assertEquals(R.string.unit_today, zeroRes.unitLabelRes)
 
         // 2. 1 year, 3 months, 10 days
         val past1 = LocalDate.of(2025, 4, 11)
         val res1 = decomposeTime(past1, today, TimeDisplayMode.ELAPSED_BREAKDOWN)
-        assertEquals("1y 3m 10d", res1.valueText)
-        assertEquals(R.string.unit_elapsed, res1.unitLabelRes)
+        assertEquals("1 YEAR 3 MONTHS 10 DAYS", res1.valueText)
+        assertEquals(R.string.unit_none, res1.unitLabelRes)
 
         // 3. Less than a year (e.g. 5 months 9 days)
         val past2 = LocalDate.of(2026, 2, 12)
         val res2 = decomposeTime(past2, today, TimeDisplayMode.ELAPSED_BREAKDOWN)
-        assertEquals("5m 9d", res2.valueText)
-        assertEquals(R.string.unit_elapsed, res2.unitLabelRes)
+        assertEquals("5 MONTHS 9 DAYS", res2.valueText)
+        assertEquals(R.string.unit_none, res2.unitLabelRes)
 
         // 4. Future target
         val future = LocalDate.of(2026, 9, 25)
         val futureRes = decomposeTime(future, today, TimeDisplayMode.ELAPSED_BREAKDOWN)
-        assertEquals("2m 4d", futureRes.valueText)
-        assertEquals(R.string.unit_until_short, futureRes.unitLabelRes)
+        assertEquals("2 MONTHS 4 DAYS", futureRes.valueText)
+        assertEquals(R.string.unit_none, futureRes.unitLabelRes)
     }
 
     @Test
@@ -117,26 +117,49 @@ class DaysSinceTest {
 
         // Exact 0 days
         val zero = decomposeTime(today, today, TimeDisplayMode.TOTAL_WEEKS)
-        assertEquals("0", zero.valueText)
-        assertEquals(R.string.unit_weeks, zero.unitLabelRes)
+        assertEquals("0 WEEKS", zero.valueText)
+        assertEquals(R.string.unit_none, zero.unitLabelRes)
 
         // Exact weeks (28 days = 4w)
         val fourWeeks = today.minusDays(28)
         val res1 = decomposeTime(fourWeeks, today, TimeDisplayMode.TOTAL_WEEKS)
-        assertEquals("4w", res1.valueText)
-        assertEquals(R.string.unit_weeks, res1.unitLabelRes)
+        assertEquals("4 WEEKS", res1.valueText)
+        assertEquals(R.string.unit_none, res1.unitLabelRes)
 
         // Partial weeks (31 days = 4w 3d)
         val fourWeeksThreeDays = today.minusDays(31)
         val res2 = decomposeTime(fourWeeksThreeDays, today, TimeDisplayMode.TOTAL_WEEKS)
-        assertEquals("4w 3d", res2.valueText)
-        assertEquals(R.string.unit_weeks, res2.unitLabelRes)
+        assertEquals("4 WEEKS 3 DAYS", res2.valueText)
+        assertEquals(R.string.unit_none, res2.unitLabelRes)
 
-        // Future weeks (16 days until = 2w 2d UNTIL)
+        // Future weeks (16 days until = 2 WEEKS 2 DAYS)
         val future = today.plusDays(16)
         val res3 = decomposeTime(future, today, TimeDisplayMode.TOTAL_WEEKS)
-        assertEquals("2w 2d", res3.valueText)
-        assertEquals(R.string.unit_until_short, res3.unitLabelRes)
+        assertEquals("2 WEEKS 2 DAYS", res3.valueText)
+        assertEquals(R.string.unit_none, res3.unitLabelRes)
+    }
+
+    @Test
+    fun `decomposeTime satisfies user format requirements for 1 WEEKS 2 DAYS and 2 DAYS`() {
+        val today = LocalDate.of(2026, 7, 21)
+        val nineDaysAgo = today.minusDays(9)
+        val weeksRes = decomposeTime(nineDaysAgo, today, TimeDisplayMode.TOTAL_WEEKS)
+        assertEquals("1 WEEKS 2 DAYS", weeksRes.valueText)
+        assertEquals(R.string.unit_none, weeksRes.unitLabelRes)
+
+        val twoDaysAgo = today.minusDays(2)
+        val breakdownRes = decomposeTime(twoDaysAgo, today, TimeDisplayMode.ELAPSED_BREAKDOWN)
+        assertEquals("2 DAYS", breakdownRes.valueText)
+        assertEquals(R.string.unit_none, breakdownRes.unitLabelRes)
+    }
+
+    @Test
+    fun `decomposeTime formats future target in DAYS mode with unit_days`() {
+        val today = LocalDate.of(2026, 7, 21)
+        val future = today.plusDays(10)
+        val result = decomposeTime(future, today, TimeDisplayMode.DAYS)
+        assertEquals("10", result.valueText)
+        assertEquals(R.string.unit_days, result.unitLabelRes)
     }
 }
 

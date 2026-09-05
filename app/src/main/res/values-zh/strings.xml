@@ -267,9 +267,7 @@
     <string name="unit_none"></string>
     <string name="unit_days">天</string>
     <string name="unit_today">今日</string>
-    <string name="unit_elapsed">已历经</string>
     <string name="unit_weeks">周数</string>
-    <string name="unit_remaining">剩余</string>
     <string name="cd_tap_to_decompose">当前显示 %1$s。点击切换时间格式。</string>
 
     <!-- Card Color Warmth Shift (Patina) Phases -->

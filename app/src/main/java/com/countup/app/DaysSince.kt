@@ -19,6 +19,15 @@ enum class TimeDisplayMode {
         val all = entries
         return all[(ordinal + 1) % all.size]
     }
+
+    fun next(count: Long): TimeDisplayMode {
+        val absDays = abs(count)
+        return when (this) {
+            DAYS -> ELAPSED_BREAKDOWN
+            ELAPSED_BREAKDOWN -> if (absDays >= 7L) TOTAL_WEEKS else DAYS
+            TOTAL_WEEKS -> DAYS
+        }
+    }
 }
 
 /**
@@ -56,17 +65,16 @@ fun decomposeTime(
     val totalDays = daysSince(anchorDate, today)
     return when (mode) {
         TimeDisplayMode.DAYS -> {
-            val isFuture = totalDays < 0
             DecomposedTime(
-                valueText = if (isFuture) kotlin.math.abs(totalDays).toString() else totalDays.toString(),
-                unitLabelRes = if (isFuture) R.string.unit_until_short else R.string.unit_days,
+                valueText = abs(totalDays).toString(),
+                unitLabelRes = R.string.unit_days,
                 mode = TimeDisplayMode.DAYS,
             )
         }
         TimeDisplayMode.ELAPSED_BREAKDOWN -> {
             if (totalDays == 0L) {
                 DecomposedTime(
-                    valueText = "0",
+                    valueText = "0 DAYS",
                     unitLabelRes = R.string.unit_today,
                     mode = TimeDisplayMode.ELAPSED_BREAKDOWN,
                 )
@@ -79,14 +87,14 @@ fun decomposeTime(
                 val days = period.days
 
                 val parts = mutableListOf<String>()
-                if (years > 0) parts.add("${years}y")
-                if (months > 0) parts.add("${months}m")
-                if (days > 0 || parts.isEmpty()) parts.add("${days}d")
+                if (years > 0) parts.add(if (years == 1) "1 YEAR" else "$years YEARS")
+                if (months > 0) parts.add(if (months == 1) "1 MONTH" else "$months MONTHS")
+                if (days > 0 || parts.isEmpty()) parts.add(if (days == 1) "1 DAY" else "$days DAYS")
 
                 val text = parts.joinToString(" ")
                 DecomposedTime(
                     valueText = text,
-                    unitLabelRes = if (isFuture) R.string.unit_until_short else R.string.unit_elapsed,
+                    unitLabelRes = R.string.unit_none,
                     mode = TimeDisplayMode.ELAPSED_BREAKDOWN,
                 )
             }
@@ -94,25 +102,24 @@ fun decomposeTime(
         TimeDisplayMode.TOTAL_WEEKS -> {
             if (totalDays == 0L) {
                 DecomposedTime(
-                    valueText = "0",
-                    unitLabelRes = R.string.unit_weeks,
+                    valueText = "0 WEEKS",
+                    unitLabelRes = R.string.unit_none,
                     mode = TimeDisplayMode.TOTAL_WEEKS,
                 )
             } else {
-                val isFuture = totalDays < 0
                 val absDays = abs(totalDays)
                 val weeks = absDays / 7
                 val remDays = absDays % 7
 
                 val text = if (remDays == 0L) {
-                    "${weeks}w"
+                    "$weeks WEEKS"
                 } else {
-                    "${weeks}w ${remDays}d"
+                    "$weeks WEEKS $remDays DAYS"
                 }
 
                 DecomposedTime(
                     valueText = text,
-                    unitLabelRes = if (isFuture) R.string.unit_until_short else R.string.unit_weeks,
+                    unitLabelRes = R.string.unit_none,
                     mode = TimeDisplayMode.TOTAL_WEEKS,
                 )
             }

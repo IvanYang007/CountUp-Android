@@ -267,9 +267,7 @@
     <string name="unit_none"></string>
     <string name="unit_days">DAYS</string>
     <string name="unit_today">TODAY</string>
-    <string name="unit_elapsed">ELAPSED</string>
     <string name="unit_weeks">WEEKS</string>
-    <string name="unit_remaining">REMAINING</string>
     <string name="cd_tap_to_decompose">Displaying %1$s. Tap to toggle time format.</string>
 
     <!-- Card Color Warmth Shift (Patina) Phases -->

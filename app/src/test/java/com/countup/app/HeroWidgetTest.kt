@@ -67,12 +67,12 @@ class HeroWidgetTest {
         assertEquals(R.string.unit_days, daysDecomposed.unitLabelRes)
 
         val breakdownDecomposed = decomposeTime(pastDate, today, TimeDisplayMode.ELAPSED_BREAKDOWN)
-        assertEquals("1y 3m 20d", breakdownDecomposed.valueText)
-        assertEquals(R.string.unit_elapsed, breakdownDecomposed.unitLabelRes)
+        assertEquals("1 YEAR 3 MONTHS 20 DAYS", breakdownDecomposed.valueText)
+        assertEquals(R.string.unit_none, breakdownDecomposed.unitLabelRes)
 
         val weeksDecomposed = decomposeTime(pastDate, today, TimeDisplayMode.TOTAL_WEEKS)
-        assertEquals("68w 1d", weeksDecomposed.valueText)
-        assertEquals(R.string.unit_weeks, weeksDecomposed.unitLabelRes)
+        assertEquals("68 WEEKS 1 DAYS", weeksDecomposed.valueText)
+        assertEquals(R.string.unit_none, weeksDecomposed.unitLabelRes)
     }
 
     @Test
