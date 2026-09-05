@@ -47,6 +47,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -168,7 +169,20 @@ fun CountUpContent(
                 )
                 Spacer(Modifier.padding(top = 16.dp))
 
-                if (state.items.isEmpty()) {
+                if (state.isLoading) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.tertiary,
+                            strokeWidth = 2.5.dp,
+                            modifier = Modifier.size(28.dp),
+                        )
+                    }
+                } else if (state.items.isEmpty()) {
                     EmptyState(
                         onNewItem = { onEvent(CountUpUiEvent.OpenEditor(null)) },
                         modifier = Modifier.fillMaxWidth().padding(top = 48.dp),

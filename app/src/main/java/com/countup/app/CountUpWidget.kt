@@ -17,7 +17,13 @@ import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import java.time.LocalDate
+
+internal val widgetReceiverScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
 /**
  * Classic RemoteViews home-screen widget (the "Gmail method"): the app pushes
@@ -34,7 +40,15 @@ import java.time.LocalDate
 class CountUpWidgetReceiver : AppWidgetProvider() {
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
-        pushWidgetUpdate(context)
+        val pendingResult = try { goAsync() } catch (_: Exception) { null }
+        val appContext = context.applicationContext
+        widgetReceiverScope.launch {
+            try {
+                pushWidgetUpdate(appContext)
+            } finally {
+                pendingResult?.finish()
+            }
+        }
     }
 
     override fun onAppWidgetOptionsChanged(
@@ -43,7 +57,15 @@ class CountUpWidgetReceiver : AppWidgetProvider() {
         appWidgetId: Int,
         newOptions: android.os.Bundle?,
     ) {
-        pushWidgetUpdate(context)
+        val pendingResult = try { goAsync() } catch (_: Exception) { null }
+        val appContext = context.applicationContext
+        widgetReceiverScope.launch {
+            try {
+                pushWidgetUpdate(appContext)
+            } finally {
+                pendingResult?.finish()
+            }
+        }
     }
 }
 
@@ -160,39 +182,46 @@ class ResetCountReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val id = intent.getStringExtra(EXTRA_ITEM_ID) ?: return
-        val store = CountUpStore(context)
-        val item = store.items().firstOrNull { it.id == id } ?: return
+        val pendingResult = try { goAsync() } catch (_: Exception) { null }
+        val appContext = context.applicationContext
 
-        val todayLocalDate = LocalDate.now()
-        val today = todayLocalDate.toEpochDay()
-        val releasedDays = daysSince(LocalDate.ofEpochDay(item.epochDay), todayLocalDate)
-        if (!item.isResettableOn(todayLocalDate)) {
-            // Stop trigger reset when the accumulate date is already 0
-            return
-        }
+        widgetReceiverScope.launch {
+            try {
+                val store = CountUpStore(appContext)
+                val item = store.items().firstOrNull { it.id == id } ?: return@launch
 
-        if (isArmed(id)) {
-            // Second tap confirmed: disarm and reset to today
-            disarm()
-            val record = WidgetResetRecord(
-                itemId = item.id,
-                itemName = item.name,
-                snapshot = item.toResetSnapshot(),
-                releasedDays = kotlin.math.abs(releasedDays),
-                timestampMillis = System.currentTimeMillis(),
-            )
-            if (store.resetTo(id, today)) {
-                store.recordWidgetReset(record)
-                // Push synchronously from the app process: the launcher redraws
-                // immediately, no composition pipeline in between.
-                pushWidgetUpdate(context)
-                pushAllHeroWidgetsUpdate(context)
+                val todayLocalDate = LocalDate.now()
+                val today = todayLocalDate.toEpochDay()
+                val releasedDays = daysSince(LocalDate.ofEpochDay(item.epochDay), todayLocalDate)
+                if (!item.isResettableOn(todayLocalDate)) {
+                    // Stop trigger reset when the accumulate date is already 0
+                    return@launch
+                }
+
+                if (isArmed(id)) {
+                    // Second tap confirmed: disarm and reset to today
+                    disarm()
+                    val record = WidgetResetRecord(
+                        itemId = item.id,
+                        itemName = item.name,
+                        snapshot = item.toResetSnapshot(),
+                        releasedDays = kotlin.math.abs(releasedDays),
+                        timestampMillis = System.currentTimeMillis(),
+                    )
+                    if (store.resetTo(id, today)) {
+                        store.recordWidgetReset(record)
+                        pushWidgetUpdate(appContext)
+                        pushAllHeroWidgetsUpdate(appContext)
+                    }
+                } else {
+                    // First tap: arm this cell and re-render widget to show "Tap again" / "0?"
+                    arm(appContext, id)
+                    pushWidgetUpdate(appContext)
+                    pushAllHeroWidgetsUpdate(appContext)
+                }
+            } finally {
+                pendingResult?.finish()
             }
-        } else {
-            // First tap: arm this cell and re-render widget to show "Tap again" / "0?"
-            arm(context, id)
-            pushWidgetUpdate(context)
-            pushAllHeroWidgetsUpdate(context)
         }
     }
 
@@ -235,8 +264,10 @@ class ResetCountReceiver : BroadcastReceiver() {
                 val runnable = Runnable {
                     if (armedItemId == id) {
                         disarm()
-                        pushWidgetUpdate(appContext)
-                        pushAllHeroWidgetsUpdate(appContext)
+                        widgetReceiverScope.launch {
+                            pushWidgetUpdate(appContext)
+                            pushAllHeroWidgetsUpdate(appContext)
+                        }
                     }
                 }
                 disarmRunnable = runnable

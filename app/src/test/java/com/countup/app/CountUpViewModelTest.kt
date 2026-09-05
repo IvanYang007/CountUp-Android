@@ -400,6 +400,9 @@ class CountUpViewModelTest {
         val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = testDispatcher)
         val target = sampleItems.first()
 
+        // Complete initial async load on testDispatcher
+        testDispatcher.scheduler.runCurrent()
+
         viewModel.onEvent(CountUpUiEvent.ConfirmReset(target.id))
         testDispatcher.scheduler.runCurrent()
         assertTrue(viewModel.state.value.cardWhispers.containsKey(target.id))
@@ -861,6 +864,61 @@ class CountUpViewModelTest {
         viewModel.state.test {
             val state = awaitItem()
             assertEquals(0, state.pendingWidgetResets.size)
+        }
+    }
+
+    @Test
+    fun `initial loading state transitions from isLoading true to false on ioDispatcher`() = runTest {
+        val testDispatcher = StandardTestDispatcher(testScheduler)
+        val repo = FakeCountUpRepository(initialItems = sampleItems)
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = testDispatcher,
+        )
+
+        // Initial state before IO dispatcher runs has isLoading = true and empty items
+        assertTrue(viewModel.state.value.isLoading)
+        assertEquals(0, viewModel.state.value.items.size)
+
+        // Advance dispatcher to execute pending initial refreshState()
+        testDispatcher.scheduler.runCurrent()
+
+        // State is now loaded
+        assertFalse(viewModel.state.value.isLoading)
+        assertEquals(3, viewModel.state.value.items.size)
+    }
+
+    @Test
+    fun `rapid theme and sort events emit RefreshWidget effects independently without dropping`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = sampleItems)
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+
+        viewModel.effects.test {
+            // Rapidly trigger theme cycle and sort order change
+            viewModel.onEvent(CountUpUiEvent.CycleBackground)
+            viewModel.onEvent(CountUpUiEvent.SortOrderSelected(SortOrder.NAME_ASC))
+            viewModel.onEvent(CountUpUiEvent.CycleBackground)
+
+            // Verify both snackbars and all RefreshWidget invalidations are emitted in order
+            val effect1 = awaitItem()
+            assertTrue(effect1 is CountUpUiEffect.ShowSnackbar)
+
+            val effect2 = awaitItem()
+            assertTrue(effect2 is CountUpUiEffect.RefreshWidget)
+
+            val effect3 = awaitItem()
+            assertTrue(effect3 is CountUpUiEffect.RefreshWidget)
+
+            val effect4 = awaitItem()
+            assertTrue(effect4 is CountUpUiEffect.ShowSnackbar)
+
+            val effect5 = awaitItem()
+            assertTrue(effect5 is CountUpUiEffect.RefreshWidget)
         }
     }
 }

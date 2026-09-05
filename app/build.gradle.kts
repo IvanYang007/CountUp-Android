@@ -53,6 +53,11 @@ android {
                 "proguard-rules.pro"
             )
         }
+        debug {
+            vcsInfo {
+                include = false
+            }
+        }
     }
 
     compileOptions {

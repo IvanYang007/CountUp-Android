@@ -21,6 +21,7 @@ data class CardResetWhisper(
 @Immutable
 data class CountUpUiState(
     val items: List<CountUpItem> = emptyList(),
+    val isLoading: Boolean = true,
     val searchQuery: String = "",
     val sortOrder: SortOrder = SortOrder.DAYS_DESC,
     val backgroundTheme: BackgroundTheme = BackgroundTheme.AUTO_DAILY,

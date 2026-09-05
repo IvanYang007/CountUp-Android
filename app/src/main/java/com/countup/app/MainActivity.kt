@@ -35,6 +35,24 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val isDebuggable = (applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
+        if (isDebuggable) {
+            android.os.StrictMode.setThreadPolicy(
+                android.os.StrictMode.ThreadPolicy.Builder()
+                    .detectDiskReads()
+                    .detectDiskWrites()
+                    .detectNetwork()
+                    .penaltyLog()
+                    .build()
+            )
+            android.os.StrictMode.setVmPolicy(
+                android.os.StrictMode.VmPolicy.Builder()
+                    .detectLeakedSqlLiteObjects()
+                    .detectLeakedClosableObjects()
+                    .penaltyLog()
+                    .build()
+            )
+        }
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
@@ -48,12 +66,14 @@ class MainActivity : ComponentActivity() {
                     viewModel.effects.collect { effect ->
                         when (effect) {
                             is CountUpUiEffect.ShowSnackbar -> {
-                                val message = when {
-                                    effect.formatArgRes != null -> getString(effect.messageRes, getString(effect.formatArgRes))
-                                    effect.formatArg != null -> getString(effect.messageRes, effect.formatArg)
-                                    else -> getString(effect.messageRes)
+                                launch {
+                                    val message = when {
+                                        effect.formatArgRes != null -> getString(effect.messageRes, getString(effect.formatArgRes))
+                                        effect.formatArg != null -> getString(effect.messageRes, effect.formatArg)
+                                        else -> getString(effect.messageRes)
+                                    }
+                                    snackbarHostState.showSnackbar(message)
                                 }
-                                snackbarHostState.showSnackbar(message)
                             }
                             CountUpUiEffect.RefreshWidget -> {
                                 refreshWidget()

@@ -30,14 +30,16 @@ class CountUpViewModel(
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(CountUpUiState(today = todayProvider()))
+    private val _state = MutableStateFlow(CountUpUiState(isLoading = true, today = todayProvider()))
     val state: StateFlow<CountUpUiState> = _state.asStateFlow()
 
     private val _effects = Channel<CountUpUiEffect>(Channel.BUFFERED)
     val effects: Flow<CountUpUiEffect> = _effects.receiveAsFlow()
 
     init {
-        refreshState()
+        viewModelScope.launch(ioDispatcher) {
+            refreshState()
+        }
     }
 
     fun onEvent(event: CountUpUiEvent) {
@@ -260,6 +262,7 @@ class CountUpViewModel(
         _state.update {
             it.copy(
                 items = items,
+                isLoading = false,
                 sortOrder = sortOrder,
                 backgroundTheme = backgroundTheme,
                 today = today,

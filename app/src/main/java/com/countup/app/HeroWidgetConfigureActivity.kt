@@ -29,6 +29,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import java.time.LocalDate
 
 /**
@@ -58,23 +65,36 @@ class HeroWidgetConfigureActivity : ComponentActivity() {
         }
 
         store = CountUpStore(this)
-        val items = store.items()
         val today = LocalDate.now()
+        val itemsState = mutableStateOf<List<CountUpItem>>(emptyList())
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            val loaded = store.items()
+            withContext(Dispatchers.Main) {
+                itemsState.value = loaded
+            }
+        }
 
         setContent {
             ZenTheme {
+                val items by itemsState
                 HeroWidgetConfigureScreen(
                     items = items,
                     today = today,
                     onSelect = { selectedItem ->
-                        store.setHeroWidgetBinding(appWidgetId, selectedItem.id)
-                        pushHeroWidgetUpdate(this, appWidgetId)
+                        val appContext = applicationContext
+                        lifecycleScope.launch(Dispatchers.IO) {
+                            store.setHeroWidgetBinding(appWidgetId, selectedItem.id)
+                            pushHeroWidgetUpdate(appContext, appWidgetId)
 
-                        val resultValue = Intent().apply {
-                            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                            val resultValue = Intent().apply {
+                                putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                            }
+                            withContext(Dispatchers.Main) {
+                                setResult(Activity.RESULT_OK, resultValue)
+                                finish()
+                            }
                         }
-                        setResult(Activity.RESULT_OK, resultValue)
-                        finish()
                     },
                 )
             }
