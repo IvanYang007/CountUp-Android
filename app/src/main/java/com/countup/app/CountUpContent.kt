@@ -629,14 +629,13 @@ private fun SubHeaderRow(
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color.Transparent)
-                    .border(1.dp, zenColors.hairlineRule, RoundedCornerShape(8.dp))
                     .clickable(
                         interactionSource = sortInteraction,
                         indication = LocalIndication.current,
                         onClick = { onToggleMenu(!isMenuOpen) },
                     )
                     .pressScale(sortInteraction)
-                    .padding(horizontal = 10.dp, vertical = 5.dp)
+                    .padding(horizontal = 6.dp, vertical = 5.dp)
                     .semantics { contentDescription = sortDescription },
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -681,9 +680,9 @@ private fun SubHeaderRow(
                 expanded = isMenuOpen,
                 onDismissRequest = { onToggleMenu(false) },
                 shape = RoundedCornerShape(12.dp),
-                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                containerColor = zenColors.paperBackground,
                 tonalElevation = 0.dp,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                border = BorderStroke(1.dp, zenColors.hairlineRule),
                 shadowElevation = 6.dp,
                 modifier = Modifier
                     .width(260.dp)
@@ -693,8 +692,8 @@ private fun SubHeaderRow(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.background)
-                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
+                        .background(zenColors.paperCard)
+                        .border(1.dp, zenColors.hairlineRule, RoundedCornerShape(8.dp))
                         .padding(horizontal = 10.dp, vertical = 6.dp),
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
@@ -736,7 +735,7 @@ private fun SubHeaderRow(
                                 modifier = Modifier
                                     .size(24.dp)
                                     .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                    .background(zenColors.paperSurface)
                                     .clickable(onClick = onClearSearch)
                                     .semantics { contentDescription = clearSearchDesc },
                             ) {
