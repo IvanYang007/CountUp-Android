@@ -12,7 +12,6 @@
     <string name="error_save_failed">Could not save. Please try again.</string>
 
     <!-- Multi-item list -->
-    <string name="app_subtitle">Mindful Days Tracker</string>
 
     <!-- 24 Solar Terms & Seasons -->
     <string name="season_spring">SPRING</string>

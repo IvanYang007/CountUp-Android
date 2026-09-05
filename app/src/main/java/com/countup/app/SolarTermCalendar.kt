@@ -76,24 +76,8 @@ object SolarTermCalendar {
      * Determines the active solar term for the specified calendar [date].
      */
     fun getActiveSolarTerm(date: LocalDate): SolarTerm {
-        val month = date.monthValue
-        val day = date.dayOfMonth
-        val monthDay = month * 100 + day
-
-        // If before Jan 5, the active solar term is 冬至 (Winter Solstice) from Dec 21
-        if (monthDay < 105) {
-            return TERMS[21] // 冬至
-        }
-
-        var active = CHRONOLOGICAL_TERMS[0]
-        for (term in CHRONOLOGICAL_TERMS) {
-            val termMonthDay = term.month * 100 + term.day
-            if (monthDay >= termMonthDay) {
-                active = term
-            } else {
-                break
-            }
-        }
-        return active
+        val monthDay = date.monthValue * 100 + date.dayOfMonth
+        return CHRONOLOGICAL_TERMS.lastOrNull { monthDay >= it.month * 100 + it.day } ?: TERMS[21]
     }
 }
+
