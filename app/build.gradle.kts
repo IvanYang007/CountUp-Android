@@ -61,6 +61,18 @@ android {
             enableSplit = false
         }
     }
+
+    lint {
+        abortOnError = true
+        checkReleaseBuilds = false
+        disable += setOf(
+            "GradleDependency",
+            "AndroidGradlePluginVersion",
+            "NewerVersionAvailable",
+            "UnusedAttribute",
+            "IconLauncherShape",
+        )
+    }
 }
 
 dependencies {

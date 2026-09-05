@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- One grid cell: item icon & name above a solid circle with the day count. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/cell_root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -9,7 +10,8 @@
     android:paddingStart="3dp"
     android:paddingTop="1dp"
     android:paddingEnd="3dp"
-    android:paddingBottom="2dp">
+    android:paddingBottom="2dp"
+    tools:ignore="SmallSp">
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -7,6 +7,7 @@ import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Shader
+import androidx.core.graphics.createBitmap
 import java.time.LocalDate
 
 /**
@@ -51,7 +52,7 @@ object WidgetBackgroundRenderer {
     ): Bitmap? {
         return try {
             val active = resolveActiveTheme(theme, epochDay)
-            val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            val bitmap = createBitmap(width, height, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
 
             // 1. Draw base warm paper background

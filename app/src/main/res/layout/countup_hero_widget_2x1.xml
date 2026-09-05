@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/hero_widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,7 +8,8 @@
     android:paddingStart="12dp"
     android:paddingTop="10dp"
     android:paddingEnd="12dp"
-    android:paddingBottom="10dp">
+    android:paddingBottom="10dp"
+    tools:ignore="SmallSp">
 
     <!-- Left: Compact Circular Icon Badge -->
     <RelativeLayout
@@ -61,7 +63,7 @@
                 android:textColor="#5D5043"
                 android:singleLine="true"
                 android:ellipsize="end"
-                android:text="SOBRIETY" />
+                tools:text="SOBRIETY" />
 
             <TextView
                 android:id="@+id/hero_reset_badge"
@@ -101,7 +103,7 @@
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:textColor="#2C2416"
-                android:text="120" />
+                tools:text="120" />
 
             <TextView
                 android:id="@+id/hero_unit"
@@ -114,7 +116,7 @@
                 android:letterSpacing="0.04"
                 android:singleLine="true"
                 android:textColor="#8C7E70"
-                android:text="DAYS" />
+                tools:text="DAYS" />
         </LinearLayout>
 
         <!-- Anchor Date Subtitle -->
@@ -127,7 +129,7 @@
             android:textColor="#8C7E70"
             android:singleLine="true"
             android:ellipsize="end"
-            android:text="since May 3, 2026" />
+            tools:text="since May 3, 2026" />
     </LinearLayout>
 
     <!-- Empty State overlay -->

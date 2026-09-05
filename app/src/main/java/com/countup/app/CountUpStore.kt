@@ -1,5 +1,6 @@
 package com.countup.app
 
+import android.annotation.SuppressLint
 import android.content.Context
 import java.io.File
 import java.time.LocalDate
@@ -18,6 +19,7 @@ import java.util.UUID
  *  4. Legacy Migration: Migrates v0 single-value `haircut_prefs` into multi-item list.
  *  5. Timestamped Quarantine: Preserves undecodable payloads for forensics without data destruction.
  */
+@SuppressLint("ApplySharedPref", "UseKtx")
 class CountUpStore(context: Context) {
 
     private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

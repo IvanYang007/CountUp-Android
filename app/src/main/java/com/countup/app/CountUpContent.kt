@@ -308,8 +308,8 @@ private fun HeaderRow(
     backgroundTheme: BackgroundTheme,
     onCycleBackground: () -> Unit,
     onNewItem: () -> Unit,
-    today: LocalDate = LocalDate.now(),
     modifier: Modifier = Modifier,
+    today: LocalDate = LocalDate.now(),
 ) {
     val ensoInteraction = rememberPressSource()
     val themeLabel = stringResource(backgroundTheme.labelRes)

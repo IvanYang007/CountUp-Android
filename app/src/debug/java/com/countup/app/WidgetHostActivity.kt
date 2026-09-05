@@ -1,5 +1,6 @@
 package com.countup.app
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.graphics.Color
 import android.os.Bundle
@@ -13,6 +14,7 @@ import android.widget.FrameLayout
  *
  * Launch: adb shell am start -n com.countup.app/.WidgetHostActivity
  */
+@SuppressLint("SetTextI18n", "UseKtx")
 class WidgetHostActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

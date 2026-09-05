@@ -267,7 +267,6 @@
     <string name="unit_none"></string>
     <string name="unit_days">天</string>
     <string name="unit_today">今日</string>
-    <string name="unit_weeks">週數</string>
     <string name="cd_tap_to_decompose">當前顯示 %1$s。點擊切換時間格式。</string>
 
     <!-- Card Color Warmth Shift (Patina) Phases -->
@@ -284,21 +283,8 @@
     <string name="reset_rhythm_multiple">總計重置 %1$d 次 · 平均間隔 %2$d 天 / 次</string>
     <string name="cd_reset_rhythm_single">重置 1 次，往期週期 %1$d 天</string>
     <string name="cd_reset_rhythm_multiple">重置 %1$d 次，平均週期 %2$d 天</string>
-    <!-- Reset as Ink Drop & Whispers -->
+    <!-- Reset as Ink Drop -->
     <string name="cd_reset_cannot_reset_zero">計數已處於0天，無需歸零</string>
-    <string name="whisper_days_released_single">已釋放 1 天</string>
-    <string name="whisper_days_released_multiple">已釋放 %1$d 天</string>
-    <string name="whisper_dot">·</string>
-    <string name="whisper_action_undo">撤銷</string>
-    <string name="cd_whisper_undo">撤銷歸零並恢復 %1$d 天</string>
-    <string name="widget_whisper_summary">“%1$s” 已在小組件重置 %2$s</string>
-    <string name="widget_whisper_restore">恢復 %1$d</string>
-    <string name="cd_widget_whisper_restore">恢復 %1$s 至 %2$d 天</string>
-    <string name="widget_whisper_dismiss">關閉</string>
-    <string name="cd_widget_whisper_dismiss">忽略 %1$s 的小組件重置提示</string>
-    <string name="time_just_now">剛剛</string>
-    <string name="time_minutes_ago">%1$d分鐘前</string>
-    <string name="time_hours_ago">%1$d小時前</string>
-    <string name="time_days_ago">%1$d天前</string>
     <string name="widget_reset_count_badge">×%1$d</string>
+    <string name="action_add_symbol">+</string>
 </resources>
