@@ -138,4 +138,40 @@ class ItemColorsTest {
             assertFalse(style.isDark)
         }
     }
+
+    @Test
+    fun `new zen presets resolve with correct backgrounds and contrast`() {
+        val celadon = resolveCardStyle("celadon_bamboo")
+        assertEquals(Color(0xFFE1E9E4), celadon.cardBg)
+        assertEquals(Color(0xFF3B5B46), celadon.badgeBg)
+        assertEquals(Color.White, celadon.badgeTint)
+        assertFalse(celadon.isDark)
+        assertFalse(isDarkCardBackground(celadon.cardBg))
+
+        val linen = resolveCardStyle("linen_sandalwood")
+        assertEquals(Color(0xFFECE4D5), linen.cardBg)
+        assertEquals(Color(0xFF8A6B4E), linen.badgeBg)
+        assertEquals(Color.White, linen.badgeTint)
+        assertFalse(linen.isDark)
+        assertFalse(isDarkCardBackground(linen.cardBg))
+
+        val nightMist = resolveCardStyle("night_mist")
+        assertEquals(Color(0xFF1F262E), nightMist.cardBg)
+        assertEquals(Color(0xFF7A91A1), nightMist.badgeBg)
+        assertEquals(Color.White, nightMist.badgeTint)
+        assertTrue(nightMist.isDark)
+        assertTrue(isDarkCardBackground(nightMist.cardBg))
+    }
+
+    @Test
+    fun `all presets have badgeTint consistent with cardBadgeTint helper`() {
+        CARD_COLOR_PRESETS.forEach { preset ->
+            val expectedTint = cardBadgeTint(preset.badgeBg)
+            assertEquals(
+                "Preset ${preset.id} badgeTint should match cardBadgeTint",
+                expectedTint,
+                preset.badgeTint,
+            )
+        }
+    }
 }

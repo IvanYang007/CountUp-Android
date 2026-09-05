@@ -42,6 +42,7 @@ import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -53,7 +54,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -95,7 +99,7 @@ fun ItemEditorDialog(
     }
     var hasCustomizedManually by rememberSaveable { mutableStateOf(false) }
     var selectedColorCategoryIndex by rememberSaveable {
-        val initialPresetId = resolveCardStyle(if (item != null) item.cardColor else DEFAULT_CARD_COLOR).id
+        val initialPresetId = resolveCardStyle(selectedCardColor).id
         val idx = CARD_COLOR_CATEGORIES.indexOfFirst { cat -> cat.presetIds.contains(initialPresetId) }
         mutableIntStateOf(if (idx >= 0) idx else 0)
     }
@@ -216,6 +220,11 @@ fun ItemEditorDialog(
                             if (match != null) {
                                 selectedIcon = match.icon
                                 selectedCardColor = match.cardColor
+                                val matchedPresetId = resolveCardStyle(match.cardColor).id
+                                val catIdx = CARD_COLOR_CATEGORIES.indexOfFirst { cat -> cat.presetIds.contains(matchedPresetId) }
+                                if (catIdx >= 0) {
+                                    selectedColorCategoryIndex = catIdx
+                                }
                             }
                         }
                     },
@@ -313,33 +322,39 @@ fun ItemEditorDialog(
                             horizontalArrangement = Arrangement.spacedBy(6.dp),
                         ) {
                             CARD_COLOR_CATEGORIES.forEachIndexed { index, category ->
-                                val isCatSelected = selectedColorCategoryIndex == index
-                                val catInteraction = rememberPressSource()
-                                Box(
-                                    contentAlignment = Alignment.Center,
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .background(
-                                            if (isCatSelected) MaterialTheme.colorScheme.tertiary
-                                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f),
+                                key(category.id) {
+                                    val isCatSelected = selectedColorCategoryIndex == index
+                                    val catInteraction = rememberPressSource()
+                                    Box(
+                                        contentAlignment = Alignment.Center,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(
+                                                if (isCatSelected) MaterialTheme.colorScheme.tertiary
+                                                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f),
+                                            )
+                                            .clickable(
+                                                interactionSource = catInteraction,
+                                                indication = LocalIndication.current,
+                                                role = Role.Tab,
+                                                onClick = { selectedColorCategoryIndex = index },
+                                            )
+                                            .pressScale(catInteraction)
+                                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                                            .semantics {
+                                                selected = isCatSelected
+                                            },
+                                    ) {
+                                        Text(
+                                            text = stringResource(category.labelRes),
+                                            style = MaterialTheme.typography.labelSmall.copy(
+                                                fontSize = 11.sp,
+                                                fontWeight = if (isCatSelected) FontWeight.Bold else FontWeight.Normal,
+                                            ),
+                                            color = if (isCatSelected) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onSurface,
                                         )
-                                        .clickable(
-                                            interactionSource = catInteraction,
-                                            indication = LocalIndication.current,
-                                            onClick = { selectedColorCategoryIndex = index },
-                                        )
-                                        .pressScale(catInteraction)
-                                        .padding(horizontal = 10.dp, vertical = 5.dp),
-                                ) {
-                                    Text(
-                                        text = stringResource(category.labelRes),
-                                        style = MaterialTheme.typography.labelSmall.copy(
-                                            fontSize = 11.sp,
-                                            fontWeight = if (isCatSelected) FontWeight.Bold else FontWeight.Normal,
-                                        ),
-                                        color = if (isCatSelected) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onSurface,
-                                    )
+                                    }
                                 }
                             }
                         }
@@ -356,61 +371,67 @@ fun ItemEditorDialog(
                             modifier = Modifier.fillMaxWidth(),
                         ) {
                             currentCategoryPresets.forEach { preset ->
-                                val isSelected = resolveCardStyle(selectedCardColor).id == preset.id
-                                val colorInteraction = rememberPressSource()
-                                val colorName = stringResource(preset.nameRes)
-                                val colorDescription = if (preset.id == DEFAULT_CARD_COLOR) {
-                                    stringResource(R.string.cd_color_default)
-                                } else {
-                                    stringResource(R.string.cd_color_option, colorName)
-                                }
+                                key(preset.id) {
+                                    val isSelected = resolveCardStyle(selectedCardColor).id == preset.id
+                                    val colorInteraction = rememberPressSource()
+                                    val colorName = stringResource(preset.nameRes)
+                                    val colorDescription = if (preset.id == DEFAULT_CARD_COLOR) {
+                                        stringResource(R.string.cd_color_default)
+                                    } else {
+                                        stringResource(R.string.cd_color_option, colorName)
+                                    }
 
-                                Box(
-                                    contentAlignment = Alignment.Center,
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .minimumInteractiveComponentSize()
-                                        .height(38.dp)
-                                        .clip(RoundedCornerShape(10.dp))
-                                        .background(preset.cardBg)
-                                        .border(
-                                            width = if (isSelected) 2.5.dp else 1.dp,
-                                            color = if (isSelected) {
-                                                if (preset.isDark) Color(0xFFDEB285) else MaterialTheme.colorScheme.primary
-                                            } else {
-                                                if (preset.isDark) Color(0x44FFFFFF) else Color(0x332C2416)
-                                            },
-                                            shape = RoundedCornerShape(10.dp),
-                                        )
-                                        .clickable(
-                                            interactionSource = colorInteraction,
-                                            indication = LocalIndication.current,
-                                            onClick = {
-                                                selectedCardColor = preset.id
-                                                hasCustomizedManually = true
-                                            },
-                                        )
-                                        .pressScale(colorInteraction)
-                                        .semantics { contentDescription = colorDescription },
-                                ) {
-                                    // Mini badge circle representing the coupled icon badge
                                     Box(
                                         contentAlignment = Alignment.Center,
                                         modifier = Modifier
-                                            .size(15.dp)
-                                            .background(preset.badgeBg, CircleShape)
+                                            .weight(1f)
+                                            .minimumInteractiveComponentSize()
+                                            .height(38.dp)
+                                            .clip(RoundedCornerShape(10.dp))
+                                            .background(preset.cardBg)
                                             .border(
+                                                width = if (isSelected) 2.5.dp else 1.dp,
+                                                color = if (isSelected) {
+                                                    if (preset.isDark) Color(0xFFDEB285) else MaterialTheme.colorScheme.primary
+                                                } else {
+                                                    if (preset.isDark) Color(0x44FFFFFF) else Color(0x332C2416)
+                                                },
+                                                shape = RoundedCornerShape(10.dp),
+                                            )
+                                            .clickable(
+                                                interactionSource = colorInteraction,
+                                                indication = LocalIndication.current,
+                                                role = Role.RadioButton,
+                                                onClick = {
+                                                    selectedCardColor = preset.id
+                                                    hasCustomizedManually = true
+                                                },
+                                            )
+                                            .pressScale(colorInteraction)
+                                            .semantics {
+                                                contentDescription = colorDescription
+                                                selected = isSelected
+                                            },
+                                    ) {
+                                        // Mini badge circle representing the coupled icon badge
+                                        Box(
+                                            contentAlignment = Alignment.Center,
+                                            modifier = Modifier
+                                                .size(15.dp)
+                                                .background(preset.badgeBg, CircleShape)
+                                                .border(
                                                 width = 0.5.dp,
                                                 color = if (preset.isDark) Color(0x33FFFFFF) else Color(0x22000000),
                                                 shape = CircleShape,
                                             ),
-                                    ) {
-                                        if (isSelected) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(5.dp)
-                                                    .background(preset.badgeTint, CircleShape),
-                                            )
+                                        ) {
+                                            if (isSelected) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(5.dp)
+                                                        .background(preset.badgeTint, CircleShape),
+                                                )
+                                            }
                                         }
                                     }
                                 }
