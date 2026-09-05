@@ -58,6 +58,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -685,7 +686,7 @@ private fun MechanicalResetButton(
 
     val scale by animateFloatAsState(
         targetValue = if (isPressed && enabled) 0.86f else 1f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow),
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMediumLow),
         label = "resetScale",
     )
 
@@ -1001,15 +1002,17 @@ fun ItemCard(
             )
     }
 
+    val cardRipple = ripple(color = ZenTactileHierarchy.CardPressHighlight)
+
     Column(
         modifier = cardModifier
             .clip(cardShape)
             .clickable(
                 interactionSource = cardInteraction,
-                indication = LocalIndication.current,
+                indication = cardRipple,
                 onClick = onClick,
             )
-            .pressScale(cardInteraction, 0.985f)
+            .pressScale(cardInteraction, ZenTactileHierarchy.Level1Card)
             .padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 14.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1120,13 +1123,13 @@ fun ItemCard(
                         .clip(RoundedCornerShape(8.dp))
                         .clickable(
                             interactionSource = countRowInteraction,
-                            indication = LocalIndication.current,
+                            indication = cardRipple,
                             onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 displayMode = displayMode.next(count)
                             },
                         )
-                        .pressScale(countRowInteraction, 0.98f)
+                        .pressScale(countRowInteraction, ZenTactileHierarchy.Level1Card)
                         .semantics {
                             contentDescription = tapToDecomposeDesc
                         },

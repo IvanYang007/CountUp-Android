@@ -111,25 +111,54 @@ fun ZenTheme(
 }
 
 /**
+ * Strict 4-tier Zen Tactile Sensory Hierarchy:
+ * "Texture, Not Tremor; Deflection, Not Collapse"
+ */
+object ZenTactileHierarchy {
+    /** Level 3: Milestone / Destructive actions (Confirm delete, etc.) — 8% deflection */
+    const val Level3Destructive: Float = 0.92f
+
+    /** Level 2: Primary Actions, Compact Buttons & Chips (Save, Plus, Category tabs, Color chips) — 4% deflection */
+    const val Level2PrimaryAction: Float = 0.96f
+
+    /** Level 1: Cards & Containers (List item cards) — 1.5% deflection */
+    const val Level1Card: Float = 0.985f
+
+    /** Level 0: Plain Text / Ghost Links (Cancel, Dismiss) — 0% deflection (flat) */
+    const val Level0Flat: Float = 1.00f
+
+    /** Luminous Washi Sheen: light specular reflection replacing dark ink stains on cards */
+    val CardPressHighlight: Color = Color.White
+}
+
+/**
  * Tactile spring-damped press feedback and micro-haptic sensation for buttons, chips, and interactive cards.
+ *
+ * Honors the Zen Tactile Hierarchy with calibrated spring physics:
+ * - Upgraded from [Spring.StiffnessLow] to [Spring.StiffnessMediumLow] for a crisp, mechanical
+ *   Leica-shutter response without marshmallow wobble.
+ * - Supports custom [HapticFeedbackType] (e.g. [HapticFeedbackType.TextHandleMove] for 5-10ms micro-tick,
+ *   or [HapticFeedbackType.LongPress] for Level 3 Destructive confirm).
+ * - Honors system-level haptic settings automatically via Compose's [LocalHapticFeedback].
  */
 @Composable
 fun Modifier.pressScale(
     interactionSource: MutableInteractionSource,
-    targetScale: Float = 0.96f,
+    targetScale: Float = ZenTactileHierarchy.Level2PrimaryAction,
+    hapticFeedbackType: HapticFeedbackType? = HapticFeedbackType.TextHandleMove,
 ): Modifier {
     val pressed by interactionSource.collectIsPressedAsState()
     val haptic = LocalHapticFeedback.current
     LaunchedEffect(pressed) {
-        if (pressed) {
-            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+        if (pressed && hapticFeedbackType != null) {
+            haptic.performHapticFeedback(hapticFeedbackType)
         }
     }
     val scale by animateFloatAsState(
         targetValue = if (pressed) targetScale else 1f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow,
+            stiffness = Spring.StiffnessMediumLow,
         ),
         label = "zenPressScale",
     )

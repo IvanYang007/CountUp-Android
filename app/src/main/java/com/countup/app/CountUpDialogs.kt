@@ -52,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -563,6 +564,7 @@ fun ItemEditorDialog(
             }
         },
         confirmButton = {
+            val saveInteraction = rememberPressSource()
             Button(
                 onClick = {
                     onSave(
@@ -575,6 +577,8 @@ fun ItemEditorDialog(
                         )
                     )
                 },
+                modifier = Modifier.pressScale(saveInteraction, ZenTactileHierarchy.Level2PrimaryAction),
+                interactionSource = saveInteraction,
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.tertiary,
@@ -643,8 +647,15 @@ fun DeleteConfirmDialog(
             )
         },
         confirmButton = {
+            val deleteInteraction = rememberPressSource()
             Button(
                 onClick = onConfirm,
+                modifier = Modifier.pressScale(
+                    interactionSource = deleteInteraction,
+                    targetScale = ZenTactileHierarchy.Level3Destructive,
+                    hapticFeedbackType = HapticFeedbackType.LongPress,
+                ),
+                interactionSource = deleteInteraction,
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.error,
@@ -730,6 +741,7 @@ fun DatePickerDialog(
             )
         },
         confirmButton = {
+            val dateConfirmInteraction = rememberPressSource()
             Button(
                 enabled = state.selectedDateMillis != null,
                 onClick = {
@@ -737,6 +749,8 @@ fun DatePickerDialog(
                     if (millis != null) onDatePicked(datePickerMillisToLocalDate(millis))
                     onDismiss()
                 },
+                modifier = Modifier.pressScale(dateConfirmInteraction, ZenTactileHierarchy.Level2PrimaryAction),
+                interactionSource = dateConfirmInteraction,
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
