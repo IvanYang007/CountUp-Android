@@ -369,7 +369,7 @@ private fun SolarTermCapsule(
         ) { step ->
             when (step) {
                 0 -> {
-                    // State 0 (Resting Seal): Marcellus 10.5sp, season in seasonal vermilion/ochre/sage/indigo, hairline pipe, term name, breathing pulse dot
+                    // State 0 (Resting Seal): Marcellus 11.5sp, season in seasonal vermilion/ochre/sage/indigo, hairline pipe, term name, breathing pulse dot
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -378,7 +378,7 @@ private fun SolarTermCapsule(
                             style = TextStyle(
                                 fontFamily = MarcellusFontFamily,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 10.5.sp,
+                                fontSize = 11.5.sp,
                                 letterSpacing = 1.1.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                                 lineHeightStyle = LineHeightStyle(
@@ -394,7 +394,7 @@ private fun SolarTermCapsule(
                             style = TextStyle(
                                 fontFamily = FontFamily.SansSerif,
                                 fontWeight = FontWeight.Light,
-                                fontSize = 10.5.sp,
+                                fontSize = 11.5.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                             ),
                             color = zenColors.hairlineRuleVariant,
@@ -406,7 +406,7 @@ private fun SolarTermCapsule(
                             style = TextStyle(
                                 fontFamily = MarcellusFontFamily,
                                 fontWeight = FontWeight.Normal,
-                                fontSize = 10.5.sp,
+                                fontSize = 11.5.sp,
                                 letterSpacing = 0.9.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                                 lineHeightStyle = LineHeightStyle(
@@ -432,7 +432,7 @@ private fun SolarTermCapsule(
                     }
                 }
                 1 -> {
-                    // State 1 (Tap 1 Reveal): 100% ONE SINGLE UNIFORM INK COLOR (ZenSealInk)
+                    // State 1 (Tap 1 Reveal): 100% ONE SINGLE UNIFORM INK COLOR (ZenSealInk) at 10.5sp
                     Column(
                         verticalArrangement = Arrangement.spacedBy(1.5.dp),
                     ) {
@@ -441,7 +441,7 @@ private fun SolarTermCapsule(
                             style = TextStyle(
                                 fontFamily = MarcellusFontFamily,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 9.5.sp,
+                                fontSize = 10.5.sp,
                                 letterSpacing = 0.9.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                             ),
@@ -617,6 +617,7 @@ private fun SubHeaderRow(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
+        val zenColors = LocalZenColors.current
         val sortInteraction = rememberPressSource()
         val sortDescription = stringResource(R.string.cd_sort_search_pill, stringResource(sortOrder.labelRes))
         val clearSearchDesc = stringResource(R.string.search_clear)
@@ -627,8 +628,8 @@ private fun SubHeaderRow(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
+                    .background(Color.Transparent)
+                    .border(1.dp, zenColors.hairlineRule, RoundedCornerShape(8.dp))
                     .clickable(
                         interactionSource = sortInteraction,
                         indication = LocalIndication.current,
