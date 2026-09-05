@@ -13,6 +13,37 @@
 
     <!-- Multi-item list -->
     <string name="app_subtitle">日积寸心</string>
+
+    <!-- 24 节气与四季 -->
+    <string name="season_spring">春</string>
+    <string name="season_summer">夏</string>
+    <string name="season_autumn">秋</string>
+    <string name="season_winter">冬</string>
+
+    <string name="solar_term_beginning_of_spring">立春</string>
+    <string name="solar_term_rain_water">雨水</string>
+    <string name="solar_term_awakening_of_insects">惊蛰</string>
+    <string name="solar_term_spring_equinox">春分</string>
+    <string name="solar_term_pure_brightness">清明</string>
+    <string name="solar_term_grain_rain">谷雨</string>
+    <string name="solar_term_beginning_of_summer">立夏</string>
+    <string name="solar_term_grain_buds">小满</string>
+    <string name="solar_term_grain_in_ear">芒种</string>
+    <string name="solar_term_summer_solstice">夏至</string>
+    <string name="solar_term_minor_heat">小暑</string>
+    <string name="solar_term_major_heat">大暑</string>
+    <string name="solar_term_beginning_of_autumn">立秋</string>
+    <string name="solar_term_end_of_heat">处暑</string>
+    <string name="solar_term_white_dew">白露</string>
+    <string name="solar_term_autumnal_equinox">秋分</string>
+    <string name="solar_term_cold_dew">寒露</string>
+    <string name="solar_term_frosts_descent">霜降</string>
+    <string name="solar_term_beginning_of_winter">立冬</string>
+    <string name="solar_term_minor_snow">小雪</string>
+    <string name="solar_term_major_snow">大雪</string>
+    <string name="solar_term_winter_solstice">冬至</string>
+    <string name="solar_term_minor_cold">小寒</string>
+    <string name="solar_term_major_cold">大寒</string>
     <string name="new_item">新建记录</string>
     <string name="empty_heading">暂无记录</string>
     <string name="empty_body">添加你的第一条天数记录，开启专注生活。</string>
@@ -110,15 +141,16 @@
 
     <!-- Card & Badge Style Presets (White, Green, Blackish) -->
     <string name="card_color_label">卡片样式</string>
+    <string name="color_paper_gold">宣白 · 沉金</string>
     <string name="color_paper_sage">宣白 · 柳叶</string>
     <string name="color_paper_terracotta">宣白 · 陶土</string>
-    <string name="color_paper_indigo">宣白 · 靛蓝</string>
+    <string name="color_paper_indigo">宣白 · 黛蓝</string>
     <string name="color_sage_forest">柳绿 · 幽森</string>
     <string name="color_sage_ochre">柳绿 · 赭石</string>
     <string name="color_ink_gold">墨黑 · 沉金</string>
     <string name="color_ink_jade">墨黑 · 碧翠</string>
     <string name="color_ink_crimson">墨黑 · 辰砂</string>
-    <string name="cd_color_default">默认（宣白 · 柳叶）卡片样式</string>
+    <string name="cd_color_default">默认（宣白 · 沉金）卡片样式</string>
     <string name="cd_color_option">%1$s 卡片样式</string>
 
     <!-- Icon Categories & Selection -->
@@ -233,11 +265,12 @@
     <string name="cd_milestone_reached">已达成里程碑：%1$d 天</string>
 
     <!-- Time Decomposition Units -->
+    <string name="unit_none"></string>
     <string name="unit_days">天</string>
     <string name="unit_today">今日</string>
     <string name="unit_elapsed">已历经</string>
     <string name="unit_weeks">周数</string>
-    <string name="unit_until_short">尚余</string>
+    <string name="unit_remaining">剩余</string>
     <string name="cd_tap_to_decompose">当前显示 %1$s。点击切换时间格式。</string>
 
     <!-- Card Color Warmth Shift (Patina) Phases -->

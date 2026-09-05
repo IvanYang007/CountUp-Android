@@ -28,11 +28,13 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -76,16 +78,23 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -96,6 +105,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
+import kotlin.math.abs
 
 /**
  * Pure stateless root composable rendering the CountUp main screen.
@@ -143,6 +153,7 @@ fun CountUpContent(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding)
                     .padding(horizontal = 20.dp),
             ) {
                 Spacer(Modifier.padding(top = 16.dp))
@@ -150,6 +161,7 @@ fun CountUpContent(
                     backgroundTheme = state.backgroundTheme,
                     onCycleBackground = { onEvent(CountUpUiEvent.CycleBackground) },
                     onNewItem = { onEvent(CountUpUiEvent.OpenEditor(null)) },
+                    today = state.today,
                 )
                 Spacer(Modifier.padding(top = 16.dp))
 
@@ -226,16 +238,84 @@ fun CountUpContent(
 }
 
 @Composable
+private fun SolarTermCapsule(
+    solarTerm: SolarTerm,
+    modifier: Modifier = Modifier,
+) {
+    val zenColors = LocalZenColors.current
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .clip(RoundedCornerShape(4.5.dp))
+            .background(zenColors.paperSurface)
+            .border(
+                BorderStroke(0.8.dp, zenColors.hairlineRuleVariant),
+                RoundedCornerShape(4.5.dp),
+            )
+            .padding(horizontal = 7.dp, vertical = 2.5.dp),
+    ) {
+        Text(
+            text = stringResource(solarTerm.seasonRes),
+            style = TextStyle(
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.Bold,
+                fontSize = 10.5.sp,
+                letterSpacing = 0.8.sp,
+                fontStyle = FontStyle.Normal,
+                platformStyle = PlatformTextStyle(includeFontPadding = false),
+                lineHeightStyle = LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.Both,
+                ),
+            ),
+            color = zenColors.cinnabarVermilion,
+        )
+
+        Spacer(Modifier.width(6.dp))
+
+        Box(
+            modifier = Modifier
+                .width(1.dp)
+                .height(10.dp)
+                .background(zenColors.hairlineRuleVariant),
+        )
+
+        Spacer(Modifier.width(6.dp))
+
+        Text(
+            text = stringResource(solarTerm.nameRes),
+            style = TextStyle(
+                fontFamily = FontFamily.Serif,
+                fontWeight = FontWeight.Medium,
+                fontSize = 12.sp,
+                lineHeight = 16.sp,
+                letterSpacing = 1.5.sp,
+                fontStyle = FontStyle.Normal,
+                platformStyle = PlatformTextStyle(includeFontPadding = false),
+                lineHeightStyle = LineHeightStyle(
+                    alignment = LineHeightStyle.Alignment.Center,
+                    trim = LineHeightStyle.Trim.Both,
+                ),
+            ),
+            color = MaterialTheme.colorScheme.onBackground,
+        )
+    }
+}
+
+@Composable
 private fun HeaderRow(
     backgroundTheme: BackgroundTheme,
     onCycleBackground: () -> Unit,
     onNewItem: () -> Unit,
+    today: LocalDate = LocalDate.now(),
     modifier: Modifier = Modifier,
 ) {
     val ensoInteraction = rememberPressSource()
     val themeLabel = stringResource(backgroundTheme.labelRes)
     val newItemLabel = stringResource(R.string.new_item)
     val plusInteraction = rememberPressSource()
+    val activeSolarTerm = remember(today) { SolarTermCalendar.getActiveSolarTerm(today) }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -270,16 +350,8 @@ private fun HeaderRow(
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
             )
-            Text(
-                text = stringResource(R.string.app_subtitle),
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontSize = 13.5.sp,
-                    letterSpacing = 0.2.sp,
-                    fontStyle = FontStyle.Italic,
-                ),
-                fontFamily = FontFamily.Serif,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Spacer(Modifier.height(3.dp))
+            SolarTermCapsule(solarTerm = activeSolarTerm)
         }
         Box(
             contentAlignment = Alignment.Center,
@@ -589,6 +661,7 @@ private fun MechanicalResetButton(
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
+            .size(30.dp)
             .zIndex(if (isPressed) 1f else 0f)
             .minimumInteractiveComponentSize()
             .pointerInput(enabled) {
@@ -667,6 +740,113 @@ private fun MechanicalResetButton(
     }
 }
 
+/**
+ * Renders decomposed time intervals (e.g. "1 WEEKS 2 DAYS" or "1 YEAR 3 MONTHS 10 DAYS") into an [AnnotatedString]
+ * that emphasizes digits with semi-bold primary ink while keeping interval unit characters (WEEKS, DAYS, YEARS, etc.)
+ * in a small, muted 12sp font to harmonize with the Mid-Century Zen design language.
+ */
+fun buildDecomposedAnnotatedString(
+    text: String,
+    mode: TimeDisplayMode,
+    primaryColor: Color,
+    unitColor: Color,
+): AnnotatedString {
+    return buildAnnotatedString {
+        if (mode == TimeDisplayMode.DAYS) {
+            withStyle(
+                SpanStyle(
+                    fontWeight = FontWeight.Bold,
+                    color = primaryColor,
+                )
+            ) {
+                append(text)
+            }
+        } else {
+            var i = 0
+            while (i < text.length) {
+                val ch = text[i]
+                if (ch.isDigit()) {
+                    val start = i
+                    while (i < text.length && text[i].isDigit()) {
+                        i++
+                    }
+                    withStyle(
+                        SpanStyle(
+                            fontWeight = FontWeight.SemiBold,
+                            color = primaryColor,
+                        )
+                    ) {
+                        append(text.substring(start, i))
+                    }
+                } else if (ch.isLetter()) {
+                    val start = i
+                    while (i < text.length && text[i].isLetter()) {
+                        i++
+                    }
+                    withStyle(
+                        SpanStyle(
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 0.5.sp,
+                            color = unitColor,
+                        )
+                    ) {
+                        append(text.substring(start, i))
+                    }
+                } else {
+                    append(ch)
+                    i++
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun OdometerDisplay(
+    decomposed: DecomposedTime,
+    fontSize: TextUnit,
+    arrivedFuture: Boolean,
+    primaryInk: Color,
+    mutedInk: Color,
+    modifier: Modifier = Modifier,
+) {
+    val unitLabel = if (decomposed.unitLabelRes != 0) stringResource(decomposed.unitLabelRes) else ""
+    val effectivePrimary = if (arrivedFuture) ZenArrivedRed else primaryInk
+    val effectiveUnit = if (arrivedFuture) ZenArrivedRed.copy(alpha = 0.8f) else mutedInk
+    val annotated = remember(decomposed.valueText, decomposed.mode, effectivePrimary, effectiveUnit) {
+        buildDecomposedAnnotatedString(
+            text = decomposed.valueText,
+            mode = decomposed.mode,
+            primaryColor = effectivePrimary,
+            unitColor = effectiveUnit,
+        )
+    }
+    Row(
+        verticalAlignment = Alignment.Bottom,
+        modifier = modifier,
+    ) {
+        Text(
+            text = annotated,
+            fontSize = fontSize,
+            fontFamily = FontFamily.SansSerif,
+            modifier = Modifier.alignByBaseline(),
+        )
+        if (unitLabel.isNotBlank()) {
+            Spacer(Modifier.width(6.dp))
+            Text(
+                text = unitLabel,
+                fontSize = 12.sp,
+                fontFamily = FontFamily.SansSerif,
+                fontWeight = FontWeight.SemiBold,
+                letterSpacing = 0.5.sp,
+                color = effectiveUnit,
+                modifier = Modifier.alignByBaseline(),
+            )
+        }
+    }
+}
+
 @Composable
 fun ItemCard(
     item: CountUpItem,
@@ -686,9 +866,15 @@ fun ItemCard(
     val countRowInteraction = rememberPressSource()
     val haptic = LocalHapticFeedback.current
 
+    val canShowWeeks = abs(count) >= 7L
     var displayMode by rememberSaveable(item.id) { mutableStateOf(TimeDisplayMode.DAYS) }
-    val decomposed = remember(anchorDate, today, displayMode) {
-        decomposeTime(anchorDate, today, displayMode)
+    val effectiveMode = if (!canShowWeeks && displayMode == TimeDisplayMode.TOTAL_WEEKS) {
+        TimeDisplayMode.DAYS
+    } else {
+        displayMode
+    }
+    val decomposed = remember(anchorDate, today, effectiveMode) {
+        decomposeTime(anchorDate, today, effectiveMode)
     }
 
     val resetDesc = stringResource(R.string.reset)
@@ -707,17 +893,15 @@ fun ItemCard(
     val accent = if (arrivedFuture) ZenArrivedGreen else style.badgeBg
     val onAccent = if (arrivedFuture) ZenWhite else style.badgeTint
 
-    val currentUnitLabel = stringResource(decomposed.unitLabelRes)
+    val currentUnitLabel = if (decomposed.unitLabelRes != 0) stringResource(decomposed.unitLabelRes) else ""
+    val fullOdometerText = if (currentUnitLabel.isNotBlank()) "${decomposed.valueText} $currentUnitLabel" else decomposed.valueText
 
-    val tapToDecomposeDesc = stringResource(
-        R.string.cd_tap_to_decompose,
-        "${decomposed.valueText} $currentUnitLabel",
-    )
+    val tapToDecomposeDesc = stringResource(R.string.cd_tap_to_decompose, fullOdometerText)
 
-    val fontSize = when (displayMode) {
+    val fontSize = when (effectiveMode) {
         TimeDisplayMode.DAYS -> 36.sp
         TimeDisplayMode.ELAPSED_BREAKDOWN -> 24.sp
-        TimeDisplayMode.TOTAL_WEEKS -> 28.sp
+        TimeDisplayMode.TOTAL_WEEKS -> 24.sp
     }
 
     val cardShape = RoundedCornerShape(20.dp)
@@ -732,8 +916,8 @@ fun ItemCard(
     val borderBrush = remember {
         Brush.verticalGradient(
             colors = listOf(
-                Color.White.copy(alpha = 0.90f),
-                Color(0xFFD8C7B0).copy(alpha = 0.65f),
+                Color.White.copy(alpha = 0.92f),
+                Color(0xFFDEB285).copy(alpha = 0.60f),
             ),
         )
     }
@@ -831,7 +1015,8 @@ fun ItemCard(
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .minimumInteractiveComponentSize()
+                    .size(30.dp)
+                    .clip(CircleShape)
                     .clickable(
                         interactionSource = widgetInteraction,
                         indication = null,
@@ -840,24 +1025,18 @@ fun ItemCard(
                     .pressScale(widgetInteraction)
                     .semantics { contentDescription = widgetDesc },
             ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .size(30.dp)
-                        .clip(CircleShape),
-                ) {
-                    Icon(
-                        painter = painterResource(if (widgetVisible) R.drawable.ic_widget_grid_filled else R.drawable.ic_widget_grid_outline),
-                        contentDescription = null,
-                        tint = if (widgetVisible) {
-                            if (isDarkCard) ZenOchre else MaterialTheme.colorScheme.primary
-                        } else {
-                            mutedInk.copy(alpha = 0.5f)
-                        },
-                        modifier = Modifier.size(15.dp),
-                    )
-                }
+                Icon(
+                    painter = painterResource(if (widgetVisible) R.drawable.ic_widget_grid_filled else R.drawable.ic_widget_grid_outline),
+                    contentDescription = null,
+                    tint = if (widgetVisible) {
+                        if (isDarkCard) ZenOchre else MaterialTheme.colorScheme.primary
+                    } else {
+                        mutedInk.copy(alpha = 0.5f)
+                    },
+                    modifier = Modifier.size(15.dp),
+                )
             }
+            Spacer(Modifier.width(2.dp))
             val canReset = item.isResettableOn(today)
             MechanicalResetButton(
                 onResetConfirmed = onReset,
@@ -866,10 +1045,12 @@ fun ItemCard(
                 isDarkCard = isDarkCard,
                 enabled = canReset,
             )
+            Spacer(Modifier.width(2.dp))
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .minimumInteractiveComponentSize()
+                    .size(30.dp)
+                    .clip(CircleShape)
                     .clickable(
                         interactionSource = deleteInteraction,
                         indication = null,
@@ -879,22 +1060,15 @@ fun ItemCard(
                     .semantics { contentDescription = deleteDesc },
             ) {
                 Box(
-                    contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .size(30.dp)
-                        .clip(CircleShape),
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(width = 12.dp, height = 2.4.dp)
-                            .background(
-                                if (isDarkCard) Color(0xFFE57A77)
-                                else if (item.cardColor == "terracotta" || item.cardColor == "rose_clay") Color(0xFF6B1D19)
-                                else MaterialTheme.colorScheme.error,
-                                RoundedCornerShape(1.dp),
-                            ),
-                    )
-                }
+                        .size(width = 12.dp, height = 2.4.dp)
+                        .background(
+                            if (isDarkCard) Color(0xFFE57A77)
+                            else if (item.cardColor == "terracotta" || item.cardColor == "rose_clay") Color(0xFF6B1D19)
+                            else MaterialTheme.colorScheme.error,
+                            RoundedCornerShape(1.dp),
+                        ),
+                )
             }
         }
 
@@ -914,7 +1088,7 @@ fun ItemCard(
                             indication = LocalIndication.current,
                             onClick = {
                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                displayMode = displayMode.next()
+                                displayMode = displayMode.next(count)
                             },
                         )
                         .pressScale(countRowInteraction, 0.98f)
@@ -923,26 +1097,16 @@ fun ItemCard(
                         },
                 ) {
                     if (reduceMotion) {
-                        Text(
-                            text = decomposed.valueText,
+                        OdometerDisplay(
+                            decomposed = decomposed,
                             fontSize = fontSize,
-                            fontFamily = FontFamily.SansSerif,
-                            fontWeight = FontWeight.Bold,
-                            color = if (arrivedFuture) ZenArrivedRed else primaryInk,
-                        )
-                        Spacer(Modifier.width(6.dp))
-                        Text(
-                            text = currentUnitLabel,
-                            fontSize = 13.sp,
-                            fontFamily = FontFamily.SansSerif,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.04.sp,
-                            color = mutedInk,
-                            modifier = Modifier.padding(bottom = 5.dp),
+                            arrivedFuture = arrivedFuture,
+                            primaryInk = primaryInk,
+                            mutedInk = mutedInk,
                         )
                     } else {
                         AnimatedContent(
-                            targetState = displayMode,
+                            targetState = effectiveMode,
                             transitionSpec = {
                                 (slideInVertically(tween(220)) { height -> height } + fadeIn(tween(220))).togetherWith(
                                     slideOutVertically(tween(220)) { height -> -height } + fadeOut(tween(220))
@@ -953,31 +1117,18 @@ fun ItemCard(
                             val targetDecomposed = remember(anchorDate, today, targetMode) {
                                 decomposeTime(anchorDate, today, targetMode)
                             }
-                            val targetUnitLabel = stringResource(targetDecomposed.unitLabelRes)
                             val targetFontSize = when (targetMode) {
                                 TimeDisplayMode.DAYS -> 36.sp
                                 TimeDisplayMode.ELAPSED_BREAKDOWN -> 24.sp
-                                TimeDisplayMode.TOTAL_WEEKS -> 28.sp
+                                TimeDisplayMode.TOTAL_WEEKS -> 24.sp
                             }
-                            Row(verticalAlignment = Alignment.Bottom) {
-                                Text(
-                                    text = targetDecomposed.valueText,
-                                    fontSize = targetFontSize,
-                                    fontFamily = FontFamily.SansSerif,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (arrivedFuture) ZenArrivedRed else primaryInk,
-                                )
-                                Spacer(Modifier.width(6.dp))
-                                Text(
-                                    text = targetUnitLabel,
-                                    fontSize = 13.sp,
-                                    fontFamily = FontFamily.SansSerif,
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = 0.04.sp,
-                                    color = mutedInk,
-                                    modifier = Modifier.padding(bottom = 5.dp),
-                                )
-                            }
+                            OdometerDisplay(
+                                decomposed = targetDecomposed,
+                                fontSize = targetFontSize,
+                                arrivedFuture = arrivedFuture,
+                                primaryInk = primaryInk,
+                                mutedInk = mutedInk,
+                            )
                         }
                     }
                     val isMilestone = remember(count) { isMilestoneDay(count) }

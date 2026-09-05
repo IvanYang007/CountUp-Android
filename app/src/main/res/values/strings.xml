@@ -13,6 +13,37 @@
 
     <!-- Multi-item list -->
     <string name="app_subtitle">Mindful Days Tracker</string>
+
+    <!-- 24 Solar Terms & Seasons -->
+    <string name="season_spring">SPRING</string>
+    <string name="season_summer">SUMMER</string>
+    <string name="season_autumn">AUTUMN</string>
+    <string name="season_winter">WINTER</string>
+
+    <string name="solar_term_beginning_of_spring">Beginning of Spring</string>
+    <string name="solar_term_rain_water">Rain Water</string>
+    <string name="solar_term_awakening_of_insects">Awakening of Insects</string>
+    <string name="solar_term_spring_equinox">Spring Equinox</string>
+    <string name="solar_term_pure_brightness">Pure Brightness</string>
+    <string name="solar_term_grain_rain">Grain Rain</string>
+    <string name="solar_term_beginning_of_summer">Beginning of Summer</string>
+    <string name="solar_term_grain_buds">Grain Buds</string>
+    <string name="solar_term_grain_in_ear">Grain in Ear</string>
+    <string name="solar_term_summer_solstice">Summer Solstice</string>
+    <string name="solar_term_minor_heat">Minor Heat</string>
+    <string name="solar_term_major_heat">Major Heat</string>
+    <string name="solar_term_beginning_of_autumn">Beginning of Autumn</string>
+    <string name="solar_term_end_of_heat">End of Heat</string>
+    <string name="solar_term_white_dew">White Dew</string>
+    <string name="solar_term_autumnal_equinox">Autumnal Equinox</string>
+    <string name="solar_term_cold_dew">Cold Dew</string>
+    <string name="solar_term_frosts_descent">Frost’s Descent</string>
+    <string name="solar_term_beginning_of_winter">Beginning of Winter</string>
+    <string name="solar_term_minor_snow">Minor Snow</string>
+    <string name="solar_term_major_snow">Major Snow</string>
+    <string name="solar_term_winter_solstice">Winter Solstice</string>
+    <string name="solar_term_minor_cold">Minor Cold</string>
+    <string name="solar_term_major_cold">Major Cold</string>
     <string name="new_item">New item</string>
     <string name="empty_heading">Nothing here yet</string>
     <string name="empty_body">Add your first count-up to start tracking days.</string>
@@ -110,15 +141,16 @@
 
     <!-- Card & Badge Style Presets (White, Green, Blackish) -->
     <string name="card_color_label">Card Style</string>
+    <string name="color_paper_gold">Paper &amp; Gold</string>
     <string name="color_paper_sage">Paper &amp; Sage</string>
     <string name="color_paper_terracotta">Paper &amp; Terracotta</string>
-    <string name="color_paper_indigo">Paper &amp; Indigo</string>
+    <string name="color_paper_indigo">Paper &amp; Lapis</string>
     <string name="color_sage_forest">Sage &amp; Forest</string>
     <string name="color_sage_ochre">Sage &amp; Ochre</string>
     <string name="color_ink_gold">Ink &amp; Gold</string>
     <string name="color_ink_jade">Ink &amp; Jade</string>
     <string name="color_ink_crimson">Ink &amp; Crimson</string>
-    <string name="cd_color_default">Default (Paper &amp; Sage) card style</string>
+    <string name="cd_color_default">Default (Paper &amp; Gold) card style</string>
     <string name="cd_color_option">%1$s card style</string>
 
     <!-- Icon Categories & Selection -->
@@ -233,11 +265,12 @@
     <string name="cd_milestone_reached">Milestone reached: %1$d days</string>
 
     <!-- Time Decomposition Units -->
+    <string name="unit_none"></string>
     <string name="unit_days">DAYS</string>
     <string name="unit_today">TODAY</string>
     <string name="unit_elapsed">ELAPSED</string>
     <string name="unit_weeks">WEEKS</string>
-    <string name="unit_until_short">UNTIL</string>
+    <string name="unit_remaining">REMAINING</string>
     <string name="cd_tap_to_decompose">Displaying %1$s. Tap to toggle time format.</string>
 
     <!-- Card Color Warmth Shift (Patina) Phases -->
