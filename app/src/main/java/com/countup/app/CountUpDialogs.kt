@@ -749,7 +749,11 @@ fun DatePickerDialog(
                     if (millis != null) onDatePicked(datePickerMillisToLocalDate(millis))
                     onDismiss()
                 },
-                modifier = Modifier.pressScale(dateConfirmInteraction, ZenTactileHierarchy.Level2PrimaryAction),
+                modifier = Modifier.pressScale(
+                    interactionSource = dateConfirmInteraction,
+                    targetScale = ZenTactileHierarchy.Level2PrimaryAction,
+                    enabled = state.selectedDateMillis != null,
+                ),
                 interactionSource = dateConfirmInteraction,
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(

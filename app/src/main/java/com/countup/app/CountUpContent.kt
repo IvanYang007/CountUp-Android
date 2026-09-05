@@ -1125,7 +1125,6 @@ fun ItemCard(
                             interactionSource = countRowInteraction,
                             indication = cardRipple,
                             onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 displayMode = displayMode.next(count)
                             },
                         )
@@ -1273,12 +1272,9 @@ fun ItemCard(
                             .clickable(
                                 interactionSource = undoInteraction,
                                 indication = LocalIndication.current,
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                    onUndoReset()
-                                },
+                                onClick = onUndoReset,
                             )
-                            .pressScale(undoInteraction, 0.94f)
+                            .pressScale(undoInteraction, ZenTactileHierarchy.Level2PrimaryAction)
                             .padding(horizontal = 10.dp, vertical = 4.dp),
                     ) {
                         Text(
@@ -1416,12 +1412,9 @@ private fun WidgetResetNoticeCard(
                         .clickable(
                             interactionSource = restoreInteraction,
                             indication = LocalIndication.current,
-                            onClick = {
-                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                onRestore()
-                            },
+                            onClick = onRestore,
                         )
-                        .pressScale(restoreInteraction)
+                        .pressScale(restoreInteraction, ZenTactileHierarchy.Level2PrimaryAction)
                         .padding(horizontal = 14.dp, vertical = 6.dp),
                 ) {
                     Text(

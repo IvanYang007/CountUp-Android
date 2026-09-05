@@ -146,16 +146,18 @@ fun Modifier.pressScale(
     interactionSource: MutableInteractionSource,
     targetScale: Float = ZenTactileHierarchy.Level2PrimaryAction,
     hapticFeedbackType: HapticFeedbackType? = HapticFeedbackType.TextHandleMove,
+    enabled: Boolean = true,
 ): Modifier {
     val pressed by interactionSource.collectIsPressedAsState()
+    val isEffectivelyPressed = pressed && enabled
     val haptic = LocalHapticFeedback.current
-    LaunchedEffect(pressed) {
-        if (pressed && hapticFeedbackType != null) {
+    LaunchedEffect(isEffectivelyPressed) {
+        if (isEffectivelyPressed && hapticFeedbackType != null) {
             haptic.performHapticFeedback(hapticFeedbackType)
         }
     }
     val scale by animateFloatAsState(
-        targetValue = if (pressed) targetScale else 1f,
+        targetValue = if (isEffectivelyPressed) targetScale else 1f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessMediumLow,
