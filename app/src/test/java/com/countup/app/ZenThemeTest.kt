@@ -64,9 +64,6 @@ class ZenThemeTest {
 
         assertEquals(ZenError, light.errorCrimson)
         assertEquals(Color(0xFFA64942), light.errorCrimson)
-
-        assertEquals(ZenSealInk, light.sealInk)
-        assertEquals(Color(0xFF5A4D41), light.sealInk)
     }
 
     @Test
@@ -74,20 +71,18 @@ class ZenThemeTest {
         val dark = darkZenColors()
 
         assertTrue(dark.isDark)
-        assertEquals(Color(0xFF191B17), dark.paperBackground)
-        assertEquals(Color(0xFF252922), dark.paperSurface)
-        assertEquals(Color(0xFF24201A), dark.paperCard)
-        assertEquals(Color(0xFFF1EBDD), dark.inkBlack)
-        assertEquals(Color(0xFFC4BEAE), dark.inkMuted)
-        assertEquals(Color(0xFF8E8A7E), dark.inkSubtle)
-        assertEquals(Color(0xFF3A3D35), dark.hairlineRule)
-        assertEquals(Color(0xFF4A4D44), dark.hairlineRuleVariant)
-        assertEquals(Color(0xFFE5A36F), dark.cinnabarVermilion)
-        assertEquals(Color(0xFF8FAF84), dark.willowSage)
-        assertEquals(Color(0xFFD4A574), dark.ochreGold)
-        assertEquals(Color(0xFFA8C4D0), dark.dustyIndigo)
-        assertEquals(Color(0xFFCF6E67), dark.errorCrimson)
-        assertEquals(Color(0xFFC4BEAE), dark.sealInk)
+        assertEquals(ZenDarkCanvas, dark.paperBackground)
+        assertEquals(ZenDarkSurface, dark.paperSurface)
+        assertEquals(ZenDarkCard, dark.paperCard)
+        assertEquals(ZenDarkTextPrimary, dark.inkBlack)
+        assertEquals(ZenDarkTextSecondary, dark.inkMuted)
+        assertEquals(ZenDarkHairline, dark.hairlineRule)
+        assertEquals(ZenDarkHairlineVariant, dark.hairlineRuleVariant)
+        assertEquals(ZenDarkVermilion, dark.cinnabarVermilion)
+        assertEquals(ZenDarkSage, dark.willowSage)
+        assertEquals(ZenDarkOchre, dark.ochreGold)
+        assertEquals(ZenDarkIndigo, dark.dustyIndigo)
+        assertEquals(ZenDarkError, dark.errorCrimson)
     }
 
     @Test
@@ -105,17 +100,28 @@ class ZenThemeTest {
     }
 
     @Test
-    fun `secondary text achieves WCAG AA contrast in both light and dark modes`() {
+    fun `secondary text achieves WCAG AA contrast across canvas and surface in both modes`() {
         val light = lightZenColors()
         val dark = darkZenColors()
 
-        // Light mode: muted ink on paper surface >= 4.5:1
+        // Light mode: muted ink on paper surface & canvas >= 4.5:1
         val lightSurfaceRatio = contrastRatio(light.inkMuted, light.paperSurface)
-        assertTrue("Light secondary text ratio ($lightSurfaceRatio) must be >= 4.5 (AA)", lightSurfaceRatio >= 4.5f)
+        assertTrue("Light secondary text on surface ($lightSurfaceRatio) must be >= 4.5 (AA)", lightSurfaceRatio >= 4.5f)
+        val lightCanvasRatio = contrastRatio(light.inkMuted, light.paperBackground)
+        assertTrue("Light secondary text on canvas ($lightCanvasRatio) must be >= 4.5 (AA)", lightCanvasRatio >= 4.5f)
 
-        // Dark mode: driftwood sand on deep moss surface >= 4.5:1
+        // Dark mode: driftwood sand on deep moss surface & canvas >= 4.5:1
         val darkSurfaceRatio = contrastRatio(dark.inkMuted, dark.paperSurface)
-        assertTrue("Dark secondary text ratio ($darkSurfaceRatio) must be >= 4.5 (AA)", darkSurfaceRatio >= 4.5f)
+        assertTrue("Dark secondary text on surface ($darkSurfaceRatio) must be >= 4.5 (AA)", darkSurfaceRatio >= 4.5f)
+        val darkCanvasRatio = contrastRatio(dark.inkMuted, dark.paperBackground)
+        assertTrue("Dark secondary text on canvas ($darkCanvasRatio) must be >= 4.5 (AA)", darkCanvasRatio >= 4.5f)
+    }
+
+    @Test
+    fun `dark outline achieves WCAG essential boundary contrast on dark canvas`() {
+        val dark = darkZenColors()
+        val outlineRatio = contrastRatio(ZenDarkOutline, dark.paperBackground)
+        assertTrue("Dark outline boundary ratio ($outlineRatio) on canvas must be >= 3.0:1", outlineRatio >= 3.0f)
     }
 
     @Test

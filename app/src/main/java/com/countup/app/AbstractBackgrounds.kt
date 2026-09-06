@@ -136,7 +136,11 @@ private val InkSage = Color(0xFF4A7C59)        // 柳绿 / 苔绿
 fun Modifier.drawAbstractBackground(
     theme: BackgroundTheme,
     epochDay: Long = LocalDate.now().toEpochDay(),
+    isDark: Boolean = false,
 ): Modifier = this.drawBehind {
+    if (isDark) {
+        drawNightZenWash()
+    }
     val active = resolveActiveTheme(theme, epochDay)
     when (active) {
         BackgroundTheme.MOUNTAIN -> drawInkMountainTheme()
@@ -592,4 +596,16 @@ private fun DrawScope.drawFishJumpingDuckweedTheme() {
     drawPath(fish, color = InkVermilion.copy(alpha = 0.60f))
     // Splash rings
     drawOval(color = InkIndigo.copy(alpha = 0.22f), topLeft = Offset(fx - 18.dp.toPx(), fy + 12.dp.toPx()), size = Size(36.dp.toPx(), 14.dp.toPx()), style = Stroke(width = 1.2.dp.toPx()))
+}
+
+private fun DrawScope.drawNightZenWash() {
+    val w = size.width
+    val h = size.height
+    drawRect(
+        brush = Brush.radialGradient(
+            colors = listOf(Color(0x0DE5A36F), Color.Transparent),
+            center = Offset(w * 0.85f, h * 0.85f),
+            radius = w * 0.6f,
+        ),
+    )
 }

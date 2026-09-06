@@ -2,6 +2,7 @@ package com.countup.app
 
 import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.provider.Settings
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -45,8 +46,6 @@ data class ZenColorScheme(
     val ochreGold: Color,
     val dustyIndigo: Color,
     val errorCrimson: Color,
-    val inkSubtle: Color = Color(0xFF827968),
-    val sealInk: Color = ZenSealInk,
     val isDark: Boolean = false,
 )
 
@@ -74,7 +73,6 @@ val ZenDarkSurface = Color(0xFF252922)
 val ZenDarkCard = Color(0xFF24201A)
 val ZenDarkTextPrimary = Color(0xFFF1EBDD)
 val ZenDarkTextSecondary = Color(0xFFC4BEAE)
-val ZenDarkTextSubtle = Color(0xFF8E8A7E)
 val ZenDarkHairline = Color(0xFF3A3D35)
 val ZenDarkHairlineVariant = Color(0xFF4A4D44)
 val ZenDarkVermilion = Color(0xFFE5A36F)
@@ -84,7 +82,6 @@ val ZenDarkIndigo = Color(0xFFA8C4D0)
 val ZenDarkError = Color(0xFFCF6E67)
 val ZenDarkOnPrimary = Color(0xFF172215)
 val ZenDarkOutline = Color(0xFF8B9484)
-val ZenDarkSealInk = Color(0xFFC4BEAE)
 
 fun getSeasonColor(seasonRes: Int, zenColors: ZenColorScheme): Color = when (seasonRes) {
     R.string.season_spring -> zenColors.willowSage
@@ -107,8 +104,6 @@ fun lightZenColors() = ZenColorScheme(
     ochreGold = ZenOchre,
     dustyIndigo = ZenIndigo,
     errorCrimson = ZenError,
-    inkSubtle = Color(0xFF827968),
-    sealInk = ZenSealInk,
     isDark = false,
 )
 
@@ -125,8 +120,6 @@ fun darkZenColors() = ZenColorScheme(
     ochreGold = ZenDarkOchre,
     dustyIndigo = ZenDarkIndigo,
     errorCrimson = ZenDarkError,
-    inkSubtle = ZenDarkTextSubtle,
-    sealInk = ZenDarkSealInk,
     isDark = true,
 )
 
@@ -164,6 +157,12 @@ private fun darkMcmMaterialColors() = darkColorScheme(
     error = ZenDarkError,
 )
 
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
+
 /**
  * Mid-Century Modern Zen Paper Theme with automatic twilight transition.
  */
@@ -176,7 +175,7 @@ fun ZenTheme(
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
-            val window = (view.context as? Activity)?.window
+            val window = view.context.findActivity()?.window
             if (window != null) {
                 val insetsController = WindowCompat.getInsetsController(window, view)
                 insetsController.isAppearanceLightStatusBars = !colors.isDark

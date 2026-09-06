@@ -142,11 +142,12 @@ fun CountUpContent(
         }
     }
 
+    val zenColors = LocalZenColors.current
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .drawAbstractBackground(state.backgroundTheme, state.today.toEpochDay()),
+            .drawAbstractBackground(state.backgroundTheme, state.today.toEpochDay(), isDark = zenColors.isDark),
     ) {
         Scaffold(
             containerColor = Color.Transparent,
@@ -443,7 +444,7 @@ private fun SolarTermCapsule(
                                     trim = LineHeightStyle.Trim.Both,
                                 ),
                             ),
-                            color = zenColors.sealInk,
+                            color = ZenSealInk,
                         )
 
                         Box(
@@ -461,7 +462,7 @@ private fun SolarTermCapsule(
                     }
                 }
                 1 -> {
-                    // State 1 (Tap 1 Reveal): 100% ONE SINGLE UNIFORM INK COLOR (sealInk) at 11.5sp
+                    // State 1 (Tap 1 Reveal): 100% ONE SINGLE UNIFORM INK COLOR (ZenSealInk) at 11.5sp
                     Column(
                         verticalArrangement = Arrangement.spacedBy(1.5.dp),
                     ) {
@@ -474,7 +475,7 @@ private fun SolarTermCapsule(
                                 letterSpacing = 0.9.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                             ),
-                            color = zenColors.sealInk,
+                            color = ZenSealInk,
                         )
                         Text(
                             text = countdownText,
@@ -486,14 +487,14 @@ private fun SolarTermCapsule(
                                 letterSpacing = 0.2.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                             ),
-                            color = zenColors.sealInk,
+                            color = ZenSealInk,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }
                 else -> {
-                    // State 2 (Tap 2 Reveal: Soft Whisper haiku in 2 lines): 100% ONE SINGLE UNIFORM INK COLOR (sealInk) at 11.5sp
+                    // State 2 (Tap 2 Reveal: Soft Whisper haiku in 2 lines): 100% ONE SINGLE UNIFORM INK COLOR (ZenSealInk) at 11.5sp
                     Column(
                         verticalArrangement = Arrangement.spacedBy(2.dp),
                     ) {
@@ -508,7 +509,7 @@ private fun SolarTermCapsule(
                                 lineHeight = 15.5.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                             ),
-                            color = zenColors.sealInk,
+                            color = ZenSealInk,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
@@ -523,7 +524,7 @@ private fun SolarTermCapsule(
                                 lineHeight = 15.5.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                             ),
-                            color = zenColors.sealInk,
+                            color = ZenSealInk,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
