@@ -35,12 +35,13 @@ import androidx.core.view.WindowCompat
  */
 enum class ThemeMode(
     val id: String,
+    val symbol: String,
     @get:StringRes val labelRes: Int,
     @get:StringRes val descriptionRes: Int,
 ) {
-    SYSTEM("system", R.string.theme_mode_system, R.string.theme_mode_system_desc),
-    LIGHT("light", R.string.theme_mode_light, R.string.theme_mode_light_desc),
-    DARK("dark", R.string.theme_mode_dark, R.string.theme_mode_dark_desc);
+    SYSTEM("system", "⚡", R.string.theme_mode_system, R.string.theme_mode_system_desc),
+    LIGHT("light", "☀️", R.string.theme_mode_light, R.string.theme_mode_light_desc),
+    DARK("dark", "🌙", R.string.theme_mode_dark, R.string.theme_mode_dark_desc);
 
     fun isDark(systemInDarkTheme: Boolean): Boolean = when (this) {
         SYSTEM -> systemInDarkTheme

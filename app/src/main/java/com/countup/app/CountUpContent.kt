@@ -694,11 +694,7 @@ private fun SubHeaderRow(
                     .semantics { contentDescription = sortDescription },
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    val themeGlyph = when (themeMode) {
-                        ThemeMode.LIGHT -> "☀️"
-                        ThemeMode.DARK -> "🌙"
-                        ThemeMode.SYSTEM -> if (zenColors.isDark) "🌙" else "☀️"
-                    }
+                    val themeGlyph = themeMode.symbol
 
                     Text(
                         text = stringResource(R.string.sort_prefix),
@@ -901,12 +897,12 @@ private fun SubHeaderRow(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     val themeItems = listOf(
-                        Triple(ThemeMode.SYSTEM, "⚡", stringResource(R.string.theme_tab_auto)),
-                        Triple(ThemeMode.LIGHT, "☀️", stringResource(R.string.theme_tab_light)),
-                        Triple(ThemeMode.DARK, "🌙", stringResource(R.string.theme_tab_dark)),
+                        ThemeMode.SYSTEM to stringResource(R.string.theme_tab_auto),
+                        ThemeMode.LIGHT to stringResource(R.string.theme_tab_light),
+                        ThemeMode.DARK to stringResource(R.string.theme_tab_dark),
                     )
 
-                    themeItems.forEach { (mode, glyph, label) ->
+                    themeItems.forEach { (mode, label) ->
                         val isSelected = mode == themeMode
                         val itemInteraction = rememberPressSource()
                         val optionDesc = stringResource(mode.labelRes)
@@ -936,7 +932,7 @@ private fun SubHeaderRow(
                                 horizontalArrangement = Arrangement.Center,
                             ) {
                                 Text(
-                                    text = glyph,
+                                    text = mode.symbol,
                                     fontSize = 12.sp,
                                 )
                                 Spacer(Modifier.width(3.5.dp))

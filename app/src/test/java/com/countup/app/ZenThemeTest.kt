@@ -192,5 +192,10 @@ class ZenThemeTest {
         assertFalse(ThemeMode.LIGHT.isDark(systemInDarkTheme = true))
         assertTrue(ThemeMode.SYSTEM.isDark(systemInDarkTheme = true))
         assertFalse(ThemeMode.SYSTEM.isDark(systemInDarkTheme = false))
+
+        // symbols
+        assertEquals("⚡", ThemeMode.SYSTEM.symbol)
+        assertEquals("☀️", ThemeMode.LIGHT.symbol)
+        assertEquals("🌙", ThemeMode.DARK.symbol)
     }
 }

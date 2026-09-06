@@ -505,4 +505,17 @@ class CountUpStoreTest {
         val store3 = CountUpStore(testContext)
         assertEquals(ThemeMode.LIGHT, store3.getThemeMode())
     }
+
+    @Test
+    fun themeModeMigratesFromLegacyKeyAndWritesToStandardKey() {
+        val prefs = testContext.getSharedPreferences("countup_prefs", android.content.Context.MODE_PRIVATE)
+        prefs.edit().putString("theme_mode_v1", "dark").remove("theme_mode").commit()
+
+        val store = CountUpStore(testContext)
+        assertEquals(ThemeMode.DARK, store.getThemeMode())
+
+        store.setThemeMode(ThemeMode.LIGHT)
+        assertEquals("light", prefs.getString("theme_mode", null))
+        assertFalse(prefs.contains("theme_mode_v1"))
+    }
 }

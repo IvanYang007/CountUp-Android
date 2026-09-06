@@ -72,6 +72,17 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 
 /**
+ * Resolves the surface color and border modifier for Zen modal dialogs.
+ */
+@Composable
+private fun zenDialogStyle(shape: RoundedCornerShape): Pair<Color, Modifier> {
+    val zenColors = LocalZenColors.current
+    val surface = if (zenColors.isDark) zenColors.paperSurface else Color(0xFFFCF8F2)
+    val border = if (zenColors.isDark) Modifier.border(1.dp, zenColors.hairlineRule, shape) else Modifier
+    return Pair(surface, border)
+}
+
+/**
  * Modal dialog for creating or editing a [CountUpItem].
  */
 @Composable
@@ -93,8 +104,7 @@ fun ItemEditorDialog(
     }
     var selectedCardColor by rememberSaveable {
         mutableStateOf(
-            if (item != null) item.cardColor
-            else randomWhiteCardColor()
+            item?.cardColor ?: DEFAULT_CARD_COLOR
         )
     }
     var isPinned by rememberSaveable { mutableStateOf(item?.isPinned ?: false) }
@@ -111,9 +121,7 @@ fun ItemEditorDialog(
     var showPicker by rememberSaveable { mutableStateOf(false) }
 
     val scrollState = rememberScrollState()
-    val zenColors = LocalZenColors.current
-    val dialogSurface = if (zenColors.isDark) zenColors.paperSurface else Color(0xFFFCF8F2)
-    val dialogBorder = if (zenColors.isDark) Modifier.border(1.dp, zenColors.hairlineRule, RoundedCornerShape(20.dp)) else Modifier
+    val (dialogSurface, dialogBorder) = zenDialogStyle(RoundedCornerShape(20.dp))
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -666,9 +674,7 @@ fun DeleteConfirmDialog(
     onConfirm: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val zenColors = LocalZenColors.current
-    val dialogSurface = if (zenColors.isDark) zenColors.paperSurface else Color(0xFFFCF8F2)
-    val dialogBorder = if (zenColors.isDark) Modifier.border(1.dp, zenColors.hairlineRule, RoundedCornerShape(20.dp)) else Modifier
+    val (dialogSurface, dialogBorder) = zenDialogStyle(RoundedCornerShape(20.dp))
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -742,9 +748,7 @@ fun DatePickerDialog(
     val state = rememberDatePickerState(
         initialSelectedDateMillis = initialDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),
     )
-    val zenColors = LocalZenColors.current
-    val dialogSurface = if (zenColors.isDark) zenColors.paperSurface else Color(0xFFFCF8F2)
-    val dialogBorder = if (zenColors.isDark) Modifier.border(1.dp, zenColors.hairlineRule, RoundedCornerShape(24.dp)) else Modifier
+    val (dialogSurface, dialogBorder) = zenDialogStyle(RoundedCornerShape(24.dp))
 
     AlertDialog(
         onDismissRequest = onDismiss,
