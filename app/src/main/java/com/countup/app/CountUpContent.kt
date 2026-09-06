@@ -1162,63 +1162,67 @@ fun ItemCard(
     val patina = remember(count, isDarkCard) { resolvePatina(count, isDark = isDarkCard) }
 
     val cardModifier = if (isCustomCardColor) {
-        val customBorder = if (isFutureEvent) {
-            Modifier.border(width = 1.5.dp, color = cardBorderColor(baseBgColor, isDark = isSystemDark), shape = cardShape)
+        val customBorder = if (isSystemDark) {
+            Modifier.border(width = 1.dp, color = cardBorderColor(baseBgColor, isDark = true), shape = cardShape)
         } else {
-            Modifier.border(width = 1.5.dp, brush = patina.borderBrush, shape = cardShape)
+            if (isFutureEvent) {
+                Modifier.border(width = 1.5.dp, color = cardBorderColor(baseBgColor), shape = cardShape)
+            } else {
+                Modifier.border(width = 1.5.dp, brush = patina.borderBrush, shape = cardShape)
+            }
         }
-        modifier
-            .fillMaxWidth()
-            .shadow(
+        val customShadow = if (isSystemDark) {
+            Modifier
+        } else {
+            Modifier.shadow(
                 elevation = if (isDarkCard) 4.dp else 2.5.dp,
                 shape = cardShape,
                 clip = false,
                 ambientColor = Color(0x182C2416),
                 spotColor = Color(0x222C2416),
             )
+        }
+        modifier
+            .fillMaxWidth()
+            .then(customShadow)
             .then(customBorder)
             .background(
                 color = baseBgColor,
                 shape = cardShape,
             )
     } else {
-        val defaultBorder = if (isSystemDark) {
-            Modifier.border(
-                width = 1.dp,
-                brush = if (isFutureEvent) Brush.linearGradient(listOf(zenColors.hairlineRule, zenColors.hairlineRule)) else patina.borderBrush,
-                shape = cardShape,
-            )
+        if (isSystemDark) {
+            modifier
+                .fillMaxWidth()
+                .border(
+                    width = 1.dp,
+                    color = zenColors.hairlineRule,
+                    shape = cardShape,
+                )
+                .background(
+                    color = style.cardBg,
+                    shape = cardShape,
+                )
         } else {
-            Modifier.border(
-                width = 1.5.dp,
-                brush = if (isFutureEvent) borderBrush else patina.borderBrush,
-                shape = cardShape,
-            )
+            modifier
+                .fillMaxWidth()
+                .shadow(
+                    elevation = 2.5.dp,
+                    shape = cardShape,
+                    clip = false,
+                    ambientColor = Color(0x182C2416),
+                    spotColor = Color(0x222C2416),
+                )
+                .border(
+                    width = 1.5.dp,
+                    brush = if (isFutureEvent) borderBrush else patina.borderBrush,
+                    shape = cardShape,
+                )
+                .background(
+                    brush = surfaceBrush,
+                    shape = cardShape,
+                )
         }
-
-        val defaultBackground = if (isSystemDark) {
-            Modifier.background(
-                color = style.cardBg,
-                shape = cardShape,
-            )
-        } else {
-            Modifier.background(
-                brush = surfaceBrush,
-                shape = cardShape,
-            )
-        }
-
-        modifier
-            .fillMaxWidth()
-            .shadow(
-                elevation = if (isSystemDark) 1.dp else 2.5.dp,
-                shape = cardShape,
-                clip = false,
-                ambientColor = if (isSystemDark) Color(0x33000000) else Color(0x182C2416),
-                spotColor = if (isSystemDark) Color(0x44000000) else Color(0x222C2416),
-            )
-            .then(defaultBorder)
-            .then(defaultBackground)
     }
 
     val cardRipple = ripple(color = ZenTactileHierarchy.CardPressHighlight)

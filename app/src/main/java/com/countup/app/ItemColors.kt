@@ -238,53 +238,54 @@ private val LEGACY_ID_MAP: Map<String, String> = mapOf(
 )
 
 /**
+ * Dark Mode Default Card Style (Warm Sumi Stone #24201A + Ochre Gold badge #DEB285).
+ */
+val DEFAULT_DARK_CARD_PRESET = CardColorPreset(
+    id = "",
+    nameRes = R.string.color_paper_gold,
+    cardBg = ZenDarkCard,
+    badgeBg = Color(0xFFDEB285),
+    badgeTint = ZenInkBlack,
+    primaryInk = ZenDarkTextPrimary,
+    mutedInk = ZenDarkTextSecondary,
+    isDark = true,
+)
+
+/**
  * Resolves a [colorId] (current or legacy) to a full [CardColorPreset].
  * In dark mode, default unstyled cards settle into warm sumi stone (#24201A),
  * while all 12 custom user-selected presets remain strictly immutable.
  */
 fun resolveCardStyle(colorId: String?, isDark: Boolean = false): CardColorPreset {
-    if (colorId.isNullOrBlank()) {
-        return if (isDark) {
-            CardColorPreset(
-                id = "",
-                nameRes = R.string.color_paper_gold,
-                cardBg = ZenDarkCard,
-                badgeBg = Color(0xFFDEB285),
-                badgeTint = ZenInkBlack,
-                primaryInk = ZenDarkTextPrimary,
-                mutedInk = ZenDarkTextSecondary,
-                isDark = true,
-            )
-        } else {
-            CARD_COLOR_PRESETS[0]
-        }
-    }
+    val fallback = if (isDark) DEFAULT_DARK_CARD_PRESET else CARD_COLOR_PRESETS[0]
+    if (colorId.isNullOrBlank()) return fallback
     val exact = PRESET_MAP[colorId]
     if (exact != null) return exact
     val legacyTarget = LEGACY_ID_MAP[colorId]
-    if (legacyTarget != null) return PRESET_MAP[legacyTarget] ?: if (isDark) resolveCardStyle("", isDark = true) else CARD_COLOR_PRESETS[0]
-    return if (isDark) resolveCardStyle("", isDark = true) else CARD_COLOR_PRESETS[0]
+    if (legacyTarget != null) return PRESET_MAP[legacyTarget] ?: fallback
+    return fallback
 }
 
 /**
  * Resolves a stored [colorId] into a solid card background [Color].
  */
 fun cardBackgroundColor(colorId: String?, isDark: Boolean = false): Color {
-    if (colorId.isNullOrBlank()) return if (isDark) ZenDarkCard else CARD_COLOR_PRESETS[0].cardBg
+    val fallback = if (isDark) ZenDarkCard else CARD_COLOR_PRESETS[0].cardBg
+    if (colorId.isNullOrBlank()) return fallback
     val exact = PRESET_MAP[colorId]
     if (exact != null) return exact.cardBg
     val legacyTarget = LEGACY_ID_MAP[colorId]
-    if (legacyTarget != null) return PRESET_MAP[legacyTarget]?.cardBg ?: if (isDark) ZenDarkCard else CARD_COLOR_PRESETS[0].cardBg
+    if (legacyTarget != null) return PRESET_MAP[legacyTarget]?.cardBg ?: fallback
     return try {
         val clean = colorId.trim().removePrefix("#")
         if (clean.length == 6 || clean.length == 8) {
             val longVal = clean.toLong(16)
             if (clean.length == 6) Color(longVal or 0xFF000000) else Color(longVal)
         } else {
-            if (isDark) ZenDarkCard else CARD_COLOR_PRESETS[0].cardBg
+            fallback
         }
     } catch (_: Exception) {
-        if (isDark) ZenDarkCard else CARD_COLOR_PRESETS[0].cardBg
+        fallback
     }
 }
 
