@@ -195,6 +195,19 @@
     <string name="sort_section_title">排序方式</string>
     <string name="cd_sort_search_pill">排序与搜索选项。当前按 %1$s 排序。点击进行搜索或更改排序。</string>
 
+    <!-- Theme Mode -->
+    <string name="theme_section_title">外观模式</string>
+    <string name="theme_tab_auto">自动</string>
+    <string name="theme_tab_light">浅色</string>
+    <string name="theme_tab_dark">深色</string>
+    <string name="theme_mode_system">跟随系统</string>
+    <string name="theme_mode_light">浅色（宣纸）</string>
+    <string name="theme_mode_dark">深色（夜墨）</string>
+    <string name="theme_mode_system_desc">跟随系统浅色或深色主题</string>
+    <string name="theme_mode_light_desc">暖色宣纸与徽墨意蕴</string>
+    <string name="theme_mode_dark_desc">沉稳墨灰与月晕微光</string>
+    <string name="theme_switched_toast">主题切换为：%1$s</string>
+
     <!-- Card & Badge Style Presets (White, Green, Blackish) -->
     <string name="card_color_label">卡片样式</string>
     <string name="color_category_washi">宣纸</string>

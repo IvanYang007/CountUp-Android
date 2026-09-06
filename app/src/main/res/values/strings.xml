@@ -197,6 +197,9 @@
 
     <!-- Theme Mode -->
     <string name="theme_section_title">APPEARANCE</string>
+    <string name="theme_tab_auto">Auto</string>
+    <string name="theme_tab_light">Light</string>
+    <string name="theme_tab_dark">Dark</string>
     <string name="theme_mode_system">System Default</string>
     <string name="theme_mode_light">Light (Washi)</string>
     <string name="theme_mode_dark">Dark (Twilight)</string>

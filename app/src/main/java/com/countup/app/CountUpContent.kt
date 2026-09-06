@@ -892,9 +892,9 @@ private fun SubHeaderRow(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     val themeItems = listOf(
-                        Triple(ThemeMode.SYSTEM, "⚡", "Auto"),
-                        Triple(ThemeMode.LIGHT, "☀️", "Light"),
-                        Triple(ThemeMode.DARK, "🌙", "Dark"),
+                        Triple(ThemeMode.SYSTEM, "⚡", stringResource(R.string.theme_tab_auto)),
+                        Triple(ThemeMode.LIGHT, "☀️", stringResource(R.string.theme_tab_light)),
+                        Triple(ThemeMode.DARK, "🌙", stringResource(R.string.theme_tab_dark)),
                     )
 
                     themeItems.forEach { (mode, glyph, label) ->
