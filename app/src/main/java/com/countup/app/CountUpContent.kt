@@ -685,6 +685,12 @@ private fun SubHeaderRow(
                     .semantics { contentDescription = sortDescription },
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    val themeGlyph = when (themeMode) {
+                        ThemeMode.LIGHT -> "☀️"
+                        ThemeMode.DARK -> "🌙"
+                        ThemeMode.SYSTEM -> if (zenColors.isDark) "🌙" else "☀️"
+                    }
+
                     Text(
                         text = stringResource(R.string.sort_prefix),
                         style = MaterialTheme.typography.bodySmall.copy(
@@ -702,6 +708,18 @@ private fun SubHeaderRow(
                         ),
                         fontFamily = FontFamily.SansSerif,
                         color = MaterialTheme.colorScheme.primary,
+                    )
+                    Spacer(Modifier.width(3.dp))
+                    Text(
+                        text = "·",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Spacer(Modifier.width(2.5.dp))
+                    Text(
+                        text = themeGlyph,
+                        fontSize = 11.sp,
                     )
                     Spacer(Modifier.width(3.dp))
                     Text(
@@ -799,12 +817,12 @@ private fun SubHeaderRow(
                 Text(
                     text = stringResource(R.string.sort_section_title),
                     style = MaterialTheme.typography.labelSmall.copy(
-                        fontSize = 10.sp,
-                        letterSpacing = 1.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontSize = 11.5.sp,
+                        letterSpacing = 0.8.sp,
+                        fontWeight = FontWeight.SemiBold,
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
                 )
                 Spacer(Modifier.padding(top = 2.dp))
 
@@ -850,16 +868,16 @@ private fun SubHeaderRow(
                     }
                 }
 
-                Spacer(Modifier.padding(top = 8.dp))
+                Spacer(Modifier.padding(top = 10.dp))
                 Text(
                     text = stringResource(R.string.theme_section_title),
                     style = MaterialTheme.typography.labelSmall.copy(
-                        fontSize = 10.sp,
-                        letterSpacing = 1.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontSize = 11.5.sp,
+                        letterSpacing = 0.8.sp,
+                        fontWeight = FontWeight.SemiBold,
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
                 )
                 Spacer(Modifier.padding(top = 2.dp))
 
