@@ -23,7 +23,7 @@
             android:id="@+id/hero_badge_circle"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:src="@drawable/ic_circle_olive"
+            android:src="@drawable/ic_circle_plate"
             android:contentDescription="@null" />
 
         <ImageView

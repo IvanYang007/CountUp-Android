@@ -252,17 +252,65 @@ val DEFAULT_DARK_CARD_PRESET = CardColorPreset(
 )
 
 /**
+ * Dark-Mode Calibrated Presets:
+ * In dark mode, card surfaces settle into twilight elevation:
+ * - Washi (Paper) cards rest on Sumi stone (#24201A) to prevent OLED glare, preserving badge identity.
+ * - Earth (Nature) cards deepen into rich botanical night tones (#1E2B22 Deep Pine, #1C2621 Celadon, #26221C Sandalwood).
+ * - Sumi (Ink) cards naturally retain their deep contemplative surfaces.
+ * All badge colors remain 100% identical between light and dark modes.
+ */
+val DARK_CARD_COLOR_PRESETS: List<CardColorPreset> = CARD_COLOR_PRESETS.map { base ->
+    when (base.id) {
+        "" -> DEFAULT_DARK_CARD_PRESET
+        "paper_sage", "paper_terracotta", "paper_indigo" -> base.copy(
+            cardBg = ZenDarkCard,
+            primaryInk = ZenDarkTextPrimary,
+            mutedInk = ZenDarkTextSecondary,
+            isDark = true,
+        )
+        "sage_forest" -> base.copy(
+            cardBg = Color(0xFF1E2B22),
+            primaryInk = Color(0xFFFAF7F2),
+            mutedInk = Color(0xFFD6E4DB),
+            isDark = true,
+        )
+        "sage_ochre" -> base.copy(
+            cardBg = Color(0xFF1E2B22),
+            primaryInk = Color(0xFFFAF7F2),
+            mutedInk = Color(0xFFD6E4DB),
+            isDark = true,
+        )
+        "celadon_bamboo" -> base.copy(
+            cardBg = Color(0xFF1C2621),
+            primaryInk = Color(0xFFFAF7F2),
+            mutedInk = Color(0xFFD6E4DB),
+            isDark = true,
+        )
+        "linen_sandalwood" -> base.copy(
+            cardBg = Color(0xFF26221C),
+            primaryInk = Color(0xFFFAF7F2),
+            mutedInk = Color(0xFFD6C8B7),
+            isDark = true,
+        )
+        else -> base // Sumi presets already have isDark = true and dark cardBg
+    }
+}
+
+private val DARK_PRESET_MAP: Map<String, CardColorPreset> = DARK_CARD_COLOR_PRESETS.associateBy { it.id }
+
+/**
  * Resolves a [colorId] (current or legacy) to a full [CardColorPreset].
- * In dark mode, default unstyled cards settle into warm sumi stone (#24201A),
- * while all 12 custom user-selected presets remain strictly immutable.
+ * In dark mode, card surfaces settle into night-calibrated tones,
+ * while light mode colors remain 100% untouched.
  */
 fun resolveCardStyle(colorId: String?, isDark: Boolean = false): CardColorPreset {
+    val map = if (isDark) DARK_PRESET_MAP else PRESET_MAP
     val fallback = if (isDark) DEFAULT_DARK_CARD_PRESET else CARD_COLOR_PRESETS[0]
     if (colorId.isNullOrBlank()) return fallback
-    val exact = PRESET_MAP[colorId]
+    val exact = map[colorId]
     if (exact != null) return exact
     val legacyTarget = LEGACY_ID_MAP[colorId]
-    if (legacyTarget != null) return PRESET_MAP[legacyTarget] ?: fallback
+    if (legacyTarget != null) return map[legacyTarget] ?: fallback
     return fallback
 }
 
@@ -270,23 +318,15 @@ fun resolveCardStyle(colorId: String?, isDark: Boolean = false): CardColorPreset
  * Resolves a stored [colorId] into a solid card background [Color].
  */
 fun cardBackgroundColor(colorId: String?, isDark: Boolean = false): Color {
-    val fallback = if (isDark) ZenDarkCard else CARD_COLOR_PRESETS[0].cardBg
-    if (colorId.isNullOrBlank()) return fallback
-    val exact = PRESET_MAP[colorId]
-    if (exact != null) return exact.cardBg
-    val legacyTarget = LEGACY_ID_MAP[colorId]
-    if (legacyTarget != null) return PRESET_MAP[legacyTarget]?.cardBg ?: fallback
-    return try {
-        val clean = colorId.trim().removePrefix("#")
-        if (clean.length == 6 || clean.length == 8) {
-            val longVal = clean.toLong(16)
-            if (clean.length == 6) Color(longVal or 0xFF000000) else Color(longVal)
-        } else {
-            fallback
+    if (colorId.isNullOrBlank()) return if (isDark) ZenDarkCard else CARD_COLOR_PRESETS[0].cardBg
+    val clean = colorId.trim().removePrefix("#")
+    if (clean.length == 6 || clean.length == 8) {
+        val longVal = clean.toLongOrNull(16)
+        if (longVal != null) {
+            return if (clean.length == 6) Color(longVal or 0xFF000000) else Color(longVal)
         }
-    } catch (_: Exception) {
-        fallback
     }
+    return resolveCardStyle(colorId, isDark).cardBg
 }
 
 /**

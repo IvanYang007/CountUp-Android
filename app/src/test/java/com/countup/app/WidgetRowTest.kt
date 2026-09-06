@@ -157,26 +157,35 @@ class WidgetRowTest {
     }
 
     @Test
-    fun widgetCircleStyleProvidesDifferentColorsForDefaultedCards() {
-        val row1 = WidgetRowData(id = "item1", name = "Item 1", count = 5, futureFlag = false, cardColor = "")
-        val row2 = WidgetRowData(id = "item2", name = "Item 2", count = 10, futureFlag = false, cardColor = "")
-        val row3 = WidgetRowData(id = "item3", name = "Item 3", count = 15, futureFlag = false, cardColor = "")
+    fun widgetCircleStyleMatchesAppCardBadgeForDefaultAndCustomCards() {
+        val defaultRow = WidgetRowData(id = "item1", name = "Default Item", count = 5, futureFlag = false, cardColor = "")
+        val defaultStyleLight = resolveWidgetCircleStyle(defaultRow, isDark = false)
+        val defaultStyleDark = resolveWidgetCircleStyle(defaultRow, isDark = true)
+        // Default card in app has Ochre Gold badge
+        assertEquals(0xFFDEB285.toInt(), defaultStyleLight.circleColor)
+        assertEquals(0xFF2C2416.toInt(), defaultStyleLight.textInk)
+        assertEquals(0xFFDEB285.toInt(), defaultStyleDark.circleColor)
+        assertEquals(0xFF2C2416.toInt(), defaultStyleDark.textInk)
 
-        val style1 = resolveWidgetCircleStyle(row1, 0)
-        val style2 = resolveWidgetCircleStyle(row2, 1)
-        val style3 = resolveWidgetCircleStyle(row3, 2)
+        // Custom presets match their exact in-app badges across both modes
+        val sageForestRow = WidgetRowData(id = "item2", name = "Garden", count = 10, futureFlag = false, cardColor = "sage_forest")
+        val sageForestLight = resolveWidgetCircleStyle(sageForestRow, isDark = false)
+        val sageForestDark = resolveWidgetCircleStyle(sageForestRow, isDark = true)
+        assertEquals(0xFF33523D.toInt(), sageForestLight.circleColor) // Deep Forest badge
+        assertEquals(0xFFFFFFFF.toInt(), sageForestLight.textInk)
+        assertEquals(0xFF33523D.toInt(), sageForestDark.circleColor)
+        assertEquals(0xFFFFFFFF.toInt(), sageForestDark.textInk)
 
-        assertTrue(DEFAULT_WIDGET_PALETTE.any { it.circleColor == style1.circleColor })
-        assertTrue(DEFAULT_WIDGET_PALETTE.any { it.circleColor == style2.circleColor })
-        assertTrue(DEFAULT_WIDGET_PALETTE.any { it.circleColor == style3.circleColor })
-        // Verify distinct adjacent styles
-        org.junit.Assert.assertNotEquals(style1.circleColor, style2.circleColor)
+        val paperSageRow = WidgetRowData(id = "item3", name = "Reading", count = 15, futureFlag = false, cardColor = "paper_sage")
+        val paperSageStyle = resolveWidgetCircleStyle(paperSageRow, isDark = false)
+        assertEquals(0xFF5E8C6D.toInt(), paperSageStyle.circleColor) // Willow Sage badge
+        assertEquals(0xFFFFFFFF.toInt(), paperSageStyle.textInk)
     }
 
     @Test
     fun widgetCircleStyleHonorsCustomCardPresets() {
         val customRow = WidgetRowData(id = "custom", name = "Custom", count = 20, futureFlag = false, cardColor = "ink_gold")
-        val style = resolveWidgetCircleStyle(customRow, 0)
+        val style = resolveWidgetCircleStyle(customRow, isDark = true)
         // Ochre gold badge color
         assertEquals(0xFFDEB285.toInt(), style.circleColor)
         // Ochre gold is light, so text ink is dark

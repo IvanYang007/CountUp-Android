@@ -27,7 +27,7 @@ class HeroWidgetTest {
             futureFlag = false,
             cardColor = "sage_forest",
         )
-        val styleSage = resolveWidgetCircleStyle(rowSage, 0)
+        val styleSage = resolveWidgetCircleStyle(rowSage)
         // Forest green badge
         assertEquals(0xFF33523D.toInt(), styleSage.circleColor)
         // Light ink on dark green
@@ -40,7 +40,7 @@ class HeroWidgetTest {
             futureFlag = false,
             cardColor = "ink_gold",
         )
-        val styleGold = resolveWidgetCircleStyle(rowGold, 0)
+        val styleGold = resolveWidgetCircleStyle(rowGold)
         // Ochre gold badge
         assertEquals(0xFFDEB285.toInt(), styleGold.circleColor)
         // Dark ink on ochre gold

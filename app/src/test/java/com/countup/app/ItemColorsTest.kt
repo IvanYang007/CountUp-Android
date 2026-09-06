@@ -1,6 +1,7 @@
 package com.countup.app
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -76,7 +77,7 @@ class ItemColorsTest {
     }
 
     @Test
-    fun `all custom card presets remain strictly immutable across light and dark modes`() {
+    fun `all custom card presets preserve badge identity while calibrating surfaces in dark mode`() {
         val customPresets = CARD_COLOR_PRESETS.filter { it.id.isNotEmpty() }
         assertEquals(11, customPresets.size)
 
@@ -84,21 +85,46 @@ class ItemColorsTest {
             val resolvedLight = resolveCardStyle(preset.id, isDark = false)
             val resolvedDark = resolveCardStyle(preset.id, isDark = true)
 
-            assertEquals("Preset ${preset.id} cardBg must be immutable", preset.cardBg, resolvedLight.cardBg)
-            assertEquals("Preset ${preset.id} cardBg must be immutable in dark", preset.cardBg, resolvedDark.cardBg)
-            assertEquals("Preset ${preset.id} badgeBg must be immutable", preset.badgeBg, resolvedDark.badgeBg)
-            assertEquals("Preset ${preset.id} badgeTint must be immutable", preset.badgeTint, resolvedDark.badgeTint)
-            assertEquals("Preset ${preset.id} primaryInk must be immutable", preset.primaryInk, resolvedDark.primaryInk)
-            assertEquals("Preset ${preset.id} mutedInk must be immutable", preset.mutedInk, resolvedDark.mutedInk)
-            assertEquals("Preset ${preset.id} isDark must be immutable", preset.isDark, resolvedDark.isDark)
+            // Light mode cardBg is strictly untouched
+            assertEquals("Preset ${preset.id} cardBg must match in light mode", preset.cardBg, resolvedLight.cardBg)
+            // Badge color & tint are 100% preserved between light and dark modes
+            assertEquals("Preset ${preset.id} badgeBg must be identical across modes", resolvedLight.badgeBg, resolvedDark.badgeBg)
+            assertEquals("Preset ${preset.id} badgeTint must be identical across modes", resolvedLight.badgeTint, resolvedDark.badgeTint)
+            // Dark mode always flags isDark = true
+            assertTrue("Preset ${preset.id} must be marked isDark in dark mode", resolvedDark.isDark)
+        }
+
+        // Specifically verify sage_forest night calibration eliminates glare
+        val sageLight = resolveCardStyle("sage_forest", isDark = false)
+        val sageDark = resolveCardStyle("sage_forest", isDark = true)
+        assertEquals(Color(0xFF5E8C6D), sageLight.cardBg) // Original light sage untouched
+        assertEquals(Color(0xFF1E2B22), sageDark.cardBg) // Deep night pine
+        assertEquals(Color(0xFF33523D), sageDark.badgeBg) // Forest green badge preserved
+        assertEquals(Color(0xFFFAF7F2), sageDark.primaryInk) // Crisp warm white text
+
+        // Specifically verify sage_ochre night calibration
+        val sageOchreLight = resolveCardStyle("sage_ochre", isDark = false)
+        val sageOchreDark = resolveCardStyle("sage_ochre", isDark = true)
+        assertEquals(Color(0xFF5E8C6D), sageOchreLight.cardBg)
+        assertEquals(Color(0xFF1E2B22), sageOchreDark.cardBg)
+        assertEquals(Color(0xFFDEB285), sageOchreDark.badgeBg)
+
+        // Specifically verify all Washi paper cards rest on Sumi stone in dark mode
+        listOf("paper_sage", "paper_terracotta", "paper_indigo").forEach { washiId ->
+            val washiLight = resolveCardStyle(washiId, isDark = false)
+            val washiDark = resolveCardStyle(washiId, isDark = true)
+            assertTrue("Light mode washi card must be white or off-white", washiLight.cardBg.luminance() > 0.85f)
+            assertEquals("Dark mode washi card must rest on sumi stone", ZenDarkCard, washiDark.cardBg)
+            assertEquals("Badge color must be identical across modes", washiLight.badgeBg, washiDark.badgeBg)
         }
     }
 
     @Test
-    fun `cardBackgroundColor respects isDark for default card and preserves custom colors`() {
+    fun `cardBackgroundColor respects isDark for default card and calibrates surfaces in dark mode`() {
         assertEquals(Color(0xFFFFFFFF), cardBackgroundColor("", isDark = false))
         assertEquals(ZenDarkCard, cardBackgroundColor("", isDark = true))
-        assertEquals(Color(0xFF5E8C6D), cardBackgroundColor("sage_forest", isDark = true))
+        assertEquals(Color(0xFF5E8C6D), cardBackgroundColor("sage_forest", isDark = false))
+        assertEquals(Color(0xFF1E2B22), cardBackgroundColor("sage_forest", isDark = true))
         assertEquals(Color(0xFF24201A), cardBackgroundColor("ink_gold", isDark = true))
     }
 

@@ -165,7 +165,7 @@ private fun buildHero2x1RemoteViews(
             icon = item.icon,
             cardColor = item.cardColor,
         ),
-        position = 0,
+        isDark = isNight,
     )
 
     val cardBgInt = style.cardBg.toArgb()

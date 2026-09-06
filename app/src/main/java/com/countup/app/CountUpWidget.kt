@@ -15,7 +15,6 @@ import android.os.SystemClock
 import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
-import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -411,9 +410,9 @@ internal class WidgetViewsFactory(private val context: Context) : RemoteViewsSer
                 views.setImageViewResource(R.id.cell_circle, R.drawable.ic_circle_green)
                 views.setInt(R.id.cell_circle, "setColorFilter", 0)
             } else {
-                val circleStyle = resolveWidgetCircleStyle(row, position)
+                val circleStyle = resolveWidgetCircleStyle(row, isDark = night)
                 views.setTextColor(R.id.cell_count, circleStyle.textInk)
-                views.setImageViewResource(R.id.cell_circle, R.drawable.ic_circle_olive)
+                views.setImageViewResource(R.id.cell_circle, R.drawable.ic_circle_plate)
                 views.setInt(R.id.cell_circle, "setColorFilter", circleStyle.circleColor)
             }
         }
@@ -448,35 +447,15 @@ internal data class WidgetCircleStyle(
 )
 
 /**
- * Curated Zen & MCM palette of circle badge colors for widget cells.
- * Even when card surface is defaulted to Paper White, widget circles cycle through
- * these rich, harmonious colors to ensure visual variety across home screen cells.
+ * Resolves the circle badge color and high-contrast text ink for a widget cell,
+ * ensuring 1:1 visual parity with the app card's badge circle in both light and dark modes.
  */
-internal val DEFAULT_WIDGET_PALETTE = listOf(
-    WidgetCircleStyle(circleColor = 0xFFDEB285.toInt(), textInk = 0xFF2C2416.toInt()), // Ochre Gold (沉金)
-    WidgetCircleStyle(circleColor = 0xFF5E8C6D.toInt(), textInk = 0xFFFFFFFF.toInt()), // Willow Sage
-    WidgetCircleStyle(circleColor = 0xFFD87A4F.toInt(), textInk = 0xFFFFFFFF.toInt()), // Warm Terracotta
-    WidgetCircleStyle(circleColor = 0xFF344C5C.toInt(), textInk = 0xFFFFFFFF.toInt()), // Lapis Indigo
-    WidgetCircleStyle(circleColor = 0xFFC45249.toInt(), textInk = 0xFFFFFFFF.toInt()), // Japanese Vermilion
-    WidgetCircleStyle(circleColor = 0xFF33523D.toInt(), textInk = 0xFFFFFFFF.toInt()), // Deep Forest
-    WidgetCircleStyle(circleColor = 0xFF4D7A58.toInt(), textInk = 0xFFFFFFFF.toInt()), // Jade Green
-)
-
-/**
- * Resolves the circle badge color and high-contrast text ink for a widget cell.
- */
-internal fun resolveWidgetCircleStyle(row: WidgetRowData, position: Int): WidgetCircleStyle {
-    if (row.cardColor.isNotBlank() && row.cardColor != DEFAULT_CARD_COLOR) {
-        val customPreset = resolveCardStyle(row.cardColor)
-        val badgeColor = customPreset.badgeBg
-        val colorInt = badgeColor.toArgb()
-        val textInk = if (badgeColor.luminance() < 0.40f) 0xFFFFFFFF.toInt() else 0xFF2C2416.toInt()
-        return WidgetCircleStyle(circleColor = colorInt, textInk = textInk)
-    }
-    // Defaulted card: provide distinct, deterministic, varied colors from the curated palette
-    val hash = if (row.id.isNotEmpty()) kotlin.math.abs(row.id.hashCode()) else position
-    val index = (hash + position) % DEFAULT_WIDGET_PALETTE.size
-    return DEFAULT_WIDGET_PALETTE[index]
+internal fun resolveWidgetCircleStyle(row: WidgetRowData, isDark: Boolean = false): WidgetCircleStyle {
+    val preset = resolveCardStyle(row.cardColor, isDark = isDark)
+    return WidgetCircleStyle(
+        circleColor = preset.badgeBg.toArgb(),
+        textInk = preset.badgeTint.toArgb(),
+    )
 }
 
 /** Whether the widget should render in dark (night) mode based on theme setting and system night mode. */
