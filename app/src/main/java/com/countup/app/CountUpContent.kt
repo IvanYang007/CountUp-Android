@@ -362,6 +362,8 @@ private fun SolarTermCapsule(
     val seasonName = stringResource(solarTerm.seasonRes)
     val termName = stringResource(solarTerm.nameRes)
 
+    val sealInk = if (zenColors.isDark) zenColors.inkMuted else ZenSealInk
+
     val contentDesc = when (morphStep) {
         0 -> "$seasonName, $termName"
         1 -> "$degreeText, $countdownText"
@@ -444,7 +446,7 @@ private fun SolarTermCapsule(
                                     trim = LineHeightStyle.Trim.Both,
                                 ),
                             ),
-                            color = ZenSealInk,
+                            color = sealInk,
                         )
 
                         Box(
@@ -475,7 +477,7 @@ private fun SolarTermCapsule(
                                 letterSpacing = 0.9.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                             ),
-                            color = ZenSealInk,
+                            color = sealInk,
                         )
                         Text(
                             text = countdownText,
@@ -487,7 +489,7 @@ private fun SolarTermCapsule(
                                 letterSpacing = 0.2.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                             ),
-                            color = ZenSealInk,
+                            color = sealInk,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
@@ -509,7 +511,7 @@ private fun SolarTermCapsule(
                                 lineHeight = 15.5.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                             ),
-                            color = ZenSealInk,
+                            color = sealInk,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
@@ -524,7 +526,7 @@ private fun SolarTermCapsule(
                                 lineHeight = 15.5.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                             ),
-                            color = ZenSealInk,
+                            color = sealInk,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
@@ -585,6 +587,15 @@ private fun HeaderRow(
             Spacer(Modifier.height(3.dp))
             SolarTermCapsule(solarTerm = activeSolarTerm, today = today)
         }
+        val zenColors = LocalZenColors.current
+        val plusContainerColor = if (zenColors.isDark) Color(0xFF2A3A2C) else MaterialTheme.colorScheme.tertiary
+        val plusContentColor = if (zenColors.isDark) ZenDarkSage else MaterialTheme.colorScheme.onTertiary
+        val plusBorderModifier = if (zenColors.isDark) {
+            Modifier.border(width = 1.dp, color = ZenDarkSage, shape = CircleShape)
+        } else {
+            Modifier
+        }
+
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
@@ -592,7 +603,8 @@ private fun HeaderRow(
                 .minimumInteractiveComponentSize()
                 .size(44.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.tertiary)
+                .then(plusBorderModifier)
+                .background(plusContainerColor)
                 .clickable(
                     interactionSource = plusInteraction,
                     indication = LocalIndication.current,
@@ -606,7 +618,7 @@ private fun HeaderRow(
                 fontSize = 24.sp,
                 fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onTertiary,
+                color = plusContentColor,
                 textAlign = TextAlign.Center,
             )
         }
@@ -710,10 +722,10 @@ private fun SubHeaderRow(
                 expanded = isMenuOpen,
                 onDismissRequest = { onToggleMenu(false) },
                 shape = RoundedCornerShape(12.dp),
-                containerColor = zenColors.paperBackground,
+                containerColor = if (zenColors.isDark) zenColors.paperSurface else zenColors.paperBackground,
                 tonalElevation = 0.dp,
                 border = BorderStroke(1.dp, zenColors.hairlineRule),
-                shadowElevation = 6.dp,
+                shadowElevation = if (zenColors.isDark) 0.dp else 6.dp,
                 modifier = Modifier
                     .width(260.dp)
                     .padding(horizontal = 8.dp, vertical = 6.dp),

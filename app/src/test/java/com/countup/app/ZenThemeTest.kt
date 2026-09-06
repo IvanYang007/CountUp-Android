@@ -156,4 +156,25 @@ class ZenThemeTest {
         assertEquals(dark.dustyIndigo, getSeasonColor(R.string.season_winter, dark))
         assertEquals(Color(0xFFA8C4D0), getSeasonColor(R.string.season_winter, dark))
     }
+
+    @Test
+    fun `ticket 3 subdued action button and dialog colors adhere to evening specification`() {
+        val dark = darkZenColors()
+        val light = lightZenColors()
+
+        // Dialog container in dark mode resolves to paperSurface (#252922)
+        assertEquals(ZenDarkSurface, dark.paperSurface)
+        // Dialog container in light mode resolves to warm washi surface or #FCF8F2
+        assertEquals(ZenPaperSurface, light.paperSurface)
+
+        // Subdued bedtime action button in dark mode
+        val darkButtonBg = Color(0xFF2A3A2C)
+        val darkButtonSage = ZenDarkSage
+        val actionContrast = contrastRatio(darkButtonSage, darkButtonBg)
+        assertTrue("Subdued action button glyph on deep sage container must have high contrast ratio ($actionContrast >= 4.5)", actionContrast >= 4.5f)
+
+        // Solar term seal ink in dark mode resolves to muted ink (#C4BEAE)
+        assertEquals(ZenDarkTextSecondary, dark.inkMuted)
+        assertEquals(ZenSealInk, Color(0xFF5A4D41))
+    }
 }

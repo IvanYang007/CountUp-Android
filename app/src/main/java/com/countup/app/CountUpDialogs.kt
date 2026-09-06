@@ -111,11 +111,14 @@ fun ItemEditorDialog(
     var showPicker by rememberSaveable { mutableStateOf(false) }
 
     val scrollState = rememberScrollState()
+    val zenColors = LocalZenColors.current
+    val dialogSurface = if (zenColors.isDark) zenColors.paperSurface else Color(0xFFFCF8F2)
+    val dialogBorder = if (zenColors.isDark) Modifier.border(1.dp, zenColors.hairlineRule, RoundedCornerShape(20.dp)) else Modifier
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        modifier = modifier,
-        containerColor = Color(0xFFFCF8F2),
+        modifier = modifier.then(dialogBorder),
+        containerColor = dialogSurface,
         tonalElevation = 0.dp,
         shape = RoundedCornerShape(20.dp),
         title = {
@@ -663,10 +666,14 @@ fun DeleteConfirmDialog(
     onConfirm: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val zenColors = LocalZenColors.current
+    val dialogSurface = if (zenColors.isDark) zenColors.paperSurface else Color(0xFFFCF8F2)
+    val dialogBorder = if (zenColors.isDark) Modifier.border(1.dp, zenColors.hairlineRule, RoundedCornerShape(20.dp)) else Modifier
+
     AlertDialog(
         onDismissRequest = onDismiss,
-        modifier = modifier,
-        containerColor = Color(0xFFFCF8F2),
+        modifier = modifier.then(dialogBorder),
+        containerColor = dialogSurface,
         tonalElevation = 0.dp,
         shape = RoundedCornerShape(20.dp),
         title = {
@@ -735,12 +742,15 @@ fun DatePickerDialog(
     val state = rememberDatePickerState(
         initialSelectedDateMillis = initialDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),
     )
+    val zenColors = LocalZenColors.current
+    val dialogSurface = if (zenColors.isDark) zenColors.paperSurface else Color(0xFFFCF8F2)
+    val dialogBorder = if (zenColors.isDark) Modifier.border(1.dp, zenColors.hairlineRule, RoundedCornerShape(24.dp)) else Modifier
 
     AlertDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false),
-        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp),
-        containerColor = Color(0xFFFCF8F2),
+        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp).then(dialogBorder),
+        containerColor = dialogSurface,
         tonalElevation = 0.dp,
         shape = RoundedCornerShape(24.dp),
         title = {
@@ -754,7 +764,7 @@ fun DatePickerDialog(
         },
         text = {
             val datePickerColors = DatePickerDefaults.colors(
-                containerColor = Color(0xFFFCF8F2),
+                containerColor = dialogSurface,
                 titleContentColor = MaterialTheme.colorScheme.onSurface,
                 headlineContentColor = MaterialTheme.colorScheme.onSurface,
                 weekdayContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
