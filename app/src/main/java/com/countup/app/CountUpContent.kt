@@ -369,7 +369,7 @@ private fun SolarTermCapsule(
         ) { step ->
             when (step) {
                 0 -> {
-                    // State 0 (Resting Seal): Marcellus 11.5sp, season in seasonal vermilion/ochre/sage/indigo, hairline pipe, term name, breathing pulse dot
+                    // State 0 (Resting Seal): Marcellus 12.5sp, season in seasonal vermilion/ochre/sage/indigo, hairline pipe, term name, breathing pulse dot
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -378,7 +378,7 @@ private fun SolarTermCapsule(
                             style = TextStyle(
                                 fontFamily = MarcellusFontFamily,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 11.5.sp,
+                                fontSize = 12.5.sp,
                                 letterSpacing = 1.1.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                                 lineHeightStyle = LineHeightStyle(
@@ -394,7 +394,7 @@ private fun SolarTermCapsule(
                             style = TextStyle(
                                 fontFamily = FontFamily.SansSerif,
                                 fontWeight = FontWeight.Light,
-                                fontSize = 11.5.sp,
+                                fontSize = 12.5.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                             ),
                             color = zenColors.hairlineRuleVariant,
@@ -406,7 +406,7 @@ private fun SolarTermCapsule(
                             style = TextStyle(
                                 fontFamily = MarcellusFontFamily,
                                 fontWeight = FontWeight.Normal,
-                                fontSize = 11.5.sp,
+                                fontSize = 12.5.sp,
                                 letterSpacing = 0.9.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                                 lineHeightStyle = LineHeightStyle(
@@ -432,7 +432,7 @@ private fun SolarTermCapsule(
                     }
                 }
                 1 -> {
-                    // State 1 (Tap 1 Reveal): 100% ONE SINGLE UNIFORM INK COLOR (ZenSealInk) at 10.5sp
+                    // State 1 (Tap 1 Reveal): 100% ONE SINGLE UNIFORM INK COLOR (ZenSealInk) at 11.5sp
                     Column(
                         verticalArrangement = Arrangement.spacedBy(1.5.dp),
                     ) {
@@ -441,7 +441,7 @@ private fun SolarTermCapsule(
                             style = TextStyle(
                                 fontFamily = MarcellusFontFamily,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 10.5.sp,
+                                fontSize = 11.5.sp,
                                 letterSpacing = 0.9.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                             ),
@@ -453,7 +453,7 @@ private fun SolarTermCapsule(
                                 fontFamily = NotoSerifItalicFontFamily,
                                 fontStyle = FontStyle.Italic,
                                 fontWeight = FontWeight.Normal,
-                                fontSize = 10.5.sp,
+                                fontSize = 11.5.sp,
                                 letterSpacing = 0.2.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                             ),
@@ -464,7 +464,7 @@ private fun SolarTermCapsule(
                     }
                 }
                 else -> {
-                    // State 2 (Tap 2 Reveal: Soft & Small Whisper haiku in 2 lines): 100% ONE SINGLE UNIFORM INK COLOR (ZenSealInk)
+                    // State 2 (Tap 2 Reveal: Soft Whisper haiku in 2 lines): 100% ONE SINGLE UNIFORM INK COLOR (ZenSealInk) at 11.5sp
                     Column(
                         verticalArrangement = Arrangement.spacedBy(2.dp),
                     ) {
@@ -474,9 +474,9 @@ private fun SolarTermCapsule(
                                 fontFamily = NotoSerifItalicFontFamily,
                                 fontStyle = FontStyle.Italic,
                                 fontWeight = FontWeight.Normal,
-                                fontSize = 10.5.sp,
+                                fontSize = 11.5.sp,
                                 letterSpacing = 0.15.sp,
-                                lineHeight = 14.5.sp,
+                                lineHeight = 15.5.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                             ),
                             color = ZenSealInk,
@@ -489,9 +489,9 @@ private fun SolarTermCapsule(
                                 fontFamily = NotoSerifItalicFontFamily,
                                 fontStyle = FontStyle.Italic,
                                 fontWeight = FontWeight.Normal,
-                                fontSize = 10.5.sp,
+                                fontSize = 11.5.sp,
                                 letterSpacing = 0.15.sp,
-                                lineHeight = 14.5.sp,
+                                lineHeight = 15.5.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                             ),
                             color = ZenSealInk,
