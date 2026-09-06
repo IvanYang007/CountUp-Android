@@ -114,6 +114,10 @@
     <string name="item_comment">备注</string>
     <string name="comment_placeholder">选填备注（最多2行）</string>
     <string name="anchor_date">起始日期</string>
+    <string name="pin_to_top">置顶记录</string>
+    <string name="cd_pin_to_top">将此记录置顶显示在列表最前</string>
+    <string name="cd_pinned">已置顶</string>
+    <string name="pinned_timeline_divider">时间线</string>
     <string name="cd_expand_customization">展开样式与图标自定义选项</string>
     <string name="cd_collapse_customization">收起样式与图标自定义选项</string>
     <string name="save">保存</string>

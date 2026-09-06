@@ -921,4 +921,34 @@ class CountUpViewModelTest {
             assertTrue(effect5 is CountUpUiEffect.RefreshWidget)
         }
     }
+
+    @Test
+    fun `saving item with isPinned true saves pinned status and emits RefreshWidget`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = sampleItems)
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+
+        viewModel.effects.test {
+            val draft = ItemDraft(
+                name = "Morning Tea",
+                epochDay = fixedToday.minusDays(3).toEpochDay(),
+                comment = "Zen practice",
+                icon = "leaf",
+                cardColor = "washi_moss",
+                isPinned = true,
+            )
+            viewModel.onEvent(CountUpUiEvent.SaveItem(draft))
+
+            val effect = awaitItem()
+            assertTrue(effect is CountUpUiEffect.RefreshWidget)
+
+            val updatedItems = repo.getItems()
+            val savedItem = updatedItems.firstOrNull { it.name == "Morning Tea" }
+            assertNotNull(savedItem)
+            assertTrue(savedItem!!.isPinned)
+        }
+    }
 }

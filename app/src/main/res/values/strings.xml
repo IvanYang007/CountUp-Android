@@ -114,6 +114,10 @@
     <string name="item_comment">Comment</string>
     <string name="comment_placeholder">Optional note (max 2 lines)</string>
     <string name="anchor_date">Anchor date</string>
+    <string name="pin_to_top">Pin to top</string>
+    <string name="cd_pin_to_top">Pin this counter to the top of the list</string>
+    <string name="cd_pinned">Pinned to top</string>
+    <string name="pinned_timeline_divider">Timeline</string>
     <string name="cd_expand_customization">Expand style and icon customization options</string>
     <string name="cd_collapse_customization">Collapse style and icon customization options</string>
     <string name="save">Save</string>

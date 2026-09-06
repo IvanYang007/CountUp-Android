@@ -46,9 +46,7 @@ class HeroWidgetReceiver : AppWidgetProvider() {
                     val store = CountUpStore(appContext)
                     val boundItemId = store.getHeroWidgetBinding(appWidgetId)
                     val items = store.items()
-                    val targetItem = items.firstOrNull { it.id == boundItemId }
-                        ?: items.firstOrNull { it.showInWidget }
-                        ?: items.firstOrNull()
+                    val targetItem = resolveHeroTargetItem(items, boundItemId)
                     val count = targetItem?.let { daysSince(LocalDate.ofEpochDay(it.epochDay), LocalDate.now()) } ?: 0L
                     val currentMode = store.getHeroWidgetDisplayMode(appWidgetId)
                     val nextMode = currentMode.next(count)
@@ -101,17 +99,20 @@ fun pushAllHeroWidgetsUpdate(context: Context) {
     }
 }
 
+/** Resolves the target item for a Hero widget: bound item -> first pinned visible -> first visible -> first item -> null. */
+internal fun resolveHeroTargetItem(items: List<CountUpItem>, boundItemId: String?): CountUpItem? =
+    items.firstOrNull { it.id == boundItemId }
+        ?: items.firstOrNull { it.isPinned && it.showInWidget }
+        ?: items.firstOrNull { it.showInWidget }
+        ?: items.firstOrNull()
+
 /** Renders and pushes RemoteViews for a single Hero Milestone widget (2x1 Poetic Card). */
 fun pushHeroWidgetUpdate(context: Context, appWidgetId: Int) {
     val manager = AppWidgetManager.getInstance(context)
     val store = CountUpStore(context)
     val items = store.items()
     val boundItemId = store.getHeroWidgetBinding(appWidgetId)
-
-    // Resolve target item: explicit binding -> first visible item -> first item -> null
-    val targetItem = items.firstOrNull { it.id == boundItemId }
-        ?: items.firstOrNull { it.showInWidget }
-        ?: items.firstOrNull()
+    val targetItem = resolveHeroTargetItem(items, boundItemId)
 
     val today = LocalDate.now()
     val views = buildHero2x1RemoteViews(context, targetItem, today, appWidgetId)

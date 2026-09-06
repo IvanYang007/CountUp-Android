@@ -14,6 +14,7 @@ interface CountUpRepository {
         comment: String = "",
         icon: String = "",
         cardColor: String = "",
+        isPinned: Boolean = false,
     ): CountUpItem?
     fun updateItem(
         id: String,
@@ -22,6 +23,7 @@ interface CountUpRepository {
         comment: String = "",
         icon: String = "",
         cardColor: String = "",
+        isPinned: Boolean = false,
     ): Boolean
     fun deleteItem(id: String): Boolean
     fun resetTo(id: String, epochDay: Long = LocalDate.now().toEpochDay()): Boolean
@@ -51,8 +53,9 @@ class DefaultCountUpRepository(
         comment: String,
         icon: String,
         cardColor: String,
+        isPinned: Boolean,
     ): CountUpItem? =
-        store.addItem(name, epochDay, comment, icon, cardColor)
+        store.addItem(name, epochDay, comment, icon, cardColor, isPinned)
 
     override fun updateItem(
         id: String,
@@ -61,8 +64,9 @@ class DefaultCountUpRepository(
         comment: String,
         icon: String,
         cardColor: String,
+        isPinned: Boolean,
     ): Boolean =
-        store.updateItem(id, name, epochDay, comment, icon, cardColor)
+        store.updateItem(id, name, epochDay, comment, icon, cardColor, isPinned)
 
     override fun deleteItem(id: String): Boolean =
         store.deleteItem(id)

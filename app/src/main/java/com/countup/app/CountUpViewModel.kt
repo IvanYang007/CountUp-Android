@@ -87,6 +87,7 @@ class CountUpViewModel(
                             comment = event.comment,
                             icon = event.icon,
                             cardColor = event.cardColor,
+                            isPinned = event.isPinned,
                         ) != null
                     } else {
                         repository.updateItem(
@@ -96,6 +97,7 @@ class CountUpViewModel(
                             comment = event.comment,
                             icon = event.icon,
                             cardColor = event.cardColor,
+                            isPinned = event.isPinned,
                         )
                     }
                     if (success) {

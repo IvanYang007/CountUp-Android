@@ -138,4 +138,35 @@ class SortOrderTest {
         assertEquals("Reading Book", sortedName[1].name)
         assertEquals("Water Bonsai", sortedName[2].name)
     }
+
+    @Test
+    fun sortItemsAlwaysPrioritizesPinnedItemsBeforeUnpinnedItems() {
+        val unpinned1 = CountUpItem(id = "1", name = "Haircut", epochDay = today.toEpochDay() - 100) // 100 days
+        val unpinned2 = CountUpItem(id = "2", name = "Plant", epochDay = today.toEpochDay() - 50) // 50 days
+        val pinned1 = CountUpItem(
+            id = "3",
+            name = "Zen Garden",
+            epochDay = today.toEpochDay() - 10, // 10 days
+            pinnedTimestamp = 1000L,
+        )
+        val pinned2 = CountUpItem(
+            id = "4",
+            name = "Tea Ceremony",
+            epochDay = today.toEpochDay() - 5, // 5 days
+            pinnedTimestamp = 2000L,
+        )
+
+        val list = listOf(unpinned1, unpinned2, pinned1, pinned2)
+        val sorted = sortItems(list, SortOrder.DAYS_DESC, today)
+
+        // Pinned items must come first regardless of count
+        assertTrue(sorted[0].isPinned)
+        assertTrue(sorted[1].isPinned)
+        assertEquals("Zen Garden", sorted[0].name) // 10 days vs 5 days (DAYS_DESC within pinned)
+        assertEquals("Tea Ceremony", sorted[1].name)
+
+        // Unpinned items follow
+        assertEquals("Haircut", sorted[2].name) // 100 days
+        assertEquals("Plant", sorted[3].name) // 50 days
+    }
 }

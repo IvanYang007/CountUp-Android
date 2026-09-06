@@ -34,6 +34,8 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -95,6 +97,7 @@ fun ItemEditorDialog(
             else randomWhiteCardColor()
         )
     }
+    var isPinned by rememberSaveable { mutableStateOf(item?.isPinned ?: false) }
     var isCustomizationExpanded by rememberSaveable {
         mutableStateOf(item != null && (item.cardColor.isNotBlank() || item.icon.isNotBlank()))
     }
@@ -192,6 +195,7 @@ fun ItemEditorDialog(
             }
         },
         text = {
+            val pinContentDesc = stringResource(R.string.cd_pin_to_top)
             val textFieldColors = TextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
                 unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
@@ -284,6 +288,40 @@ fun ItemEditorDialog(
                             color = MaterialTheme.colorScheme.primary,
                         )
                     }
+                }
+
+                // Pin to top toggle row (Zen minimalist switch)
+                Spacer(Modifier.padding(top = 10.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                        .clickable { isPinned = !isPinned }
+                        .padding(horizontal = 2.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        text = stringResource(R.string.pin_to_top).uppercase(),
+                        style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.sp),
+                        fontFamily = FontFamily.SansSerif,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Switch(
+                        checked = isPinned,
+                        onCheckedChange = { isPinned = it },
+                        modifier = Modifier.semantics {
+                            contentDescription = pinContentDesc
+                        },
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = ZenWhite,
+                            checkedTrackColor = MaterialTheme.colorScheme.primary,
+                            uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+                            uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            uncheckedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                        ),
+                    )
                 }
 
                 AnimatedVisibility(
@@ -574,6 +612,7 @@ fun ItemEditorDialog(
                             comment = comment,
                             icon = selectedIcon,
                             cardColor = selectedCardColor,
+                            isPinned = isPinned,
                         )
                     )
                 },

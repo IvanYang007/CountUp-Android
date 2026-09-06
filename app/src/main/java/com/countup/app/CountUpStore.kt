@@ -118,6 +118,7 @@ class CountUpStore(context: Context) {
         comment: String = "",
         icon: String = "",
         cardColor: String = "",
+        isPinned: Boolean = false,
     ): CountUpItem? {
         val trimmed = name.trim()
         val resolvedIcon = icon.trim().ifEmpty { ALL_ICON_NAMES.random() }
@@ -129,6 +130,7 @@ class CountUpStore(context: Context) {
             icon = resolvedIcon,
             cardColor = cardColor.trim(),
             futureFlag = epochDay > LocalDate.now().toEpochDay(),
+            pinnedTimestamp = if (isPinned) System.currentTimeMillis() else null,
         )
         return synchronized(globalStoreLock) {
             val updated = items() + item
@@ -149,6 +151,7 @@ class CountUpStore(context: Context) {
         comment: String = "",
         icon: String = "",
         cardColor: String = "",
+        isPinned: Boolean = false,
     ): Boolean {
         val trimmed = name.trim()
         return synchronized(globalStoreLock) {
@@ -157,6 +160,11 @@ class CountUpStore(context: Context) {
             if (index < 0) return false
             val current = list[index]
             val resolvedIcon = icon.trim().ifEmpty { current.icon.ifEmpty { DEFAULT_ICON } }
+            val newPinnedTimestamp = if (isPinned) {
+                current.pinnedTimestamp ?: System.currentTimeMillis()
+            } else {
+                null
+            }
             list[index] = current.copy(
                 name = trimmed.ifEmpty { DEFAULT_ITEM_NAME },
                 epochDay = epochDay,
@@ -164,6 +172,7 @@ class CountUpStore(context: Context) {
                 icon = resolvedIcon,
                 cardColor = cardColor.trim(),
                 futureFlag = epochDay > LocalDate.now().toEpochDay(),
+                pinnedTimestamp = newPinnedTimestamp,
             )
             persist(list)
         }

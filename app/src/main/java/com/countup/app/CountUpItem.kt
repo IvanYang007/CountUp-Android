@@ -27,7 +27,12 @@ data class CountUpItem(
     val resetCount: Int = 0,
     /** Cumulative days elapsed across all completed reset cycles. */
     val totalResetDays: Long = 0L,
+    /** Epoch milliseconds when this item was pinned to the top; null indicates unpinned. */
+    val pinnedTimestamp: Long? = null,
 ) {
+    /** True when this item is pinned to the top of the list. */
+    val isPinned: Boolean get() = pinnedTimestamp != null
+
     /** Mathematically-rounded average days per reset cycle. Returns 0 if never reset. */
     val averageResetDays: Int
         get() = if (resetCount > 0) {
@@ -110,6 +115,7 @@ data class ItemDraft(
     val comment: String = "",
     val icon: String = "",
     val cardColor: String = "",
+    val isPinned: Boolean = false,
 )
 
 /**
@@ -152,7 +158,12 @@ internal fun encodeItems(items: List<CountUpItem>): String {
                 .put("futureFlag", item.futureFlag)
                 .put("showInWidget", item.showInWidget)
                 .put("resetCount", item.resetCount)
-                .put("totalResetDays", item.totalResetDays),
+                .put("totalResetDays", item.totalResetDays)
+                .apply {
+                    if (item.pinnedTimestamp != null) {
+                        put("pinnedTimestamp", item.pinnedTimestamp)
+                    }
+                },
         )
     }
     return arr.toString()
@@ -278,6 +289,12 @@ internal fun decodeElement(o: JSONObject?): CountUpItem? {
         val rawName = o.optString("name", "").trim()
         val name = rawName.ifEmpty { DEFAULT_ITEM_NAME }
 
+        val pinnedTimestamp = when (val raw = o.opt("pinnedTimestamp")) {
+            is Number -> raw.toLong()
+            is String -> raw.toLongOrNull()
+            else -> null
+        }
+
         CountUpItem(
             id = id,
             name = name,
@@ -289,6 +306,7 @@ internal fun decodeElement(o: JSONObject?): CountUpItem? {
             showInWidget = o.optBoolean("showInWidget", true),
             resetCount = o.optInt("resetCount", 0).coerceAtLeast(0),
             totalResetDays = o.optLong("totalResetDays", 0L).coerceAtLeast(0L),
+            pinnedTimestamp = pinnedTimestamp,
         )
     } catch (_: Exception) {
         null

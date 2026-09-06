@@ -46,6 +46,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -89,6 +90,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.disabled
@@ -213,6 +215,24 @@ fun CountUpContent(
                             modifier = Modifier.fillMaxWidth().padding(top = 48.dp),
                         )
                     } else {
+                        val pinnedItems = remember(displayItems) { displayItems.filter { it.isPinned } }
+                        val unpinnedItems = remember(displayItems) { displayItems.filter { !it.isPinned } }
+
+                        val renderItemCard: @Composable LazyItemScope.(CountUpItem) -> Unit = { item ->
+                            ItemCard(
+                                item = item,
+                                onClick = { onEvent(CountUpUiEvent.OpenEditor(item)) },
+                                onDelete = { onEvent(CountUpUiEvent.RequestDelete(item)) },
+                                onReset = { onEvent(CountUpUiEvent.ConfirmReset(item.id)) },
+                                onToggleWidget = { onEvent(CountUpUiEvent.ToggleWidgetVisibility(item.id)) },
+                                whisper = state.cardWhispers[item.id],
+                                onUndoReset = { onEvent(CountUpUiEvent.UndoReset(item.id)) },
+                                modifier = if (reduceMotion) Modifier else Modifier.animateItem(),
+                                today = state.today,
+                                reduceMotion = reduceMotion,
+                            )
+                        }
+
                         LazyColumn(
                             verticalArrangement = Arrangement.spacedBy(16.dp),
                             contentPadding = PaddingValues(vertical = 8.dp, horizontal = 6.dp),
@@ -231,23 +251,32 @@ fun CountUpContent(
                                     )
                                 }
                             }
+
                             items(
-                                items = displayItems,
+                                items = pinnedItems,
                                 key = { it.id },
                                 contentType = { "item_card" },
                             ) { item ->
-                                ItemCard(
-                                    item = item,
-                                    onClick = { onEvent(CountUpUiEvent.OpenEditor(item)) },
-                                    onDelete = { onEvent(CountUpUiEvent.RequestDelete(item)) },
-                                    onReset = { onEvent(CountUpUiEvent.ConfirmReset(item.id)) },
-                                    onToggleWidget = { onEvent(CountUpUiEvent.ToggleWidgetVisibility(item.id)) },
-                                    whisper = state.cardWhispers[item.id],
-                                    onUndoReset = { onEvent(CountUpUiEvent.UndoReset(item.id)) },
-                                    modifier = if (reduceMotion) Modifier else Modifier.animateItem(),
-                                    today = state.today,
-                                    reduceMotion = reduceMotion,
-                                )
+                                renderItemCard(item)
+                            }
+
+                            if (pinnedItems.isNotEmpty() && unpinnedItems.isNotEmpty()) {
+                                item(
+                                    key = "pinned_section_divider",
+                                    contentType = "pinned_section_divider",
+                                ) {
+                                    PinnedSectionDivider(
+                                        modifier = if (reduceMotion) Modifier else Modifier.animateItem(),
+                                    )
+                                }
+                            }
+
+                            items(
+                                items = unpinnedItems,
+                                key = { it.id },
+                                contentType = { "item_card" },
+                            ) { item ->
+                                renderItemCard(item)
                             }
                         }
                     }
@@ -1209,6 +1238,16 @@ fun ItemCard(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f, fill = false),
                 )
+                if (item.isPinned) {
+                    Spacer(Modifier.width(5.dp))
+                    val pinDesc = stringResource(R.string.cd_pinned)
+                    Icon(
+                        painter = painterResource(R.drawable.ic_seal_pin),
+                        contentDescription = pinDesc,
+                        tint = if (isDarkCard) Color(0xFFDEB285) else MaterialTheme.colorScheme.primary.copy(alpha = 0.85f),
+                        modifier = Modifier.size(11.dp),
+                    )
+                }
                 if (count >= 0 && item.resetCount > 0) {
                     Spacer(Modifier.width(6.dp))
                     ResetRhythmBadge(
@@ -1658,6 +1697,49 @@ private fun EmptyState(onNewItem: () -> Unit, modifier: Modifier = Modifier) {
             modifier = Modifier.pressScale(emptyInteraction),
         ) {
             Text(stringResource(R.string.new_item))
+        }
+    }
+}
+
+/**
+ * Minimalist Zen hairline divider separating pinned cards from standard chronological cards.
+ * Provides subtle negative space and a refined washi/stone rule with zero visual distraction.
+ */
+@Composable
+private fun PinnedSectionDivider(
+    modifier: Modifier = Modifier,
+) {
+    val zenColors = LocalZenColors.current
+    val dividerDescription = stringResource(R.string.pinned_timeline_divider)
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 14.dp, vertical = 4.dp)
+            .clearAndSetSemantics {
+                contentDescription = dividerDescription
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+        ) {
+            val strokeWidth = 0.8.dp.toPx()
+            drawLine(
+                brush = Brush.horizontalGradient(
+                    0.0f to Color.Transparent,
+                    0.15f to zenColors.hairlineRule.copy(alpha = 0.5f),
+                    0.5f to zenColors.hairlineRule.copy(alpha = 0.85f),
+                    0.85f to zenColors.hairlineRule.copy(alpha = 0.5f),
+                    1.0f to Color.Transparent,
+                ),
+                start = Offset(0f, size.height / 2),
+                end = Offset(size.width, size.height / 2),
+                strokeWidth = strokeWidth,
+                cap = StrokeCap.Round,
+            )
         }
     }
 }

@@ -301,6 +301,7 @@ internal data class WidgetRowData(
     val icon: String = DEFAULT_ICON,
     val cardColor: String = "",
     val resetCount: Int = 0,
+    val isPinned: Boolean = false,
 )
 
 /** Pure derivation shared by the widget (and unit-tested on the JVM). */
@@ -314,6 +315,7 @@ internal fun widgetRows(items: List<CountUpItem>, today: LocalDate): List<Widget
             icon = item.icon,
             cardColor = item.cardColor,
             resetCount = item.resetCount,
+            isPinned = item.isPinned,
         )
     }
 
@@ -375,6 +377,7 @@ internal class WidgetViewsFactory(private val context: Context) : RemoteViewsSer
             views.setTextViewText(R.id.cell_name, context.getString(R.string.widget_reset_prompt))
             views.setTextColor(R.id.cell_name, textInk)
             views.setViewVisibility(R.id.cell_reset_count, View.GONE)
+            views.setViewVisibility(R.id.cell_pin, View.GONE)
             views.setTextViewText(R.id.cell_count, "0?")
             views.setTextColor(R.id.cell_count, WHITE)
             views.setImageViewResource(R.id.cell_circle, R.drawable.ic_circle_orange)
@@ -389,6 +392,14 @@ internal class WidgetViewsFactory(private val context: Context) : RemoteViewsSer
                 views.setTextColor(R.id.cell_reset_count, if (night) WIDGET_RESET_BADGE_NIGHT else WIDGET_RESET_BADGE_DAY)
             } else {
                 views.setViewVisibility(R.id.cell_reset_count, View.GONE)
+            }
+
+            if (row.isPinned) {
+                views.setViewVisibility(R.id.cell_pin, View.VISIBLE)
+                val pinTint = if (night) WIDGET_RESET_BADGE_NIGHT else WIDGET_RESET_BADGE_DAY
+                views.setInt(R.id.cell_pin, "setColorFilter", pinTint)
+            } else {
+                views.setViewVisibility(R.id.cell_pin, View.GONE)
             }
 
             val arrived = arrivedFuture(row)
