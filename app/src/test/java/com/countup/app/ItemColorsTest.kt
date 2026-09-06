@@ -60,6 +60,56 @@ class ItemColorsTest {
     }
 
     @Test
+    fun `default card style settles into warm sumi stone in dark mode with ochre gold badge`() {
+        val darkDefault = resolveCardStyle("", isDark = true)
+        assertEquals(ZenDarkCard, darkDefault.cardBg)
+        assertEquals(Color(0xFF24201A), darkDefault.cardBg)
+        assertEquals(Color(0xFFDEB285), darkDefault.badgeBg)
+        assertEquals(ZenInkBlack, darkDefault.badgeTint)
+        assertEquals(ZenDarkTextPrimary, darkDefault.primaryInk)
+        assertEquals(ZenDarkTextSecondary, darkDefault.mutedInk)
+        assertTrue(darkDefault.isDark)
+
+        val nullDarkDefault = resolveCardStyle(null, isDark = true)
+        assertEquals(ZenDarkCard, nullDarkDefault.cardBg)
+        assertTrue(nullDarkDefault.isDark)
+    }
+
+    @Test
+    fun `all custom card presets remain strictly immutable across light and dark modes`() {
+        val customPresets = CARD_COLOR_PRESETS.filter { it.id.isNotEmpty() }
+        assertEquals(11, customPresets.size)
+
+        customPresets.forEach { preset ->
+            val resolvedLight = resolveCardStyle(preset.id, isDark = false)
+            val resolvedDark = resolveCardStyle(preset.id, isDark = true)
+
+            assertEquals("Preset ${preset.id} cardBg must be immutable", preset.cardBg, resolvedLight.cardBg)
+            assertEquals("Preset ${preset.id} cardBg must be immutable in dark", preset.cardBg, resolvedDark.cardBg)
+            assertEquals("Preset ${preset.id} badgeBg must be immutable", preset.badgeBg, resolvedDark.badgeBg)
+            assertEquals("Preset ${preset.id} badgeTint must be immutable", preset.badgeTint, resolvedDark.badgeTint)
+            assertEquals("Preset ${preset.id} primaryInk must be immutable", preset.primaryInk, resolvedDark.primaryInk)
+            assertEquals("Preset ${preset.id} mutedInk must be immutable", preset.mutedInk, resolvedDark.mutedInk)
+            assertEquals("Preset ${preset.id} isDark must be immutable", preset.isDark, resolvedDark.isDark)
+        }
+    }
+
+    @Test
+    fun `cardBackgroundColor respects isDark for default card and preserves custom colors`() {
+        assertEquals(Color(0xFFFFFFFF), cardBackgroundColor("", isDark = false))
+        assertEquals(ZenDarkCard, cardBackgroundColor("", isDark = true))
+        assertEquals(Color(0xFF5E8C6D), cardBackgroundColor("sage_forest", isDark = true))
+        assertEquals(Color(0xFF24201A), cardBackgroundColor("ink_gold", isDark = true))
+    }
+
+    @Test
+    fun `cardBorderColor provides hairline rule for light backgrounds in dark mode`() {
+        assertEquals(ZenDarkHairline, cardBorderColor(Color.White, isDark = true))
+        assertEquals(Color(0x33FFFFFF), cardBorderColor(Color(0xFF24201A), isDark = true))
+        assertEquals(Color(0x242C2416), cardBorderColor(Color.White, isDark = false))
+    }
+
+    @Test
     fun `legacy color ids map to refined modern combinations`() {
         assertEquals("sage_forest", resolveCardStyle("willow_sage").id)
         assertEquals("ink_gold", resolveCardStyle("deep_ink").id)

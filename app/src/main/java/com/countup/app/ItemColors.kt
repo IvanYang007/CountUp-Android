@@ -239,35 +239,52 @@ private val LEGACY_ID_MAP: Map<String, String> = mapOf(
 
 /**
  * Resolves a [colorId] (current or legacy) to a full [CardColorPreset].
+ * In dark mode, default unstyled cards settle into warm sumi stone (#24201A),
+ * while all 12 custom user-selected presets remain strictly immutable.
  */
-fun resolveCardStyle(colorId: String?): CardColorPreset {
-    if (colorId.isNullOrBlank()) return CARD_COLOR_PRESETS[0]
+fun resolveCardStyle(colorId: String?, isDark: Boolean = false): CardColorPreset {
+    if (colorId.isNullOrBlank()) {
+        return if (isDark) {
+            CardColorPreset(
+                id = "",
+                nameRes = R.string.color_paper_gold,
+                cardBg = ZenDarkCard,
+                badgeBg = Color(0xFFDEB285),
+                badgeTint = ZenInkBlack,
+                primaryInk = ZenDarkTextPrimary,
+                mutedInk = ZenDarkTextSecondary,
+                isDark = true,
+            )
+        } else {
+            CARD_COLOR_PRESETS[0]
+        }
+    }
     val exact = PRESET_MAP[colorId]
     if (exact != null) return exact
     val legacyTarget = LEGACY_ID_MAP[colorId]
-    if (legacyTarget != null) return PRESET_MAP[legacyTarget] ?: CARD_COLOR_PRESETS[0]
-    return CARD_COLOR_PRESETS[0]
+    if (legacyTarget != null) return PRESET_MAP[legacyTarget] ?: if (isDark) resolveCardStyle("", isDark = true) else CARD_COLOR_PRESETS[0]
+    return if (isDark) resolveCardStyle("", isDark = true) else CARD_COLOR_PRESETS[0]
 }
 
 /**
  * Resolves a stored [colorId] into a solid card background [Color].
  */
-fun cardBackgroundColor(colorId: String?): Color {
-    if (colorId.isNullOrBlank()) return CARD_COLOR_PRESETS[0].cardBg
+fun cardBackgroundColor(colorId: String?, isDark: Boolean = false): Color {
+    if (colorId.isNullOrBlank()) return if (isDark) ZenDarkCard else CARD_COLOR_PRESETS[0].cardBg
     val exact = PRESET_MAP[colorId]
     if (exact != null) return exact.cardBg
     val legacyTarget = LEGACY_ID_MAP[colorId]
-    if (legacyTarget != null) return PRESET_MAP[legacyTarget]?.cardBg ?: CARD_COLOR_PRESETS[0].cardBg
+    if (legacyTarget != null) return PRESET_MAP[legacyTarget]?.cardBg ?: if (isDark) ZenDarkCard else CARD_COLOR_PRESETS[0].cardBg
     return try {
         val clean = colorId.trim().removePrefix("#")
         if (clean.length == 6 || clean.length == 8) {
             val longVal = clean.toLong(16)
             if (clean.length == 6) Color(longVal or 0xFF000000) else Color(longVal)
         } else {
-            CARD_COLOR_PRESETS[0].cardBg
+            if (isDark) ZenDarkCard else CARD_COLOR_PRESETS[0].cardBg
         }
     } catch (_: Exception) {
-        CARD_COLOR_PRESETS[0].cardBg
+        if (isDark) ZenDarkCard else CARD_COLOR_PRESETS[0].cardBg
     }
 }
 
@@ -291,8 +308,8 @@ fun cardMutedInk(backgroundColor: Color): Color =
 /**
  * Returns a high-contrast card border brush/tint for the given [backgroundColor].
  */
-fun cardBorderColor(backgroundColor: Color): Color =
-    if (isDarkCardBackground(backgroundColor)) Color(0x33FFFFFF) else Color(0x242C2416)
+fun cardBorderColor(backgroundColor: Color, isDark: Boolean = false): Color =
+    if (isDarkCardBackground(backgroundColor)) Color(0x33FFFFFF) else if (isDark) ZenDarkHairline else Color(0x242C2416)
 
 /**
  * Computes an icon badge container color that complements the [backgroundColor] / [colorId].
