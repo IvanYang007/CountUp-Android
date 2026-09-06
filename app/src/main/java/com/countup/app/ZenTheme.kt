@@ -27,7 +27,31 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
+import androidx.annotation.StringRes
 import androidx.core.view.WindowCompat
+
+/**
+ * User selectable appearance mode.
+ */
+enum class ThemeMode(
+    val id: String,
+    @get:StringRes val labelRes: Int,
+    @get:StringRes val descriptionRes: Int,
+) {
+    SYSTEM("system", R.string.theme_mode_system, R.string.theme_mode_system_desc),
+    LIGHT("light", R.string.theme_mode_light, R.string.theme_mode_light_desc),
+    DARK("dark", R.string.theme_mode_dark, R.string.theme_mode_dark_desc);
+
+    fun isDark(systemInDarkTheme: Boolean): Boolean = when (this) {
+        SYSTEM -> systemInDarkTheme
+        LIGHT -> false
+        DARK -> true
+    }
+
+    companion object {
+        fun fromId(id: String?): ThemeMode = entries.firstOrNull { it.id == id } ?: SYSTEM
+    }
+}
 
 /**
  * Mid-Century Modern Zen Paper & Chinese Ink Pigment Color Tokens.

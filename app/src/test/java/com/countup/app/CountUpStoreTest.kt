@@ -485,4 +485,24 @@ class CountUpStoreTest {
         val finalItems = finalStore.items()
         assertEquals(threadCount * itemsPerThread, finalItems.size)
     }
+
+    @Test
+    fun themeModeDefaultsToSystemAndPersistsAcrossStoreInstances() {
+        val store1 = CountUpStore(testContext)
+        assertEquals(ThemeMode.SYSTEM, store1.getThemeMode())
+
+        // Persist DARK mode
+        val saved = store1.setThemeMode(ThemeMode.DARK)
+        assertTrue(saved)
+        assertEquals(ThemeMode.DARK, store1.getThemeMode())
+
+        // Read from fresh store instance
+        val store2 = CountUpStore(testContext)
+        assertEquals(ThemeMode.DARK, store2.getThemeMode())
+
+        // Switch to LIGHT mode
+        store2.setThemeMode(ThemeMode.LIGHT)
+        val store3 = CountUpStore(testContext)
+        assertEquals(ThemeMode.LIGHT, store3.getThemeMode())
+    }
 }

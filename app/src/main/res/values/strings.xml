@@ -195,6 +195,16 @@
     <string name="sort_section_title">SORT ORDER</string>
     <string name="cd_sort_search_pill">Sort and search options. Currently sorted by %1$s. Tap to search or change sort.</string>
 
+    <!-- Theme Mode -->
+    <string name="theme_section_title">APPEARANCE</string>
+    <string name="theme_mode_system">System Default</string>
+    <string name="theme_mode_light">Light (Washi)</string>
+    <string name="theme_mode_dark">Dark (Twilight)</string>
+    <string name="theme_mode_system_desc">Follows device day &amp; night theme</string>
+    <string name="theme_mode_light_desc">Warm parchment &amp; Chinese soot ink</string>
+    <string name="theme_mode_dark_desc">Charcoal slate &amp; moonlight glow</string>
+    <string name="theme_switched_toast">Theme: %1$s</string>
+
     <!-- Card & Badge Style Presets (White, Green, Blackish) -->
     <string name="card_color_label">Card Style</string>
     <string name="color_category_washi">Washi</string>

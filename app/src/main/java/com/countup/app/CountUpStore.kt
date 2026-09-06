@@ -309,6 +309,23 @@ class CountUpStore(context: Context) {
     }
 
     /**
+     * Retrieves the saved [ThemeMode], defaulting to [ThemeMode.SYSTEM].
+     */
+    fun getThemeMode(): ThemeMode {
+        val raw = prefs.getString(KEY_THEME_MODE, null)
+        return ThemeMode.fromId(raw)
+    }
+
+    /**
+     * Persists the user's selected [ThemeMode].
+     */
+    fun setThemeMode(mode: ThemeMode): Boolean {
+        return prefs.edit()
+            .putString(KEY_THEME_MODE, mode.id)
+            .commit()
+    }
+
+    /**
      * Retrieves the saved [SortOrder], defaulting to [SortOrder.DAYS_DESC].
      */
     fun getSortOrder(): SortOrder {
@@ -538,6 +555,7 @@ class CountUpStore(context: Context) {
         private const val KEY_LEGACY_DAY_QUARANTINE = "legacy_day_quarantine"
         private const val KEY_MIGRATED = "migrated_v1"
         private const val KEY_BACKGROUND_THEME = "background_theme_v1"
+        private const val KEY_THEME_MODE = "theme_mode_v1"
         private const val KEY_SORT_ORDER = "sort_order_v1"
         private const val LEGACY_PREFS_NAME = "haircut_prefs"
         private const val LEGACY_KEY_EPOCH_DAY = "last_haircut_epoch_day"

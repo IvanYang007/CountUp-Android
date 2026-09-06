@@ -154,7 +154,8 @@ private fun buildHero2x1RemoteViews(
     val armed = ResetCountReceiver.isArmed(item.id)
     val count = daysSince(LocalDate.ofEpochDay(item.epochDay), today)
     val isMilestone = isMilestoneDay(count)
-    val style = resolveCardStyle(item.cardColor)
+    val isNight = isNightMode(context)
+    val style = resolveCardStyle(item.cardColor, isDark = isNight)
     val circleStyle = resolveWidgetCircleStyle(
         row = WidgetRowData(
             id = item.id,

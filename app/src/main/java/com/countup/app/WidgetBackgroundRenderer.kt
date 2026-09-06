@@ -30,7 +30,7 @@ object WidgetBackgroundRenderer {
 
     // Palette: Chinese Ink & Mineral Pigments with soft wash alpha
     private const val COLOR_PAPER = 0xFFF5E6D3.toInt()
-    private const val COLOR_NIGHT_PAPER = 0xFF241D12.toInt()
+    private const val COLOR_NIGHT_PAPER = 0xFF191B17.toInt()
 
     private const val INK_BLACK = 0x241E2124       // 浓墨
     private const val INK_MUTED = 0x224A4E54       // 淡墨

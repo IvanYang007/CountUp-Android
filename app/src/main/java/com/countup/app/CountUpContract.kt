@@ -25,6 +25,7 @@ data class CountUpUiState(
     val searchQuery: String = "",
     val sortOrder: SortOrder = SortOrder.DAYS_DESC,
     val backgroundTheme: BackgroundTheme = BackgroundTheme.AUTO_DAILY,
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val editorTarget: CountUpItem? = null,
     val isEditorOpen: Boolean = false,
     val isSearchSortMenuOpen: Boolean = false,
@@ -48,6 +49,7 @@ sealed interface CountUpUiEvent {
     data class SearchQueryChanged(val query: String) : CountUpUiEvent
     data object ClearSearch : CountUpUiEvent
     data class SortOrderSelected(val order: SortOrder) : CountUpUiEvent
+    data class ThemeModeSelected(val mode: ThemeMode) : CountUpUiEvent
     data object CycleBackground : CountUpUiEvent
     data class OpenEditor(val target: CountUpItem? = null) : CountUpUiEvent
     data object CloseEditor : CountUpUiEvent

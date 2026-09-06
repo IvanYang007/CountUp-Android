@@ -57,8 +57,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            ZenTheme {
-                val state by viewModel.state.collectAsStateWithLifecycle()
+            val state by viewModel.state.collectAsStateWithLifecycle()
+            val systemDark = androidx.compose.foundation.isSystemInDarkTheme()
+            val isDark = state.themeMode.isDark(systemDark)
+
+            ZenTheme(darkTheme = isDark) {
                 val snackbarHostState = remember { SnackbarHostState() }
 
                 LaunchedEffect(Unit) {

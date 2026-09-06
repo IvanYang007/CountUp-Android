@@ -201,12 +201,14 @@ fun CountUpContent(
                     SubHeaderRow(
                         itemCount = displayItems.size,
                         sortOrder = state.sortOrder,
+                        themeMode = state.themeMode,
                         searchQuery = state.searchQuery,
                         isMenuOpen = state.isSearchSortMenuOpen,
                         onToggleMenu = { onEvent(CountUpUiEvent.SetSearchSortMenuOpen(it)) },
                         onSearchChanged = { onEvent(CountUpUiEvent.SearchQueryChanged(it)) },
                         onClearSearch = { onEvent(CountUpUiEvent.ClearSearch) },
                         onSelectSortOrder = { onEvent(CountUpUiEvent.SortOrderSelected(it)) },
+                        onSelectThemeMode = { onEvent(CountUpUiEvent.ThemeModeSelected(it)) },
                     )
                     Spacer(Modifier.padding(top = 8.dp))
 
@@ -629,12 +631,14 @@ private fun HeaderRow(
 private fun SubHeaderRow(
     itemCount: Int,
     sortOrder: SortOrder,
+    themeMode: ThemeMode,
     searchQuery: String,
     isMenuOpen: Boolean,
     onToggleMenu: (Boolean) -> Unit,
     onSearchChanged: (String) -> Unit,
     onClearSearch: () -> Unit,
     onSelectSortOrder: (SortOrder) -> Unit,
+    onSelectThemeMode: (ThemeMode) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -816,6 +820,61 @@ private fun SubHeaderRow(
                                 else Color.Transparent
                             )
                             .clickable { onSelectSortOrder(option) }
+                            .padding(horizontal = 8.dp, vertical = 6.dp),
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(option.labelRes),
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontSize = 12.5.sp,
+                                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                ),
+                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                            )
+                            Text(
+                                text = stringResource(option.descriptionRes),
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontSize = 10.5.sp,
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                        if (isSelected) {
+                            Text(
+                                text = "✓",
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    }
+                }
+
+                Spacer(Modifier.padding(top = 8.dp))
+                Text(
+                    text = stringResource(R.string.theme_section_title),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 10.sp,
+                        letterSpacing = 1.sp,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                )
+                Spacer(Modifier.padding(top = 2.dp))
+
+                ThemeMode.entries.forEach { option ->
+                    val isSelected = option == themeMode
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(
+                                if (isSelected) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
+                                else Color.Transparent
+                            )
+                            .clickable { onSelectThemeMode(option) }
                             .padding(horizontal = 8.dp, vertical = 6.dp),
                     ) {
                         Column(modifier = Modifier.weight(1f)) {

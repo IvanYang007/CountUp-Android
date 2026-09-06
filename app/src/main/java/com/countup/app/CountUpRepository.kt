@@ -34,6 +34,8 @@ interface CountUpRepository {
     fun setWidgetVisibility(id: String, showInWidget: Boolean): Boolean
     fun getBackgroundTheme(): BackgroundTheme
     fun setBackgroundTheme(theme: BackgroundTheme): Boolean
+    fun getThemeMode(): ThemeMode
+    fun setThemeMode(mode: ThemeMode): Boolean
     fun getSortOrder(): SortOrder
     fun setSortOrder(order: SortOrder): Boolean
 }
@@ -94,6 +96,12 @@ class DefaultCountUpRepository(
 
     override fun setBackgroundTheme(theme: BackgroundTheme): Boolean =
         store.setBackgroundTheme(theme)
+
+    override fun getThemeMode(): ThemeMode =
+        store.getThemeMode()
+
+    override fun setThemeMode(mode: ThemeMode): Boolean =
+        store.setThemeMode(mode)
 
     override fun getSortOrder(): SortOrder =
         store.getSortOrder()

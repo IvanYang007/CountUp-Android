@@ -10,11 +10,13 @@ class FakeCountUpRepository(
     initialItems: List<CountUpItem> = emptyList(),
     initialTheme: BackgroundTheme = BackgroundTheme.AUTO_DAILY,
     initialSortOrder: SortOrder = SortOrder.DAYS_DESC,
+    initialThemeMode: ThemeMode = ThemeMode.SYSTEM,
 ) : CountUpRepository {
 
     private val itemsList = initialItems.toMutableList()
     private var theme: BackgroundTheme = initialTheme
     private var sortOrder: SortOrder = initialSortOrder
+    private var themeMode: ThemeMode = initialThemeMode
 
     var shouldFailWrite: Boolean = false
 
@@ -139,6 +141,14 @@ class FakeCountUpRepository(
     override fun setBackgroundTheme(theme: BackgroundTheme): Boolean {
         if (shouldFailWrite) return false
         this.theme = theme
+        return true
+    }
+
+    override fun getThemeMode(): ThemeMode = themeMode
+
+    override fun setThemeMode(mode: ThemeMode): Boolean {
+        if (shouldFailWrite) return false
+        this.themeMode = mode
         return true
     }
 

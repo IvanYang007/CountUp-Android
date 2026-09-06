@@ -177,4 +177,21 @@ class ZenThemeTest {
         assertEquals(ZenDarkTextSecondary, dark.inkMuted)
         assertEquals(ZenSealInk, Color(0xFF5A4D41))
     }
+
+    @Test
+    fun `ThemeMode resolves correctly and parses ids`() {
+        assertEquals(ThemeMode.SYSTEM, ThemeMode.fromId("system"))
+        assertEquals(ThemeMode.LIGHT, ThemeMode.fromId("light"))
+        assertEquals(ThemeMode.DARK, ThemeMode.fromId("dark"))
+        assertEquals(ThemeMode.SYSTEM, ThemeMode.fromId("unknown"))
+        assertEquals(ThemeMode.SYSTEM, ThemeMode.fromId(null))
+
+        // isDark evaluation
+        assertTrue(ThemeMode.DARK.isDark(systemInDarkTheme = false))
+        assertTrue(ThemeMode.DARK.isDark(systemInDarkTheme = true))
+        assertFalse(ThemeMode.LIGHT.isDark(systemInDarkTheme = false))
+        assertFalse(ThemeMode.LIGHT.isDark(systemInDarkTheme = true))
+        assertTrue(ThemeMode.SYSTEM.isDark(systemInDarkTheme = true))
+        assertFalse(ThemeMode.SYSTEM.isDark(systemInDarkTheme = false))
+    }
 }

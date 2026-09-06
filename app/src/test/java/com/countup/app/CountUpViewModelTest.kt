@@ -112,6 +112,30 @@ class CountUpViewModelTest {
     }
 
     @Test
+    fun `theme mode selection updates state, repository and emits snackbar and refresh widget effects`() = runTest {
+        val repo = FakeCountUpRepository(initialThemeMode = ThemeMode.SYSTEM)
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday })
+
+        viewModel.effects.test {
+            viewModel.onEvent(CountUpUiEvent.ThemeModeSelected(ThemeMode.DARK))
+
+            val snackbarEffect = awaitItem()
+            assertTrue(snackbarEffect is CountUpUiEffect.ShowSnackbar)
+            assertEquals(R.string.theme_switched_toast, (snackbarEffect as CountUpUiEffect.ShowSnackbar).messageRes)
+            assertEquals(ThemeMode.DARK.labelRes, snackbarEffect.formatArgRes)
+
+            val refreshEffect = awaitItem()
+            assertTrue(refreshEffect is CountUpUiEffect.RefreshWidget)
+        }
+
+        viewModel.state.test {
+            val state = awaitItem()
+            assertEquals(ThemeMode.DARK, state.themeMode)
+            assertEquals(ThemeMode.DARK, repo.getThemeMode())
+        }
+    }
+
+    @Test
     fun `save new item adds item and closes editor`() = runTest {
         val repo = FakeCountUpRepository(initialItems = emptyList())
         val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday })

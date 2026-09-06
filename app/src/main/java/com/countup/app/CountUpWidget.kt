@@ -479,22 +479,27 @@ internal fun resolveWidgetCircleStyle(row: WidgetRowData, position: Int): Widget
     return DEFAULT_WIDGET_PALETTE[index]
 }
 
-/** Whether the device is in dark (night) mode. */
-/** Light palette only (design decision): dark text mode is removed, so this is false. */
-private fun isNightMode(context: Context): Boolean = false
+/** Whether the widget should render in dark (night) mode based on theme setting and system night mode. */
+internal fun isNightMode(context: Context): Boolean {
+    val store = CountUpStore(context)
+    val mode = store.getThemeMode()
+    val isSystemNight = (context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
+        android.content.res.Configuration.UI_MODE_NIGHT_YES
+    return mode.isDark(isSystemNight)
+}
 
 // Mid-century-modern palette (mirrors MainActivity's named constants).
 private val PAPER: Int = 0xFFF5E6D3.toInt()
-private val NIGHT_PAPER: Int = 0xFF241D12.toInt()
+private val NIGHT_PAPER: Int = 0xFF191B17.toInt()
 private val MUTED: Int = 0xFF6B5D4F.toInt()
-private val NIGHT_MUTED: Int = 0xFFC4B291.toInt()
+private val NIGHT_MUTED: Int = 0xFFC4BEAE.toInt()
 private val WHITE: Int = 0xFFFFFFFF.toInt()
 private val DIVIDER: Int = 0x66E3D3B8
-private val NIGHT_DIVIDER: Int = 0x40D9C6A6
+private val NIGHT_DIVIDER: Int = 0x403A3D35
 
 // Reset badge gold palette (mirrors @color/widget_reset_count_text)
 internal val WIDGET_RESET_BADGE_DAY: Int = 0xFF785D2A.toInt()
-internal val WIDGET_RESET_BADGE_NIGHT: Int = 0xFFD4B87C.toInt()
+internal val WIDGET_RESET_BADGE_NIGHT: Int = 0xFFD4A574.toInt()
 
 // Arrived-future styling: solid green plate with a dark red bold count.
 private val ARRIVED_NUMBER: Int = 0xFFB71C1C.toInt()

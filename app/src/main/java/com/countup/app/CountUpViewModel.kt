@@ -57,6 +57,19 @@ class CountUpViewModel(
                     emitEffect(CountUpUiEffect.RefreshWidget)
                 }
             }
+            is CountUpUiEvent.ThemeModeSelected -> {
+                viewModelScope.launch(ioDispatcher) {
+                    repository.setThemeMode(event.mode)
+                    _state.update { it.copy(themeMode = event.mode, isSearchSortMenuOpen = false) }
+                    emitEffect(
+                        CountUpUiEffect.ShowSnackbar(
+                            messageRes = R.string.theme_switched_toast,
+                            formatArgRes = event.mode.labelRes,
+                        )
+                    )
+                    emitEffect(CountUpUiEffect.RefreshWidget)
+                }
+            }
             CountUpUiEvent.CycleBackground -> {
                 val next = _state.value.backgroundTheme.next()
                 viewModelScope.launch(ioDispatcher) {
@@ -260,6 +273,7 @@ class CountUpViewModel(
         val items = repository.getItems()
         val sortOrder = repository.getSortOrder()
         val backgroundTheme = repository.getBackgroundTheme()
+        val themeMode = repository.getThemeMode()
         val pendingWidgetResets = repository.getPendingWidgetResets()
         _state.update {
             it.copy(
@@ -267,6 +281,7 @@ class CountUpViewModel(
                 isLoading = false,
                 sortOrder = sortOrder,
                 backgroundTheme = backgroundTheme,
+                themeMode = themeMode,
                 today = today,
                 pendingWidgetResets = pendingWidgetResets,
             )
