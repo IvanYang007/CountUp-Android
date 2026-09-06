@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CountUp — Dark Mode Design & Strategy Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Noto+Serif+SC:wght@400;600;700&family=JetBrains+Mono:wght@400;500;600&family=Marcellus&display=swap" rel="stylesheet">
+<style>
+  /* ────── SEMANTIC TOKEN SYSTEM ────── */
+  :root {
+    /* Prototype Shell (not app colors) */
+    --shell-bg: #0E1015;
+    --shell-card: #181C24;
+    --shell-border: #2B3245;
+    --shell-text: #E8ECF4;
+    --shell-muted: #8896AA;
+    --shell-accent: #D4A574;
+    --shell-pass: #68D391;
+    --shell-warn: #F6AD55;
+    --shell-fail: #FC8181;
+
+    /* ── LIGHT THEME TOKENS ── */
+    --light-canvas: #F3E9D2;
+    --light-surface: #FAF8F2;
+    --light-primary-text: #29271E;
+    --light-secondary-text: #665F52;
+    --light-primary-action: #46664B;
+    --light-on-primary: #FFFFFF;
+    --light-accent: #A24E22;
+    --light-outline: #827968;
+    --light-hairline: #E3D3B8;
+    --light-card-white: #FFFFFF;
+    --light-error: #A64942;
+
+    /* ── DARK THEME TOKENS ── */
+    --dark-canvas: #191B17;
+    --dark-surface: #252922;
+    --dark-primary-text: #F1EBDD;
+    --dark-secondary-text: #C4BEAE;
+    --dark-tertiary-text: #8E8A7E;
+    --dark-primary-action: #8FAF84;
+    --dark-on-primary: #172215;
+    --dark-accent: #E5A36F;
+    --dark-outline: #8B9484;
+    --dark-hairline: #3A3D35;
+    --dark-card-elevated: #2E322A;
+    --dark-error: #CF6E67;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    background: var(--shell-bg);
+    color: var(--shell-text);
+    min-height: 100vh;
+    padding: 20px 16px 110px;
+  }
+
+  /* ── HEADER ── */
+  .proto-header {
+    max-width: 1400px;
+    margin: 0 auto 24px;
+    text-align: center;
+  }
+  .proto-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    background: rgba(212, 165, 116, 0.12);
+    border: 1px solid rgba(212, 165, 116, 0.35);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--shell-accent);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+  }
+  .proto-badge::before { content: '⬡'; font-size: 10px; }
+  .proto-header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 28px;
+    letter-spacing: 1px;
+    color: #FFFFFF;
+    margin-bottom: 6px;
+  }
+  .proto-header p {
+    color: var(--shell-muted);
+    font-size: 14px;
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  /* ── VARIANT CONTAINER ── */
+  .variant-container { max-width: 1400px; margin: 0 auto; display: none; }
+  .variant-container.active { display: block; }
+
+  /* ── PHONE FRAMES ── */
+  .phone-frame {
+    width: 390px;
+    min-height: 760px;
+    border-radius: 36px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+    box-shadow: 0 20px 50px -12px rgba(0,0,0,0.6), 0 0 0 8px #242938, 0 0 0 10px #3A4259;
+    border: 1px solid rgba(255,255,255,0.06);
+    flex-shrink: 0;
+  }
+  .phone-frame.light-mode {
+    background: var(--light-canvas);
+    color: var(--light-primary-text);
+  }
+  .phone-frame.dark-mode {
+    background: var(--dark-canvas);
+    color: var(--dark-primary-text);
+  }
+
+  /* Rice paper texture */
+  .phone-frame.light-mode::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.03;
+    pointer-events: none;
+    background-image: radial-gradient(#2C2416 1px, transparent 1px);
+    background-size: 12px 12px;
+  }
+  .phone-frame.dark-mode::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.02;
+    pointer-events: none;
+    background-image: radial-gradient(#F1EBDD 0.5px, transparent 0.5px);
+    background-size: 14px 14px;
+  }
+
+  /* System bar */
+  .sys-bar {
+    height: 36px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 22px;
+    font-size: 12px;
+    font-weight: 600;
+    z-index: 5;
+  }
+  .light-mode .sys-bar { color: var(--light-secondary-text); }
+  .dark-mode .sys-bar { color: var(--dark-secondary-text); }
+  .sys-icons { display: flex; gap: 5px; align-items: center; }
+
+  /* App header */
+  .app-bar {
+    padding: 6px 18px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 5;
+  }
+  .light-mode .app-bar { border-bottom: 1px solid var(--light-hairline); }
+  .dark-mode .app-bar { border-bottom: 1px solid var(--dark-hairline); }
+  .app-bar-title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .light-mode .app-bar-title { color: var(--light-primary-text); }
+  .dark-mode .app-bar-title { color: var(--dark-primary-text); }
+  .app-bar-sub {
+    font-family: 'Marcellus', serif;
+    font-size: 11.5px;
+    letter-spacing: 0.8px;
+    margin-top: 2px;
+  }
+  .light-mode .app-bar-sub { color: var(--light-accent); }
+  .dark-mode .app-bar-sub { color: var(--dark-accent); }
+  .plus-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+  }
+  .light-mode .plus-btn {
+    background: var(--light-primary-action);
+    color: var(--light-on-primary);
+  }
+  .dark-mode .plus-btn {
+    background: var(--dark-primary-action);
+    color: var(--dark-on-primary);
+  }
+
+  /* Sub-header row */
+  .sub-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 18px 4px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .light-mode .sub-header { color: var(--light-secondary-text); }
+  .dark-mode .sub-header { color: var(--dark-secondary-text); }
+  .sort-pill {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11.5px;
+  }
+  .light-mode .sort-pill .sort-value { color: var(--light-accent); font-weight: 700; }
+  .dark-mode .sort-pill .sort-value { color: var(--dark-accent); font-weight: 700; }
+
+  /* Card feed */
+  .card-feed {
+    flex: 1;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    z-index: 3;
+  }
+
+  /* ── CARD STYLES ── */
+  .count-card {
+    border-radius: 18px;
+    padding: 16px 16px 14px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: transform 0.2s;
+  }
+  .count-card:hover { transform: translateY(-1px); }
+
+  /* Theme-responsive card (white/paper card that changes with theme) */
+  .count-card.theme-card {
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+  }
+  .light-mode .count-card.theme-card {
+    background: var(--light-card-white);
+    color: var(--light-primary-text);
+    border: 1px solid rgba(41, 39, 30, 0.08);
+  }
+  .dark-mode .count-card.theme-card {
+    background: var(--dark-surface);
+    color: var(--dark-primary-text);
+    border: 1px solid var(--dark-outline);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  }
+
+  /* Identity card: charcoal stays charcoal in BOTH modes */
+  .count-card.identity-card {
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+  }
+
+  /* Milestone card: patina border */
+  .count-card.patina-card {
+    border-width: 1.5px;
+    border-style: solid;
+  }
+  .light-mode .count-card.patina-card {
+    background: var(--light-card-white);
+    border-color: rgba(212, 165, 116, 0.75);
+    color: var(--light-primary-text);
+    box-shadow: 0 6px 18px rgba(212, 165, 116, 0.18);
+  }
+  .dark-mode .count-card.patina-card {
+    background: var(--dark-surface);
+    border-color: rgba(212, 165, 116, 0.5);
+    color: var(--dark-primary-text);
+    box-shadow: 0 6px 18px rgba(212, 165, 116, 0.12);
+  }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .card-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .badge-circle {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+  }
+  .badge-circle svg { width: 20px; height: 20px; }
+  .card-name {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    line-height: 1.2;
+  }
+  .card-anchor {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    margin-top: 2px;
+  }
+  .light-mode .count-card.theme-card .card-anchor,
+  .light-mode .count-card.patina-card .card-anchor { color: var(--light-secondary-text); }
+  .dark-mode .count-card.theme-card .card-anchor,
+  .dark-mode .count-card.patina-card .card-anchor { color: var(--dark-secondary-text); }
+
+  .card-days { text-align: right; }
+  .card-days-num {
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -1px;
+  }
+  .card-days-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .card-note {
+    font-size: 12px;
+    line-height: 1.4;
+    padding-top: 7px;
+    font-style: italic;
+  }
+  .light-mode .count-card.theme-card .card-note,
+  .light-mode .count-card.patina-card .card-note {
+    border-top: 1px solid rgba(41, 39, 30, 0.06);
+    color: var(--light-secondary-text);
+  }
+  .dark-mode .count-card.theme-card .card-note,
+  .dark-mode .count-card.patina-card .card-note {
+    border-top: 1px solid rgba(241, 235, 221, 0.08);
+    color: var(--dark-secondary-text);
+  }
+
+  /* ── BOTTOM SHEET (dialog) ── */
+  .bottom-sheet {
+    border-radius: 24px 24px 0 0;
+    padding: 14px 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 10;
+  }
+  .light-mode .bottom-sheet {
+    background: var(--light-surface);
+    box-shadow: 0 -8px 24px rgba(41, 39, 30, 0.12);
+    border-top: 1px solid var(--light-hairline);
+  }
+  .dark-mode .bottom-sheet {
+    background: var(--dark-surface);
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.4);
+    border-top: 1px solid var(--dark-outline);
+  }
+  .sheet-handle {
+    width: 32px;
+    height: 3.5px;
+    border-radius: 2px;
+    margin: 0 auto 4px;
+  }
+  .light-mode .sheet-handle { background: var(--light-outline); opacity: 0.4; }
+  .dark-mode .sheet-handle { background: var(--dark-outline); opacity: 0.4; }
+
+  .sheet-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+  }
+  .light-mode .sheet-label { color: var(--light-secondary-text); }
+  .dark-mode .sheet-label { color: var(--dark-secondary-text); }
+
+  .theme-toggle-row {
+    display: flex;
+    gap: 6px;
+  }
+  .theme-chip {
+    flex: 1;
+    height: 34px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1.5px solid transparent;
+  }
+  .theme-chip.light-chip {
+    background: #FAF8F2;
+    color: #29271E;
+    border-color: rgba(41, 39, 30, 0.15);
+  }
+  .theme-chip.dark-chip {
+    background: #252922;
+    color: #F1EBDD;
+    border-color: rgba(139, 148, 132, 0.4);
+  }
+  .theme-chip.auto-chip {
+    background: linear-gradient(135deg, #FAF8F2 50%, #252922 50%);
+    color: #665F52;
+    border-color: rgba(130, 121, 104, 0.3);
+    font-size: 10px;
+  }
+  .theme-chip.selected {
+    border-color: var(--shell-accent) !important;
+    box-shadow: 0 0 0 1px var(--shell-accent);
+  }
+
+  /* ────────────────────────────────────────
+     VARIANT A: SIDE-BY-SIDE COMPARISON
+     ──────────────────────────────────────── */
+  .variant-a-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+  .mode-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .mode-label {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--shell-muted);
+  }
+
+  @media (max-width: 900px) {
+    .variant-a-layout {
+      grid-template-columns: 1fr;
+      justify-items: center;
+    }
+  }
+
+  /* ────────────────────────────────────────
+     VARIANT B: FULL-SCREEN TOGGLE + ALL SURFACES
+     ──────────────────────────────────────── */
+  .variant-b-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+  .toggle-bar {
+    display: flex;
+    gap: 4px;
+    background: var(--shell-card);
+    border: 1px solid var(--shell-border);
+    border-radius: 12px;
+    padding: 4px;
+  }
+  .toggle-btn {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .toggle-btn.active {
+    background: var(--shell-accent);
+    color: #1A1D26;
+  }
+  .toggle-btn:not(.active) {
+    background: transparent;
+    color: var(--shell-muted);
+  }
+
+  .surfaces-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 1200px;
+  }
+  .surface-card {
+    border-radius: 16px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .surface-card.as-light {
+    background: var(--light-canvas);
+    color: var(--light-primary-text);
+    border: 1px solid var(--light-hairline);
+  }
+  .surface-card.as-dark {
+    background: var(--dark-canvas);
+    color: var(--dark-primary-text);
+    border: 1px solid var(--dark-outline);
+  }
+  .surface-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+  }
+  .as-light .surface-title { color: var(--light-secondary-text); }
+  .as-dark .surface-title { color: var(--dark-secondary-text); }
+
+  .surface-sample {
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  /* Button samples */
+  .btn-sample {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    min-height: 48px;
+  }
+  .btn-sample.primary-btn.as-light {
+    background: var(--light-primary-action);
+    color: var(--light-on-primary);
+  }
+  .btn-sample.primary-btn.as-dark {
+    background: var(--dark-primary-action);
+    color: var(--dark-on-primary);
+  }
+  .btn-sample.outline-btn {
+    background: transparent;
+    border: 1.5px solid;
+  }
+  .btn-sample.outline-btn.as-light {
+    border-color: var(--light-outline);
+    color: var(--light-primary-text);
+  }
+  .btn-sample.outline-btn.as-dark {
+    border-color: var(--dark-outline);
+    color: var(--dark-primary-text);
+  }
+
+  /* ────────────────────────────────────────
+     VARIANT C: TOKEN INSPECTOR
+     ──────────────────────────────────────── */
+  .variant-c-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .token-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--shell-border);
+  }
+  .token-table thead th {
+    background: var(--shell-card);
+    padding: 12px 14px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--shell-accent);
+    border-bottom: 1px solid var(--shell-border);
+  }
+  .token-table tbody td {
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: middle;
+  }
+  .token-table tbody tr:hover {
+    background: rgba(255,255,255,0.02);
+  }
+  .swatch {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .swatch-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.15);
+    flex-shrink: 0;
+  }
+  .swatch-hex {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .contrast-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .contrast-badge.pass {
+    background: rgba(104, 211, 145, 0.15);
+    color: var(--shell-pass);
+    border: 1px solid rgba(104, 211, 145, 0.3);
+  }
+  .contrast-badge.warn {
+    background: rgba(246, 173, 85, 0.15);
+    color: var(--shell-warn);
+    border: 1px solid rgba(246, 173, 85, 0.3);
+  }
+  .contrast-badge.fail {
+    background: rgba(252, 129, 129, 0.15);
+    color: var(--shell-fail);
+    border: 1px solid rgba(252, 129, 129, 0.3);
+  }
+
+  /* Audit section */
+  .audit-panel {
+    background: var(--shell-card);
+    border: 1px solid var(--shell-border);
+    border-radius: 16px;
+    padding: 20px 22px;
+  }
+  .audit-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--shell-accent);
+    margin-bottom: 14px;
+  }
+  .audit-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 13px;
+  }
+  .audit-row:last-child { border-bottom: none; }
+  .audit-pair {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 80px;
+  }
+  .audit-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+  .audit-on-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    border: 1px solid rgba(255,255,255,0.12);
+    margin-left: -7px;
+    margin-top: 8px;
+    position: relative;
+    z-index: 1;
+  }
+  .audit-name {
+    flex: 1;
+    color: var(--shell-muted);
+  }
+  .audit-ratio {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 55px;
+    text-align: right;
+  }
+
+  /* Kotlin code block */
+  .code-block {
+    position: relative;
+    background: #0C0E12;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 16px 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.65;
+    color: #D0D7E3;
+    overflow-x: auto;
+    white-space: pre;
+    tab-size: 4;
+  }
+  .code-block .kw { color: #C792EA; }
+  .code-block .fn { color: #82AAFF; }
+  .code-block .str { color: #C3E88D; }
+  .code-block .num { color: #F78C6C; }
+  .code-block .cmt { color: #546E7A; font-style: italic; }
+  .code-block .type { color: #FFCB6B; }
+  .code-block .param { color: #F07178; }
+  .copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #252D3B;
+    border: 1px solid #3E4C63;
+    color: #F8FAFC;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .copy-btn:hover {
+    background: var(--shell-accent);
+    color: #1A1D26;
+    border-color: var(--shell-accent);
+  }
+
+  /* ── FLOATING SWITCHER ── */
+  .floating-switcher {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1E2330;
+    border: 1.5px solid #3E4B66;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.08);
+    border-radius: 999px;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 9999;
+    backdrop-filter: blur(12px);
+  }
+  .nav-arrow {
+    background: #2A3347;
+    border: none;
+    color: #FFFFFF;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.18s;
+  }
+  .nav-arrow:hover {
+    background: var(--shell-accent);
+    color: #1A1D26;
+  }
+  .variant-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 280px;
+    text-align: center;
+  }
+  .variant-label-main {
+    font-size: 13px;
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: 0.5px;
+  }
+  .variant-label-sub {
+    font-size: 11px;
+    color: var(--shell-muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="proto-header">
+  <div class="proto-badge">Dark Mode Design Strategy Prototype</div>
+  <h1>CountUp Dark Mode</h1>
+  <p>Side-by-side rendering validation, semantic token mapping, WCAG contrast auditing, and full surface coverage for the paper-and-sage identity in both light and dark contexts.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     VARIANT A: SIDE-BY-SIDE COMPARISON
+     ═══════════════════════════════════════════════ -->
+<div class="variant-container" id="variantA">
+  <div class="variant-a-layout">
+    <!-- LIGHT COLUMN -->
+    <div class="mode-column">
+      <div class="mode-label">☀ Light Mode</div>
+      <div class="phone-frame light-mode">
+        <div class="sys-bar">
+          <span>09:41</span>
+          <div class="sys-icons">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+          </div>
+        </div>
+        <div class="app-bar">
+          <div>
+            <div class="app-bar-title">CountUp</div>
+            <div class="app-bar-sub">AUTUMN · White Dew</div>
+          </div>
+          <button class="plus-btn">+</button>
+        </div>
+        <div class="sub-header">
+          <span>3 items</span>
+          <div class="sort-pill">Sort: <span class="sort-value">Oldest</span> ▾ 🔍</div>
+        </div>
+        <div class="card-feed">
+          <!-- Theme-responsive card -->
+          <div class="count-card theme-card">
+            <div class="card-top">
+              <div class="card-info">
+                <div class="badge-circle" style="background: #DEB285; color: #2C2416;">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
+                </div>
+                <div>
+                  <div class="card-name">Morning Meditation</div>
+                  <div class="card-anchor">Since Jul 19, 2026</div>
+                </div>
+              </div>
+              <div class="card-days">
+                <div class="card-days-num">49</div>
+                <div class="card-days-label" style="color: var(--light-secondary-text);">DAYS</div>
+              </div>
+            </div>
+            <div class="card-note">"Breath, tea, silence before the world wakes."</div>
+          </div>
+
+          <!-- Patina milestone card -->
+          <div class="count-card patina-card">
+            <div class="card-top">
+              <div class="card-info">
+                <div class="badge-circle" style="background: #DEB285; color: #2C2416;">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                </div>
+                <div>
+                  <div class="card-name">Sobriety Vow</div>
+                  <div class="card-anchor">Since Sep 6, 2025</div>
+                </div>
+              </div>
+              <div class="card-days">
+                <div class="card-days-num">366</div>
+                <div class="card-days-label" style="color: #D4A574;">1 YEAR PATINA</div>
+              </div>
+            </div>
+            <div class="card-note">"One year of clear mind and renewed spirit."</div>
+          </div>
+
+          <!-- Identity card: Sumi Ink stays dark in BOTH modes -->
+          <div class="count-card identity-card" style="background: #24201A; color: #FAF7F2;">
+            <div class="card-top">
+              <div class="card-info">
+                <div class="badge-circle" style="background: #4D7A58; color: #FFFFFF;">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75C7 8 17 8 17 8z"/></svg>
+                </div>
+                <div>
+                  <div class="card-name">No Sugar Streak</div>
+                  <div class="card-anchor" style="color: #D6C8B7;">Since Mar 1, 2026</div>
+                </div>
+              </div>
+              <div class="card-days">
+                <div class="card-days-num">189</div>
+                <div class="card-days-label" style="color: #D6C8B7;">DAYS</div>
+              </div>
+            </div>
+            <div class="card-note" style="color: #D6C8B7; border-top-color: rgba(255,255,255,0.1);">"Sumi ink card — unchanged in both modes."</div>
+          </div>
+        </div>
+
+        <!-- Bottom sheet -->
+        <div class="bottom-sheet">
+          <div class="sheet-handle"></div>
+          <div class="sheet-label">Theme</div>
+          <div class="theme-toggle-row">
+            <div class="theme-chip light-chip selected">☀ Light</div>
+            <div class="theme-chip dark-chip">🌙 Dark</div>
+            <div class="theme-chip auto-chip">⚙ Auto</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DARK COLUMN -->
+    <div class="mode-column">
+      <div class="mode-label">🌙 Dark Mode</div>
+      <div class="phone-frame dark-mode">
+        <div class="sys-bar">
+          <span>09:41</span>
+          <div class="sys-icons">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+          </div>
+        </div>
+        <div class="app-bar">
+          <div>
+            <div class="app-bar-title">CountUp</div>
+            <div class="app-bar-sub">AUTUMN · White Dew</div>
+          </div>
+          <button class="plus-btn">+</button>
+        </div>
+        <div class="sub-header">
+          <span>3 items</span>
+          <div class="sort-pill">Sort: <span class="sort-value">Oldest</span> ▾ 🔍</div>
+        </div>
+        <div class="card-feed">
+          <!-- Theme-responsive card (adapts to dark surface) -->
+          <div class="count-card theme-card">
+            <div class="card-top">
+              <div class="card-info">
+                <div class="badge-circle" style="background: #DEB285; color: #2C2416;">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
+                </div>
+                <div>
+                  <div class="card-name">Morning Meditation</div>
+                  <div class="card-anchor">Since Jul 19, 2026</div>
+                </div>
+              </div>
+              <div class="card-days">
+                <div class="card-days-num">49</div>
+                <div class="card-days-label" style="color: var(--dark-secondary-text);">DAYS</div>
+              </div>
+            </div>
+            <div class="card-note">"Breath, tea, silence before the world wakes."</div>
+          </div>
+
+          <!-- Patina milestone (dark variant) -->
+          <div class="count-card patina-card">
+            <div class="card-top">
+              <div class="card-info">
+                <div class="badge-circle" style="background: #DEB285; color: #2C2416;">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                </div>
+                <div>
+                  <div class="card-name">Sobriety Vow</div>
+                  <div class="card-anchor">Since Sep 6, 2025</div>
+                </div>
+              </div>
+              <div class="card-days">
+                <div class="card-days-num">366</div>
+                <div class="card-days-label" style="color: #D4A574;">1 YEAR PATINA</div>
+              </div>
+            </div>
+            <div class="card-note">"One year of clear mind and renewed spirit."</div>
+          </div>
+
+          <!-- SAME sumi card — unchanged! -->
+          <div class="count-card identity-card" style="background: #24201A; color: #FAF7F2;">
+            <div class="card-top">
+              <div class="card-info">
+                <div class="badge-circle" style="background: #4D7A58; color: #FFFFFF;">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 8C8 10 5.9 16.17 3.82 21.34l1.89.66.95-2.3c.48.17.98.3 1.34.3C19 20 22 3 22 3c-1 2-8 2.25-13 3.25S2 11.5 2 13.5s1.75 3.75 1.75 3.75C7 8 17 8 17 8z"/></svg>
+                </div>
+                <div>
+                  <div class="card-name">No Sugar Streak</div>
+                  <div class="card-anchor" style="color: #D6C8B7;">Since Mar 1, 2026</div>
+                </div>
+              </div>
+              <div class="card-days">
+                <div class="card-days-num">189</div>
+                <div class="card-days-label" style="color: #D6C8B7;">DAYS</div>
+              </div>
+            </div>
+            <div class="card-note" style="color: #D6C8B7; border-top-color: rgba(255,255,255,0.1);">"Sumi ink card — unchanged in both modes."</div>
+          </div>
+        </div>
+
+        <div class="bottom-sheet">
+          <div class="sheet-handle"></div>
+          <div class="sheet-label">Theme</div>
+          <div class="theme-toggle-row">
+            <div class="theme-chip light-chip">☀ Light</div>
+            <div class="theme-chip dark-chip selected">🌙 Dark</div>
+            <div class="theme-chip auto-chip">⚙ Auto</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     VARIANT B: FULL-SCREEN TOGGLE — ALL SURFACES
+     ═══════════════════════════════════════════════ -->
+<div class="variant-container" id="variantB">
+  <div class="variant-b-layout">
+    <div class="toggle-bar">
+      <button class="toggle-btn active" onclick="setB('light')">☀ Light Mode</button>
+      <button class="toggle-btn" onclick="setB('dark')">🌙 Dark Mode</button>
+    </div>
+
+    <div class="surfaces-grid" id="surfacesGrid">
+      <!-- Rendered by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     VARIANT C: TOKEN INSPECTOR + WCAG AUDIT
+     ═══════════════════════════════════════════════ -->
+<div class="variant-container" id="variantC">
+  <div class="variant-c-layout">
+    <!-- Token Mapping Table -->
+    <div class="audit-panel">
+      <div class="audit-title">Semantic Token Map — Light ↔ Dark</div>
+      <table class="token-table">
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th>Light</th>
+            <th>Dark</th>
+            <th>Usage</th>
+          </tr>
+        </thead>
+        <tbody id="tokenTableBody">
+          <!-- Rendered by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- WCAG Contrast Audit -->
+    <div class="audit-panel">
+      <div class="audit-title">WCAG Contrast Audit — All Critical Pairs</div>
+      <div id="auditResults">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Kotlin Code Export -->
+    <div class="audit-panel">
+      <div class="audit-title">Kotlin Implementation — ZenTheme.kt</div>
+      <div class="code-block" id="kotlinExport">
+        <button class="copy-btn" onclick="copyKotlin()">Copy Code</button>
+        <span id="kotlinCode"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FLOATING SWITCHER -->
+<div class="floating-switcher">
+  <button class="nav-arrow" onclick="cycleVariant(-1)" title="Previous (←)">←</button>
+  <div class="variant-label">
+    <div class="variant-label-main" id="switcherTitle">Variant A — Side-by-Side Comparison</div>
+    <div class="variant-label-sub" id="switcherDesc">Light & Dark phones rendered simultaneously</div>
+  </div>
+  <button class="nav-arrow" onclick="cycleVariant(1)" title="Next (→)">→</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// TOKEN DATABASE
+// ═══════════════════════════════════════════
+const TOKENS = [
+  { role: 'Canvas',          light: '#F3E9D2', dark: '#191B17', usage: 'Screen background (Warm tea-paper / Charcoal slate)' },
+  { role: 'Surface',         light: '#FAF8F2', dark: '#252922', usage: 'Dialogs, ordinary cards (Deep moss-stone)' },
+  { role: 'Primary text',    light: '#29271E', dark: '#F1EBDD', usage: 'Day counts, headings (Parchment ink)' },
+  { role: 'Secondary text',  light: '#665F52', dark: '#C4BEAE', usage: 'Dates, body copy, descriptions' },
+  { role: 'Subtle / Caption', light: '#827968', dark: '#8E8A7E', usage: 'Small unit labels (DAYS, SINCE, sort prefix)' },
+  { role: 'Primary action',  light: '#46664B', dark: '#8FAF84', usage: 'Save button, + FAB (Muted Bamboo / Warm Sage)' },
+  { role: 'On primary',      light: '#FFFFFF', dark: '#172215', usage: 'Primary-button text / icon' },
+  { role: 'Accent / Anchor', light: '#A24E22', dark: '#E5A36F', usage: 'Solar term titles, links, terracotta highlights' },
+  { role: 'Outline / Border',light: '#827968', dark: '#8B9484', usage: 'Selected borders, search boxes, chip bounds' },
+  { role: 'Hairline rule',   light: '#E3D3B8', dark: '#3A3D35', usage: 'Subtle 1dp separators between cards & surfaces' },
+  { role: 'Error',           light: '#A64942', dark: '#CF6E67', usage: 'Destructive confirms, input error states' },
+  { role: 'Card Elevated',   light: '#FFFFFF', dark: '#2E322A', usage: 'Elevated theme cards (paper preset in dark)' },
+];
+
+// Critical contrast pairs to audit
+const AUDIT_PAIRS = [
+  // LIGHT MODE
+  { mode: 'Light', fg: '#29271E', bg: '#F3E9D2', label: 'Primary text on Canvas', type: 'normal' },
+  { mode: 'Light', fg: '#29271E', bg: '#FAF8F2', label: 'Primary text on Surface', type: 'normal' },
+  { mode: 'Light', fg: '#29271E', bg: '#FFFFFF', label: 'Primary text on Card', type: 'normal' },
+  { mode: 'Light', fg: '#665F52', bg: '#F3E9D2', label: 'Secondary text on Canvas', type: 'normal' },
+  { mode: 'Light', fg: '#665F52', bg: '#FFFFFF', label: 'Secondary text on Card', type: 'normal' },
+  { mode: 'Light', fg: '#FFFFFF', bg: '#46664B', label: 'On Primary on Primary Action', type: 'normal' },
+  { mode: 'Light', fg: '#A24E22', bg: '#F3E9D2', label: 'Accent on Canvas', type: 'normal' },
+  { mode: 'Light', fg: '#A24E22', bg: '#FFFFFF', label: 'Accent on Card', type: 'normal' },
+  { mode: 'Light', fg: '#827968', bg: '#F3E9D2', label: 'Outline on Canvas (icon/border)', type: 'large' },
+  { mode: 'Light', fg: '#A64942', bg: '#FFFFFF', label: 'Error on Card', type: 'normal' },
+  // DARK MODE
+  { mode: 'Dark', fg: '#F1EBDD', bg: '#191B17', label: 'Primary text on Canvas', type: 'normal' },
+  { mode: 'Dark', fg: '#F1EBDD', bg: '#252922', label: 'Primary text on Surface', type: 'normal' },
+  { mode: 'Dark', fg: '#F1EBDD', bg: '#2E322A', label: 'Primary text on Card Elevated', type: 'normal' },
+  { mode: 'Dark', fg: '#C4BEAE', bg: '#191B17', label: 'Secondary text on Canvas', type: 'normal' },
+  { mode: 'Dark', fg: '#C4BEAE', bg: '#252922', label: 'Secondary text on Surface', type: 'normal' },
+  { mode: 'Dark', fg: '#172215', bg: '#B1CCAA', label: 'On Primary on Primary Action', type: 'normal' },
+  { mode: 'Dark', fg: '#E5A36F', bg: '#191B17', label: 'Accent on Canvas', type: 'normal' },
+  { mode: 'Dark', fg: '#E5A36F', bg: '#252922', label: 'Accent on Surface', type: 'normal' },
+  { mode: 'Dark', fg: '#8B9484', bg: '#191B17', label: 'Outline on Canvas (icon/border)', type: 'large' },
+  { mode: 'Dark', fg: '#CF6E67', bg: '#252922', label: 'Error on Surface', type: 'normal' },
+  // CROSS-THEME PRESERVED CARDS (identity cards stay the same)
+  { mode: 'Both', fg: '#FAF7F2', bg: '#24201A', label: 'Sumi card text (preserved)', type: 'normal' },
+  { mode: 'Both', fg: '#D6C8B7', bg: '#24201A', label: 'Sumi card muted (preserved)', type: 'normal' },
+  { mode: 'Both', fg: '#FAF7F2', bg: '#5E8C6D', label: 'Sage card text (preserved)', type: 'normal' },
+];
+
+// ═══════════════════════════════════════════
+// CONTRAST COMPUTATION (WCAG 2.1)
+// ═══════════════════════════════════════════
+function hexToRgb(hex) {
+  hex = hex.replace('#', '');
+  return {
+    r: parseInt(hex.substring(0, 2), 16) / 255,
+    g: parseInt(hex.substring(2, 4), 16) / 255,
+    b: parseInt(hex.substring(4, 6), 16) / 255,
+  };
+}
+
+function srgbToLinear(c) {
+  return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+}
+
+function relativeLuminance(hex) {
+  const { r, g, b } = hexToRgb(hex);
+  return 0.2126 * srgbToLinear(r) + 0.7152 * srgbToLinear(g) + 0.0722 * srgbToLinear(b);
+}
+
+function contrastRatio(hex1, hex2) {
+  const l1 = relativeLuminance(hex1);
+  const l2 = relativeLuminance(hex2);
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+function wcagGrade(ratio, type) {
+  if (type === 'large') {
+    // Large text / icons: 3:1 AA, 4.5:1 AAA
+    if (ratio >= 4.5) return { grade: 'AAA', cls: 'pass' };
+    if (ratio >= 3.0) return { grade: 'AA', cls: 'pass' };
+    return { grade: 'FAIL', cls: 'fail' };
+  }
+  // Normal text: 4.5:1 AA, 7:1 AAA
+  if (ratio >= 7.0) return { grade: 'AAA', cls: 'pass' };
+  if (ratio >= 4.5) return { grade: 'AA', cls: 'pass' };
+  if (ratio >= 3.0) return { grade: 'AA18+', cls: 'warn' };
+  return { grade: 'FAIL', cls: 'fail' };
+}
+
+// ═══════════════════════════════════════════
+// VARIANT MANAGEMENT
+// ═══════════════════════════════════════════
+const VARIANTS = [
+  {
+    key: 'A',
+    title: 'Variant A — Side-by-Side Comparison',
+    desc: 'Light & Dark phones rendered simultaneously',
+  },
+  {
+    key: 'B',
+    title: 'Variant B — All Surfaces Toggle',
+    desc: 'Every UI surface: cards, dialogs, buttons, date picker, error states',
+  },
+  {
+    key: 'C',
+    title: 'Variant C — Token Inspector & WCAG Audit',
+    desc: 'Semantic mapping, live contrast ratios, Kotlin export',
+  },
+];
+
+let currentVariantIndex = 0;
+let variantBMode = 'light';
+
+function init() {
+  const params = new URLSearchParams(window.location.search);
+  const v = (params.get('variant') || 'A').toUpperCase();
+  const idx = VARIANTS.findIndex(item => item.key === v);
+  currentVariantIndex = idx !== -1 ? idx : 0;
+  renderVariant();
+  renderTokenTable();
+  renderAudit();
+  renderKotlin();
+  renderSurfaces('light');
+}
+
+function cycleVariant(dir) {
+  currentVariantIndex = (currentVariantIndex + dir + VARIANTS.length) % VARIANTS.length;
+  const url = new URL(window.location);
+  url.searchParams.set('variant', VARIANTS[currentVariantIndex].key);
+  window.history.replaceState({}, '', url);
+  renderVariant();
+}
+
+function renderVariant() {
+  document.querySelectorAll('.variant-container').forEach(el => el.classList.remove('active'));
+  const current = VARIANTS[currentVariantIndex];
+  document.getElementById(`variant${current.key}`).classList.add('active');
+  document.getElementById('switcherTitle').textContent = current.title;
+  document.getElementById('switcherDesc').textContent = current.desc;
+}
+
+// ═══════════════════════════════════════════
+// VARIANT B: SURFACE SAMPLES
+// ═══════════════════════════════════════════
+function setB(mode) {
+  variantBMode = mode;
+  document.querySelectorAll('#variantB .toggle-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.textContent.toLowerCase().includes(mode));
+  });
+  renderSurfaces(mode);
+}
+
+function renderSurfaces(mode) {
+  const grid = document.getElementById('surfacesGrid');
+  const cls = mode === 'light' ? 'as-light' : 'as-dark';
+  const t = mode === 'light' ? {
+    canvas: '#F3E9D2', surface: '#FAF8F2', card: '#FFFFFF',
+    text1: '#29271E', text2: '#665F52', action: '#46664B',
+    onAction: '#FFFFFF', accent: '#A24E22', outline: '#827968',
+    hairline: '#E3D3B8', error: '#A64942',
+  } : {
+    canvas: '#191B17', surface: '#252922', card: '#2E322A',
+    text1: '#F1EBDD', text2: '#C4BEAE', action: '#B1CCAA',
+    onAction: '#172215', accent: '#E5A36F', outline: '#8B9484',
+    hairline: '#3A3D35', error: '#CF6E67',
+  };
+
+  grid.innerHTML = `
+    <!-- 1. Canvas + Typography -->
+    <div class="surface-card ${cls}">
+      <div class="surface-title">Canvas · Typography</div>
+      <div style="font-size:26px;font-weight:800;color:${t.text1};letter-spacing:-0.5px;">CountUp</div>
+      <div style="font-size:14px;color:${t.text2};margin-top:2px;">Secondary text on canvas background</div>
+      <div style="font-size:13px;color:${t.accent};font-weight:700;margin-top:4px;">Accent link / decorative →</div>
+    </div>
+
+    <!-- 2. Surface (Dialog) -->
+    <div class="surface-card" style="background:${t.surface};color:${t.text1};border:1px solid ${t.outline};">
+      <div class="surface-title" style="color:${t.text2};">Surface · Dialog Card</div>
+      <div style="background:${t.card};padding:14px;border-radius:12px;border:1px solid ${t.hairline};">
+        <div style="font-size:15px;font-weight:700;color:${t.text1};">Edit Counter</div>
+        <div style="font-size:12px;color:${t.text2};margin-top:4px;">Name, date picker, icon, card style</div>
+        <div style="margin-top:12px;display:flex;gap:8px;">
+          <button class="btn-sample primary-btn ${cls}">Save</button>
+          <button class="btn-sample outline-btn ${cls}">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Theme-responsive Card -->
+    <div class="surface-card ${cls}">
+      <div class="surface-title">Card · Theme-Responsive (Paper/Gold)</div>
+      <div style="background:${t.card};padding:14px;border-radius:14px;border:1px solid ${t.hairline};">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div style="display:flex;gap:10px;align-items:center;">
+            <div style="width:40px;height:40px;border-radius:50%;background:#DEB285;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,0.12);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#2C2416"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>
+            </div>
+            <div>
+              <div style="font-size:15px;font-weight:700;color:${t.text1};">Reading Habit</div>
+              <div style="font-size:11px;color:${t.text2};">Since Jan 15, 2026</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:28px;font-weight:800;color:${t.text1};font-variant-numeric:tabular-nums;">234</div>
+            <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:${t.text2};">DAYS</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Identity Card (Preserved) -->
+    <div class="surface-card ${cls}">
+      <div class="surface-title">Card · Identity (Preserved Charcoal)</div>
+      <div style="background:#24201A;padding:14px;border-radius:14px;border:1px solid rgba(255,255,255,0.15);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div style="display:flex;gap:10px;align-items:center;">
+            <div style="width:40px;height:40px;border-radius:50%;background:#C45249;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 5px rgba(0,0,0,0.2);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="#FFFFFF"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            </div>
+            <div>
+              <div style="font-size:15px;font-weight:700;color:#FAF7F2;">Quit Smoking</div>
+              <div style="font-size:11px;color:#D6C8B7;">Since Dec 31, 2025</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:28px;font-weight:800;color:#FAF7F2;font-variant-numeric:tabular-nums;">249</div>
+            <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;color:#D6C8B7;">DAYS</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#D6C8B7;margin-top:6px;font-style:italic;padding-top:6px;border-top:1px solid rgba(255,255,255,0.1);">⬡ Same in light & dark — card color is user identity</div>
+      </div>
+    </div>
+
+    <!-- 5. Buttons & Controls -->
+    <div class="surface-card ${cls}">
+      <div class="surface-title">Controls · Buttons & Selection</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;">
+        <button class="btn-sample primary-btn ${cls}">✓ Save Counter</button>
+        <button class="btn-sample outline-btn ${cls}">Cancel</button>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:6px;">
+        <div style="width:42px;height:42px;border-radius:50%;background:${t.action};display:flex;align-items:center;justify-content:center;font-size:20px;color:${t.onAction};font-weight:500;">+</div>
+        <div style="flex:1;height:42px;border-radius:10px;background:${t.card};border:1px solid ${t.outline};display:flex;align-items:center;padding:0 12px;font-size:12px;color:${t.text2};">Search counters...</div>
+      </div>
+    </div>
+
+    <!-- 6. Error / Empty State -->
+    <div class="surface-card ${cls}">
+      <div class="surface-title">States · Error & Empty</div>
+      <div style="padding:16px;border-radius:12px;border:1px solid ${t.hairline};text-align:center;background:${t.card};">
+        <div style="font-size:32px;margin-bottom:8px;">🍃</div>
+        <div style="font-size:15px;font-weight:700;color:${t.text1};">No counters yet</div>
+        <div style="font-size:12px;color:${t.text2};margin-top:4px;">Tap + to begin counting days</div>
+      </div>
+      <div style="margin-top:8px;padding:10px 14px;border-radius:10px;background:${mode === 'light' ? 'rgba(166,73,66,0.08)' : 'rgba(207,110,103,0.1)'};border:1px solid ${mode === 'light' ? 'rgba(166,73,66,0.2)' : 'rgba(207,110,103,0.2)'};">
+        <div style="font-size:12px;font-weight:700;color:${t.error};">⚠ Name is required</div>
+        <div style="font-size:11px;color:${t.text2};margin-top:2px;">Please enter a counter name</div>
+      </div>
+    </div>
+
+    <!-- 7. System Bars -->
+    <div class="surface-card ${cls}">
+      <div class="surface-title">Platform · System Bars & Navigation</div>
+      <div style="background:${t.canvas};padding:0;border-radius:12px;overflow:hidden;border:1px solid ${t.hairline};">
+        <div style="height:28px;background:${t.canvas};display:flex;justify-content:space-between;align-items:center;padding:0 12px;font-size:11px;font-weight:600;color:${t.text2};">
+          <span>09:41</span>
+          <span style="display:flex;gap:4px;">
+            <span>📶</span><span>🔋</span>
+          </span>
+        </div>
+        <div style="height:1px;background:${t.hairline};"></div>
+        <div style="padding:12px;text-align:center;">
+          <div style="font-size:13px;color:${t.text1};font-weight:600;">Status bar: <span style="font-family:'JetBrains Mono',monospace;font-size:11px;">${mode === 'light' ? 'APPEARANCE_LIGHT_STATUS_BARS' : 'dark icons'}</span></div>
+          <div style="font-size:11px;color:${t.text2};margin-top:4px;">Nav bar: ${mode === 'light' ? 'APPEARANCE_LIGHT_NAVIGATION_BARS' : 'transparent with dark icons'}</div>
+        </div>
+        <div style="height:1px;background:${t.hairline};"></div>
+        <div style="height:20px;background:${t.canvas};display:flex;justify-content:center;align-items:center;">
+          <div style="width:80px;height:4px;border-radius:2px;background:${t.outline};opacity:0.5;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. Date Picker -->
+    <div class="surface-card ${cls}">
+      <div class="surface-title">Component · Date Picker</div>
+      <div style="background:${t.surface};padding:14px;border-radius:12px;border:1px solid ${t.outline};">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="font-size:14px;font-weight:700;color:${t.text1};">September 2026</div>
+          <div style="display:flex;gap:6px;">
+            <span style="color:${t.text2};font-size:16px;cursor:pointer;">‹</span>
+            <span style="color:${t.text2};font-size:16px;cursor:pointer;">›</span>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;font-size:11px;">
+          ${['S','M','T','W','T','F','S'].map(d => `<div style="color:${t.text2};font-weight:600;padding:4px 0;">${d}</div>`).join('')}
+          ${[...Array(30)].map((_, i) => {
+            const day = i + 1;
+            const isToday = day === 6;
+            const bgC = isToday ? t.action : 'transparent';
+            const fgC = isToday ? t.onAction : t.text1;
+            return `<div style="padding:6px 0;border-radius:8px;background:${bgC};color:${fgC};font-weight:${isToday ? '700' : '400'};font-size:12px;">${day}</div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════
+// VARIANT C: TOKEN TABLE + AUDIT
+// ═══════════════════════════════════════════
+function renderTokenTable() {
+  const tbody = document.getElementById('tokenTableBody');
+  tbody.innerHTML = TOKENS.map(t => `
+    <tr>
+      <td style="font-weight:600;">${t.role}</td>
+      <td>
+        <div class="swatch">
+          <div class="swatch-dot" style="background:${t.light};"></div>
+          <span class="swatch-hex">${t.light}</span>
+        </div>
+      </td>
+      <td>
+        <div class="swatch">
+          <div class="swatch-dot" style="background:${t.dark};"></div>
+          <span class="swatch-hex">${t.dark}</span>
+        </div>
+      </td>
+      <td style="color:var(--shell-muted);font-size:12px;">${t.usage}</td>
+    </tr>
+  `).join('');
+}
+
+function renderAudit() {
+  const container = document.getElementById('auditResults');
+  let lastMode = '';
+
+  container.innerHTML = AUDIT_PAIRS.map(pair => {
+    const ratio = contrastRatio(pair.fg, pair.bg);
+    const { grade, cls } = wcagGrade(ratio, pair.type);
+    const modeHeader = pair.mode !== lastMode ? `<div style="font-size:12px;font-weight:700;color:var(--shell-accent);letter-spacing:1px;text-transform:uppercase;padding:12px 0 4px;margin-top:8px;border-top:1px solid var(--shell-border);">${pair.mode} MODE</div>` : '';
+    lastMode = pair.mode;
+
+    return `
+      ${modeHeader}
+      <div class="audit-row">
+        <div class="audit-pair">
+          <div class="audit-dot" style="background:${pair.bg};"></div>
+          <div class="audit-on-dot" style="background:${pair.fg};"></div>
+        </div>
+        <div class="audit-name">${pair.label} <span style="font-size:10px;opacity:0.6;">(${pair.type})</span></div>
+        <div class="audit-ratio">${ratio.toFixed(1)}:1</div>
+        <span class="contrast-badge ${cls}">${grade}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderKotlin() {
+  const code = `<span class="cmt">// ZenTheme.kt — Dark mode color scheme addition</span>
+
+<span class="kw">fun</span> <span class="fn">darkZenColors</span>() = <span class="type">ZenColorScheme</span>(
+    paperBackground = <span class="type">Color</span>(<span class="num">0xFF191B17</span>),  <span class="cmt">// Canvas</span>
+    paperSurface    = <span class="type">Color</span>(<span class="num">0xFF252922</span>),  <span class="cmt">// Surface</span>
+    paperCard       = <span class="type">Color</span>(<span class="num">0xFF2E322A</span>),  <span class="cmt">// Elevated card</span>
+    inkBlack        = <span class="type">Color</span>(<span class="num">0xFFF1EBDD</span>),  <span class="cmt">// Primary text</span>
+    inkMuted        = <span class="type">Color</span>(<span class="num">0xFFC4BEAE</span>),  <span class="cmt">// Secondary text</span>
+    hairlineRule    = <span class="type">Color</span>(<span class="num">0xFF3A3D35</span>),  <span class="cmt">// Hairline</span>
+    hairlineRuleVariant = <span class="type">Color</span>(<span class="num">0xFF4A4D44</span>),
+    cinnabarVermilion   = <span class="type">Color</span>(<span class="num">0xFFE5A36F</span>),  <span class="cmt">// Accent</span>
+    willowSage      = <span class="type">Color</span>(<span class="num">0xFFB1CCAA</span>),  <span class="cmt">// Primary action</span>
+    ochreGold       = <span class="type">Color</span>(<span class="num">0xFFD4A574</span>),  <span class="cmt">// Patina</span>
+    dustyIndigo     = <span class="type">Color</span>(<span class="num">0xFFA8C4D0</span>),
+    errorCrimson    = <span class="type">Color</span>(<span class="num">0xFFCF6E67</span>),  <span class="cmt">// Error</span>
+    isDark          = <span class="kw">true</span>,
+)
+
+<span class="kw">private fun</span> <span class="fn">darkMcmMaterialColors</span>() = <span class="fn">darkColorScheme</span>(
+    primary          = <span class="type">Color</span>(<span class="num">0xFFE5A36F</span>),  <span class="cmt">// Accent</span>
+    onPrimary        = <span class="type">Color</span>(<span class="num">0xFF172215</span>),
+    tertiary         = <span class="type">Color</span>(<span class="num">0xFFB1CCAA</span>),  <span class="cmt">// Primary action</span>
+    onTertiary       = <span class="type">Color</span>(<span class="num">0xFF172215</span>),
+    background       = <span class="type">Color</span>(<span class="num">0xFF191B17</span>),
+    onBackground     = <span class="type">Color</span>(<span class="num">0xFFF1EBDD</span>),
+    surface          = <span class="type">Color</span>(<span class="num">0xFF2E322A</span>),
+    onSurface        = <span class="type">Color</span>(<span class="num">0xFFF1EBDD</span>),
+    surfaceVariant   = <span class="type">Color</span>(<span class="num">0xFF252922</span>),
+    onSurfaceVariant = <span class="type">Color</span>(<span class="num">0xFFC4BEAE</span>),
+    outline          = <span class="type">Color</span>(<span class="num">0xFF8B9484</span>),
+    outlineVariant   = <span class="type">Color</span>(<span class="num">0xFF3A3D35</span>),
+    error            = <span class="type">Color</span>(<span class="num">0xFFCF6E67</span>),
+)
+
+<span class="cmt">// Updated ZenTheme composable</span>
+<span class="kw">@Composable</span>
+<span class="kw">fun</span> <span class="fn">ZenTheme</span>(
+    darkTheme: <span class="type">Boolean</span> = <span class="fn">isSystemInDarkTheme</span>(),
+    content: <span class="kw">@Composable</span> () -> <span class="type">Unit</span>,
+) {
+    <span class="kw">val</span> colors = <span class="kw">if</span> (darkTheme) <span class="fn">darkZenColors</span>() <span class="kw">else</span> <span class="fn">lightZenColors</span>()
+    <span class="kw">val</span> materialColors = <span class="kw">if</span> (darkTheme) <span class="fn">darkMcmMaterialColors</span>() <span class="kw">else</span> <span class="fn">lightMcmMaterialColors</span>()
+
+    <span class="fn">CompositionLocalProvider</span>(<span class="type">LocalZenColors</span> provides colors) {
+        <span class="fn">MaterialTheme</span>(
+            colorScheme = materialColors,
+            content = content,
+        )
+    }
+}`;
+
+  document.getElementById('kotlinCode').innerHTML = code;
+}
+
+function copyKotlin() {
+  const el = document.getElementById('kotlinCode');
+  const text = el.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = el.parentElement.querySelector('.copy-btn');
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = 'Copy Code'; }, 2000);
+  });
+}
+
+// ═══════════════════════════════════════════
+// KEYBOARD NAV
+// ═══════════════════════════════════════════
+window.addEventListener('keydown', (e) => {
+  if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+  if (e.key === 'ArrowLeft') cycleVariant(-1);
+  if (e.key === 'ArrowRight') cycleVariant(1);
+});
+
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
