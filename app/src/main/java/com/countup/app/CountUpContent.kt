@@ -879,46 +879,71 @@ private fun SubHeaderRow(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
                 )
-                Spacer(Modifier.padding(top = 2.dp))
+                Spacer(Modifier.padding(top = 4.dp))
 
-                ThemeMode.entries.forEach { option ->
-                    val isSelected = option == themeMode
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(
-                                if (isSelected) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
-                                else Color.Transparent
-                            )
-                            .clickable { onSelectThemeMode(option) }
-                            .padding(horizontal = 8.dp, vertical = 6.dp),
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(option.labelRes),
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    fontSize = 12.5.sp,
-                                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                ),
-                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                            )
-                            Text(
-                                text = stringResource(option.descriptionRes),
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    fontSize = 10.5.sp,
-                                ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        if (isSelected) {
-                            Text(
-                                text = "✓",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary,
-                            )
+                // Segmented Theme Selector (Auto / Sun / Moon)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(zenColors.hairlineRule.copy(alpha = if (zenColors.isDark) 0.35f else 0.45f))
+                        .padding(3.dp),
+                    horizontalArrangement = Arrangement.spacedBy(3.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    val themeItems = listOf(
+                        Triple(ThemeMode.SYSTEM, "⚡", "Auto"),
+                        Triple(ThemeMode.LIGHT, "☀️", "Light"),
+                        Triple(ThemeMode.DARK, "🌙", "Dark"),
+                    )
+
+                    themeItems.forEach { (mode, glyph, label) ->
+                        val isSelected = mode == themeMode
+                        val itemInteraction = rememberPressSource()
+                        val optionDesc = stringResource(mode.labelRes)
+
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(7.dp))
+                                .background(
+                                    if (isSelected) {
+                                        if (zenColors.isDark) zenColors.paperSurface else Color.White
+                                    } else {
+                                        Color.Transparent
+                                    }
+                                )
+                                .clickable(
+                                    interactionSource = itemInteraction,
+                                    indication = LocalIndication.current,
+                                    onClick = { onSelectThemeMode(mode) },
+                                )
+                                .padding(vertical = 6.dp)
+                                .semantics { contentDescription = optionDesc },
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center,
+                            ) {
+                                Text(
+                                    text = glyph,
+                                    fontSize = 12.sp,
+                                )
+                                Spacer(Modifier.width(3.5.dp))
+                                Text(
+                                    text = label,
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        fontSize = 11.5.sp,
+                                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                    ),
+                                    color = if (isSelected) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                    },
+                                )
+                            }
                         }
                     }
                 }
