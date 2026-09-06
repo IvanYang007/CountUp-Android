@@ -85,6 +85,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
@@ -366,6 +367,14 @@ private fun SolarTermCapsule(
 
     val sealInk = if (zenColors.isDark) zenColors.inkMuted else ZenSealInk
 
+    val configuration = LocalConfiguration.current
+    val isChinese = remember(configuration) {
+        val locale = if (!configuration.locales.isEmpty) configuration.locales[0] else java.util.Locale.getDefault()
+        locale.language.equals("zh", ignoreCase = true)
+    }
+    val subtitleFontFamily = if (isChinese) FontFamily.Serif else NotoSerifItalicFontFamily
+    val subtitleFontStyle = if (isChinese) FontStyle.Normal else FontStyle.Italic
+
     val contentDesc = when (morphStep) {
         0 -> "$seasonName, $termName"
         1 -> "$degreeText, $countdownText"
@@ -466,7 +475,7 @@ private fun SolarTermCapsule(
                     }
                 }
                 1 -> {
-                    // State 1 (Tap 1 Reveal): 100% ONE SINGLE UNIFORM INK COLOR (ZenSealInk) at 11.5sp
+                    // State 1 (Tap 1 Reveal): 100% ONE SINGLE UNIFORM INK COLOR (ZenSealInk) at 12sp
                     Column(
                         verticalArrangement = Arrangement.spacedBy(1.5.dp),
                     ) {
@@ -475,7 +484,7 @@ private fun SolarTermCapsule(
                             style = TextStyle(
                                 fontFamily = MarcellusFontFamily,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 11.5.sp,
+                                fontSize = 12.sp,
                                 letterSpacing = 0.9.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                             ),
@@ -484,11 +493,11 @@ private fun SolarTermCapsule(
                         Text(
                             text = countdownText,
                             style = TextStyle(
-                                fontFamily = NotoSerifItalicFontFamily,
-                                fontStyle = FontStyle.Italic,
+                                fontFamily = subtitleFontFamily,
+                                fontStyle = subtitleFontStyle,
                                 fontWeight = FontWeight.Normal,
-                                fontSize = 11.5.sp,
-                                letterSpacing = 0.2.sp,
+                                fontSize = 12.sp,
+                                letterSpacing = if (isChinese) 0.3.sp else 0.2.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                             ),
                             color = sealInk,
@@ -498,19 +507,19 @@ private fun SolarTermCapsule(
                     }
                 }
                 else -> {
-                    // State 2 (Tap 2 Reveal: Soft Whisper haiku in 2 lines): 100% ONE SINGLE UNIFORM INK COLOR (ZenSealInk) at 11.5sp
+                    // State 2 (Tap 2 Reveal: Soft Whisper haiku in 2 lines): 100% ONE SINGLE UNIFORM INK COLOR (ZenSealInk) at 12sp
                     Column(
                         verticalArrangement = Arrangement.spacedBy(2.dp),
                     ) {
                         Text(
                             text = whisperLine1,
                             style = TextStyle(
-                                fontFamily = NotoSerifItalicFontFamily,
-                                fontStyle = FontStyle.Italic,
+                                fontFamily = subtitleFontFamily,
+                                fontStyle = subtitleFontStyle,
                                 fontWeight = FontWeight.Normal,
-                                fontSize = 11.5.sp,
-                                letterSpacing = 0.15.sp,
-                                lineHeight = 15.5.sp,
+                                fontSize = 12.sp,
+                                letterSpacing = if (isChinese) 0.3.sp else 0.15.sp,
+                                lineHeight = 16.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                             ),
                             color = sealInk,
@@ -520,12 +529,12 @@ private fun SolarTermCapsule(
                         Text(
                             text = whisperLine2,
                             style = TextStyle(
-                                fontFamily = NotoSerifItalicFontFamily,
-                                fontStyle = FontStyle.Italic,
+                                fontFamily = subtitleFontFamily,
+                                fontStyle = subtitleFontStyle,
                                 fontWeight = FontWeight.Normal,
-                                fontSize = 11.5.sp,
-                                letterSpacing = 0.15.sp,
-                                lineHeight = 15.5.sp,
+                                fontSize = 12.sp,
+                                letterSpacing = if (isChinese) 0.3.sp else 0.15.sp,
+                                lineHeight = 16.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                             ),
                             color = sealInk,
