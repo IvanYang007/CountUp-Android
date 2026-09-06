@@ -268,13 +268,7 @@ val DARK_CARD_COLOR_PRESETS: List<CardColorPreset> = CARD_COLOR_PRESETS.map { ba
             mutedInk = ZenDarkTextSecondary,
             isDark = true,
         )
-        "sage_forest" -> base.copy(
-            cardBg = Color(0xFF1E2B22),
-            primaryInk = Color(0xFFFAF7F2),
-            mutedInk = Color(0xFFD6E4DB),
-            isDark = true,
-        )
-        "sage_ochre" -> base.copy(
+        "sage_forest", "sage_ochre" -> base.copy(
             cardBg = Color(0xFF1E2B22),
             primaryInk = Color(0xFFFAF7F2),
             mutedInk = Color(0xFFD6E4DB),

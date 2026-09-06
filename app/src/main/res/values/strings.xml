@@ -372,7 +372,4 @@
     <string name="widget_reset_notice_body" tools:ignore="PluralsCandidate">“%1$s” was reset to today on the home screen (%2$d days released).</string>
     <string name="action_restore">Restore</string>
     <string name="action_dismiss">Dismiss</string>
-
-    <!-- Zen Loading -->
-    <string name="loading_zen">Loading…</string>
 </resources>
