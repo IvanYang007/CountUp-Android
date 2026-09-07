@@ -49,20 +49,20 @@ class ZenPebbleCompactTest {
     fun oneWordLabelResolvesAppropriatePebbleTag() {
         // Priority 1: Explicit custom tag
         val item1 = CountUpItem(id = "1", name = "Morning Meditation", epochDay = 0L, comment = "habit")
-        assertEquals("ZEN", ZenWidgetReducer.resolveOneWordLabel(item1, "zen"))
-        assertEquals("FOCUS", ZenWidgetReducer.resolveOneWordLabel(item1, "focus"))
+        assertEquals("ZEN", item1.resolveOneWordLabel("zen"))
+        assertEquals("FOCUS", item1.resolveOneWordLabel("focus"))
 
         // Priority 2: Single word comment (<= 8 chars)
         val item2 = CountUpItem(id = "2", name = "Sober Living", epochDay = 0L, comment = "clean")
-        assertEquals("CLEAN", ZenWidgetReducer.resolveOneWordLabel(item2, null))
+        assertEquals("CLEAN", item2.resolveOneWordLabel(null))
 
         // Priority 3: First word of name
         val item3 = CountUpItem(id = "3", name = "Study Japanese", epochDay = 0L, comment = "daily kanji review")
-        assertEquals("STUDY", ZenWidgetReducer.resolveOneWordLabel(item3, null))
+        assertEquals("STUDY", item3.resolveOneWordLabel(null))
 
         // Truncation: max 8 characters
         val item4 = CountUpItem(id = "4", name = "Supercalifragilistic", epochDay = 0L)
-        val tag = ZenWidgetReducer.resolveOneWordLabel(item4, null)
+        val tag = item4.resolveOneWordLabel(null)
         assertTrue(tag.length <= 8)
         assertEquals("SUPERCAL", tag)
     }

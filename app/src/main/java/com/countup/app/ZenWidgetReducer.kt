@@ -1,7 +1,6 @@
 package com.countup.app
 
 import androidx.compose.runtime.Immutable
-import androidx.compose.ui.graphics.toArgb
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -99,13 +98,6 @@ object ZenWidgetReducer {
             else -> "$sign${absCount / 1000L}k"
         }
     }
-
-    /**
-     * Resolves a concise 1-word label for 1x1 pebble widgets.
-     * Prioritizes explicit [customTag], then single-word item comment, then the first word of item name.
-     */
-    fun resolveOneWordLabel(item: CountUpItem, customTag: String? = null): String =
-        item.resolveOneWordLabel(customTag)
 
     /**
      * Decomposes [days] into value text and uppercase unit string for [unit].

@@ -60,7 +60,7 @@ class ZenWidgetSuiteIntegrationSmokeTest {
         assertTrue(display.line2Res != 0)
 
         // 3. Zen Pebble 1x1 state verification
-        val pebbleLabel = ZenWidgetReducer.resolveOneWordLabel(item, customTag = null)
+        val pebbleLabel = item.resolveOneWordLabel(customTag = null)
         assertEquals("ZEN", pebbleLabel)
         val pebbleCompactNumber = ZenWidgetReducer.formatCompactNumber(108)
         assertEquals("108", pebbleCompactNumber)
