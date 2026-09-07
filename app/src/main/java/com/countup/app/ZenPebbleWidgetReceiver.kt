@@ -90,7 +90,7 @@ fun buildZenPebbleRemoteViews(
         today = today,
         isDarkMode = isDark,
     )
-    val oneWordLabel = ZenWidgetReducer.resolveOneWordLabel(item, customTag)
+    val oneWordLabel = item.resolveOneWordLabel(customTag)
 
     // Set tranquil background with preserved 24dp pebble corners
     views.setInt(R.id.zen_pebble_bg, "setColorFilter", widgetState.palette.canvasBg)

@@ -2,6 +2,7 @@ package com.countup.app
 
 import androidx.annotation.ColorInt
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.graphics.toArgb
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
@@ -77,6 +78,20 @@ object WidgetThemeTokens {
 
     /** Resolves the active widget palette based on system or user dark mode flag. */
     fun resolve(isDarkMode: Boolean): WidgetColorPalette = if (isDarkMode) Dark else Light
+
+    /**
+     * Resolves the widget palette harmonized with an optional [CountUpItem]'s custom card color.
+     */
+    fun resolveWithItem(item: CountUpItem?, isDarkMode: Boolean): WidgetColorPalette {
+        val base = resolve(isDarkMode)
+        if (item == null) return base
+        val cardStyle = resolveCardStyle(item.cardColor, isDark = isDarkMode)
+        return base.copy(
+            canvasBg = cardStyle.cardBg.toArgb(),
+            primaryInk = cardStyle.primaryInk.toArgb(),
+            secondaryInk = cardStyle.mutedInk.toArgb(),
+        )
+    }
 
     /**
      * Calculates the WCAG 2.1 relative luminance for an ARGB color integer.

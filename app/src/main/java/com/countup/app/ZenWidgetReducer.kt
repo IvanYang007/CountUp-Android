@@ -155,13 +155,7 @@ object ZenWidgetReducer {
         val remaining = max(0L, nextMilestone - days)
 
         val formattedStart = "Since " + anchorDate.format(DATE_FORMATTER)
-        val cardStyle = resolveCardStyle(item.cardColor, isDark = isDarkMode)
-        val basePalette = WidgetThemeTokens.resolve(isDarkMode)
-        val palette = basePalette.copy(
-            canvasBg = cardStyle.cardBg.toArgb(),
-            primaryInk = cardStyle.primaryInk.toArgb(),
-            secondaryInk = cardStyle.mutedInk.toArgb(),
-        )
+        val palette = WidgetThemeTokens.resolveWithItem(item, isDarkMode = isDarkMode)
 
         return ZenWidgetViewState(
             itemId = item.id,

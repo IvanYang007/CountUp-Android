@@ -163,14 +163,13 @@ fun buildSolarRhythmRemoteViews(
     val layoutRes = if (isCompact) R.layout.widget_solar_rhythm_2x2 else R.layout.widget_solar_rhythm_4x2
     val views = RemoteViews(context.packageName, layoutRes)
 
-    val themeTokens = WidgetThemeTokens.resolve(isDark)
-    val cardStyle = targetItem?.let { resolveCardStyle(it.cardColor, isDark = isDark) }
-    val canvasBg = cardStyle?.cardBg?.toArgb() ?: themeTokens.canvasBg
-    val primaryInk = cardStyle?.primaryInk?.toArgb() ?: themeTokens.primaryInk
-    val secondaryInk = cardStyle?.mutedInk?.toArgb() ?: themeTokens.secondaryInk
+    val palette = WidgetThemeTokens.resolveWithItem(targetItem, isDarkMode = isDark)
+    val canvasBg = palette.canvasBg
+    val primaryInk = palette.primaryInk
+    val secondaryInk = palette.secondaryInk
     val seasonalPrimary = display.palette.primaryTint
     val seasonalProgress = display.palette.progressTint
-    val hairlineColor = themeTokens.hairline
+    val hairlineColor = palette.hairline
 
     // Base background color
     views.setInt(R.id.solar_rhythm_root, "setBackgroundColor", canvasBg)
