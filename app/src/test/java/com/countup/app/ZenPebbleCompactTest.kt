@@ -102,10 +102,8 @@ class ZenPebbleCompactTest {
         assertEquals(WidgetThemeTokens.LIGHT_PRIMARY_INK, state.palette.primaryInk)
 
         // Verify hairline ink dash colors per spec (#6B5D4F in light, #8E8A7E in dark)
-        val dashLight = 0xFF6B5D4F.toInt()
-        val dashDark = 0xFF8E8A7E.toInt()
-        assertEquals(0xFF6B5D4F.toInt(), dashLight)
-        assertEquals(0xFF8E8A7E.toInt(), dashDark)
+        assertEquals(0xFF6B5D4F.toInt(), WidgetThemeTokens.PEBBLE_DASH_LIGHT)
+        assertEquals(0xFF8E8A7E.toInt(), WidgetThemeTokens.PEBBLE_DASH_DARK)
 
         val stateDark = ZenWidgetReducer.resolveZenWidgetState(
             item = item,

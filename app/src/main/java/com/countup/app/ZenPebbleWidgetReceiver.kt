@@ -116,7 +116,7 @@ fun buildZenPebbleRemoteViews(
     views.setTextColor(R.id.zen_pebble_number, palette.primaryInk)
 
     // Micro-unit label
-    views.setTextViewText(R.id.zen_pebble_unit, "DAYS")
+    views.setTextViewText(R.id.zen_pebble_unit, context.getString(R.string.unit_days))
     views.setTextColor(R.id.zen_pebble_unit, palette.secondaryInk)
 
     // Hairline ink dash using semantic theme token

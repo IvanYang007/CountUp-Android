@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- resizeMode="horizontal|vertical" is required by launcher drop engines to accept targeted single-cell placement without cancelling -->
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:minWidth="40dp"
     android:minHeight="40dp"
@@ -12,7 +13,6 @@
     android:previewLayout="@layout/widget_zen_pebble_1x1"
     android:description="@string/zen_pebble_widget_description"
     android:widgetCategory="home_screen"
-    <!-- resizeMode="horizontal|vertical" is required by launcher drop engines to accept targeted single-cell placement without cancelling -->
     android:resizeMode="horizontal|vertical"
     android:widgetFeatures="reconfigurable"
     android:configure="com.countup.app.ZenPebbleConfigureActivity"
