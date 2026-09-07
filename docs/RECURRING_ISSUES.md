@@ -39,7 +39,23 @@ In `app/src/main/res/xml/zen_pebble_widget_info.xml`, the following attributes a
 ### Prevention Rules
 - **DO NOT** change `android:resizeMode` to `horizontal`, `vertical`, or `horizontal|vertical` on 1x1 widgets. It must remain `none`.
 - **DO NOT** remove `configuration_optional` from `android:widgetFeatures` on 1x1 pebble widgets.
-- **Automated Verification**: `ZenPebbleWidgetXmlContractTest` must assert both `resizeMode="none"` and `configuration_optional` in CI/unit tests.
+- **Corner radius**: Must be ≤ 16dp (or use `@android:dimen/system_app_widget_inner_radius` on API 31+). OEM launchers with 56dp cells clip content inside 24dp corners.
+- **Content padding**: Must be ≤ 4dp. The rounded corners provide visual breathing room.
+- **Text sizing**: Use `autoSizeTextType="uniform"` with `autoSizeMaxTextSize="18sp"` and `autoSizeMinTextSize="10sp"` for the number field. Fixed 22sp overflows on tight OEM cells.
+- **Tag text**: Must use `singleLine="true"`, `ellipsize="end"`, and `maxWidth="52dp"` to prevent overflow.
+- **Automated Verification**: `WidgetContractInvariantsTest` must assert `resizeMode="none"`, `configuration_optional`, corner radius ≤ 16dp, auto-size text, and ellipsize.
+
+#### OEM Launcher Cell Sizes (Reference)
+| Launcher | Typical 1x1 Cell Size | Grid Density |
+|---|---|---|
+| Pixel Launcher | ~80dp | 5×5 |
+| Samsung One UI | ~68dp | 4×6 or 5×6 |
+| Vivo OriginOS / Funtouch | ~56–64dp | 5×6 or 5×9 |
+| Xiaomi HyperOS / MIUI | ~60–68dp | 4×6 or 5×6 |
+| OPPO ColorOS / Realme | ~60–66dp | 4×6 or 5×6 |
+| Nova Launcher | configurable | varies |
+
+**Design for the worst case (56dp) so it works everywhere.**
 
 ---
 

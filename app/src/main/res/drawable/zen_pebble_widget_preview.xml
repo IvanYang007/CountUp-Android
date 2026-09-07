@@ -1,41 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Preview asset for the 1x1 Zen Pebble widget in the launcher widget picker. -->
+<!-- Preview asset for the 1x1 Zen Pebble widget in the launcher widget picker.
+     Matches conservative universal layout: 16dp corner radius, compact content. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="80dp"
     android:height="80dp"
     android:viewportWidth="80"
     android:viewportHeight="80">
-    <!-- Serene Rounded Pebble Surface -->
+    <!-- Serene Rounded Pebble Surface (16dp radius = 16/80 viewport = ~16 units) -->
     <path
         android:fillColor="#FAF5EE"
-        android:pathData="M16,6 h48 a14,14 0 0 1 14,14 v40 a14,14 0 0 1 -14,14 h-48 a14,14 0 0 1 -14,-14 v-40 a14,14 0 0 1 14,-14 z" />
+        android:pathData="M16,4 h48 a12,12 0 0 1 12,12 v48 a12,12 0 0 1 -12,12 h-48 a12,12 0 0 1 -12,-12 v-48 a12,12 0 0 1 12,-12 z" />
     <path
         android:fillColor="#152C2416"
-        android:pathData="M16,6 h48 a14,14 0 0 1 14,14 v40 a14,14 0 0 1 -14,14 h-48 a14,14 0 0 1 -14,-14 v-40 a14,14 0 0 1 14,-14 z" />
+        android:pathData="M16,4 h48 a12,12 0 0 1 12,12 v48 a12,12 0 0 1 -12,12 h-48 a12,12 0 0 1 -12,-12 v-48 a12,12 0 0 1 12,-12 z" />
 
-    <!-- Bold Count Numeral ("42") -->
+    <!-- Bold Count Numeral ("42") — compact 18sp equivalent -->
     <!-- "4" -->
     <path
         android:fillColor="#2C2416"
-        android:pathData="M31,21 h4 v14 h3 v3 h-3 v4 h-4 v-4 h-9 v-3 l8,-14 z M27,32 h4 v-7 l-4,7 z" />
+        android:pathData="M31,22 h4 v12 h3 v3 h-3 v4 h-4 v-4 h-8 v-3 l7,-12 z M28,33 h3 v-6 l-3,6 z" />
     <!-- "2" -->
     <path
         android:fillColor="#2C2416"
-        android:pathData="M43,21 c4,0 7,2 7,6 c0,3 -2,5 -5,8 l-3,3 h8 v4 h-15 v-3 l6,-6 c2,-2 3,-3 3,-5 c0,-2 -1,-3 -3,-3 c-2,0 -3,1 -3,3 h-4 c0,-4 3,-7 7,-7 z" />
+        android:pathData="M43,22 c4,0 6,2 6,5 c0,3 -2,4 -4,7 l-3,3 h7 v3 h-13 v-3 l5,-5 c2,-2 3,-3 3,-4 c0,-2 -1,-3 -3,-3 c-2,0 -3,1 -3,3 h-3 c0,-4 3,-6 6,-6 z" />
 
-    <!-- Micro-Unit Label ("DAYS") -->
+    <!-- Micro-Unit Label ("DAYS") — 7sp equivalent -->
     <path
         android:fillColor="#8C7E70"
-        android:pathData="M27,47 h26 v3 h-26 z" />
+        android:pathData="M28,47 h24 v2.5 h-24 z" />
 
-    <!-- Hairline Ink Dash -->
+    <!-- Hairline Ink Dash — 12dp equivalent -->
     <path
         android:fillColor="#6B5D4F"
-        android:pathData="M32,53 h16 v1.5 h-16 z" />
+        android:pathData="M34,52 h12 v1 h-12 z" />
 
-    <!-- One-Word Tag Label ("ZEN" / "SOBRIETY") -->
+    <!-- One-Word Tag Label — 7sp equivalent -->
     <path
         android:fillColor="#46664B"
-        android:pathData="M25,58 h30 v3.5 h-30 z" />
+        android:pathData="M26,56 h28 v3 h-28 z" />
 </vector>
-

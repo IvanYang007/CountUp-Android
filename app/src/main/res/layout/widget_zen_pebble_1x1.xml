@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Universal 1x1 Zen Pebble layout — designed for worst-case 56dp OEM cells
+  (Vivo OriginOS, Xiaomi HyperOS, OPPO ColorOS) while looking great on 80dp Pixel cells.
+  Key constraints: 16dp corners, 2dp inner padding, auto-sizing text, compact spacing.
+-->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@android:id/background"
@@ -8,7 +13,7 @@
     android:gravity="center"
     tools:ignore="SmallSp">
 
-    <!-- Pebble Background Surface with 24dp rounded corners -->
+    <!-- Pebble Background Surface — corner radius handled by drawable (16dp base / system radius on v31) -->
     <ImageView
         android:id="@+id/zen_pebble_bg"
         android:layout_width="match_parent"
@@ -17,26 +22,31 @@
         android:scaleType="fitXY"
         android:contentDescription="@null" />
 
-    <!-- Active Content Container -->
+    <!-- Active Content Container — tight 2dp padding for maximum usable area -->
     <LinearLayout
         android:id="@+id/zen_pebble_content"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_centerInParent="true"
-        android:padding="6dp"
+        android:padding="2dp"
         android:gravity="center"
         android:orientation="vertical">
 
-        <!-- Bold Serene Numeral -->
+        <!-- Bold Serene Numeral — auto-sizes from 18sp down to 10sp to fit any cell width -->
         <TextView
             android:id="@+id/zen_pebble_number"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="22sp"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="10sp"
+            android:autoSizeMaxTextSize="18sp"
+            android:autoSizeStepGranularity="1sp"
             android:textStyle="bold"
             android:textColor="#2C2416"
             android:includeFontPadding="false"
             android:singleLine="true"
+            android:gravity="center"
+            android:maxLines="1"
             tools:text="412" />
 
         <!-- Micro-Unit Label -->
@@ -44,35 +54,36 @@
             android:id="@+id/zen_pebble_unit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="8.5sp"
+            android:textSize="7sp"
             android:textStyle="bold"
-            android:letterSpacing="0.12"
+            android:letterSpacing="0.06"
             android:textColor="#8C7E70"
             android:singleLine="true"
             android:text="@string/unit_days"
             tools:text="DAYS" />
 
-        <!-- Hairline Ink Dash -->
+        <!-- Hairline Ink Dash — compact -->
         <ImageView
             android:id="@+id/zen_pebble_dash"
-            android:layout_width="16dp"
-            android:layout_height="2dp"
-            android:layout_marginTop="3dp"
-            android:layout_marginBottom="3dp"
+            android:layout_width="12dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="1dp"
+            android:layout_marginBottom="1dp"
             android:background="#6B5D4F"
             android:contentDescription="@null" />
 
-        <!-- Subtle One-Word Tag -->
+        <!-- Subtle One-Word Tag — capped width with ellipsize for long tags -->
         <TextView
             android:id="@+id/zen_pebble_tag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="8.5sp"
+            android:textSize="7sp"
             android:textStyle="bold"
-            android:letterSpacing="0.08"
+            android:letterSpacing="0.04"
             android:textColor="#46664B"
             android:singleLine="true"
             android:ellipsize="end"
+            android:maxWidth="52dp"
             tools:text="SOBRIETY" />
     </LinearLayout>
 
@@ -82,7 +93,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:textSize="16sp"
+        android:textSize="14sp"
         android:textStyle="bold"
         android:textColor="#8C7E70"
         android:text="@string/action_add_symbol"
