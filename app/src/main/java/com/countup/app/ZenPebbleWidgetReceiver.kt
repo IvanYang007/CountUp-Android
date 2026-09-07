@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.Intent
 import android.view.View
 import android.widget.RemoteViews
-import androidx.compose.ui.graphics.toArgb
 import java.time.LocalDate
 
 /**
@@ -97,27 +96,23 @@ fun buildZenPebbleRemoteViews(
     views.setViewVisibility(R.id.zen_pebble_empty, View.GONE)
     views.setViewVisibility(R.id.zen_pebble_content, View.VISIBLE)
 
-    val cardStyle = resolveCardStyle(item.cardColor, isDark = isDark)
-    val palette = WidgetThemeTokens.resolve(isDark).copy(
-        canvasBg = cardStyle.cardBg.toArgb(),
-        primaryInk = cardStyle.primaryInk.toArgb(),
-        secondaryInk = cardStyle.mutedInk.toArgb(),
+    val widgetState = ZenWidgetReducer.resolveZenWidgetState(
+        item = item,
+        today = today,
+        isDarkMode = isDark,
     )
-    val count = daysSince(LocalDate.ofEpochDay(item.epochDay), today)
-    val compactNumber = ZenWidgetReducer.formatCompactNumber(count)
-
     val oneWordLabel = ZenWidgetReducer.resolveOneWordLabel(item, customTag)
 
     // Set tranquil background with preserved 24dp pebble corners
-    views.setInt(R.id.zen_pebble_bg, "setColorFilter", palette.canvasBg)
+    views.setInt(R.id.zen_pebble_bg, "setColorFilter", widgetState.palette.canvasBg)
 
     // Bold compact numeral
-    views.setTextViewText(R.id.zen_pebble_number, compactNumber)
-    views.setTextColor(R.id.zen_pebble_number, palette.primaryInk)
+    views.setTextViewText(R.id.zen_pebble_number, widgetState.compactValueText)
+    views.setTextColor(R.id.zen_pebble_number, widgetState.palette.primaryInk)
 
     // Micro-unit label
     views.setTextViewText(R.id.zen_pebble_unit, context.getString(R.string.unit_days))
-    views.setTextColor(R.id.zen_pebble_unit, palette.secondaryInk)
+    views.setTextColor(R.id.zen_pebble_unit, widgetState.palette.secondaryInk)
 
     // Hairline ink dash using semantic theme token
     val dashColor = if (isDark) WidgetThemeTokens.PEBBLE_DASH_DARK else WidgetThemeTokens.PEBBLE_DASH_LIGHT
@@ -125,7 +120,7 @@ fun buildZenPebbleRemoteViews(
 
     // Subtle 1-word tag
     views.setTextViewText(R.id.zen_pebble_tag, oneWordLabel)
-    views.setTextColor(R.id.zen_pebble_tag, palette.accentPrimary)
+    views.setTextColor(R.id.zen_pebble_tag, widgetState.palette.accentPrimary)
 
     // Tap anywhere on pebble opens specific event in CountUp
     val launchIntent = Intent(context, MainActivity::class.java).apply {
