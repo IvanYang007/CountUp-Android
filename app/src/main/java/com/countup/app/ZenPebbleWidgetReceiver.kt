@@ -79,7 +79,7 @@ fun buildZenPebbleRemoteViews(
         views.setViewVisibility(R.id.zen_pebble_content, View.GONE)
 
         val defaultBg = if (isDark) WidgetThemeTokens.DARK_CANVAS_BG else WidgetThemeTokens.LIGHT_CANVAS_BG
-        views.setInt(R.id.zen_pebble_root, "setBackgroundColor", defaultBg)
+        views.setInt(R.id.zen_pebble_bg, "setColorFilter", defaultBg)
 
         val launchIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -90,7 +90,7 @@ fun buildZenPebbleRemoteViews(
             launchIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
-        views.setOnClickPendingIntent(R.id.zen_pebble_root, pendingIntent)
+        views.setOnClickPendingIntent(android.R.id.background, pendingIntent)
         return views
     }
 
@@ -108,8 +108,8 @@ fun buildZenPebbleRemoteViews(
 
     val oneWordLabel = ZenWidgetReducer.resolveOneWordLabel(item, customTag)
 
-    // Set tranquil background
-    views.setInt(R.id.zen_pebble_root, "setBackgroundColor", palette.canvasBg)
+    // Set tranquil background with preserved 24dp pebble corners
+    views.setInt(R.id.zen_pebble_bg, "setColorFilter", palette.canvasBg)
 
     // Bold compact numeral
     views.setTextViewText(R.id.zen_pebble_number, compactNumber)
@@ -138,7 +138,7 @@ fun buildZenPebbleRemoteViews(
         launchIntent,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
-    views.setOnClickPendingIntent(R.id.zen_pebble_root, pendingIntent)
+    views.setOnClickPendingIntent(android.R.id.background, pendingIntent)
 
     return views
 }

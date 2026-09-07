@@ -12,6 +12,6 @@
     android:description="@string/zen_horizon_widget_description"
     android:widgetCategory="home_screen"
     android:resizeMode="horizontal"
-    android:widgetFeatures="reconfigurable|configuration_optional"
+    android:widgetFeatures="reconfigurable"
     android:configure="com.countup.app.ZenHorizonConfigureActivity"
     android:label="@string/zen_horizon_widget_label" />

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Preview asset for the 1x1 Zen Pebble widget in the launcher widget picker. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="80dp"
+    android:height="80dp"
+    android:viewportWidth="80"
+    android:viewportHeight="80">
+    <!-- Serene Rounded Pebble Surface -->
+    <path
+        android:fillColor="#FAF5EE"
+        android:pathData="M16,6 h48 a14,14 0 0 1 14,14 v40 a14,14 0 0 1 -14,14 h-48 a14,14 0 0 1 -14,-14 v-40 a14,14 0 0 1 14,-14 z" />
+    <path
+        android:fillColor="#152C2416"
+        android:pathData="M16,6 h48 a14,14 0 0 1 14,14 v40 a14,14 0 0 1 -14,14 h-48 a14,14 0 0 1 -14,-14 v-40 a14,14 0 0 1 14,-14 z" />
+
+    <!-- Bold Count Numeral ("42") -->
+    <!-- "4" -->
+    <path
+        android:fillColor="#2C2416"
+        android:pathData="M31,21 h4 v14 h3 v3 h-3 v4 h-4 v-4 h-9 v-3 l8,-14 z M27,32 h4 v-7 l-4,7 z" />
+    <!-- "2" -->
+    <path
+        android:fillColor="#2C2416"
+        android:pathData="M43,21 c4,0 7,2 7,6 c0,3 -2,5 -5,8 l-3,3 h8 v4 h-15 v-3 l6,-6 c2,-2 3,-3 3,-5 c0,-2 -1,-3 -3,-3 c-2,0 -3,1 -3,3 h-4 c0,-4 3,-7 7,-7 z" />
+
+    <!-- Micro-Unit Label ("DAYS") -->
+    <path
+        android:fillColor="#8C7E70"
+        android:pathData="M27,47 h26 v3 h-26 z" />
+
+    <!-- Hairline Ink Dash -->
+    <path
+        android:fillColor="#6B5D4F"
+        android:pathData="M32,53 h16 v1.5 h-16 z" />
+
+    <!-- One-Word Tag Label ("ZEN" / "SOBRIETY") -->
+    <path
+        android:fillColor="#46664B"
+        android:pathData="M25,58 h30 v3.5 h-30 z" />
+</vector>

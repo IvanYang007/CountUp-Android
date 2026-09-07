@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/zen_pebble_root"
+    android:id="@android:id/background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/widget_zen_bg"
-    android:padding="6dp"
     android:clipToOutline="true"
     android:gravity="center"
     tools:ignore="SmallSp">
+
+    <!-- Pebble Background Surface with 24dp rounded corners -->
+    <ImageView
+        android:id="@+id/zen_pebble_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/widget_zen_bg"
+        android:scaleType="fitXY"
+        android:contentDescription="@null" />
 
     <!-- Active Content Container -->
     <LinearLayout
@@ -16,6 +23,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
+        android:padding="6dp"
         android:gravity="center"
         android:orientation="vertical">
 

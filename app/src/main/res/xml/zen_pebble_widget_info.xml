@@ -8,9 +8,11 @@
     android:targetCellHeight="1"
     android:updatePeriodMillis="1800000"
     android:initialLayout="@layout/widget_zen_pebble_1x1"
+    android:previewImage="@drawable/zen_pebble_widget_preview"
+    android:previewLayout="@layout/widget_zen_pebble_1x1"
     android:description="@string/zen_pebble_widget_description"
     android:widgetCategory="home_screen"
-    android:resizeMode="none"
-    android:widgetFeatures="reconfigurable|configuration_optional"
+    android:resizeMode="horizontal|vertical"
+    android:widgetFeatures="reconfigurable"
     android:configure="com.countup.app.ZenPebbleConfigureActivity"
     android:label="@string/zen_pebble_widget_label" />
