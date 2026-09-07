@@ -73,6 +73,21 @@ data class CountUpItem(
     fun isResettableOn(today: LocalDate): Boolean = isResettableOn(today.toEpochDay())
 
     /**
+     * Resolves an ultra-concise 1-word tag for compact 1x1 micro-widgets.
+     */
+    fun resolveOneWordLabel(customTag: String? = null): String {
+        if (!customTag.isNullOrBlank()) {
+            return customTag.trim().take(8).uppercase()
+        }
+        val fromComment = comment.trim().takeIf { it.isNotBlank() && !it.contains(" ") && it.length <= 8 }
+        if (fromComment != null) {
+            return fromComment.uppercase()
+        }
+        val firstWord = name.trim().split(Regex("\\s+")).firstOrNull()?.trim() ?: "ZEN"
+        return firstWord.take(8).uppercase()
+    }
+
+    /**
      * Resets this counter to [newEpochDay] (typically today's date), updating the streak metrics.
      *
      * Clean domain transition:

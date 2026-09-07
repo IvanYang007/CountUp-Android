@@ -82,33 +82,24 @@ object WidgetNavigationContract {
     }
 
     /**
-     * Creates a broadcast pending intent with immutable and update current flags.
-     */
-    fun createBroadcastPendingIntent(
-        context: Context,
-        requestCode: Int,
-        intent: Intent,
-    ): PendingIntent {
-        return PendingIntent.getBroadcast(
-            context,
-            requestCode,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
-    }
-
-    /**
-     * Attaches a broadcast pending intent to [viewId].
+     * Attaches a broadcast pending intent to one or more [viewIds].
      */
     fun attachBroadcastPendingIntent(
         views: RemoteViews,
         context: Context,
         requestCode: Int,
         intent: Intent,
-        viewId: Int,
+        vararg viewIds: Int,
     ) {
-        val pendingIntent = createBroadcastPendingIntent(context, requestCode, intent)
-        views.setOnClickPendingIntent(viewId, pendingIntent)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        for (viewId in viewIds) {
+            views.setOnClickPendingIntent(viewId, pendingIntent)
+        }
     }
 
     fun resolveRequestCode(targetItemId: String?, appWidgetId: Int, offset: Int): Int {

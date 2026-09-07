@@ -101,20 +101,11 @@ object ZenWidgetReducer {
     }
 
     /**
-     * Resolves a crisp 1-word tag (e.g. CLEAN, ZEN, LOVE, FOCUS) for the Zen Pebble widget.
+     * Resolves a concise 1-word label for 1x1 pebble widgets.
      * Prioritizes explicit [customTag], then single-word item comment, then the first word of item name.
      */
-    fun resolveOneWordLabel(item: CountUpItem, customTag: String? = null): String {
-        if (!customTag.isNullOrBlank()) {
-            return customTag.trim().take(8).uppercase()
-        }
-        val fromComment = item.comment.trim().takeIf { it.isNotBlank() && !it.contains(" ") && it.length <= 8 }
-        if (fromComment != null) {
-            return fromComment.uppercase()
-        }
-        val firstWord = item.name.trim().split(Regex("\\s+")).firstOrNull()?.trim() ?: "ZEN"
-        return firstWord.take(8).uppercase()
-    }
+    fun resolveOneWordLabel(item: CountUpItem, customTag: String? = null): String =
+        item.resolveOneWordLabel(customTag)
 
     /**
      * Decomposes [days] into value text and uppercase unit string for [unit].

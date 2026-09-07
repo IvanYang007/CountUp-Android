@@ -157,10 +157,10 @@ private fun buildHero2x1RemoteViews(
     val resetIntent = Intent(context, ResetCountReceiver::class.java).apply {
         putExtra(ResetCountReceiver.EXTRA_ITEM_ID, item.id)
     }
-    val resetPendingIntent = WidgetNavigationContract.createBroadcastPendingIntent(
-        context = context,
-        requestCode = WidgetNavigationContract.resolveRequestCode(item.id, appWidgetId, WidgetNavigationContract.HERO_RESET_PENDING_INTENT_OFFSET),
-        intent = resetIntent,
+    val resetRequestCode = WidgetNavigationContract.resolveRequestCode(
+        targetItemId = item.id,
+        appWidgetId = appWidgetId,
+        offset = WidgetNavigationContract.HERO_RESET_PENDING_INTENT_OFFSET,
     )
 
     if (armed) {
@@ -189,9 +189,15 @@ private fun buildHero2x1RemoteViews(
         views.setInt(R.id.hero_badge_icon, "setColorFilter", 0xFFFFFFFF.toInt())
 
         // When armed, tapping anywhere on the card confirms reset
-        views.setOnClickPendingIntent(R.id.hero_widget_root, resetPendingIntent)
-        views.setOnClickPendingIntent(R.id.hero_badge_container, resetPendingIntent)
-        views.setOnClickPendingIntent(R.id.hero_count_container, resetPendingIntent)
+        WidgetNavigationContract.attachBroadcastPendingIntent(
+            views = views,
+            context = context,
+            requestCode = resetRequestCode,
+            intent = resetIntent,
+            R.id.hero_widget_root,
+            R.id.hero_badge_container,
+            R.id.hero_count_container,
+        )
     } else {
         // Normal active state with tap-to-decompose ephemeris odometer
         val store = CountUpStore(context)
@@ -201,7 +207,7 @@ private fun buildHero2x1RemoteViews(
         val decomposed = decomposeTime(LocalDate.ofEpochDay(item.epochDay), today, displayMode)
 
         views.setTextViewText(R.id.hero_name, item.name.uppercase())
-        views.setTextColor(R.id.hero_name, if (isDark) 0xFFDEB285.toInt() else mutedInkInt)
+        views.setTextColor(R.id.hero_name, if (isDark) WidgetThemeTokens.DARK_ACCENT_GOLD else mutedInkInt)
 
         if (item.resetCount > 0) {
             views.setViewVisibility(R.id.hero_reset_badge, View.VISIBLE)
@@ -237,7 +243,7 @@ private fun buildHero2x1RemoteViews(
         // Milestone Accent Dot
         if (isMilestone) {
             views.setViewVisibility(R.id.hero_milestone_dot, View.VISIBLE)
-            val milestoneColor = if (isDark) 0xFFC88D58.toInt() else 0xFFC2410C.toInt()
+            val milestoneColor = if (isDark) WidgetThemeTokens.DARK_MILESTONE_ACCENT else WidgetThemeTokens.LIGHT_MILESTONE_ACCENT
             views.setInt(R.id.hero_milestone_dot, "setColorFilter", milestoneColor)
         } else {
             views.setViewVisibility(R.id.hero_milestone_dot, View.GONE)
@@ -261,11 +267,17 @@ private fun buildHero2x1RemoteViews(
             context = context,
             requestCode = WidgetNavigationContract.resolveRequestCode(null, appWidgetId, WidgetNavigationContract.HERO_CYCLE_PENDING_INTENT_OFFSET),
             intent = cycleIntent,
-            viewId = R.id.hero_count_container,
+            R.id.hero_count_container,
         )
 
         // Tap badge circle to arm reset
-        views.setOnClickPendingIntent(R.id.hero_badge_container, resetPendingIntent)
+        WidgetNavigationContract.attachBroadcastPendingIntent(
+            views = views,
+            context = context,
+            requestCode = resetRequestCode,
+            intent = resetIntent,
+            R.id.hero_badge_container,
+        )
 
         // Tap card body / title to open MainActivity
         WidgetNavigationContract.attachItemLaunchIntent(

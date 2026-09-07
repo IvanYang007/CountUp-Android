@@ -34,6 +34,7 @@ object WidgetThemeTokens {
     const val LIGHT_ACCENT_PRIMARY = 0xFF46664B.toInt() // Bamboo forest jade
     const val LIGHT_ACCENT_GOLD = 0xFFDEB285.toInt()    // Filament Gold (PatinaPigments.GoldLight)
     const val LIGHT_ACCENT_KINTSUGI = 0xFFD6A848.toInt() // Kintsugi Gold (PatinaPigments.Gold)
+    const val LIGHT_MILESTONE_ACCENT = 0xFFC2410C.toInt() // Radiant persimmon milestone dot
 
     // --- Dark Theme: Twilight Sumi Stone Palette matching App Dark Card ---
     const val DARK_CANVAS_BG = 0xFF24201A.toInt()    // Sumi stone / ZenDarkCard
@@ -44,6 +45,7 @@ object WidgetThemeTokens {
     const val DARK_ACCENT_PRIMARY = 0xFF8FAF84.toInt() // Tea moss green
     const val DARK_ACCENT_GOLD = 0xFFDEB285.toInt()    // Filament Gold
     const val DARK_ACCENT_KINTSUGI = 0xFFD6A848.toInt() // Kintsugi Gold
+    const val DARK_MILESTONE_ACCENT = 0xFFC88D58.toInt() // Patina bronze milestone dot
 
     // --- Micro-Divider Hairline Tokens ---
     const val MICRO_DIVIDER_LIGHT = LIGHT_SECONDARY_INK
