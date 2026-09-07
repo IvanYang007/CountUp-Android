@@ -22,6 +22,7 @@
 -keep class com.countup.app.ZenPebbleWidgetReceiver { *; }
 -keep class com.countup.app.ZenPebbleConfigureActivity { *; }
 -keep class com.countup.app.SolarRhythmWidgetReceiver { *; }
+-keep class com.countup.app.SolarRhythmConfigureActivity { *; }
 -keep class com.countup.app.MidnightAlarmReceiver { *; }
 
 # WorkManager / Room Database reflection safety (required by transitive Glance dependency)

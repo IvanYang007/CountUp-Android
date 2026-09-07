@@ -378,6 +378,8 @@
     <string name="solar_rhythm_widget_label">Solar Rhythm</string>
     <string name="solar_rhythm_widget_description">4x2 seasonal canvas harmonizing personal milestones with the 24 Solar Terms.</string>
     <string name="solar_rhythm_day_of">Day %1$d of %2$d</string>
+    <string name="solar_rhythm_configure_title">Solar Rhythm</string>
+    <string name="solar_rhythm_configure_subtitle">Select a counter to honor on this seasonal canvas.</string>
 
     <!-- Zen Pebble (1x1 极简原石) -->
     <string name="zen_pebble_widget_label">Zen Pebble</string>

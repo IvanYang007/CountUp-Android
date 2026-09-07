@@ -314,4 +314,8 @@
     <string name="widget_reset_notice_body" tools:ignore="PluralsCandidate">“%1$s” 已在桌面重置归零（释放 %2$d 天）。</string>
     <string name="action_restore">恢复</string>
     <string name="action_dismiss">忽略</string>
+    <string name="solar_rhythm_widget_label">时节同行</string>
+    <string name="solar_rhythm_widget_description">二十四节气流转画卷，融汇个人修持与时令诗意。</string>
+    <string name="solar_rhythm_configure_title">时节同行</string>
+    <string name="solar_rhythm_configure_subtitle">选择要在此时节画卷上呈现的习惯或纪念日。</string>
 </resources>

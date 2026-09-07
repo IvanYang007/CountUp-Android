@@ -83,6 +83,16 @@ class SolarRhythmWidgetReceiver : AppWidgetProvider() {
             pushSolarRhythmWidgetUpdate(appContext, appWidgetId)
         }
     }
+
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        val appContext = context.applicationContext
+        launchAsync {
+            val store = CountUpStore(appContext)
+            for (id in appWidgetIds) {
+                store.removeSolarRhythmBinding(id)
+            }
+        }
+    }
 }
 
 /** Pushes update to all placed Solar Rhythm widgets on the launcher. */

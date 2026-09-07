@@ -105,17 +105,28 @@
         </activity>
 
 
-        <!-- Solar Rhythm 4x2 / 2x2 Glance Seasonal Canvas -->
+        <!-- Solar Rhythm 4x2 / 2x2 Seasonal Canvas -->
         <receiver
             android:name=".SolarRhythmWidgetReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.appwidget.action.APPWIDGET_DELETED" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/solar_rhythm_widget_info" />
         </receiver>
+
+        <!-- Configuration Activity for Solar Rhythm Widget -->
+        <activity
+            android:name=".SolarRhythmConfigureActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
 
         <!-- Zen Pebble (1x1 极简原石) -->
         <receiver
