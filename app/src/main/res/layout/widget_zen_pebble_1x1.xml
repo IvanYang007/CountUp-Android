@@ -72,7 +72,7 @@
             android:background="#6B5D4F"
             android:contentDescription="@null" />
 
-        <!-- Subtle One-Word Tag — capped width with ellipsize for long tags -->
+        <!-- Subtle One-Word Tag — single-line with ellipsize to fit any cell width -->
         <TextView
             android:id="@+id/zen_pebble_tag"
             android:layout_width="wrap_content"
@@ -83,7 +83,6 @@
             android:textColor="#46664B"
             android:singleLine="true"
             android:ellipsize="end"
-            android:maxWidth="52dp"
             tools:text="SOBRIETY" />
     </LinearLayout>
 

@@ -92,8 +92,13 @@ fun buildZenPebbleRemoteViews(
     )
     val oneWordLabel = item.resolveOneWordLabel(customTag)
 
-    // Set tranquil background with preserved 24dp pebble corners
+    // Set tranquil background with adaptive pebble corners (16dp / system radius on v31)
     views.setInt(R.id.zen_pebble_bg, "setColorFilter", widgetState.palette.canvasBg)
+
+    // Unified TalkBack semantic description for accessibility
+    val unitDays = context.getString(R.string.unit_days)
+    val a11yDesc = "${item.name}: ${widgetState.compactValueText} $unitDays"
+    views.setContentDescription(android.R.id.background, a11yDesc)
 
     // Bold compact numeral
     views.setTextViewText(R.id.zen_pebble_number, widgetState.compactValueText)
