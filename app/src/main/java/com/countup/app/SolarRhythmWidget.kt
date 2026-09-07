@@ -180,14 +180,7 @@ fun buildSolarRhythmRemoteViews(
         views.setViewVisibility(R.id.solar_rhythm_content, View.GONE)
         views.setViewVisibility(R.id.solar_rhythm_empty, View.VISIBLE)
 
-        val launchIntent = WidgetNavigationContract.createLaunchIntent(context)
-        val pendingIntent = PendingIntent.getActivity(
-            context,
-            appWidgetId,
-            launchIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
-        views.setOnClickPendingIntent(R.id.solar_rhythm_root, pendingIntent)
+        WidgetNavigationContract.attachEmptyStateLaunchIntent(views, context, appWidgetId, R.id.solar_rhythm_root)
         return views
     }
 

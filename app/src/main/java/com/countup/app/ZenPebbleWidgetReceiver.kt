@@ -78,7 +78,7 @@ fun buildZenPebbleRemoteViews(
 
         val defaultBg = WidgetThemeTokens.resolve(isDark).canvasBg
         views.setInt(R.id.zen_pebble_bg, "setColorFilter", defaultBg)
-        attachPebbleLaunchIntent(views, context, appWidgetId, targetItemId = null)
+        WidgetNavigationContract.attachEmptyStateLaunchIntent(views, context, appWidgetId, android.R.id.background)
         return views
     }
 
@@ -120,7 +120,7 @@ private fun attachPebbleLaunchIntent(
     views: RemoteViews,
     context: Context,
     appWidgetId: Int,
-    targetItemId: String?,
+    targetItemId: String,
 ) {
     val launchIntent = WidgetNavigationContract.createLaunchIntent(context, targetItemId)
     val requestCode = WidgetNavigationContract.resolveRequestCode(

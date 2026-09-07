@@ -21,17 +21,10 @@ import kotlin.math.abs
  */
 class HeroWidgetReceiver : AppWidgetProvider() {
 
-    companion object {
-        const val ACTION_CYCLE_HERO_DISPLAY_MODE = WidgetNavigationContract.ACTION_CYCLE_HERO_DISPLAY_MODE
-        @Deprecated("Use WidgetNavigationContract.ACTION_CYCLE_ZEN_HORIZON_UNIT", ReplaceWith("WidgetNavigationContract.ACTION_CYCLE_ZEN_HORIZON_UNIT"))
-        const val ACTION_CYCLE_ZEN_HORIZON_UNIT = WidgetNavigationContract.ACTION_CYCLE_ZEN_HORIZON_UNIT
-        const val EXTRA_APP_WIDGET_ID = WidgetNavigationContract.EXTRA_APP_WIDGET_ID
-    }
-
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
-        if (intent.action == ACTION_CYCLE_HERO_DISPLAY_MODE) {
-            val appWidgetId = intent.getIntExtra(EXTRA_APP_WIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
+        if (intent.action == WidgetNavigationContract.ACTION_CYCLE_HERO_DISPLAY_MODE) {
+            val appWidgetId = intent.getIntExtra(WidgetNavigationContract.EXTRA_APP_WIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
             if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
                 val appWidgetManager = AppWidgetManager.getInstance(context)
                 val info = try {
@@ -47,7 +40,7 @@ class HeroWidgetReceiver : AppWidgetProvider() {
                     val store = CountUpStore(appContext)
                     val boundItemId = store.getHeroWidgetBinding(appWidgetId)
                     val items = store.items()
-                    val targetItem = resolveHeroTargetItem(items, boundItemId)
+                    val targetItem = ZenWidgetReducer.resolveTargetItem(items, boundItemId)
                     val count = targetItem?.let { daysSince(LocalDate.ofEpochDay(it.epochDay), LocalDate.now()) } ?: 0L
                     val currentMode = store.getHeroWidgetDisplayMode(appWidgetId)
                     val nextMode = currentMode.next(count)
@@ -100,17 +93,13 @@ fun pushAllHeroWidgetsUpdate(context: Context) {
     }
 }
 
-/** Resolves the target item for a Hero widget: bound item -> first pinned visible -> first visible -> first item -> null. */
-internal fun resolveHeroTargetItem(items: List<CountUpItem>, boundItemId: String?): CountUpItem? =
-    ZenWidgetReducer.resolveTargetItem(items, boundItemId)
-
 /** Renders and pushes RemoteViews for a single Hero Milestone widget (2x1 Poetic Card). */
 fun pushHeroWidgetUpdate(context: Context, appWidgetId: Int) {
     val manager = AppWidgetManager.getInstance(context)
     val store = CountUpStore(context)
     val items = store.items()
     val boundItemId = store.getHeroWidgetBinding(appWidgetId)
-    val targetItem = resolveHeroTargetItem(items, boundItemId)
+    val targetItem = ZenWidgetReducer.resolveTargetItem(items, boundItemId)
 
     val today = LocalDate.now()
     val views = buildHero2x1RemoteViews(context, targetItem, today, appWidgetId)
@@ -132,14 +121,7 @@ private fun buildHero2x1RemoteViews(
         views.setViewVisibility(R.id.hero_content_container, View.GONE)
         views.setViewVisibility(R.id.hero_badge_container, View.GONE)
 
-        val launchIntent = WidgetNavigationContract.createLaunchIntent(context)
-        val pendingIntent = PendingIntent.getActivity(
-            context,
-            appWidgetId,
-            launchIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
-        views.setOnClickPendingIntent(R.id.hero_widget_root, pendingIntent)
+        WidgetNavigationContract.attachEmptyStateLaunchIntent(views, context, appWidgetId, R.id.hero_widget_root)
         return views
     }
 
@@ -280,8 +262,8 @@ private fun buildHero2x1RemoteViews(
 
         // Cycle display mode pending intent (tapping the count container)
         val cycleIntent = Intent(context, HeroWidgetReceiver::class.java).apply {
-            action = HeroWidgetReceiver.ACTION_CYCLE_HERO_DISPLAY_MODE
-            putExtra(HeroWidgetReceiver.EXTRA_APP_WIDGET_ID, appWidgetId)
+            action = WidgetNavigationContract.ACTION_CYCLE_HERO_DISPLAY_MODE
+            putExtra(WidgetNavigationContract.EXTRA_APP_WIDGET_ID, appWidgetId)
         }
         val cyclePendingIntent = PendingIntent.getBroadcast(
             context,

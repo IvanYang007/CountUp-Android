@@ -147,14 +147,7 @@ fun buildZenHorizonRemoteViews(
         val defaultBg = WidgetThemeTokens.resolve(isDark).canvasBg
         views.setInt(R.id.zen_horizon_root, "setBackgroundColor", defaultBg)
 
-        val launchIntent = WidgetNavigationContract.createLaunchIntent(context)
-        val pendingIntent = PendingIntent.getActivity(
-            context,
-            appWidgetId,
-            launchIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
-        views.setOnClickPendingIntent(R.id.zen_horizon_root, pendingIntent)
+        WidgetNavigationContract.attachEmptyStateLaunchIntent(views, context, appWidgetId, R.id.zen_horizon_root)
         return views
     }
 

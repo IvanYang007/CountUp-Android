@@ -140,11 +140,27 @@ object WidgetNavigationContract {
         }
     }
 
+    /**
+     * Attaches a pending intent to [viewId] that opens MainActivity when a widget is in empty state.
+     */
+    fun attachEmptyStateLaunchIntent(
+        views: android.widget.RemoteViews,
+        context: android.content.Context,
+        appWidgetId: Int,
+        viewId: Int,
+    ) {
+        val launchIntent = createLaunchIntent(context)
+        val pendingIntent = android.app.PendingIntent.getActivity(
+            context,
+            appWidgetId,
+            launchIntent,
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE,
+        )
+        views.setOnClickPendingIntent(viewId, pendingIntent)
+    }
+
     fun resolveRequestCode(targetItemId: String?, appWidgetId: Int, offset: Int): Int {
-        return if (targetItemId != null) {
-            (targetItemId.hashCode() and 0x7FFFFFFF) + offset
-        } else {
-            appWidgetId
-        }
+        val base = if (targetItemId != null) (targetItemId.hashCode() and 0x7FFFFFFF) else appWidgetId
+        return base + offset
     }
 }
