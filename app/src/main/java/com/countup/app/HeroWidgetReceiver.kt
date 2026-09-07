@@ -157,11 +157,10 @@ private fun buildHero2x1RemoteViews(
     val resetIntent = Intent(context, ResetCountReceiver::class.java).apply {
         putExtra(ResetCountReceiver.EXTRA_ITEM_ID, item.id)
     }
-    val resetPendingIntent = PendingIntent.getBroadcast(
-        context,
-        WidgetNavigationContract.resolveRequestCode(item.id, appWidgetId, WidgetNavigationContract.HERO_RESET_PENDING_INTENT_OFFSET),
-        resetIntent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+    val resetPendingIntent = WidgetNavigationContract.createBroadcastPendingIntent(
+        context = context,
+        requestCode = WidgetNavigationContract.resolveRequestCode(item.id, appWidgetId, WidgetNavigationContract.HERO_RESET_PENDING_INTENT_OFFSET),
+        intent = resetIntent,
     )
 
     if (armed) {
@@ -260,7 +259,7 @@ private fun buildHero2x1RemoteViews(
         WidgetNavigationContract.attachBroadcastPendingIntent(
             views = views,
             context = context,
-            requestCode = appWidgetId + WidgetNavigationContract.HERO_CYCLE_PENDING_INTENT_OFFSET,
+            requestCode = WidgetNavigationContract.resolveRequestCode(null, appWidgetId, WidgetNavigationContract.HERO_CYCLE_PENDING_INTENT_OFFSET),
             intent = cycleIntent,
             viewId = R.id.hero_count_container,
         )

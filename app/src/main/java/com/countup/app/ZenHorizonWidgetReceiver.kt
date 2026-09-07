@@ -211,7 +211,7 @@ fun buildZenHorizonRemoteViews(
     WidgetNavigationContract.attachBroadcastPendingIntent(
         views = views,
         context = context,
-        requestCode = appWidgetId + WidgetNavigationContract.ZEN_HORIZON_CYCLE_PENDING_INTENT_OFFSET,
+        requestCode = WidgetNavigationContract.resolveRequestCode(null, appWidgetId, WidgetNavigationContract.ZEN_HORIZON_CYCLE_PENDING_INTENT_OFFSET),
         intent = cycleIntent,
         viewId = R.id.zen_horizon_right_section,
     )

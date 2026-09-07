@@ -1,4 +1,4 @@
-﻿package com.countup.app
+package com.countup.app
 
 import android.app.PendingIntent
 import android.content.Context
@@ -25,12 +25,6 @@ object WidgetNavigationContract {
     // Action constants for widget broadcast receivers
     const val ACTION_CYCLE_HERO_DISPLAY_MODE = "com.countup.app.ACTION_CYCLE_HERO_DISPLAY_MODE"
     const val ACTION_CYCLE_ZEN_HORIZON_UNIT = "com.countup.app.ACTION_CYCLE_ZEN_HORIZON_UNIT"
-
-    // Activity launch request code partition offsets per widget family
-    const val HERO_PENDING_INTENT_OFFSET = 101
-    const val ZEN_HORIZON_PENDING_INTENT_OFFSET = 150
-    const val SOLAR_RHYTHM_PENDING_INTENT_OFFSET = 202
-    const val ZEN_PEBBLE_PENDING_INTENT_OFFSET = 303
 
     // Broadcast pending intent request code offsets
     const val HERO_RESET_PENDING_INTENT_OFFSET = 4004
@@ -88,6 +82,22 @@ object WidgetNavigationContract {
     }
 
     /**
+     * Creates a broadcast pending intent with immutable and update current flags.
+     */
+    fun createBroadcastPendingIntent(
+        context: Context,
+        requestCode: Int,
+        intent: Intent,
+    ): PendingIntent {
+        return PendingIntent.getBroadcast(
+            context,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+    }
+
+    /**
      * Attaches a broadcast pending intent to [viewId].
      */
     fun attachBroadcastPendingIntent(
@@ -97,12 +107,7 @@ object WidgetNavigationContract {
         intent: Intent,
         viewId: Int,
     ) {
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            requestCode,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
+        val pendingIntent = createBroadcastPendingIntent(context, requestCode, intent)
         views.setOnClickPendingIntent(viewId, pendingIntent)
     }
 
