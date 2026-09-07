@@ -77,7 +77,7 @@ fun buildZenPebbleRemoteViews(
         views.setViewVisibility(R.id.zen_pebble_empty, View.VISIBLE)
         views.setViewVisibility(R.id.zen_pebble_content, View.GONE)
 
-        val defaultBg = if (isDark) WidgetThemeTokens.DARK_CANVAS_BG else WidgetThemeTokens.LIGHT_CANVAS_BG
+        val defaultBg = WidgetThemeTokens.resolve(isDark).canvasBg
         views.setInt(R.id.zen_pebble_bg, "setColorFilter", defaultBg)
 
         val launchIntent = Intent(context, MainActivity::class.java).apply {
@@ -115,8 +115,7 @@ fun buildZenPebbleRemoteViews(
     views.setTextColor(R.id.zen_pebble_unit, widgetState.palette.secondaryInk)
 
     // Hairline ink dash using semantic theme token
-    val dashColor = if (isDark) WidgetThemeTokens.PEBBLE_DASH_DARK else WidgetThemeTokens.PEBBLE_DASH_LIGHT
-    views.setInt(R.id.zen_pebble_dash, "setBackgroundColor", dashColor)
+    views.setInt(R.id.zen_pebble_dash, "setBackgroundColor", widgetState.palette.pebbleDash)
 
     // Subtle 1-word tag
     views.setTextViewText(R.id.zen_pebble_tag, oneWordLabel)

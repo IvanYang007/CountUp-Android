@@ -20,6 +20,7 @@ data class WidgetColorPalette(
     @field:ColorInt val accentPrimary: Int,
     @field:ColorInt val accentGold: Int,
     @field:ColorInt val accentKintsugi: Int,
+    @field:ColorInt val pebbleDash: Int = secondaryInk,
 )
 
 object WidgetThemeTokens {
@@ -57,6 +58,7 @@ object WidgetThemeTokens {
         accentPrimary = LIGHT_ACCENT_PRIMARY,
         accentGold = LIGHT_ACCENT_GOLD,
         accentKintsugi = LIGHT_ACCENT_KINTSUGI,
+        pebbleDash = PEBBLE_DASH_LIGHT,
     )
 
     val Dark = WidgetColorPalette(
@@ -68,6 +70,7 @@ object WidgetThemeTokens {
         accentPrimary = DARK_ACCENT_PRIMARY,
         accentGold = DARK_ACCENT_GOLD,
         accentKintsugi = DARK_ACCENT_KINTSUGI,
+        pebbleDash = PEBBLE_DASH_DARK,
     )
 
     /** Resolves the active widget palette based on system or user dark mode flag. */
