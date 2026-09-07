@@ -194,14 +194,14 @@ fun buildZenHorizonRemoteViews(
     views.setContentDescription(R.id.zen_horizon_unit, context.getString(R.string.cd_zen_horizon_cycle_unit))
 
     // Left tap -> Open item in CountUp
-    val launchIntent = WidgetNavigationContract.createLaunchIntent(context, item.id)
-    val leftPendingIntent = PendingIntent.getActivity(
-        context,
-        WidgetNavigationContract.resolveRequestCode(item.id, appWidgetId, WidgetNavigationContract.ZEN_HORIZON_PENDING_INTENT_OFFSET),
-        launchIntent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+    WidgetNavigationContract.attachItemLaunchIntent(
+        views = views,
+        context = context,
+        appWidgetId = appWidgetId,
+        targetItemId = item.id,
+        offset = WidgetNavigationContract.ZEN_HORIZON_PENDING_INTENT_OFFSET,
+        viewId = R.id.zen_horizon_left_section,
     )
-    views.setOnClickPendingIntent(R.id.zen_horizon_left_section, leftPendingIntent)
 
     // Right tap -> In-place unit cycling (#13)
     val cycleIntent = Intent(context, ZenHorizonWidgetReceiver::class.java).apply {

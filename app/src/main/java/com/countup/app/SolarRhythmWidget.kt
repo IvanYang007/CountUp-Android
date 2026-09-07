@@ -252,14 +252,14 @@ fun buildSolarRhythmRemoteViews(
     }
 
     // Tap anywhere on widget opens the target item in MainActivity
-    val launchIntent = WidgetNavigationContract.createLaunchIntent(context, targetItem.id)
-    val pendingIntent = PendingIntent.getActivity(
-        context,
-        WidgetNavigationContract.resolveRequestCode(targetItem.id, appWidgetId, WidgetNavigationContract.SOLAR_RHYTHM_PENDING_INTENT_OFFSET),
-        launchIntent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+    WidgetNavigationContract.attachItemLaunchIntent(
+        views = views,
+        context = context,
+        appWidgetId = appWidgetId,
+        targetItemId = targetItem.id,
+        offset = WidgetNavigationContract.SOLAR_RHYTHM_PENDING_INTENT_OFFSET,
+        viewId = R.id.solar_rhythm_root,
     )
-    views.setOnClickPendingIntent(R.id.solar_rhythm_root, pendingIntent)
 
     return views
 }

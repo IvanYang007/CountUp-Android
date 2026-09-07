@@ -164,14 +164,6 @@ private fun buildHero2x1RemoteViews(
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
 
-    val launchIntent = WidgetNavigationContract.createLaunchIntent(context, item.id)
-    val openAppPendingIntent = PendingIntent.getActivity(
-        context,
-        WidgetNavigationContract.resolveRequestCode(item.id, appWidgetId, WidgetNavigationContract.HERO_PENDING_INTENT_OFFSET),
-        launchIntent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-    )
-
     if (armed) {
         // Armed state: visual confirmation prompt
         views.setTextViewText(R.id.hero_name, context.getString(R.string.hero_widget_reset_prompt).uppercase())
@@ -279,7 +271,14 @@ private fun buildHero2x1RemoteViews(
         views.setOnClickPendingIntent(R.id.hero_badge_container, resetPendingIntent)
 
         // Tap card body / title to open MainActivity
-        views.setOnClickPendingIntent(R.id.hero_widget_root, openAppPendingIntent)
+        WidgetNavigationContract.attachItemLaunchIntent(
+            views = views,
+            context = context,
+            appWidgetId = appWidgetId,
+            targetItemId = item.id,
+            offset = WidgetNavigationContract.HERO_PENDING_INTENT_OFFSET,
+            viewId = R.id.hero_widget_root,
+        )
     }
 
     return views

@@ -159,8 +159,34 @@ object WidgetNavigationContract {
         views.setOnClickPendingIntent(viewId, pendingIntent)
     }
 
+    /**
+     * Attaches a pending intent to [viewId] that opens MainActivity targeting [targetItemId].
+     */
+    fun attachItemLaunchIntent(
+        views: android.widget.RemoteViews,
+        context: android.content.Context,
+        appWidgetId: Int,
+        targetItemId: String,
+        offset: Int,
+        viewId: Int,
+    ) {
+        val launchIntent = createLaunchIntent(context, targetItemId)
+        val requestCode = resolveRequestCode(targetItemId, appWidgetId, offset)
+        val pendingIntent = android.app.PendingIntent.getActivity(
+            context,
+            requestCode,
+            launchIntent,
+            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE,
+        )
+        views.setOnClickPendingIntent(viewId, pendingIntent)
+    }
+
     fun resolveRequestCode(targetItemId: String?, appWidgetId: Int, offset: Int): Int {
-        val base = if (targetItemId != null) (targetItemId.hashCode() and 0x7FFFFFFF) else appWidgetId
+        val base = if (targetItemId != null) {
+            ((targetItemId.hashCode() * 31 + appWidgetId) and 0x7FFFFFFF)
+        } else {
+            appWidgetId
+        }
         return base + offset
     }
 }

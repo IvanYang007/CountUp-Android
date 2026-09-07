@@ -111,28 +111,14 @@ fun buildZenPebbleRemoteViews(
     views.setTextColor(R.id.zen_pebble_tag, widgetState.palette.accentPrimary)
 
     // Tap anywhere on pebble opens specific event in CountUp
-    attachPebbleLaunchIntent(views, context, appWidgetId, targetItemId = item.id)
+    WidgetNavigationContract.attachItemLaunchIntent(
+        views = views,
+        context = context,
+        appWidgetId = appWidgetId,
+        targetItemId = item.id,
+        offset = WidgetNavigationContract.ZEN_PEBBLE_PENDING_INTENT_OFFSET,
+        viewId = android.R.id.background,
+    )
 
     return views
-}
-
-private fun attachPebbleLaunchIntent(
-    views: RemoteViews,
-    context: Context,
-    appWidgetId: Int,
-    targetItemId: String,
-) {
-    val launchIntent = WidgetNavigationContract.createLaunchIntent(context, targetItemId)
-    val requestCode = WidgetNavigationContract.resolveRequestCode(
-        targetItemId = targetItemId,
-        appWidgetId = appWidgetId,
-        offset = WidgetNavigationContract.ZEN_PEBBLE_PENDING_INTENT_OFFSET,
-    )
-    val pendingIntent = PendingIntent.getActivity(
-        context,
-        requestCode,
-        launchIntent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-    )
-    views.setOnClickPendingIntent(android.R.id.background, pendingIntent)
 }
