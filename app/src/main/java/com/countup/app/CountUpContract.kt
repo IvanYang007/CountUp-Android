@@ -114,12 +114,22 @@ sealed interface CountUpUiEffect {
  */
 object WidgetNavigationContract {
     const val EXTRA_TARGET_ITEM_ID = "EXTRA_TARGET_ITEM_ID"
+    const val EXTRA_APP_WIDGET_ID = "EXTRA_APP_WIDGET_ID"
 
-    // Request code partition offsets per widget family
+    // Action constants for widget broadcast receivers
+    const val ACTION_CYCLE_HERO_DISPLAY_MODE = "com.countup.app.ACTION_CYCLE_HERO_DISPLAY_MODE"
+    const val ACTION_CYCLE_ZEN_HORIZON_UNIT = "com.countup.app.ACTION_CYCLE_ZEN_HORIZON_UNIT"
+
+    // Activity launch request code partition offsets per widget family
     const val HERO_PENDING_INTENT_OFFSET = 101
     const val ZEN_HORIZON_PENDING_INTENT_OFFSET = 150
     const val SOLAR_RHYTHM_PENDING_INTENT_OFFSET = 202
     const val ZEN_PEBBLE_PENDING_INTENT_OFFSET = 303
+
+    // Broadcast pending intent request code offsets
+    const val HERO_RESET_PENDING_INTENT_OFFSET = 4004
+    const val ZEN_HORIZON_CYCLE_PENDING_INTENT_OFFSET = 8888
+    const val HERO_CYCLE_PENDING_INTENT_OFFSET = 9009
 
     fun createLaunchIntent(context: android.content.Context, targetItemId: String? = null): android.content.Intent {
         return android.content.Intent(context, MainActivity::class.java).apply {

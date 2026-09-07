@@ -22,9 +22,10 @@ import kotlin.math.abs
 class HeroWidgetReceiver : AppWidgetProvider() {
 
     companion object {
-        const val ACTION_CYCLE_HERO_DISPLAY_MODE = "com.countup.app.ACTION_CYCLE_HERO_DISPLAY_MODE"
-        const val ACTION_CYCLE_ZEN_HORIZON_UNIT = "com.countup.app.ACTION_CYCLE_ZEN_HORIZON_UNIT"
-        const val EXTRA_APP_WIDGET_ID = "EXTRA_APP_WIDGET_ID"
+        const val ACTION_CYCLE_HERO_DISPLAY_MODE = WidgetNavigationContract.ACTION_CYCLE_HERO_DISPLAY_MODE
+        @Deprecated("Use WidgetNavigationContract.ACTION_CYCLE_ZEN_HORIZON_UNIT", ReplaceWith("WidgetNavigationContract.ACTION_CYCLE_ZEN_HORIZON_UNIT"))
+        const val ACTION_CYCLE_ZEN_HORIZON_UNIT = WidgetNavigationContract.ACTION_CYCLE_ZEN_HORIZON_UNIT
+        const val EXTRA_APP_WIDGET_ID = WidgetNavigationContract.EXTRA_APP_WIDGET_ID
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -101,10 +102,7 @@ fun pushAllHeroWidgetsUpdate(context: Context) {
 
 /** Resolves the target item for a Hero widget: bound item -> first pinned visible -> first visible -> first item -> null. */
 internal fun resolveHeroTargetItem(items: List<CountUpItem>, boundItemId: String?): CountUpItem? =
-    items.firstOrNull { it.id == boundItemId }
-        ?: items.firstOrNull { it.isPinned && it.showInWidget }
-        ?: items.firstOrNull { it.showInWidget }
-        ?: items.firstOrNull()
+    ZenWidgetReducer.resolveTargetItem(items, boundItemId)
 
 /** Renders and pushes RemoteViews for a single Hero Milestone widget (2x1 Poetic Card). */
 fun pushHeroWidgetUpdate(context: Context, appWidgetId: Int) {
@@ -179,7 +177,7 @@ private fun buildHero2x1RemoteViews(
     }
     val resetPendingIntent = PendingIntent.getBroadcast(
         context,
-        WidgetNavigationContract.resolveRequestCode(item.id, appWidgetId, 4004),
+        WidgetNavigationContract.resolveRequestCode(item.id, appWidgetId, WidgetNavigationContract.HERO_RESET_PENDING_INTENT_OFFSET),
         resetIntent,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
@@ -287,7 +285,7 @@ private fun buildHero2x1RemoteViews(
         }
         val cyclePendingIntent = PendingIntent.getBroadcast(
             context,
-            appWidgetId + 9009,
+            appWidgetId + WidgetNavigationContract.HERO_CYCLE_PENDING_INTENT_OFFSET,
             cycleIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )

@@ -21,8 +21,8 @@ class ZenHorizonWidgetReceiver : AppWidgetProvider() {
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
-        if (intent.action == HeroWidgetReceiver.ACTION_CYCLE_ZEN_HORIZON_UNIT) {
-            val appWidgetId = intent.getIntExtra(HeroWidgetReceiver.EXTRA_APP_WIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
+        if (intent.action == WidgetNavigationContract.ACTION_CYCLE_ZEN_HORIZON_UNIT) {
+            val appWidgetId = intent.getIntExtra(WidgetNavigationContract.EXTRA_APP_WIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
             if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
                 val appWidgetManager = AppWidgetManager.getInstance(context)
                 val info = try {
@@ -87,21 +87,13 @@ fun pushAllZenHorizonWidgetsUpdate(context: Context) {
     }
 }
 
-/** Resolves the target item for a widget based on binding, pin status, and widget visibility. */
-internal fun resolveWidgetTargetItem(items: List<CountUpItem>, boundItemId: String?): CountUpItem? =
-    ZenWidgetReducer.resolveTargetItem(items, boundItemId)
-
-@Deprecated("Use resolveWidgetTargetItem instead", ReplaceWith("resolveWidgetTargetItem(items, boundItemId)"))
-internal fun resolveZenHorizonTargetItem(items: List<CountUpItem>, boundItemId: String?): CountUpItem? =
-    resolveWidgetTargetItem(items, boundItemId)
-
 /** Renders and pushes RemoteViews for a single Zen Horizon widget. */
 fun pushZenHorizonWidgetUpdate(context: Context, appWidgetId: Int) {
     val manager = AppWidgetManager.getInstance(context)
     val store = CountUpStore(context)
     val items = store.items()
     val boundItemId = store.getZenHorizonBinding(appWidgetId)
-    val targetItem = resolveWidgetTargetItem(items, boundItemId)
+    val targetItem = ZenWidgetReducer.resolveTargetItem(items, boundItemId)
 
     val today = LocalDate.now()
     val isDark = isNightMode(context)
@@ -152,7 +144,7 @@ fun buildZenHorizonRemoteViews(
         views.setViewVisibility(R.id.zen_horizon_left_section, View.GONE)
         views.setViewVisibility(R.id.zen_horizon_right_section, View.GONE)
 
-        val defaultBg = if (isDark) WidgetThemeTokens.DARK_CANVAS_BG else WidgetThemeTokens.LIGHT_CANVAS_BG
+        val defaultBg = WidgetThemeTokens.resolve(isDark).canvasBg
         views.setInt(R.id.zen_horizon_root, "setBackgroundColor", defaultBg)
 
         val launchIntent = WidgetNavigationContract.createLaunchIntent(context)
@@ -220,12 +212,12 @@ fun buildZenHorizonRemoteViews(
 
     // Right tap -> In-place unit cycling (#13)
     val cycleIntent = Intent(context, ZenHorizonWidgetReceiver::class.java).apply {
-        action = HeroWidgetReceiver.ACTION_CYCLE_ZEN_HORIZON_UNIT
-        putExtra(HeroWidgetReceiver.EXTRA_APP_WIDGET_ID, appWidgetId)
+        action = WidgetNavigationContract.ACTION_CYCLE_ZEN_HORIZON_UNIT
+        putExtra(WidgetNavigationContract.EXTRA_APP_WIDGET_ID, appWidgetId)
     }
     val cyclePendingIntent = PendingIntent.getBroadcast(
         context,
-        appWidgetId + 8888,
+        appWidgetId + WidgetNavigationContract.ZEN_HORIZON_CYCLE_PENDING_INTENT_OFFSET,
         cycleIntent,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )

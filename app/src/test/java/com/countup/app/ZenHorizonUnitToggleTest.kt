@@ -9,7 +9,7 @@ class ZenHorizonUnitToggleTest {
     fun `zen horizon action constant is properly declared`() {
         assertEquals(
             "com.countup.app.ACTION_CYCLE_ZEN_HORIZON_UNIT",
-            HeroWidgetReceiver.ACTION_CYCLE_ZEN_HORIZON_UNIT
+            WidgetNavigationContract.ACTION_CYCLE_ZEN_HORIZON_UNIT
         )
     }
 

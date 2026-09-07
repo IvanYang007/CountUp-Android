@@ -76,19 +76,18 @@ class ZenHorizonLayoutTest {
         )
 
         // 1. Explicit bound item takes priority
-        assertEquals("item-3", resolveWidgetTargetItem(items, "item-3")?.id)
-        assertEquals("item-3", resolveZenHorizonTargetItem(items, "item-3")?.id)
+        assertEquals("item-3", ZenWidgetReducer.resolveTargetItem(items, "item-3")?.id)
 
         // 2. Fallback to pinned visible item
-        assertEquals("item-2", resolveWidgetTargetItem(items, "non-existent")?.id)
-        assertEquals("item-2", resolveWidgetTargetItem(items, null)?.id)
+        assertEquals("item-2", ZenWidgetReducer.resolveTargetItem(items, "non-existent")?.id)
+        assertEquals("item-2", ZenWidgetReducer.resolveTargetItem(items, null)?.id)
 
         // 3. Fallback when no pinned item exists
         val unpinned = listOf(items[0], items[2])
-        assertEquals("item-1", resolveWidgetTargetItem(unpinned, null)?.id)
+        assertEquals("item-1", ZenWidgetReducer.resolveTargetItem(unpinned, null)?.id)
 
         // 4. Empty list returns null safely
-        assertNull(resolveWidgetTargetItem(emptyList(), null))
+        assertNull(ZenWidgetReducer.resolveTargetItem(emptyList(), null))
     }
 
     @Test
@@ -133,7 +132,7 @@ class ZenHorizonLayoutTest {
 
     @Test
     fun zenHorizonActionConstantAndLayoutsAreConfigured() {
-        assertEquals("com.countup.app.ACTION_CYCLE_ZEN_HORIZON_UNIT", HeroWidgetReceiver.ACTION_CYCLE_ZEN_HORIZON_UNIT)
+        assertEquals("com.countup.app.ACTION_CYCLE_ZEN_HORIZON_UNIT", WidgetNavigationContract.ACTION_CYCLE_ZEN_HORIZON_UNIT)
         assertTrue(R.layout.widget_zen_horizon_4x1 != 0)
         assertTrue(R.layout.widget_zen_horizon_2x1 != 0)
     }
