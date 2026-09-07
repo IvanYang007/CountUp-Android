@@ -51,6 +51,15 @@ object ZenWidgetReducer {
     private val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.US)
 
     /**
+     * Resolves the target item for a widget based on explicit binding, pin status, and widget visibility.
+     */
+    fun resolveTargetItem(items: List<CountUpItem>, boundItemId: String?): CountUpItem? =
+        items.firstOrNull { it.id == boundItemId }
+            ?: items.firstOrNull { it.isPinned && it.showInWidget }
+            ?: items.firstOrNull { it.showInWidget }
+            ?: items.firstOrNull()
+
+    /**
      * Resolves the nearest upcoming milestone goal strictly greater than [count].
      */
     fun resolveNextMilestone(count: Long): Long {

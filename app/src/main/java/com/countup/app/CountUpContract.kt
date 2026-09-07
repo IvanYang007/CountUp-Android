@@ -117,6 +117,7 @@ object WidgetNavigationContract {
 
     // Request code partition offsets per widget family
     const val HERO_PENDING_INTENT_OFFSET = 101
+    const val ZEN_HORIZON_PENDING_INTENT_OFFSET = 150
     const val SOLAR_RHYTHM_PENDING_INTENT_OFFSET = 202
     const val ZEN_PEBBLE_PENDING_INTENT_OFFSET = 303
 

@@ -89,10 +89,7 @@ fun pushAllZenHorizonWidgetsUpdate(context: Context) {
 
 /** Resolves the target item for a widget based on binding, pin status, and widget visibility. */
 internal fun resolveWidgetTargetItem(items: List<CountUpItem>, boundItemId: String?): CountUpItem? =
-    items.firstOrNull { it.id == boundItemId }
-        ?: items.firstOrNull { it.isPinned && it.showInWidget }
-        ?: items.firstOrNull { it.showInWidget }
-        ?: items.firstOrNull()
+    ZenWidgetReducer.resolveTargetItem(items, boundItemId)
 
 @Deprecated("Use resolveWidgetTargetItem instead", ReplaceWith("resolveWidgetTargetItem(items, boundItemId)"))
 internal fun resolveZenHorizonTargetItem(items: List<CountUpItem>, boundItemId: String?): CountUpItem? =
@@ -158,9 +155,7 @@ fun buildZenHorizonRemoteViews(
         val defaultBg = if (isDark) WidgetThemeTokens.DARK_CANVAS_BG else WidgetThemeTokens.LIGHT_CANVAS_BG
         views.setInt(R.id.zen_horizon_root, "setBackgroundColor", defaultBg)
 
-        val launchIntent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-        }
+        val launchIntent = WidgetNavigationContract.createLaunchIntent(context)
         val pendingIntent = PendingIntent.getActivity(
             context,
             appWidgetId,
@@ -217,7 +212,7 @@ fun buildZenHorizonRemoteViews(
     val launchIntent = WidgetNavigationContract.createLaunchIntent(context, item.id)
     val leftPendingIntent = PendingIntent.getActivity(
         context,
-        WidgetNavigationContract.resolveRequestCode(item.id, appWidgetId, WidgetNavigationContract.HERO_PENDING_INTENT_OFFSET),
+        WidgetNavigationContract.resolveRequestCode(item.id, appWidgetId, WidgetNavigationContract.ZEN_HORIZON_PENDING_INTENT_OFFSET),
         launchIntent,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )

@@ -134,12 +134,10 @@ private fun buildHero2x1RemoteViews(
         views.setViewVisibility(R.id.hero_content_container, View.GONE)
         views.setViewVisibility(R.id.hero_badge_container, View.GONE)
 
-        val launchIntent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-        }
+        val launchIntent = WidgetNavigationContract.createLaunchIntent(context)
         val pendingIntent = PendingIntent.getActivity(
             context,
-            0,
+            appWidgetId,
             launchIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
@@ -181,7 +179,7 @@ private fun buildHero2x1RemoteViews(
     }
     val resetPendingIntent = PendingIntent.getBroadcast(
         context,
-        appWidgetIdHashCode(item.id) + 4004,
+        WidgetNavigationContract.resolveRequestCode(item.id, appWidgetId, 4004),
         resetIntent,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
@@ -189,7 +187,7 @@ private fun buildHero2x1RemoteViews(
     val launchIntent = WidgetNavigationContract.createLaunchIntent(context, item.id)
     val openAppPendingIntent = PendingIntent.getActivity(
         context,
-        appWidgetIdHashCode(item.id),
+        WidgetNavigationContract.resolveRequestCode(item.id, appWidgetId, WidgetNavigationContract.HERO_PENDING_INTENT_OFFSET),
         launchIntent,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
@@ -306,6 +304,4 @@ private fun buildHero2x1RemoteViews(
 
     return views
 }
-
-private fun appWidgetIdHashCode(id: String): Int = (id.hashCode() and 0x7FFFFFFF)
 

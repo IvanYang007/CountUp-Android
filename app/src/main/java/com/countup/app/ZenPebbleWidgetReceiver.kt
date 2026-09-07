@@ -52,7 +52,7 @@ fun pushZenPebbleWidgetUpdate(context: Context, appWidgetId: Int) {
     val store = CountUpStore(context)
     val items = store.items()
     val boundItemId = store.getZenPebbleBinding(appWidgetId)
-    val targetItem = resolveWidgetTargetItem(items, boundItemId)
+    val targetItem = ZenWidgetReducer.resolveTargetItem(items, boundItemId)
     val customTag = store.getZenPebbleTag(appWidgetId)
 
     val today = LocalDate.now()

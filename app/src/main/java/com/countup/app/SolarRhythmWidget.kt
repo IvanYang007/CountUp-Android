@@ -101,7 +101,7 @@ fun pushSolarRhythmWidgetUpdate(context: Context, appWidgetId: Int) {
     val store = CountUpStore(context)
     val items = store.items()
     val boundId = store.getSolarRhythmBinding(appWidgetId)
-    val targetItem = resolveWidgetTargetItem(items, boundId)
+    val targetItem = ZenWidgetReducer.resolveTargetItem(items, boundId)
     val today = LocalDate.now()
     val isDark = isNightMode(context)
 
@@ -180,9 +180,7 @@ fun buildSolarRhythmRemoteViews(
         views.setViewVisibility(R.id.solar_rhythm_content, View.GONE)
         views.setViewVisibility(R.id.solar_rhythm_empty, View.VISIBLE)
 
-        val launchIntent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-        }
+        val launchIntent = WidgetNavigationContract.createLaunchIntent(context)
         val pendingIntent = PendingIntent.getActivity(
             context,
             appWidgetId,
