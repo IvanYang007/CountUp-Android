@@ -44,6 +44,10 @@ object WidgetThemeTokens {
     const val DARK_ACCENT_GOLD = 0xFFDEB285.toInt()    // Filament Gold
     const val DARK_ACCENT_KINTSUGI = 0xFFD6A848.toInt() // Kintsugi Gold
 
+    // --- Pebble Micro-Divider Tokens ---
+    const val PEBBLE_DASH_LIGHT = LIGHT_SECONDARY_INK
+    const val PEBBLE_DASH_DARK = 0xFF8E8A7E.toInt()
+
     val Light = WidgetColorPalette(
         canvasBg = LIGHT_CANVAS_BG,
         surfaceBg = LIGHT_SURFACE_BG,

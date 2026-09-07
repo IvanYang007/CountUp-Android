@@ -119,8 +119,8 @@ fun buildZenPebbleRemoteViews(
     views.setTextViewText(R.id.zen_pebble_unit, "DAYS")
     views.setTextColor(R.id.zen_pebble_unit, palette.secondaryInk)
 
-    // Hairline ink dash (#6B5D4F in light, #8E8A7E in dark)
-    val dashColor = if (isDark) 0xFF8E8A7E.toInt() else 0xFF6B5D4F.toInt()
+    // Hairline ink dash using semantic theme token
+    val dashColor = if (isDark) WidgetThemeTokens.PEBBLE_DASH_DARK else WidgetThemeTokens.PEBBLE_DASH_LIGHT
     views.setInt(R.id.zen_pebble_dash, "setBackgroundColor", dashColor)
 
     // Subtle 1-word tag
@@ -134,7 +134,7 @@ fun buildZenPebbleRemoteViews(
     }
     val pendingIntent = PendingIntent.getActivity(
         context,
-        (item.id.hashCode() and 0x7FFFFFFF) + 303,
+        (item.id.hashCode() and 0x7FFFFFFF) + ZEN_PEBBLE_PENDING_INTENT_OFFSET,
         launchIntent,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
@@ -142,3 +142,5 @@ fun buildZenPebbleRemoteViews(
 
     return views
 }
+
+private const val ZEN_PEBBLE_PENDING_INTENT_OFFSET = 303
