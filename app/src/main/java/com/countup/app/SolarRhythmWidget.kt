@@ -261,13 +261,10 @@ fun buildSolarRhythmRemoteViews(
     }
 
     // Tap anywhere on widget opens the target item in MainActivity
-    val launchIntent = Intent(context, MainActivity::class.java).apply {
-        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-        putExtra(HeroWidgetReceiver.EXTRA_TARGET_ITEM_ID, targetItem.id)
-    }
+    val launchIntent = WidgetNavigationContract.createLaunchIntent(context, targetItem.id)
     val pendingIntent = PendingIntent.getActivity(
         context,
-        (targetItem.id.hashCode() and 0x7FFFFFFF) + 202,
+        WidgetNavigationContract.resolveRequestCode(targetItem.id, appWidgetId, WidgetNavigationContract.SOLAR_RHYTHM_PENDING_INTENT_OFFSET),
         launchIntent,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )

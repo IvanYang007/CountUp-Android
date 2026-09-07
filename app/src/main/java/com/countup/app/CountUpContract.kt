@@ -110,8 +110,30 @@ sealed interface CountUpUiEffect {
 }
 
 /**
- * Shared contract constants for widget-to-app navigation intents.
+ * Shared contract constants and navigation utilities for widget-to-app intents.
  */
 object WidgetNavigationContract {
     const val EXTRA_TARGET_ITEM_ID = "EXTRA_TARGET_ITEM_ID"
+
+    // Request code partition offsets per widget family
+    const val HERO_PENDING_INTENT_OFFSET = 101
+    const val SOLAR_RHYTHM_PENDING_INTENT_OFFSET = 202
+    const val ZEN_PEBBLE_PENDING_INTENT_OFFSET = 303
+
+    fun createLaunchIntent(context: android.content.Context, targetItemId: String? = null): android.content.Intent {
+        return android.content.Intent(context, MainActivity::class.java).apply {
+            flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
+            if (targetItemId != null) {
+                putExtra(EXTRA_TARGET_ITEM_ID, targetItemId)
+            }
+        }
+    }
+
+    fun resolveRequestCode(targetItemId: String?, appWidgetId: Int, offset: Int): Int {
+        return if (targetItemId != null) {
+            (targetItemId.hashCode() and 0x7FFFFFFF) + offset
+        } else {
+            appWidgetId
+        }
+    }
 }

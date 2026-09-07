@@ -102,7 +102,7 @@ class MainActivity : ComponentActivity() {
 
     private fun handleIntent(intent: Intent?) {
         if (intent == null) return
-        val targetItemId = intent.getStringExtra(HeroWidgetReceiver.EXTRA_TARGET_ITEM_ID)
+        val targetItemId = intent.getStringExtra(WidgetNavigationContract.EXTRA_TARGET_ITEM_ID)
         val isAdd = intent.action == ACTION_ADD_ITEM ||
             intent.data?.toString() == "countup://new"
         if (targetItemId != null) {

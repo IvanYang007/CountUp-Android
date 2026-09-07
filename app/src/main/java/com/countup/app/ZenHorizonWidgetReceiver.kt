@@ -214,13 +214,10 @@ fun buildZenHorizonRemoteViews(
     views.setContentDescription(R.id.zen_horizon_unit, context.getString(R.string.cd_zen_horizon_cycle_unit))
 
     // Left tap -> Open item in CountUp
-    val launchIntent = Intent(context, MainActivity::class.java).apply {
-        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-        putExtra(HeroWidgetReceiver.EXTRA_TARGET_ITEM_ID, item.id)
-    }
+    val launchIntent = WidgetNavigationContract.createLaunchIntent(context, item.id)
     val leftPendingIntent = PendingIntent.getActivity(
         context,
-        (item.id.hashCode() and 0x7FFFFFFF) + 101,
+        WidgetNavigationContract.resolveRequestCode(item.id, appWidgetId, WidgetNavigationContract.HERO_PENDING_INTENT_OFFSET),
         launchIntent,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )

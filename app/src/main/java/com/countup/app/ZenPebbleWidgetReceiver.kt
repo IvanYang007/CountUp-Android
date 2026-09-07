@@ -5,7 +5,6 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.view.View
 import android.widget.RemoteViews
 import java.time.LocalDate
@@ -123,17 +122,12 @@ private fun attachPebbleLaunchIntent(
     appWidgetId: Int,
     targetItemId: String?,
 ) {
-    val launchIntent = Intent(context, MainActivity::class.java).apply {
-        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-        if (targetItemId != null) {
-            putExtra(WidgetNavigationContract.EXTRA_TARGET_ITEM_ID, targetItemId)
-        }
-    }
-    val requestCode = if (targetItemId != null) {
-        (targetItemId.hashCode() and 0x7FFFFFFF) + ZEN_PEBBLE_PENDING_INTENT_OFFSET
-    } else {
-        appWidgetId
-    }
+    val launchIntent = WidgetNavigationContract.createLaunchIntent(context, targetItemId)
+    val requestCode = WidgetNavigationContract.resolveRequestCode(
+        targetItemId = targetItemId,
+        appWidgetId = appWidgetId,
+        offset = WidgetNavigationContract.ZEN_PEBBLE_PENDING_INTENT_OFFSET,
+    )
     val pendingIntent = PendingIntent.getActivity(
         context,
         requestCode,
@@ -142,10 +136,3 @@ private fun attachPebbleLaunchIntent(
     )
     views.setOnClickPendingIntent(android.R.id.background, pendingIntent)
 }
-
-/**
- * Dedicated request code offset for 1x1 Zen Pebble widgets.
- * Partitions the request code namespace (300-399) to avoid PendingIntent collisions with
- * Hero widgets (100 range) and Zen Horizon widgets (200 range).
- */
-private const val ZEN_PEBBLE_PENDING_INTENT_OFFSET = 303

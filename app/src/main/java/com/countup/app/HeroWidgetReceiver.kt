@@ -22,7 +22,6 @@ import kotlin.math.abs
 class HeroWidgetReceiver : AppWidgetProvider() {
 
     companion object {
-        const val EXTRA_TARGET_ITEM_ID = WidgetNavigationContract.EXTRA_TARGET_ITEM_ID
         const val ACTION_CYCLE_HERO_DISPLAY_MODE = "com.countup.app.ACTION_CYCLE_HERO_DISPLAY_MODE"
         const val ACTION_CYCLE_ZEN_HORIZON_UNIT = "com.countup.app.ACTION_CYCLE_ZEN_HORIZON_UNIT"
         const val EXTRA_APP_WIDGET_ID = "EXTRA_APP_WIDGET_ID"
@@ -187,10 +186,7 @@ private fun buildHero2x1RemoteViews(
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
 
-    val launchIntent = Intent(context, MainActivity::class.java).apply {
-        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-        putExtra(HeroWidgetReceiver.EXTRA_TARGET_ITEM_ID, item.id)
-    }
+    val launchIntent = WidgetNavigationContract.createLaunchIntent(context, item.id)
     val openAppPendingIntent = PendingIntent.getActivity(
         context,
         appWidgetIdHashCode(item.id),
