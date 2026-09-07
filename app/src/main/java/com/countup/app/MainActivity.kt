@@ -109,23 +109,19 @@ class MainActivity : ComponentActivity() {
             viewModel.onEvent(CountUpUiEvent.OpenTargetItem(targetItemId))
         } else if (isAdd) {
             viewModel.onEvent(CountUpUiEvent.OpenEditor(target = null))
-        } else if (intent.data?.toString() == "countup://pin_hero") {
-            val manager = getSystemService(android.appwidget.AppWidgetManager::class.java)
-            if (manager.isRequestPinAppWidgetSupported) {
-                val myProvider = android.content.ComponentName(this, HeroWidgetReceiver::class.java)
-                manager.requestPinAppWidget(myProvider, null, null)
+        } else {
+            val pinProviderClass = when (intent.data?.toString()) {
+                "countup://pin_hero" -> HeroWidgetReceiver::class.java
+                "countup://pin_pebble" -> ZenPebbleWidgetReceiver::class.java
+                "countup://pin_solar" -> SolarRhythmWidgetReceiver::class.java
+                else -> null
             }
-        } else if (intent.data?.toString() == "countup://pin_pebble") {
-            val manager = getSystemService(android.appwidget.AppWidgetManager::class.java)
-            if (manager.isRequestPinAppWidgetSupported) {
-                val myProvider = android.content.ComponentName(this, ZenPebbleWidgetReceiver::class.java)
-                manager.requestPinAppWidget(myProvider, null, null)
-            }
-        } else if (intent.data?.toString() == "countup://pin_solar") {
-            val manager = getSystemService(android.appwidget.AppWidgetManager::class.java)
-            if (manager.isRequestPinAppWidgetSupported) {
-                val myProvider = android.content.ComponentName(this, SolarRhythmWidgetReceiver::class.java)
-                manager.requestPinAppWidget(myProvider, null, null)
+            if (pinProviderClass != null) {
+                val manager = getSystemService(android.appwidget.AppWidgetManager::class.java)
+                if (manager.isRequestPinAppWidgetSupported) {
+                    val myProvider = android.content.ComponentName(this, pinProviderClass)
+                    manager.requestPinAppWidget(myProvider, null, null)
+                }
             }
         }
     }
