@@ -21,10 +21,7 @@ data class WidgetColorPalette(
     @field:ColorInt val accentGold: Int,
     @field:ColorInt val accentKintsugi: Int,
     @field:ColorInt val microDivider: Int = secondaryInk,
-) {
-    // Backward compatibility alias
-    val pebbleDash: Int get() = microDivider
-}
+)
 
 object WidgetThemeTokens {
 
@@ -51,8 +48,6 @@ object WidgetThemeTokens {
     // --- Micro-Divider Hairline Tokens ---
     const val MICRO_DIVIDER_LIGHT = LIGHT_SECONDARY_INK
     const val MICRO_DIVIDER_DARK = 0xFF8E8A7E.toInt()
-    const val PEBBLE_DASH_LIGHT = MICRO_DIVIDER_LIGHT
-    const val PEBBLE_DASH_DARK = MICRO_DIVIDER_DARK
 
     val Light = WidgetColorPalette(
         canvasBg = LIGHT_CANVAS_BG,

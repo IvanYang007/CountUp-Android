@@ -108,3 +108,10 @@ sealed interface CountUpUiEffect {
 
     data object RefreshWidget : CountUpUiEffect
 }
+
+/**
+ * Shared contract constants for widget-to-app navigation intents.
+ */
+object WidgetNavigationContract {
+    const val EXTRA_TARGET_ITEM_ID = "EXTRA_TARGET_ITEM_ID"
+}
