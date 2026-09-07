@@ -116,7 +116,7 @@ fun buildZenPebbleRemoteViews(
         context = context,
         appWidgetId = appWidgetId,
         targetItemId = item.id,
-        offset = WidgetNavigationContract.ZEN_PEBBLE_PENDING_INTENT_OFFSET,
+        family = WidgetFamily.ZEN_PEBBLE,
         viewId = android.R.id.background,
     )
 

@@ -257,15 +257,13 @@ private fun buildHero2x1RemoteViews(
             action = WidgetNavigationContract.ACTION_CYCLE_HERO_DISPLAY_MODE
             putExtra(WidgetNavigationContract.EXTRA_APP_WIDGET_ID, appWidgetId)
         }
-        val cyclePendingIntent = PendingIntent.getBroadcast(
-            context,
-            appWidgetId + WidgetNavigationContract.HERO_CYCLE_PENDING_INTENT_OFFSET,
-            cycleIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        WidgetNavigationContract.attachBroadcastPendingIntent(
+            views = views,
+            context = context,
+            requestCode = appWidgetId + WidgetNavigationContract.HERO_CYCLE_PENDING_INTENT_OFFSET,
+            intent = cycleIntent,
+            viewId = R.id.hero_count_container,
         )
-
-        // Tap count container to cycle display mode (skips weeks if < 7 days)
-        views.setOnClickPendingIntent(R.id.hero_count_container, cyclePendingIntent)
 
         // Tap badge circle to arm reset
         views.setOnClickPendingIntent(R.id.hero_badge_container, resetPendingIntent)
@@ -276,7 +274,7 @@ private fun buildHero2x1RemoteViews(
             context = context,
             appWidgetId = appWidgetId,
             targetItemId = item.id,
-            offset = WidgetNavigationContract.HERO_PENDING_INTENT_OFFSET,
+            family = WidgetFamily.HERO,
             viewId = R.id.hero_widget_root,
         )
     }

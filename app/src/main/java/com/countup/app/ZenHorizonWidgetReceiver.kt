@@ -199,7 +199,7 @@ fun buildZenHorizonRemoteViews(
         context = context,
         appWidgetId = appWidgetId,
         targetItemId = item.id,
-        offset = WidgetNavigationContract.ZEN_HORIZON_PENDING_INTENT_OFFSET,
+        family = WidgetFamily.ZEN_HORIZON,
         viewId = R.id.zen_horizon_left_section,
     )
 
@@ -208,13 +208,13 @@ fun buildZenHorizonRemoteViews(
         action = WidgetNavigationContract.ACTION_CYCLE_ZEN_HORIZON_UNIT
         putExtra(WidgetNavigationContract.EXTRA_APP_WIDGET_ID, appWidgetId)
     }
-    val cyclePendingIntent = PendingIntent.getBroadcast(
-        context,
-        appWidgetId + WidgetNavigationContract.ZEN_HORIZON_CYCLE_PENDING_INTENT_OFFSET,
-        cycleIntent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+    WidgetNavigationContract.attachBroadcastPendingIntent(
+        views = views,
+        context = context,
+        requestCode = appWidgetId + WidgetNavigationContract.ZEN_HORIZON_CYCLE_PENDING_INTENT_OFFSET,
+        intent = cycleIntent,
+        viewId = R.id.zen_horizon_right_section,
     )
-    views.setOnClickPendingIntent(R.id.zen_horizon_right_section, cyclePendingIntent)
 
     return views
 }

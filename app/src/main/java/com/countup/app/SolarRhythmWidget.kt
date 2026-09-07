@@ -257,7 +257,7 @@ fun buildSolarRhythmRemoteViews(
         context = context,
         appWidgetId = appWidgetId,
         targetItemId = targetItem.id,
-        offset = WidgetNavigationContract.SOLAR_RHYTHM_PENDING_INTENT_OFFSET,
+        family = WidgetFamily.SOLAR_RHYTHM,
         viewId = R.id.solar_rhythm_root,
     )
 
