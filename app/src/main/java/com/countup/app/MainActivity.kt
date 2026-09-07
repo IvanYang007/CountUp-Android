@@ -115,6 +115,18 @@ class MainActivity : ComponentActivity() {
                 val myProvider = android.content.ComponentName(this, HeroWidgetReceiver::class.java)
                 manager.requestPinAppWidget(myProvider, null, null)
             }
+        } else if (intent.data?.toString() == "countup://pin_pebble") {
+            val manager = getSystemService(android.appwidget.AppWidgetManager::class.java)
+            if (manager.isRequestPinAppWidgetSupported) {
+                val myProvider = android.content.ComponentName(this, ZenPebbleWidgetReceiver::class.java)
+                manager.requestPinAppWidget(myProvider, null, null)
+            }
+        } else if (intent.data?.toString() == "countup://pin_solar") {
+            val manager = getSystemService(android.appwidget.AppWidgetManager::class.java)
+            if (manager.isRequestPinAppWidgetSupported) {
+                val myProvider = android.content.ComponentName(this, SolarRhythmWidgetReceiver::class.java)
+                manager.requestPinAppWidget(myProvider, null, null)
+            }
         }
     }
 

@@ -1,8 +1,5 @@
 package com.countup.app
 
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
-import androidx.glance.appwidget.SizeMode
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -12,19 +9,26 @@ import java.time.LocalDate
 class SolarRhythmWidgetTest {
 
     @Test
-    fun solarRhythmWidgetDeclaresResponsiveSizesFor4x2And2x2() {
-        val widget = SolarRhythmWidget()
-        val sizes = widget.sizeMode.sizes
-        assertEquals(2, sizes.size)
-        assertTrue(sizes.contains(DpSize(140.dp, 110.dp))) // 2x2
-        assertTrue(sizes.contains(DpSize(260.dp, 110.dp))) // 4x2
+    fun solarRhythmReceiverIsInstantiable() {
+        val receiver = SolarRhythmWidgetReceiver()
+        assertNotNull(receiver)
     }
 
     @Test
-    fun solarRhythmReceiverProvidesValidWidgetInstance() {
-        val receiver = SolarRhythmWidgetReceiver()
-        assertNotNull(receiver.glanceAppWidget)
-        assertTrue(receiver.glanceAppWidget is SolarRhythmWidget)
+    fun solarRhythmTrackRendererHandlesProgressGracefullyWithoutExceptions() {
+        for (progress in listOf(0.0f, 0.25f, 0.5f, 0.72f, 1.0f, -0.1f, 1.5f)) {
+            val result = SolarRhythmTrackRenderer.renderTrack(
+                progress = progress,
+                progressColor = 0xFF8A5A36.toInt(),
+                trackColor = 0x1F000000,
+                widthPx = 200,
+                heightPx = 16,
+            )
+            if (result != null) {
+                assertEquals(200, result.width)
+                assertEquals(16, result.height)
+            }
+        }
     }
 
     @Test
@@ -55,6 +59,8 @@ class SolarRhythmWidgetTest {
         assertTrue(R.string.solar_rhythm_widget_label != 0)
         assertTrue(R.string.solar_rhythm_widget_description != 0)
         assertTrue(R.string.solar_rhythm_day_of != 0)
+        assertTrue(R.layout.widget_solar_rhythm_4x2 != 0)
+        assertTrue(R.layout.widget_solar_rhythm_2x2 != 0)
     }
 
     @Test
@@ -69,3 +75,4 @@ class SolarRhythmWidgetTest {
         assertEquals("Single line", formatSolarWhisperQuote("Single line", ""))
     }
 }
+

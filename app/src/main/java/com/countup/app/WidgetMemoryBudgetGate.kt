@@ -10,7 +10,7 @@ import android.os.Parcelable
  *
  * Budgets:
  * - Zen Horizon (4x1 & 2x1): strictly < 40 KB (40,960 bytes)
- * - Solar Rhythm (4x2 & 2x2 Glance): strictly < 40 KB (40,960 bytes)
+ * - Solar Rhythm (4x2 & 2x2): strictly < 40 KB (40,960 bytes)
  * - Zen Pebble (1x1): strictly < 15 KB (15,360 bytes)
  */
 object WidgetMemoryBudgetGate {
@@ -75,8 +75,8 @@ object WidgetMemoryBudgetGate {
     }
 
     /**
-     * Estimates payload size for Solar Rhythm (4x2 or 2x2 Glance).
-     * Glance Compose tree containing seasonal timeline progress bar, couplet poetry, and badges.
+     * Estimates payload size for Solar Rhythm (4x2 or 2x2 RemoteViews).
+     * RemoteViews hierarchy containing seasonal timeline progress bar, couplet poetry, and badges.
      */
     fun estimateSolarRhythmPayload(is4x2: Boolean): PayloadEstimate {
         val estimatedBytes = if (is4x2) 11264 else 7168 // ~11 KB for 4x2, ~7 KB for 2x2
