@@ -15,6 +15,37 @@ object ZenHorizonTrackRenderer {
     const val DEFAULT_HEIGHT_PX = 28
     const val MAX_BITMAP_BYTES = 32 * 1024 // 32 KB strict IPC allocation gate
 
+    /** Clamps requested bitmap dimensions so IPC allocation strictly respects [maxBytes]. */
+    fun computeSafeDimensions(widthPx: Int, heightPx: Int, maxBytes: Int = MAX_BITMAP_BYTES): Pair<Int, Int> {
+        val rawBytes = widthPx * heightPx * 4
+        return if (rawBytes > maxBytes) {
+            val scale = kotlin.math.sqrt(maxBytes.toDouble() / rawBytes)
+            val w = (widthPx * scale).toInt().coerceAtLeast(10)
+            val h = (heightPx * scale).toInt().coerceAtLeast(4)
+            Pair(w, h)
+        } else {
+            Pair(widthPx, heightPx)
+        }
+    }
+
+    /** Draws an anti-aliased, rounded-cap stroke line onto [canvas]. */
+    fun drawTrackLine(
+        canvas: Canvas,
+        startX: Float,
+        endX: Float,
+        centerY: Float,
+        thickness: Float,
+        color: Int,
+    ) {
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            this.color = color
+            strokeWidth = thickness
+            strokeCap = Paint.Cap.ROUND
+            style = Paint.Style.STROKE
+        }
+        canvas.drawLine(startX, centerY, endX, centerY, paint)
+    }
+
     /**
      * Renders a [Bitmap] containing the 1dp hairline milestone track,
      * filled progress bar, and Patina Gold circular pebble indicator.
@@ -26,15 +57,7 @@ object ZenHorizonTrackRenderer {
         heightPx: Int = DEFAULT_HEIGHT_PX,
     ): Bitmap? {
         return try {
-            val rawBytes = widthPx * heightPx * 4
-            val (safeWidth, safeHeight) = if (rawBytes > MAX_BITMAP_BYTES) {
-                val scale = kotlin.math.sqrt(MAX_BITMAP_BYTES.toDouble() / rawBytes)
-                val w = (widthPx * scale).toInt().coerceAtLeast(10)
-                val h = (heightPx * scale).toInt().coerceAtLeast(4)
-                Pair(w, h)
-            } else {
-                Pair(widthPx, heightPx)
-            }
+            val (safeWidth, safeHeight) = computeSafeDimensions(widthPx, heightPx, MAX_BITMAP_BYTES)
 
             val bitmap = createBitmap(safeWidth, safeHeight, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
@@ -53,26 +76,14 @@ object ZenHorizonTrackRenderer {
             val trackLength = maxOf(1f, endX - startX)
 
             // 1. Draw 1dp background hairline track (#E3D3B8 in light, #3A3D35 in dark)
-            val trackPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = palette.hairline
-                strokeWidth = trackThickness
-                strokeCap = Paint.Cap.ROUND
-                style = Paint.Style.STROKE
-            }
-            canvas.drawLine(startX, centerY, endX, centerY, trackPaint)
+            drawTrackLine(canvas, startX, endX, centerY, trackThickness, palette.hairline)
 
             // 2. Draw filled milestone progress bar
             val clampedProgress = progress.coerceIn(0f, 1f)
             val currentX = startX + (trackLength * clampedProgress)
 
             if (clampedProgress > 0f) {
-                val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = palette.accentGold
-                    strokeWidth = trackThickness
-                    strokeCap = Paint.Cap.ROUND
-                    style = Paint.Style.STROKE
-                }
-                canvas.drawLine(startX, centerY, currentX, centerY, fillPaint)
+                drawTrackLine(canvas, startX, currentX, centerY, trackThickness, palette.accentGold)
             }
 
             // 3. Draw Patina Gold pebble halo (matching widget background for clean cutout)

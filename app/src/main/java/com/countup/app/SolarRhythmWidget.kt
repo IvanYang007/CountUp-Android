@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Paint
 import android.os.Build
 import android.util.SizeF
 import android.view.View
@@ -16,8 +15,6 @@ import android.widget.RemoteViews
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.createBitmap
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 /**
  * Procedural vector renderer for the Solar Rhythm seasonal timeline track.
@@ -36,32 +33,21 @@ object SolarRhythmTrackRenderer {
         heightPx: Int = DEFAULT_HEIGHT_PX,
     ): Bitmap? {
         return try {
-            val bitmap = createBitmap(widthPx, heightPx, Bitmap.Config.ARGB_8888)
+            val (safeWidth, safeHeight) = ZenHorizonTrackRenderer.computeSafeDimensions(widthPx, heightPx, MAX_BITMAP_BYTES)
+            val bitmap = createBitmap(safeWidth, safeHeight, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
-            val centerY = heightPx / 2f
-            val trackThickness = heightPx * 0.75f
+            val centerY = safeHeight / 2f
+            val trackThickness = safeHeight * 0.75f
             val startX = trackThickness / 2f
-            val endX = widthPx - (trackThickness / 2f)
+            val endX = safeWidth - (trackThickness / 2f)
             val trackLength = maxOf(1f, endX - startX)
 
-            val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = trackColor
-                strokeWidth = trackThickness
-                strokeCap = Paint.Cap.ROUND
-                style = Paint.Style.STROKE
-            }
-            canvas.drawLine(startX, centerY, endX, centerY, bgPaint)
+            ZenHorizonTrackRenderer.drawTrackLine(canvas, startX, endX, centerY, trackThickness, trackColor)
 
             val clampedProgress = progress.coerceIn(0f, 1f)
             if (clampedProgress > 0f) {
                 val currentX = startX + (trackLength * clampedProgress)
-                val progressPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                    color = progressColor
-                    strokeWidth = trackThickness
-                    strokeCap = Paint.Cap.ROUND
-                    style = Paint.Style.STROKE
-                }
-                canvas.drawLine(startX, centerY, currentX, centerY, progressPaint)
+                ZenHorizonTrackRenderer.drawTrackLine(canvas, startX, currentX, centerY, trackThickness, progressColor)
             }
             bitmap
         } catch (_: Throwable) {
@@ -100,7 +86,7 @@ class SolarRhythmWidgetReceiver : AppWidgetProvider() {
 }
 
 /** Pushes update to all placed Solar Rhythm widgets on the launcher. */
-suspend fun pushAllSolarRhythmWidgetsUpdate(context: Context) {
+fun pushAllSolarRhythmWidgetsUpdate(context: Context) {
     val manager = AppWidgetManager.getInstance(context)
     val ids = manager.getAppWidgetIds(ComponentName(context, SolarRhythmWidgetReceiver::class.java))
     if (ids.isEmpty()) return
@@ -114,8 +100,8 @@ fun pushSolarRhythmWidgetUpdate(context: Context, appWidgetId: Int) {
     val manager = AppWidgetManager.getInstance(context)
     val store = CountUpStore(context)
     val items = store.items()
-    val boundId = store.getZenHorizonBinding(appWidgetId) ?: store.getHeroWidgetBinding(appWidgetId)
-    val targetItem = resolveZenHorizonTargetItem(items, boundId)
+    val boundId = store.getSolarRhythmBinding(appWidgetId)
+    val targetItem = resolveWidgetTargetItem(items, boundId)
     val today = LocalDate.now()
     val isDark = isNightMode(context)
 
@@ -250,8 +236,12 @@ fun buildSolarRhythmRemoteViews(
         views.setTextViewText(R.id.solar_rhythm_event_title, targetItem.name)
         views.setTextColor(R.id.solar_rhythm_event_title, primaryInk)
 
-        val startDateFormatted = "Since " + LocalDate.ofEpochDay(targetItem.epochDay)
-            .format(DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.US))
+        val startDateFormatted = formatAnchorDateSubLabel(
+            count = daysCount,
+            date = LocalDate.ofEpochDay(targetItem.epochDay),
+            sinceTemplate = context.getString(R.string.since_label),
+            untilTemplate = context.getString(R.string.until_label),
+        )
         views.setTextViewText(R.id.solar_rhythm_event_subtitle, startDateFormatted)
         views.setTextColor(R.id.solar_rhythm_event_subtitle, secondaryInk)
 

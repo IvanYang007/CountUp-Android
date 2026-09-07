@@ -87,12 +87,16 @@ fun pushAllZenHorizonWidgetsUpdate(context: Context) {
     }
 }
 
-/** Resolves the target item for a Zen Horizon widget. */
-internal fun resolveZenHorizonTargetItem(items: List<CountUpItem>, boundItemId: String?): CountUpItem? =
+/** Resolves the target item for a widget based on binding, pin status, and widget visibility. */
+internal fun resolveWidgetTargetItem(items: List<CountUpItem>, boundItemId: String?): CountUpItem? =
     items.firstOrNull { it.id == boundItemId }
         ?: items.firstOrNull { it.isPinned && it.showInWidget }
         ?: items.firstOrNull { it.showInWidget }
         ?: items.firstOrNull()
+
+@Deprecated("Use resolveWidgetTargetItem instead", ReplaceWith("resolveWidgetTargetItem(items, boundItemId)"))
+internal fun resolveZenHorizonTargetItem(items: List<CountUpItem>, boundItemId: String?): CountUpItem? =
+    resolveWidgetTargetItem(items, boundItemId)
 
 /** Renders and pushes RemoteViews for a single Zen Horizon widget. */
 fun pushZenHorizonWidgetUpdate(context: Context, appWidgetId: Int) {
@@ -100,7 +104,7 @@ fun pushZenHorizonWidgetUpdate(context: Context, appWidgetId: Int) {
     val store = CountUpStore(context)
     val items = store.items()
     val boundItemId = store.getZenHorizonBinding(appWidgetId)
-    val targetItem = resolveZenHorizonTargetItem(items, boundItemId)
+    val targetItem = resolveWidgetTargetItem(items, boundItemId)
 
     val today = LocalDate.now()
     val isDark = isNightMode(context)

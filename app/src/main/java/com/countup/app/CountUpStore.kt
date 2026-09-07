@@ -443,6 +443,25 @@ class CountUpStore(context: Context) {
             .commit()
     }
 
+    /** Retrieves the bound item ID for a Solar Rhythm Widget instance. */
+    fun getSolarRhythmBinding(appWidgetId: Int): String? {
+        return prefs.getString(PREFIX_SOLAR_RHYTHM_BINDING + appWidgetId, null)
+    }
+
+    /** Binds a specific [itemId] to a Solar Rhythm Widget instance. */
+    fun setSolarRhythmBinding(appWidgetId: Int, itemId: String): Boolean {
+        return prefs.edit()
+            .putString(PREFIX_SOLAR_RHYTHM_BINDING + appWidgetId, itemId)
+            .commit()
+    }
+
+    /** Removes the binding for a deleted Solar Rhythm Widget instance. */
+    fun removeSolarRhythmBinding(appWidgetId: Int): Boolean {
+        return prefs.edit()
+            .remove(PREFIX_SOLAR_RHYTHM_BINDING + appWidgetId)
+            .commit()
+    }
+
     /** Removes the binding for a deleted Hero Widget instance. */
     fun removeHeroWidgetBinding(appWidgetId: Int): Boolean {
         return prefs.edit()
@@ -640,6 +659,7 @@ class CountUpStore(context: Context) {
         private const val PREFIX_ZEN_HORIZON_UNIT = "zen_horizon_unit_"
         private const val PREFIX_ZEN_PEBBLE_BINDING = "zen_pebble_binding_"
         private const val PREFIX_ZEN_PEBBLE_TAG = "zen_pebble_tag_"
+        private const val PREFIX_SOLAR_RHYTHM_BINDING = "solar_rhythm_binding_"
         private const val MAX_QUARANTINE_ENTRIES = 3
         private const val KEY_PENDING_WIDGET_RESETS = "pending_widget_resets_v1"
         private const val MAX_PENDING_WIDGET_RESETS = 3

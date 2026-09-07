@@ -74,5 +74,35 @@ class SolarRhythmWidgetTest {
         assertEquals("", formatSolarWhisperQuote("", ""))
         assertEquals("Single line", formatSolarWhisperQuote("Single line", ""))
     }
+
+    @Test
+    fun solarRhythmDateSubLabelAdheresToStandardsContract() {
+        val today = LocalDate.of(2026, 9, 23)
+        val pastDate = LocalDate.of(2025, 1, 20)
+        val futureDate = LocalDate.of(2026, 12, 31)
+
+        val pastCount = daysSince(pastDate, today)
+        assertTrue(pastCount > 0)
+        val pastSubLabel = formatAnchorDateSubLabel(pastCount, pastDate, "SINCE %s", "UNTIL %s")
+        assertTrue(pastSubLabel.startsWith("SINCE "))
+
+        val futureCount = daysSince(futureDate, today)
+        assertTrue(futureCount < 0)
+        val futureSubLabel = formatAnchorDateSubLabel(futureCount, futureDate, "SINCE %s", "UNTIL %s")
+        assertTrue(futureSubLabel.startsWith("UNTIL "))
+    }
+
+    @Test
+    fun safeDimensionsCalculationRespectsStrictIpcLimits() {
+        // Under limit: unchanged
+        val (w1, h1) = ZenHorizonTrackRenderer.computeSafeDimensions(200, 16, 32 * 1024)
+        assertEquals(200, w1)
+        assertEquals(16, h1)
+
+        // Massive dimensions: scaled down to fit within limit
+        val (w2, h2) = ZenHorizonTrackRenderer.computeSafeDimensions(2000, 1000, 32 * 1024)
+        val bytes = w2 * h2 * 4
+        assertTrue(bytes <= 32 * 1024)
+    }
 }
 

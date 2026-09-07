@@ -76,18 +76,19 @@ class ZenHorizonLayoutTest {
         )
 
         // 1. Explicit bound item takes priority
+        assertEquals("item-3", resolveWidgetTargetItem(items, "item-3")?.id)
         assertEquals("item-3", resolveZenHorizonTargetItem(items, "item-3")?.id)
 
         // 2. Fallback to pinned visible item
-        assertEquals("item-2", resolveZenHorizonTargetItem(items, "non-existent")?.id)
-        assertEquals("item-2", resolveZenHorizonTargetItem(items, null)?.id)
+        assertEquals("item-2", resolveWidgetTargetItem(items, "non-existent")?.id)
+        assertEquals("item-2", resolveWidgetTargetItem(items, null)?.id)
 
         // 3. Fallback when no pinned item exists
         val unpinned = listOf(items[0], items[2])
-        assertEquals("item-1", resolveZenHorizonTargetItem(unpinned, null)?.id)
+        assertEquals("item-1", resolveWidgetTargetItem(unpinned, null)?.id)
 
         // 4. Empty list returns null safely
-        assertNull(resolveZenHorizonTargetItem(emptyList(), null))
+        assertNull(resolveWidgetTargetItem(emptyList(), null))
     }
 
     @Test

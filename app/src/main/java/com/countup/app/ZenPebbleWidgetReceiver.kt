@@ -54,11 +54,12 @@ fun pushZenPebbleWidgetUpdate(context: Context, appWidgetId: Int) {
     val store = CountUpStore(context)
     val items = store.items()
     val boundItemId = store.getZenPebbleBinding(appWidgetId)
-    val targetItem = resolveZenHorizonTargetItem(items, boundItemId)
+    val targetItem = resolveWidgetTargetItem(items, boundItemId)
+    val customTag = store.getZenPebbleTag(appWidgetId)
 
     val today = LocalDate.now()
     val isDark = isNightMode(context)
-    val views = buildZenPebbleRemoteViews(context, targetItem, today, appWidgetId, isDark)
+    val views = buildZenPebbleRemoteViews(context, targetItem, today, appWidgetId, isDark, customTag)
     manager.updateAppWidget(appWidgetId, views)
 }
 
@@ -69,6 +70,7 @@ fun buildZenPebbleRemoteViews(
     today: LocalDate,
     appWidgetId: Int,
     isDark: Boolean,
+    customTag: String? = null,
 ): RemoteViews {
     val views = RemoteViews(context.packageName, R.layout.widget_zen_pebble_1x1)
 
@@ -95,7 +97,6 @@ fun buildZenPebbleRemoteViews(
     views.setViewVisibility(R.id.zen_pebble_empty, View.GONE)
     views.setViewVisibility(R.id.zen_pebble_content, View.VISIBLE)
 
-    val store = CountUpStore(context)
     val cardStyle = resolveCardStyle(item.cardColor, isDark = isDark)
     val palette = WidgetThemeTokens.resolve(isDark).copy(
         canvasBg = cardStyle.cardBg.toArgb(),
@@ -105,7 +106,6 @@ fun buildZenPebbleRemoteViews(
     val count = daysSince(LocalDate.ofEpochDay(item.epochDay), today)
     val compactNumber = ZenWidgetReducer.formatCompactNumber(count)
 
-    val customTag = store.getZenPebbleTag(appWidgetId)
     val oneWordLabel = ZenWidgetReducer.resolveOneWordLabel(item, customTag)
 
     // Set tranquil background
