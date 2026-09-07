@@ -217,12 +217,18 @@ class ResetCountReceiver : BroadcastReceiver() {
                     store.recordWidgetReset(record)
                     pushWidgetUpdate(appContext)
                     pushAllHeroWidgetsUpdate(appContext)
+                    pushAllZenHorizonWidgetsUpdate(appContext)
+                    pushAllSolarRhythmWidgetsUpdate(appContext)
+                    pushAllZenPebbleWidgetsUpdate(appContext)
                 }
             } else {
                 // First tap: arm this cell and re-render widget to show "Tap again" / "0?"
                 arm(appContext, id)
                 pushWidgetUpdate(appContext)
                 pushAllHeroWidgetsUpdate(appContext)
+                pushAllZenHorizonWidgetsUpdate(appContext)
+                pushAllSolarRhythmWidgetsUpdate(appContext)
+                pushAllZenPebbleWidgetsUpdate(appContext)
             }
         }
     }
@@ -269,6 +275,9 @@ class ResetCountReceiver : BroadcastReceiver() {
                         widgetReceiverScope.launch {
                             pushWidgetUpdate(appContext)
                             pushAllHeroWidgetsUpdate(appContext)
+                            pushAllZenHorizonWidgetsUpdate(appContext)
+                            pushAllSolarRhythmWidgetsUpdate(appContext)
+                            pushAllZenPebbleWidgetsUpdate(appContext)
                         }
                     }
                 }

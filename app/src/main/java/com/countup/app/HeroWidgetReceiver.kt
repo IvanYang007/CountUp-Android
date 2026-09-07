@@ -24,6 +24,7 @@ class HeroWidgetReceiver : AppWidgetProvider() {
     companion object {
         const val EXTRA_TARGET_ITEM_ID = "EXTRA_TARGET_ITEM_ID"
         const val ACTION_CYCLE_HERO_DISPLAY_MODE = "com.countup.app.ACTION_CYCLE_HERO_DISPLAY_MODE"
+        const val ACTION_CYCLE_ZEN_HORIZON_UNIT = "com.countup.app.ACTION_CYCLE_ZEN_HORIZON_UNIT"
         const val EXTRA_APP_WIDGET_ID = "EXTRA_APP_WIDGET_ID"
     }
 

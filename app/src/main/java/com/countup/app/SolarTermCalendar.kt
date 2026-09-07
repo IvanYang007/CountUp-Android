@@ -25,6 +25,22 @@ data class CelestialCountdown(
     @get:StringRes val targetNameRes: Int,
 )
 
+/**
+ * Progress and transition bounds for a date within its active solar term.
+ */
+@Immutable
+data class SolarTermTransition(
+    val currentTerm: SolarTerm,
+    val startDate: LocalDate,
+    val nextTermStartDate: LocalDate,
+    val nextTerm: SolarTerm,
+    val daysInTerm: Long,
+    val elapsedDays: Long,
+) {
+    val progressFraction: Float
+        get() = if (daysInTerm > 0) (elapsedDays.toFloat() / daysInTerm).coerceIn(0f, 1f) else 0f
+}
+
 object SolarTermCalendar {
     val TERMS: List<SolarTerm> = listOf(
         SolarTerm(1, R.string.season_spring, R.string.solar_term_beginning_of_spring, 2, 4, 315, R.string.solar_term_whisper_1_line1, R.string.solar_term_whisper_1_line2),
@@ -105,6 +121,47 @@ object SolarTermCalendar {
             ?: candidateAnchors.last()
         val days = java.time.temporal.ChronoUnit.DAYS.between(date, next.first)
         return CelestialCountdown(days = days, targetNameRes = next.second)
+    }
+
+    /**
+     * Calculates the complete solar term transition snapshot (start date, next term start date,
+     * total days in term, and elapsed days) for any calendar [date].
+     */
+    fun getSolarTermTransition(date: LocalDate): SolarTermTransition {
+        val y = date.year
+        // Build 3-year chronological window: previous year, current year, next year
+        val transitions = mutableListOf<Pair<LocalDate, SolarTerm>>()
+        for (year in (y - 1)..(y + 1)) {
+            for (term in CHRONOLOGICAL_TERMS) {
+                transitions.add(LocalDate.of(year, term.month, term.day) to term)
+            }
+        }
+        transitions.sortBy { it.first }
+
+        var activeIndex = 0
+        for (i in 0 until transitions.size - 1) {
+            val current = transitions[i].first
+            val next = transitions[i + 1].first
+            if (!date.isBefore(current) && date.isBefore(next)) {
+                activeIndex = i
+                break
+            }
+        }
+
+        val (startDate, currentTerm) = transitions[activeIndex]
+        val (nextDate, nextTerm) = transitions[activeIndex + 1]
+
+        val daysInTerm = java.time.temporal.ChronoUnit.DAYS.between(startDate, nextDate)
+        val elapsedDays = java.time.temporal.ChronoUnit.DAYS.between(startDate, date)
+
+        return SolarTermTransition(
+            currentTerm = currentTerm,
+            startDate = startDate,
+            nextTermStartDate = nextDate,
+            nextTerm = nextTerm,
+            daysInTerm = daysInTerm,
+            elapsedDays = elapsedDays,
+        )
     }
 }
 

@@ -372,4 +372,25 @@
     <string name="widget_reset_notice_body" tools:ignore="PluralsCandidate">“%1$s” was reset to today on the home screen (%2$d days released).</string>
     <string name="action_restore">Restore</string>
     <string name="action_dismiss">Dismiss</string>
+
+
+    <!-- Solar Rhythm (时节同行 · 岁华流转) -->
+    <string name="solar_rhythm_widget_label">Solar Rhythm</string>
+    <string name="solar_rhythm_widget_description">4x2 seasonal canvas harmonizing personal milestones with the 24 Solar Terms.</string>
+    <string name="solar_rhythm_day_of">Day %1$d of %2$d</string>
+
+    <!-- Zen Pebble (1x1 极简原石) -->
+    <string name="zen_pebble_widget_label">Zen Pebble</string>
+    <string name="zen_pebble_widget_description">Ultra-compact 1x1 minimalist pebble token with serene count and one-word label.</string>
+    <string name="zen_pebble_configure_title">Zen Pebble</string>
+    <string name="zen_pebble_configure_subtitle">Select a counter to honor on this 1x1 pebble.</string>
+
+    <!-- Zen Horizon (呼吸时序) -->
+    <string name="zen_horizon_widget_label">Zen Horizon</string>
+    <string name="zen_horizon_widget_description">Single-row ribbon with milestone hairline track and in-place unit cycling.</string>
+    <string name="zen_horizon_configure_title">Zen Horizon</string>
+    <string name="zen_horizon_configure_subtitle">Select a counter to honor on this horizon ribbon.</string>
+    <string name="zen_horizon_empty">Tap to select a counter</string>
+    <string name="zen_horizon_unit_hint"> ⇄</string>
+    <string name="cd_zen_horizon_cycle_unit">Cycle time unit</string>
 </resources>

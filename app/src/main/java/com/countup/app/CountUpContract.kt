@@ -33,6 +33,7 @@ data class CountUpUiState(
     val today: LocalDate = LocalDate.now(),
     val cardWhispers: Map<String, CardResetWhisper> = emptyMap(),
     val pendingWidgetResets: List<WidgetResetRecord> = emptyList(),
+    val pendingTargetItemId: String? = null,
 ) {
     /**
      * Instant derived filtered & sorted list of items matching [searchQuery] in [sortOrder].
@@ -52,6 +53,7 @@ sealed interface CountUpUiEvent {
     data class ThemeModeSelected(val mode: ThemeMode) : CountUpUiEvent
     data object CycleBackground : CountUpUiEvent
     data class OpenEditor(val target: CountUpItem? = null) : CountUpUiEvent
+    data class OpenTargetItem(val itemId: String) : CountUpUiEvent
     data object CloseEditor : CountUpUiEvent
     data class SaveItem(
         val draft: ItemDraft,

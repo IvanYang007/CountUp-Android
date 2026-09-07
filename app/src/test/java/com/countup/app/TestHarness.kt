@@ -15,6 +15,7 @@ class TestContext(private val baseFilesDir: File) : android.content.ContextWrapp
     }
 
     override fun getFilesDir(): File = baseFilesDir
+    override fun getPackageName(): String = "com.countup.app"
 }
 
 class TestSharedPreferences : SharedPreferences {

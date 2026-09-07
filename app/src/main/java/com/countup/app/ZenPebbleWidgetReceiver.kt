@@ -1,0 +1,144 @@
+package com.countup.app
+
+import android.app.PendingIntent
+import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetProvider
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.view.View
+import android.widget.RemoteViews
+import androidx.compose.ui.graphics.toArgb
+import java.time.LocalDate
+
+/**
+ * The Zen Pebble (1x1 极简原石) Widget provider.
+ * Ultra-compact single-cell token optimized for 56x56dp to 80x80dp launcher cells.
+ * Features a bold serene count glyph, micro-unit, hairline ink dash, and a one-word label.
+ */
+class ZenPebbleWidgetReceiver : AppWidgetProvider() {
+
+    override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
+        val appContext = context.applicationContext
+        launchAsync {
+            for (appWidgetId in appWidgetIds) {
+                pushZenPebbleWidgetUpdate(appContext, appWidgetId)
+            }
+        }
+    }
+
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        val appContext = context.applicationContext
+        launchAsync {
+            val store = CountUpStore(appContext)
+            for (id in appWidgetIds) {
+                store.removeZenPebbleBinding(id)
+            }
+        }
+    }
+}
+
+/** Pushes update to all placed Zen Pebble widgets on the launcher. */
+fun pushAllZenPebbleWidgetsUpdate(context: Context) {
+    val manager = AppWidgetManager.getInstance(context)
+    val ids = manager.getAppWidgetIds(ComponentName(context, ZenPebbleWidgetReceiver::class.java))
+    if (ids.isEmpty()) return
+    for (id in ids) {
+        pushZenPebbleWidgetUpdate(context, id)
+    }
+}
+
+/** Renders and pushes RemoteViews for a single Zen Pebble widget. */
+fun pushZenPebbleWidgetUpdate(context: Context, appWidgetId: Int) {
+    val manager = AppWidgetManager.getInstance(context)
+    val store = CountUpStore(context)
+    val items = store.items()
+    val boundItemId = store.getZenPebbleBinding(appWidgetId)
+    val targetItem = resolveZenHorizonTargetItem(items, boundItemId)
+
+    val today = LocalDate.now()
+    val isDark = isNightMode(context)
+    val views = buildZenPebbleRemoteViews(context, targetItem, today, appWidgetId, isDark)
+    manager.updateAppWidget(appWidgetId, views)
+}
+
+/** Builds the RemoteViews hierarchy for the 1x1 Zen Pebble widget. */
+fun buildZenPebbleRemoteViews(
+    context: Context,
+    item: CountUpItem?,
+    today: LocalDate,
+    appWidgetId: Int,
+    isDark: Boolean,
+): RemoteViews {
+    val views = RemoteViews(context.packageName, R.layout.widget_zen_pebble_1x1)
+
+    if (item == null) {
+        views.setViewVisibility(R.id.zen_pebble_empty, View.VISIBLE)
+        views.setViewVisibility(R.id.zen_pebble_content, View.GONE)
+
+        val defaultBg = if (isDark) WidgetThemeTokens.DARK_CANVAS_BG else WidgetThemeTokens.LIGHT_CANVAS_BG
+        views.setInt(R.id.zen_pebble_root, "setBackgroundColor", defaultBg)
+
+        val launchIntent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            appWidgetId,
+            launchIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        views.setOnClickPendingIntent(R.id.zen_pebble_root, pendingIntent)
+        return views
+    }
+
+    views.setViewVisibility(R.id.zen_pebble_empty, View.GONE)
+    views.setViewVisibility(R.id.zen_pebble_content, View.VISIBLE)
+
+    val store = CountUpStore(context)
+    val cardStyle = resolveCardStyle(item.cardColor, isDark = isDark)
+    val palette = WidgetThemeTokens.resolve(isDark).copy(
+        canvasBg = cardStyle.cardBg.toArgb(),
+        primaryInk = cardStyle.primaryInk.toArgb(),
+        secondaryInk = cardStyle.mutedInk.toArgb(),
+    )
+    val count = daysSince(LocalDate.ofEpochDay(item.epochDay), today)
+    val compactNumber = ZenWidgetReducer.formatCompactNumber(count)
+
+    val customTag = store.getZenPebbleTag(appWidgetId)
+    val oneWordLabel = ZenWidgetReducer.resolveOneWordLabel(item, customTag)
+
+    // Set tranquil background
+    views.setInt(R.id.zen_pebble_root, "setBackgroundColor", palette.canvasBg)
+
+    // Bold compact numeral
+    views.setTextViewText(R.id.zen_pebble_number, compactNumber)
+    views.setTextColor(R.id.zen_pebble_number, palette.primaryInk)
+
+    // Micro-unit label
+    views.setTextViewText(R.id.zen_pebble_unit, "DAYS")
+    views.setTextColor(R.id.zen_pebble_unit, palette.secondaryInk)
+
+    // Hairline ink dash (#6B5D4F in light, #8E8A7E in dark)
+    val dashColor = if (isDark) 0xFF8E8A7E.toInt() else 0xFF6B5D4F.toInt()
+    views.setInt(R.id.zen_pebble_dash, "setBackgroundColor", dashColor)
+
+    // Subtle 1-word tag
+    views.setTextViewText(R.id.zen_pebble_tag, oneWordLabel)
+    views.setTextColor(R.id.zen_pebble_tag, palette.accentPrimary)
+
+    // Tap anywhere on pebble opens specific event in CountUp
+    val launchIntent = Intent(context, MainActivity::class.java).apply {
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        putExtra(HeroWidgetReceiver.EXTRA_TARGET_ITEM_ID, item.id)
+    }
+    val pendingIntent = PendingIntent.getActivity(
+        context,
+        (item.id.hashCode() and 0x7FFFFFFF) + 303,
+        launchIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+    )
+    views.setOnClickPendingIntent(R.id.zen_pebble_root, pendingIntent)
+
+    return views
+}

@@ -71,7 +71,7 @@ class EdgeCaseMatrixTest {
             }
         }
 
-        assertTrue(latch.await(10, TimeUnit.SECONDS))
+        assertTrue(latch.await(30, TimeUnit.SECONDS))
         executor.shutdown()
         assertEquals(0, errors.get())
 

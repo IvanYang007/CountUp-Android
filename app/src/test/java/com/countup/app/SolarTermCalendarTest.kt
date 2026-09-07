@@ -141,5 +141,36 @@ class SolarTermCalendarTest {
         assertEquals(85L, countdown.days)
         assertEquals(R.string.solar_term_spring_equinox, countdown.targetNameRes)
     }
+
+    @Test
+    fun getSolarTermTransition_calculatesValidBoundariesAndProgress() {
+        // White Dew (Sep 7, 2026 to Sep 23, 2026)
+        val testDate = LocalDate.of(2026, 9, 10)
+        val transition = SolarTermCalendar.getSolarTermTransition(testDate)
+
+        assertEquals(15, transition.currentTerm.id)
+        assertEquals(R.string.solar_term_white_dew, transition.currentTerm.nameRes)
+        assertEquals(LocalDate.of(2026, 9, 7), transition.startDate)
+        assertEquals(LocalDate.of(2026, 9, 23), transition.nextTermStartDate)
+        assertEquals(16, transition.nextTerm.id)
+        assertEquals(16L, transition.daysInTerm)
+        assertEquals(3L, transition.elapsedDays)
+        assertTrue(transition.progressFraction > 0.18f && transition.progressFraction < 0.19f)
+    }
+
+    @Test
+    fun getSolarTermTransition_handlesYearBoundaryGracefully() {
+        // Jan 2, 2026 is Winter Solstice (Dec 21, 2025 to Jan 5, 2026)
+        val testDate = LocalDate.of(2026, 1, 2)
+        val transition = SolarTermCalendar.getSolarTermTransition(testDate)
+
+        assertEquals(22, transition.currentTerm.id)
+        assertEquals(R.string.solar_term_winter_solstice, transition.currentTerm.nameRes)
+        assertEquals(LocalDate.of(2025, 12, 21), transition.startDate)
+        assertEquals(LocalDate.of(2026, 1, 5), transition.nextTermStartDate)
+        assertEquals(23, transition.nextTerm.id) // Minor Cold
+        assertEquals(15L, transition.daysInTerm)
+        assertEquals(12L, transition.elapsedDays)
+    }
 }
 

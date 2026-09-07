@@ -13,6 +13,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" tools:node="remove" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" tools:node="remove" />
     <uses-permission android:name="com.countup.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" tools:node="remove" />
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:allowBackup="false"
@@ -79,6 +80,66 @@
             </intent-filter>
         </activity>
 
+        <!-- Zen Horizon Ribbon Widget (4x1 & 2x1) -->
+        <receiver
+            android:name=".ZenHorizonWidgetReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.appwidget.action.APPWIDGET_DELETED" />
+                <action android:name="com.countup.app.ACTION_CYCLE_ZEN_HORIZON_UNIT" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/zen_horizon_widget_info" />
+        </receiver>
+
+        <!-- Configuration Activity for Zen Horizon Widget -->
+        <activity
+            android:name=".ZenHorizonConfigureActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+
+        <!-- Solar Rhythm 4x2 / 2x2 Glance Seasonal Canvas -->
+        <receiver
+            android:name=".SolarRhythmWidgetReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/solar_rhythm_widget_info" />
+        </receiver>
+
+        <!-- Zen Pebble (1x1 极简原石) -->
+        <receiver
+            android:name=".ZenPebbleWidgetReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.appwidget.action.APPWIDGET_DELETED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/zen_pebble_widget_info" />
+        </receiver>
+
+        <!-- Configuration Activity for Zen Pebble Widget -->
+        <activity
+            android:name=".ZenPebbleConfigureActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
         <!-- Serves the widget grid's cell views to the launcher. Exported=false
              is safe: only the system can hold BIND_REMOTEVIEWS. -->
         <service
@@ -90,6 +151,17 @@
         <receiver
             android:name=".ResetCountReceiver"
             android:exported="false" />
+
+        <!-- Silent Midnight Rollover Alarm Receiver -->
+        <receiver
+            android:name=".MidnightAlarmReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.countup.app.ACTION_MIDNIGHT_ROLLOVER" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

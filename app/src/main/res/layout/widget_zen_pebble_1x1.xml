@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/zen_pebble_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_zen_bg"
+    android:padding="6dp"
+    android:clipToOutline="true"
+    android:gravity="center"
+    tools:ignore="SmallSp">
+
+    <!-- Active Content Container -->
+    <LinearLayout
+        android:id="@+id/zen_pebble_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <!-- Bold Serene Numeral -->
+        <TextView
+            android:id="@+id/zen_pebble_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#2C2416"
+            android:includeFontPadding="false"
+            android:singleLine="true"
+            tools:text="412" />
+
+        <!-- Micro-Unit Label -->
+        <TextView
+            android:id="@+id/zen_pebble_unit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="8.5sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.12"
+            android:textColor="#8C7E70"
+            android:singleLine="true"
+            android:text="DAYS"
+            tools:text="DAYS" />
+
+        <!-- Hairline Ink Dash -->
+        <ImageView
+            android:id="@+id/zen_pebble_dash"
+            android:layout_width="16dp"
+            android:layout_height="2dp"
+            android:layout_marginTop="3dp"
+            android:layout_marginBottom="3dp"
+            android:background="#6B5D4F"
+            android:contentDescription="@null" />
+
+        <!-- Subtle One-Word Tag -->
+        <TextView
+            android:id="@+id/zen_pebble_tag"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="8.5sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.08"
+            android:textColor="#46664B"
+            android:singleLine="true"
+            android:ellipsize="end"
+            tools:text="SOBRIETY" />
+    </LinearLayout>
+
+    <!-- Empty State Overlay -->
+    <TextView
+        android:id="@+id/zen_pebble_empty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#8C7E70"
+        android:text="+"
+        android:visibility="gone" />
+
+</RelativeLayout>

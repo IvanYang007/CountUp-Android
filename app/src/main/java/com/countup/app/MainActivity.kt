@@ -102,9 +102,12 @@ class MainActivity : ComponentActivity() {
 
     private fun handleIntent(intent: Intent?) {
         if (intent == null) return
+        val targetItemId = intent.getStringExtra(HeroWidgetReceiver.EXTRA_TARGET_ITEM_ID)
         val isAdd = intent.action == ACTION_ADD_ITEM ||
             intent.data?.toString() == "countup://new"
-        if (isAdd) {
+        if (targetItemId != null) {
+            viewModel.onEvent(CountUpUiEvent.OpenTargetItem(targetItemId))
+        } else if (isAdd) {
             viewModel.onEvent(CountUpUiEvent.OpenEditor(target = null))
         } else if (intent.data?.toString() == "countup://pin_hero") {
             val manager = getSystemService(android.appwidget.AppWidgetManager::class.java)
@@ -121,13 +124,20 @@ class MainActivity : ComponentActivity() {
         refreshWidget()
     }
 
+    override fun onPause() {
+        super.onPause()
+        refreshWidget()
+    }
+
     private fun refreshWidget() {
         val appContext = applicationContext
-        lifecycleScope.launch(Dispatchers.Default) {
-            runCatching {
-                pushWidgetUpdate(appContext)
-                pushAllHeroWidgetsUpdate(appContext)
-            }
+        widgetReceiverScope.launch {
+            runCatching { pushWidgetUpdate(appContext) }
+            runCatching { pushAllHeroWidgetsUpdate(appContext) }
+            runCatching { pushAllZenHorizonWidgetsUpdate(appContext) }
+            runCatching { pushAllSolarRhythmWidgetsUpdate(appContext) }
+            runCatching { pushAllZenPebbleWidgetsUpdate(appContext) }
+            runCatching { MidnightAlarmReceiver.scheduleMidnightAlarm(appContext) }
         }
     }
 }

@@ -87,6 +87,15 @@ class CountUpViewModel(
             is CountUpUiEvent.OpenEditor -> {
                 _state.update { it.copy(editorTarget = event.target, isEditorOpen = true) }
             }
+            is CountUpUiEvent.OpenTargetItem -> {
+                val currentItems = _state.value.items
+                val target = currentItems.find { it.id == event.itemId }
+                if (target != null) {
+                    _state.update { it.copy(editorTarget = target, isEditorOpen = true, pendingTargetItemId = null) }
+                } else {
+                    _state.update { it.copy(pendingTargetItemId = event.itemId) }
+                }
+            }
             CountUpUiEvent.CloseEditor -> {
                 _state.update { it.copy(isEditorOpen = false, editorTarget = null) }
             }
@@ -275,8 +284,10 @@ class CountUpViewModel(
         val backgroundTheme = repository.getBackgroundTheme()
         val themeMode = repository.getThemeMode()
         val pendingWidgetResets = repository.getPendingWidgetResets()
-        _state.update {
-            it.copy(
+        _state.update { current ->
+            val pendingId = current.pendingTargetItemId
+            val target = if (pendingId != null) items.find { it.id == pendingId } else null
+            current.copy(
                 items = items,
                 isLoading = false,
                 sortOrder = sortOrder,
@@ -284,6 +295,9 @@ class CountUpViewModel(
                 themeMode = themeMode,
                 today = today,
                 pendingWidgetResets = pendingWidgetResets,
+                editorTarget = target ?: current.editorTarget,
+                isEditorOpen = if (target != null) true else current.isEditorOpen,
+                pendingTargetItemId = if (target != null) null else pendingId,
             )
         }
     }

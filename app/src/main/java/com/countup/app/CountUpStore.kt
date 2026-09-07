@@ -373,11 +373,82 @@ class CountUpStore(context: Context) {
             .commit()
     }
 
+    /** Retrieves the saved [ZenWidgetDisplayUnit] for a Zen Horizon instance, defaulting to [ZenWidgetDisplayUnit.DAYS]. */
+    fun getZenHorizonUnit(appWidgetId: Int): ZenWidgetDisplayUnit {
+        val raw = prefs.getString(PREFIX_ZEN_HORIZON_UNIT + appWidgetId, null)
+        return try {
+            if (raw != null) ZenWidgetDisplayUnit.valueOf(raw) else ZenWidgetDisplayUnit.DAYS
+        } catch (_: IllegalArgumentException) {
+            ZenWidgetDisplayUnit.DAYS
+        }
+    }
+
+    /** Persists the [ZenWidgetDisplayUnit] for a Zen Horizon instance. */
+    fun setZenHorizonUnit(appWidgetId: Int, unit: ZenWidgetDisplayUnit): Boolean {
+        return prefs.edit()
+            .putString(PREFIX_ZEN_HORIZON_UNIT + appWidgetId, unit.name)
+            .commit()
+    }
+
+    /** Retrieves the bound item ID for a Zen Horizon Widget instance, falling back to hero binding or null. */
+    fun getZenHorizonBinding(appWidgetId: Int): String? {
+        return prefs.getString(PREFIX_ZEN_HORIZON_BINDING + appWidgetId, null)
+            ?: prefs.getString(PREFIX_HERO_BINDING + appWidgetId, null)
+    }
+
+    /** Binds a specific [itemId] to a Zen Horizon Widget instance. */
+    fun setZenHorizonBinding(appWidgetId: Int, itemId: String): Boolean {
+        return prefs.edit()
+            .putString(PREFIX_ZEN_HORIZON_BINDING + appWidgetId, itemId)
+            .commit()
+    }
+
+    /** Removes the binding and display unit for a deleted Zen Horizon Widget instance. */
+    fun removeZenHorizonBinding(appWidgetId: Int): Boolean {
+        return prefs.edit()
+            .remove(PREFIX_ZEN_HORIZON_BINDING + appWidgetId)
+            .remove(PREFIX_ZEN_HORIZON_UNIT + appWidgetId)
+            .commit()
+    }
+
+    /** Retrieves the bound item ID for a Zen Pebble Widget instance, falling back to null. */
+    fun getZenPebbleBinding(appWidgetId: Int): String? {
+        return prefs.getString(PREFIX_ZEN_PEBBLE_BINDING + appWidgetId, null)
+    }
+
+    /** Binds a specific [itemId] to a Zen Pebble Widget instance. */
+    fun setZenPebbleBinding(appWidgetId: Int, itemId: String): Boolean {
+        return prefs.edit()
+            .putString(PREFIX_ZEN_PEBBLE_BINDING + appWidgetId, itemId)
+            .commit()
+    }
+
+    /** Retrieves the customizable one-word tag for a Zen Pebble Widget instance. */
+    fun getZenPebbleTag(appWidgetId: Int): String? {
+        return prefs.getString(PREFIX_ZEN_PEBBLE_TAG + appWidgetId, null)
+    }
+
+    /** Persists a customizable one-word tag for a Zen Pebble Widget instance. */
+    fun setZenPebbleTag(appWidgetId: Int, tag: String): Boolean {
+        return prefs.edit()
+            .putString(PREFIX_ZEN_PEBBLE_TAG + appWidgetId, tag)
+            .commit()
+    }
+
+    /** Removes the binding and custom tag for a deleted Zen Pebble Widget instance. */
+    fun removeZenPebbleBinding(appWidgetId: Int): Boolean {
+        return prefs.edit()
+            .remove(PREFIX_ZEN_PEBBLE_BINDING + appWidgetId)
+            .remove(PREFIX_ZEN_PEBBLE_TAG + appWidgetId)
+            .commit()
+    }
+
     /** Removes the binding for a deleted Hero Widget instance. */
     fun removeHeroWidgetBinding(appWidgetId: Int): Boolean {
         return prefs.edit()
             .remove(PREFIX_HERO_BINDING + appWidgetId)
             .remove(PREFIX_HERO_DISPLAY_MODE + appWidgetId)
+            .remove(PREFIX_ZEN_HORIZON_UNIT + appWidgetId)
             .commit()
     }
 
@@ -565,6 +636,10 @@ class CountUpStore(context: Context) {
         private const val BACKUP_FILE_NAME = "countup_backup.json"
         private const val PREFIX_HERO_BINDING = "hero_widget_binding_"
         private const val PREFIX_HERO_DISPLAY_MODE = "hero_widget_mode_"
+        private const val PREFIX_ZEN_HORIZON_BINDING = "zen_horizon_binding_"
+        private const val PREFIX_ZEN_HORIZON_UNIT = "zen_horizon_unit_"
+        private const val PREFIX_ZEN_PEBBLE_BINDING = "zen_pebble_binding_"
+        private const val PREFIX_ZEN_PEBBLE_TAG = "zen_pebble_tag_"
         private const val MAX_QUARANTINE_ENTRIES = 3
         private const val KEY_PENDING_WIDGET_RESETS = "pending_widget_resets_v1"
         private const val MAX_PENDING_WIDGET_RESETS = 3
