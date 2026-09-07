@@ -20,8 +20,11 @@ data class WidgetColorPalette(
     @field:ColorInt val accentPrimary: Int,
     @field:ColorInt val accentGold: Int,
     @field:ColorInt val accentKintsugi: Int,
-    @field:ColorInt val pebbleDash: Int = secondaryInk,
-)
+    @field:ColorInt val microDivider: Int = secondaryInk,
+) {
+    // Backward compatibility alias
+    val pebbleDash: Int get() = microDivider
+}
 
 object WidgetThemeTokens {
 
@@ -45,9 +48,11 @@ object WidgetThemeTokens {
     const val DARK_ACCENT_GOLD = 0xFFDEB285.toInt()    // Filament Gold
     const val DARK_ACCENT_KINTSUGI = 0xFFD6A848.toInt() // Kintsugi Gold
 
-    // --- Pebble Micro-Divider Tokens ---
-    const val PEBBLE_DASH_LIGHT = LIGHT_SECONDARY_INK
-    const val PEBBLE_DASH_DARK = 0xFF8E8A7E.toInt()
+    // --- Micro-Divider Hairline Tokens ---
+    const val MICRO_DIVIDER_LIGHT = LIGHT_SECONDARY_INK
+    const val MICRO_DIVIDER_DARK = 0xFF8E8A7E.toInt()
+    const val PEBBLE_DASH_LIGHT = MICRO_DIVIDER_LIGHT
+    const val PEBBLE_DASH_DARK = MICRO_DIVIDER_DARK
 
     val Light = WidgetColorPalette(
         canvasBg = LIGHT_CANVAS_BG,
@@ -58,7 +63,7 @@ object WidgetThemeTokens {
         accentPrimary = LIGHT_ACCENT_PRIMARY,
         accentGold = LIGHT_ACCENT_GOLD,
         accentKintsugi = LIGHT_ACCENT_KINTSUGI,
-        pebbleDash = PEBBLE_DASH_LIGHT,
+        microDivider = MICRO_DIVIDER_LIGHT,
     )
 
     val Dark = WidgetColorPalette(
@@ -70,7 +75,7 @@ object WidgetThemeTokens {
         accentPrimary = DARK_ACCENT_PRIMARY,
         accentGold = DARK_ACCENT_GOLD,
         accentKintsugi = DARK_ACCENT_KINTSUGI,
-        pebbleDash = PEBBLE_DASH_DARK,
+        microDivider = MICRO_DIVIDER_DARK,
     )
 
     /** Resolves the active widget palette based on system or user dark mode flag. */

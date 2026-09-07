@@ -79,17 +79,7 @@ fun buildZenPebbleRemoteViews(
 
         val defaultBg = WidgetThemeTokens.resolve(isDark).canvasBg
         views.setInt(R.id.zen_pebble_bg, "setColorFilter", defaultBg)
-
-        val launchIntent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-        }
-        val pendingIntent = PendingIntent.getActivity(
-            context,
-            appWidgetId,
-            launchIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-        )
-        views.setOnClickPendingIntent(android.R.id.background, pendingIntent)
+        attachPebbleLaunchIntent(views, context, appWidgetId, targetItemId = null)
         return views
     }
 
@@ -115,26 +105,47 @@ fun buildZenPebbleRemoteViews(
     views.setTextColor(R.id.zen_pebble_unit, widgetState.palette.secondaryInk)
 
     // Hairline ink dash using semantic theme token
-    views.setInt(R.id.zen_pebble_dash, "setBackgroundColor", widgetState.palette.pebbleDash)
+    views.setInt(R.id.zen_pebble_dash, "setBackgroundColor", widgetState.palette.microDivider)
 
     // Subtle 1-word tag
     views.setTextViewText(R.id.zen_pebble_tag, oneWordLabel)
     views.setTextColor(R.id.zen_pebble_tag, widgetState.palette.accentPrimary)
 
     // Tap anywhere on pebble opens specific event in CountUp
-    val launchIntent = Intent(context, MainActivity::class.java).apply {
-        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-        putExtra(HeroWidgetReceiver.EXTRA_TARGET_ITEM_ID, item.id)
-    }
-    val pendingIntent = PendingIntent.getActivity(
-        context,
-        (item.id.hashCode() and 0x7FFFFFFF) + ZEN_PEBBLE_PENDING_INTENT_OFFSET,
-        launchIntent,
-        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-    )
-    views.setOnClickPendingIntent(android.R.id.background, pendingIntent)
+    attachPebbleLaunchIntent(views, context, appWidgetId, targetItemId = item.id)
 
     return views
 }
 
+private fun attachPebbleLaunchIntent(
+    views: RemoteViews,
+    context: Context,
+    appWidgetId: Int,
+    targetItemId: String?,
+) {
+    val launchIntent = Intent(context, MainActivity::class.java).apply {
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        if (targetItemId != null) {
+            putExtra(HeroWidgetReceiver.EXTRA_TARGET_ITEM_ID, targetItemId)
+        }
+    }
+    val requestCode = if (targetItemId != null) {
+        (targetItemId.hashCode() and 0x7FFFFFFF) + ZEN_PEBBLE_PENDING_INTENT_OFFSET
+    } else {
+        appWidgetId
+    }
+    val pendingIntent = PendingIntent.getActivity(
+        context,
+        requestCode,
+        launchIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+    )
+    views.setOnClickPendingIntent(android.R.id.background, pendingIntent)
+}
+
+/**
+ * Dedicated request code offset for 1x1 Zen Pebble widgets.
+ * Partitions the request code namespace (300-399) to avoid PendingIntent collisions with
+ * Hero widgets (100 range) and Zen Horizon widgets (200 range).
+ */
 private const val ZEN_PEBBLE_PENDING_INTENT_OFFSET = 303
