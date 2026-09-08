@@ -518,4 +518,34 @@ class CountUpStoreTest {
         assertEquals("light", prefs.getString("theme_mode", null))
         assertFalse(prefs.contains("theme_mode_v1"))
     }
+
+    @Test
+    fun sanitizeOrphanedWidgetBindingsPurgesStaleBindingsAndRetainsActiveOnes() {
+        val store = CountUpStore(testContext)
+        val prefs = testContext.getSharedPreferences("countup_prefs", Context.MODE_PRIVATE)
+
+        store.addItem(name = "Daily Reading", epochDay = 20000)
+        prefs.edit()
+            .putString("hero_widget_binding_101", "item-1")
+            .putString("hero_widget_mode_101", "DAYS")
+            .putString("zen_horizon_binding_101", "item-1")
+            .putString("zen_horizon_unit_101", "WEEKS")
+            .putString("zen_pebble_binding_102", "item-2")
+            .putString("zen_pebble_tag_102", "PEBBLE")
+            .putString("solar_rhythm_binding_103", "item-3")
+            .commit()
+
+        val purged = store.sanitizeOrphanedWidgetBindings(activeWidgetIds = setOf(101))
+        assertEquals(3, purged)
+
+        assertEquals("item-1", prefs.getString("hero_widget_binding_101", null))
+        assertEquals("DAYS", prefs.getString("hero_widget_mode_101", null))
+        assertEquals("item-1", prefs.getString("zen_horizon_binding_101", null))
+        assertEquals("WEEKS", prefs.getString("zen_horizon_unit_101", null))
+
+        assertFalse(prefs.contains("zen_pebble_binding_102"))
+        assertFalse(prefs.contains("zen_pebble_tag_102"))
+        assertFalse(prefs.contains("solar_rhythm_binding_103"))
+        assertEquals(1, store.items().size)
+    }
 }

@@ -104,4 +104,47 @@ class WidgetContractInvariantsTest {
             content.contains("android:ellipsize=\"end\"") && content.contains("android:singleLine=\"true\"")
         )
     }
+
+    @Test
+    fun manifestAndBackupRulesEnforceSecureAutoBackup() {
+        val manifestCandidates = listOf(
+            File("app/src/main/AndroidManifest.xml"),
+            File("src/main/AndroidManifest.xml"),
+        )
+        val manifestFile = manifestCandidates.firstOrNull { it.exists() }
+        assertNotNull("AndroidManifest.xml must exist", manifestFile)
+        val manifestContent = manifestFile!!.readText(Charsets.UTF_8)
+        assertTrue(
+            "AndroidManifest.xml must set android:allowBackup=\"true\" for cross-device transfer",
+            manifestContent.contains("android:allowBackup=\"true\"")
+        )
+        assertTrue(
+            "AndroidManifest.xml must point to @xml/data_extraction_rules",
+            manifestContent.contains("android:dataExtractionRules=\"@xml/data_extraction_rules\"")
+        )
+        assertTrue(
+            "AndroidManifest.xml must point to @xml/backup_rules",
+            manifestContent.contains("android:fullBackupContent=\"@xml/backup_rules\"")
+        )
+
+        val extractionCandidates = listOf(
+            File("app/src/main/res/xml/data_extraction_rules.xml"),
+            File("src/main/res/xml/data_extraction_rules.xml"),
+        )
+        val extractionFile = extractionCandidates.firstOrNull { it.exists() }
+        assertNotNull("data_extraction_rules.xml must exist", extractionFile)
+        val extractionContent = extractionFile!!.readText(Charsets.UTF_8)
+        assertTrue(extractionContent.contains("<include domain=\"sharedpref\" path=\"countup_prefs.xml\" />"))
+        assertTrue(extractionContent.contains("<include domain=\"file\" path=\"countup_backup.json\" />"))
+
+        val backupRulesCandidates = listOf(
+            File("app/src/main/res/xml/backup_rules.xml"),
+            File("src/main/res/xml/backup_rules.xml"),
+        )
+        val backupRulesFile = backupRulesCandidates.firstOrNull { it.exists() }
+        assertNotNull("backup_rules.xml must exist", backupRulesFile)
+        val backupRulesContent = backupRulesFile!!.readText(Charsets.UTF_8)
+        assertTrue(backupRulesContent.contains("<include domain=\"sharedpref\" path=\"countup_prefs.xml\" />"))
+        assertTrue(backupRulesContent.contains("<include domain=\"file\" path=\"countup_backup.json\" />"))
+    }
 }

@@ -140,6 +140,7 @@ class MainActivity : ComponentActivity() {
     private fun refreshWidget() {
         val appContext = applicationContext
         widgetReceiverScope.launch {
+            runCatching { CountUpStore(appContext).sanitizeOrphanedWidgetBindings(appContext) }
             runCatching { pushWidgetUpdate(appContext) }
             runCatching { pushAllHeroWidgetsUpdate(appContext) }
             runCatching { pushAllZenHorizonWidgetsUpdate(appContext) }

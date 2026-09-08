@@ -486,6 +486,69 @@ class CountUpStore(context: Context) {
     }
 
     /**
+     * Purges widget instance bindings whose IDs are not in [activeWidgetIds].
+     * Protects newly restored or cloned databases from retaining dead widget bindings.
+     * @return count of keys purged.
+     */
+    fun sanitizeOrphanedWidgetBindings(activeWidgetIds: Set<Int>): Int {
+        return synchronized(globalStoreLock) {
+            val bindingPrefixes = listOf(
+                PREFIX_HERO_BINDING,
+                PREFIX_HERO_DISPLAY_MODE,
+                PREFIX_ZEN_HORIZON_BINDING,
+                PREFIX_ZEN_HORIZON_UNIT,
+                PREFIX_ZEN_PEBBLE_BINDING,
+                PREFIX_ZEN_PEBBLE_TAG,
+                PREFIX_SOLAR_RHYTHM_BINDING,
+            )
+            val editor = prefs.edit()
+            var purgedCount = 0
+
+            for (key in prefs.all.keys) {
+                for (prefix in bindingPrefixes) {
+                    if (key.startsWith(prefix)) {
+                        val id = key.removePrefix(prefix).toIntOrNull()
+                        if (id != null && id !in activeWidgetIds) {
+                            editor.remove(key)
+                            purgedCount++
+                        }
+                    }
+                }
+            }
+            if (purgedCount > 0) {
+                editor.commit()
+            }
+            purgedCount
+        }
+    }
+
+    /**
+     * Queries the system [android.appwidget.AppWidgetManager] across all 5 widget providers
+     * to sanitize orphaned widget bindings on this device.
+     * @return count of keys purged.
+     */
+    fun sanitizeOrphanedWidgetBindings(context: Context): Int {
+        return try {
+            val manager = android.appwidget.AppWidgetManager.getInstance(context) ?: return 0
+            val activeIds = mutableSetOf<Int>()
+            val providers = listOf(
+                HeroWidgetReceiver::class.java,
+                ZenHorizonWidgetReceiver::class.java,
+                SolarRhythmWidgetReceiver::class.java,
+                ZenPebbleWidgetReceiver::class.java,
+                CountUpWidgetReceiver::class.java,
+            )
+            for (p in providers) {
+                val comp = android.content.ComponentName(context, p)
+                activeIds.addAll(manager.getAppWidgetIds(comp).toList())
+            }
+            sanitizeOrphanedWidgetBindings(activeIds)
+        } catch (_: Exception) {
+            0
+        }
+    }
+
+    /**
      * Records a widget-triggered counter reset so opening the app can present an undo whisper stack.
      * Stacks up to 3 newest widget resets.
      */

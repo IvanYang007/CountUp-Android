@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- API 23-30: disable Auto Backup. -->
+<!-- API 23-30: selectively enable Auto Backup for core database files. -->
 <full-backup-content>
-    <exclude domain="root" path="." />
+    <include domain="sharedpref" path="countup_prefs.xml" />
+    <include domain="file" path="countup_backup.json" />
 </full-backup-content>

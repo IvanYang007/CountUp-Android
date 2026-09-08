@@ -10,6 +10,8 @@ import java.util.concurrent.ConcurrentHashMap
 class TestContext(private val baseFilesDir: File) : android.content.ContextWrapper(null) {
     private val prefsMap = ConcurrentHashMap<String, TestSharedPreferences>()
 
+    override fun getApplicationContext(): android.content.Context = this
+
     override fun getSharedPreferences(name: String, mode: Int): SharedPreferences {
         return prefsMap.computeIfAbsent(name) { TestSharedPreferences() }
     }
