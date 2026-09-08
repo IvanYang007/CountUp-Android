@@ -167,4 +167,30 @@ class FakeCountUpRepository(
             backgroundTheme = theme,
             items = itemsList.toList(),
         )
+
+    override fun restoreBackupPayload(payload: CountUpBackupPayload, strategy: RestoreStrategy): Boolean {
+        if (shouldFailWrite) return false
+        when (strategy) {
+            RestoreStrategy.REPLACE_ALL -> {
+                itemsList.clear()
+                itemsList.addAll(payload.items)
+                sortOrder = payload.sortOrder
+                themeMode = payload.themeMode
+                theme = payload.backgroundTheme
+            }
+            RestoreStrategy.MERGE_KEEP_EXISTING -> {
+                val existingIds = itemsList.map { it.id }.toMutableSet()
+                val existingNames = itemsList.map { it.name.trim().lowercase() }.toMutableSet()
+                for (item in payload.items) {
+                    val normName = item.name.trim().lowercase()
+                    if (item.id !in existingIds && normName !in existingNames) {
+                        itemsList.add(item)
+                        existingIds.add(item.id)
+                        existingNames.add(normName)
+                    }
+                }
+            }
+        }
+        return true
+    }
 }

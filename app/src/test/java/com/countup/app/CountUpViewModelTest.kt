@@ -1054,4 +1054,173 @@ class CountUpViewModelTest {
             assertEquals(R.string.backup_export_failed, (effect as CountUpUiEffect.ShowSnackbar).messageRes)
         }
     }
+
+    @Test
+    fun `requestImportBackup closes search menu and emits TriggerImportDocument`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = sampleItems)
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+
+        viewModel.onEvent(CountUpUiEvent.SetSearchSortMenuOpen(true))
+
+        viewModel.effects.test {
+            viewModel.onEvent(CountUpUiEvent.RequestImportBackup)
+
+            val effect = awaitItem()
+            assertTrue(effect is CountUpUiEffect.TriggerImportDocument)
+            val mimeTypes = (effect as CountUpUiEffect.TriggerImportDocument).mimeTypes
+            assertTrue(mimeTypes.contains("application/json"))
+            assertTrue(mimeTypes.contains("*/*"))
+        }
+
+        viewModel.state.test {
+            val state = awaitItem()
+            assertFalse(state.isSearchSortMenuOpen)
+        }
+    }
+
+    @Test
+    fun `importBackupFromStream parses valid payload and sets pendingRestorePayload`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = sampleItems)
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+
+        val payload = CountUpBackupPayload(
+            items = listOf(CountUpItem(id = "restored-1", name = "Bonsai Tree", epochDay = 20000)),
+        )
+        val json = CountUpBackupPayload.encode(payload)
+        val inStream = java.io.ByteArrayInputStream(json.toByteArray(Charsets.UTF_8))
+
+        viewModel.onEvent(CountUpUiEvent.ImportBackupFromStream(inStream))
+
+        viewModel.state.test {
+            val state = awaitItem()
+            val pending = state.pendingRestorePayload
+            assertNotNull(pending)
+            assertEquals(1, pending?.items?.size)
+            assertEquals("Bonsai Tree", pending?.items?.first()?.name)
+        }
+    }
+
+    @Test
+    fun `importBackupFromStream with unparseable payload emits ShowSnackbar invalid file`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = sampleItems)
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+
+        val inStream = java.io.ByteArrayInputStream("not a valid backup".toByteArray(Charsets.UTF_8))
+
+        viewModel.effects.test {
+            viewModel.onEvent(CountUpUiEvent.ImportBackupFromStream(inStream))
+
+            val effect = awaitItem()
+            assertTrue(effect is CountUpUiEffect.ShowSnackbar)
+            assertEquals(R.string.backup_restore_invalid_file, (effect as CountUpUiEffect.ShowSnackbar).messageRes)
+        }
+
+        viewModel.state.test {
+            val state = awaitItem()
+            assertNull(state.pendingRestorePayload)
+        }
+    }
+
+    @Test
+    fun `importBackupFromStream emits ShowSnackbar failure when stream throws`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = sampleItems)
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+
+        val failingStream = object : java.io.InputStream() {
+            override fun read(): Int {
+                throw java.io.IOException("Stream read failure")
+            }
+        }
+
+        viewModel.effects.test {
+            viewModel.onEvent(CountUpUiEvent.ImportBackupFromStream(failingStream))
+
+            val effect = awaitItem()
+            assertTrue(effect is CountUpUiEffect.ShowSnackbar)
+            assertEquals(R.string.backup_restore_failed, (effect as CountUpUiEffect.ShowSnackbar).messageRes)
+        }
+    }
+
+    @Test
+    fun `confirmRestore executes restore, refreshes state, and emits RefreshWidget and success snackbar`() = runTest {
+        val repo = FakeCountUpRepository(
+            initialItems = sampleItems,
+            initialTheme = BackgroundTheme.SAND_DUNES,
+            initialSortOrder = SortOrder.DAYS_DESC,
+        )
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+
+        val restorePayload = CountUpBackupPayload(
+            sortOrder = SortOrder.DATE_DESC,
+            themeMode = ThemeMode.DARK,
+            backgroundTheme = BackgroundTheme.MOUNTAIN,
+            items = listOf(CountUpItem(id = "new-1", name = "Morning Tea", epochDay = 20500)),
+        )
+        val json = CountUpBackupPayload.encode(restorePayload)
+        viewModel.onEvent(CountUpUiEvent.ImportBackupFromStream(java.io.ByteArrayInputStream(json.toByteArray(Charsets.UTF_8))))
+
+        viewModel.effects.test {
+            viewModel.onEvent(CountUpUiEvent.ConfirmRestore(RestoreStrategy.REPLACE_ALL))
+
+            val effect1 = awaitItem()
+            assertTrue(effect1 is CountUpUiEffect.RefreshWidget)
+
+            val effect2 = awaitItem()
+            assertTrue(effect2 is CountUpUiEffect.ShowSnackbar)
+            assertEquals(R.string.backup_restore_success, (effect2 as CountUpUiEffect.ShowSnackbar).messageRes)
+        }
+
+        viewModel.state.test {
+            val state = awaitItem()
+            assertNull(state.pendingRestorePayload)
+            assertEquals(1, state.items.size)
+            assertEquals("Morning Tea", state.items.first().name)
+            assertEquals(SortOrder.DATE_DESC, state.sortOrder)
+            assertEquals(BackgroundTheme.MOUNTAIN, state.backgroundTheme)
+            assertEquals(ThemeMode.DARK, state.themeMode)
+        }
+    }
+
+    @Test
+    fun `dismissRestorePreview clears pendingRestorePayload`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = sampleItems)
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+
+        val payload = CountUpBackupPayload(
+            items = listOf(CountUpItem(id = "temp-1", name = "Temporary", epochDay = 20000)),
+        )
+        val json = CountUpBackupPayload.encode(payload)
+        viewModel.onEvent(CountUpUiEvent.ImportBackupFromStream(java.io.ByteArrayInputStream(json.toByteArray(Charsets.UTF_8))))
+
+        viewModel.onEvent(CountUpUiEvent.DismissRestorePreview)
+
+        viewModel.state.test {
+            val state = awaitItem()
+            assertNull(state.pendingRestorePayload)
+        }
+    }
 }

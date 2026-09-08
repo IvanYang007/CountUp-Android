@@ -402,5 +402,19 @@
     <string name="backup_action_export_desc">Save a JSON backup of items and appearance settings</string>
     <string name="backup_export_success">Backup exported successfully</string>
     <string name="backup_export_failed">Export failed. Please try again.</string>
+    <string name="backup_action_import">Restore Backup</string>
+    <string name="backup_action_import_desc">Import and restore items from a JSON backup file</string>
+    <string name="backup_restore_preview_title">Restore Backup</string>
+    <string name="backup_restore_items_count">%1$d items found</string>
+    <string name="backup_restore_version">v%1$s</string>
+    <string name="backup_restore_date">%1$s</string>
+    <string name="backup_restore_strategy_merge">Merge Non-Duplicates</string>
+    <string name="backup_restore_strategy_merge_desc">Keep existing items and append novel items</string>
+    <string name="backup_restore_strategy_replace">Replace All</string>
+    <string name="backup_restore_strategy_replace_desc">Overwrite all items and settings with backup</string>
+    <string name="backup_restore_confirm">Restore</string>
+    <string name="backup_restore_success">Backup restored successfully</string>
+    <string name="backup_restore_failed">Restore failed. Please check the file.</string>
+    <string name="backup_restore_invalid_file">Invalid or unreadable backup file</string>
     <string name="error_no_file_picker">No document manager available on this device</string>
 </resources>

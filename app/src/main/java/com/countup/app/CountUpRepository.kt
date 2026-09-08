@@ -39,6 +39,7 @@ interface CountUpRepository {
     fun getSortOrder(): SortOrder
     fun setSortOrder(order: SortOrder): Boolean
     fun exportBackupPayload(): CountUpBackupPayload
+    fun restoreBackupPayload(payload: CountUpBackupPayload, strategy: RestoreStrategy): Boolean
 }
 
 /**
@@ -112,4 +113,7 @@ class DefaultCountUpRepository(
 
     override fun exportBackupPayload(): CountUpBackupPayload =
         store.exportBackupPayload()
+
+    override fun restoreBackupPayload(payload: CountUpBackupPayload, strategy: RestoreStrategy): Boolean =
+        store.restoreBackupPayload(payload, strategy)
 }

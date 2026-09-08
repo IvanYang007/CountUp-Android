@@ -136,4 +136,20 @@ class CountUpBackupPayloadTest {
         assertNull(CountUpBackupPayload.decode("   "))
         assertNull(CountUpBackupPayload.decode("not a valid json"))
     }
+
+    @Test
+    fun decodeSalvagesValidItemsFromTruncatedPayload() {
+        // Truncated payload cut off midway through second item
+        val truncatedJson = """
+            {
+              "schemaVersion": 1,
+              "itemsJson": "[{\"id\":\"item-1\",\"name\":\"Meditation\",\"epochDay\":20000},{\"id\":\"item-2\",\"name\":\"Guitar"
+        """.trimIndent()
+
+        val decoded = CountUpBackupPayload.decode(truncatedJson)
+        assertNotNull(decoded)
+        assertEquals(1, decoded!!.items.size)
+        assertEquals("item-1", decoded.items[0].id)
+        assertEquals("Meditation", decoded.items[0].name)
+    }
 }

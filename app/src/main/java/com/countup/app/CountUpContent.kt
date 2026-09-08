@@ -211,6 +211,7 @@ fun CountUpContent(
                         onSelectSortOrder = { onEvent(CountUpUiEvent.SortOrderSelected(it)) },
                         onSelectThemeMode = { onEvent(CountUpUiEvent.ThemeModeSelected(it)) },
                         onExportBackup = { onEvent(CountUpUiEvent.RequestExportBackup) },
+                        onImportBackup = { onEvent(CountUpUiEvent.RequestImportBackup) },
                     )
                     Spacer(Modifier.padding(top = 8.dp))
 
@@ -306,6 +307,16 @@ fun CountUpContent(
                 itemName = target.name,
                 onDismiss = { onEvent(CountUpUiEvent.DismissDelete) },
                 onConfirm = { onEvent(CountUpUiEvent.ConfirmDelete(target.id)) },
+            )
+        }
+
+        state.pendingRestorePayload?.let { payload ->
+            BackupRestorePreviewDialog(
+                payload = payload,
+                onDismiss = { onEvent(CountUpUiEvent.DismissRestorePreview) },
+                onConfirmRestore = { strategy ->
+                    onEvent(CountUpUiEvent.ConfirmRestore(strategy))
+                },
             )
         }
     }
@@ -650,6 +661,7 @@ private fun SubHeaderRow(
     onSelectSortOrder: (SortOrder) -> Unit,
     onSelectThemeMode: (ThemeMode) -> Unit,
     onExportBackup: () -> Unit = {},
+    onImportBackup: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -995,6 +1007,40 @@ private fun SubHeaderRow(
                     }
                     Text(
                         text = "↗",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                Spacer(Modifier.padding(top = 2.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(6.dp))
+                        .clickable(onClick = onImportBackup)
+                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.backup_action_import),
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontSize = 12.5.sp,
+                                fontWeight = FontWeight.Normal,
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Text(
+                            text = stringResource(R.string.backup_action_import_desc),
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontSize = 10.5.sp,
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Text(
+                        text = "↙",
                         fontSize = 13.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

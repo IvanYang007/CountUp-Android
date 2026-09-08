@@ -48,6 +48,7 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -833,4 +834,197 @@ fun DatePickerDialog(
             }
         },
     )
+}
+
+/**
+ * Modal dialog for previewing an imported backup file and choosing a restore strategy.
+ */
+@Composable
+fun BackupRestorePreviewDialog(
+    payload: CountUpBackupPayload,
+    onDismiss: () -> Unit,
+    onConfirmRestore: (RestoreStrategy) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var selectedStrategy by rememberSaveable { mutableStateOf(RestoreStrategy.MERGE_KEEP_EXISTING) }
+    val (dialogSurface, dialogBorder) = zenDialogStyle(RoundedCornerShape(20.dp))
+    val zenColors = LocalZenColors.current
+
+    val formattedDate = remember(payload.exportTimestamp) {
+        if (payload.exportTimestamp > 0L) {
+            try {
+                java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM)
+                    .format(java.util.Date(payload.exportTimestamp))
+            } catch (_: Exception) {
+                null
+            }
+        } else null
+    }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        modifier = modifier.then(dialogBorder),
+        containerColor = dialogSurface,
+        tonalElevation = 0.dp,
+        shape = RoundedCornerShape(20.dp),
+        title = {
+            Text(
+                text = stringResource(R.string.backup_restore_preview_title).uppercase(),
+                style = MaterialTheme.typography.titleMedium.copy(letterSpacing = 1.2.sp),
+                fontFamily = FontFamily.SansSerif,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(zenColors.paperCard)
+                        .padding(horizontal = 14.dp, vertical = 12.dp),
+                ) {
+                    Column {
+                        Text(
+                            text = stringResource(R.string.backup_restore_items_count, payload.items.size),
+                            style = MaterialTheme.typography.titleSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp,
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = stringResource(R.string.backup_restore_version, payload.appVersion),
+                                style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            if (formattedDate != null) {
+                                Text(
+                                    text = "•",
+                                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                                Text(
+                                    text = stringResource(R.string.backup_restore_date, formattedDate),
+                                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                RestoreStrategyOptionCard(
+                    title = stringResource(R.string.backup_restore_strategy_merge),
+                    description = stringResource(R.string.backup_restore_strategy_merge_desc),
+                    isSelected = selectedStrategy == RestoreStrategy.MERGE_KEEP_EXISTING,
+                    onClick = { selectedStrategy = RestoreStrategy.MERGE_KEEP_EXISTING },
+                )
+
+                Spacer(Modifier.height(8.dp))
+
+                RestoreStrategyOptionCard(
+                    title = stringResource(R.string.backup_restore_strategy_replace),
+                    description = stringResource(R.string.backup_restore_strategy_replace_desc),
+                    isSelected = selectedStrategy == RestoreStrategy.REPLACE_ALL,
+                    onClick = { selectedStrategy = RestoreStrategy.REPLACE_ALL },
+                )
+            }
+        },
+        confirmButton = {
+            val confirmInteraction = rememberPressSource()
+            Button(
+                onClick = { onConfirmRestore(selectedStrategy) },
+                modifier = Modifier.pressScale(
+                    interactionSource = confirmInteraction,
+                    targetScale = ZenTactileHierarchy.Level2PrimaryAction,
+                ),
+                interactionSource = confirmInteraction,
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                ),
+            ) {
+                Text(
+                    text = stringResource(R.string.backup_restore_confirm),
+                    fontFamily = FontFamily.SansSerif,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant),
+            ) {
+                Text(
+                    text = stringResource(R.string.cancel),
+                    fontFamily = FontFamily.SansSerif,
+                )
+            }
+        },
+    )
+}
+
+@Composable
+private fun RestoreStrategyOptionCard(
+    title: String,
+    description: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val zenColors = LocalZenColors.current
+    val borderModifier = if (isSelected) {
+        Modifier.border(1.5.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
+    } else {
+        Modifier.border(1.dp, zenColors.hairlineRule, RoundedCornerShape(12.dp))
+    }
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .then(borderModifier)
+            .background(if (isSelected) zenColors.paperCard else Color.Transparent)
+            .clickable(onClick = onClick)
+            .padding(12.dp),
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                    fontSize = 13.5.sp,
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Text(
+            text = if (isSelected) "●" else "○",
+            fontSize = 14.sp,
+            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 8.dp),
+        )
+    }
 }

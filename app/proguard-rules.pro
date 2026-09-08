@@ -5,6 +5,7 @@
 -keep class com.countup.app.BackgroundTheme { *; }
 -keep class com.countup.app.SortOrder { *; }
 -keep class com.countup.app.CountUpBackupPayload { *; }
+-keep class com.countup.app.RestoreStrategy { *; }
 
 # Keep Enum values and valueOf methods for reflection/serialization
 -keepclassmembers enum * {

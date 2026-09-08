@@ -277,6 +277,44 @@ class CountUpViewModel(
                     }
                 }
             }
+            CountUpUiEvent.RequestImportBackup -> {
+                _state.update { it.copy(isSearchSortMenuOpen = false) }
+                emitEffect(CountUpUiEffect.TriggerImportDocument())
+            }
+            is CountUpUiEvent.ImportBackupFromStream -> {
+                viewModelScope.launch(ioDispatcher) {
+                    try {
+                        val raw = event.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+                        val payload = CountUpBackupPayload.decode(raw)
+                        if (payload != null && payload.items.isNotEmpty()) {
+                            _state.update { it.copy(pendingRestorePayload = payload) }
+                        } else {
+                            emitEffect(CountUpUiEffect.ShowSnackbar(R.string.backup_restore_invalid_file))
+                        }
+                    } catch (_: Exception) {
+                        emitEffect(CountUpUiEffect.ShowSnackbar(R.string.backup_restore_failed))
+                    }
+                }
+            }
+            is CountUpUiEvent.ConfirmRestore -> {
+                val payload = _state.value.pendingRestorePayload
+                _state.update { it.copy(pendingRestorePayload = null) }
+                if (payload != null) {
+                    viewModelScope.launch(ioDispatcher) {
+                        val success = repository.restoreBackupPayload(payload, event.strategy)
+                        if (success) {
+                            refreshState()
+                            emitEffect(CountUpUiEffect.RefreshWidget)
+                            emitEffect(CountUpUiEffect.ShowSnackbar(R.string.backup_restore_success))
+                        } else {
+                            emitEffect(CountUpUiEffect.ShowSnackbar(R.string.backup_restore_failed))
+                        }
+                    }
+                }
+            }
+            CountUpUiEvent.DismissRestorePreview -> {
+                _state.update { it.copy(pendingRestorePayload = null) }
+            }
             CountUpUiEvent.Refresh -> {
                 viewModelScope.launch(ioDispatcher) {
                     refreshState()

@@ -46,7 +46,8 @@ data class CountUpBackupPayload(
             return try {
                 val obj = JSONObject(raw)
                 val itemsJson = obj.optString("itemsJson", "")
-                val items = decodeItems(itemsJson) ?: salvageItems(itemsJson)
+                val items = decodeItems(itemsJson)
+                    ?: salvageItems(itemsJson).ifEmpty { salvageFromTruncatedRaw(raw) }
                 CountUpBackupPayload(
                     schemaVersion = obj.optInt("schemaVersion", CURRENT_SCHEMA_VERSION),
                     exportTimestamp = obj.optLong("exportTimestamp", 0L),
@@ -57,8 +58,43 @@ data class CountUpBackupPayload(
                     items = items,
                 )
             } catch (_: Exception) {
-                null
+                // If outer envelope is truncated or damaged, salvage valid item tokens directly
+                val salvaged = salvageFromTruncatedRaw(raw)
+                if (salvaged.isNotEmpty()) {
+                    CountUpBackupPayload(items = salvaged)
+                } else {
+                    null
+                }
             }
         }
+
+        private fun salvageFromTruncatedRaw(raw: String): List<CountUpItem> {
+            val marker = "\"itemsJson\""
+            val idx = raw.indexOf(marker)
+            if (idx != -1) {
+                val afterMarker = raw.substring(idx + marker.length).trimStart()
+                if (afterMarker.startsWith(":")) {
+                    var content = afterMarker.substring(1).trimStart()
+                    if (content.startsWith("\"")) {
+                        content = content.substring(1)
+                    }
+                    val unescaped = content.replace("\\\"", "\"")
+                    val items = salvageItems(unescaped)
+                    if (items.isNotEmpty()) return items
+                }
+            }
+            return salvageItems(raw).ifEmpty { decodeItems(raw) ?: emptyList() }
+        }
     }
+}
+
+/**
+ * Strategy for reconciling imported backup items with existing on-device data.
+ */
+enum class RestoreStrategy {
+    /** Retains all existing items; appends novel items ignoring duplicate IDs and names. */
+    MERGE_KEEP_EXISTING,
+
+    /** Overwrites all local items and appearance settings with the backup snapshot. */
+    REPLACE_ALL,
 }

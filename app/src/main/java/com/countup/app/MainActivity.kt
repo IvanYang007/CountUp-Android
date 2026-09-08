@@ -46,6 +46,20 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private val importBackupLauncher = registerForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            try {
+                contentResolver.openInputStream(uri)?.let { stream ->
+                    viewModel.onEvent(CountUpUiEvent.ImportBackupFromStream(stream))
+                }
+            } catch (_: Exception) {
+                // Handled gracefully without crash
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         val isDebuggable = (applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
         if (isDebuggable) {
@@ -97,6 +111,19 @@ class MainActivity : ComponentActivity() {
                                 try {
                                     exportBackupLauncher.launch(effect.defaultFilename)
                                 } catch (_: ActivityNotFoundException) {
+                                    launch {
+                                        snackbarHostState.showSnackbar(getString(R.string.error_no_file_picker))
+                                    }
+                                }
+                            }
+                            is CountUpUiEffect.TriggerImportDocument -> {
+                                try {
+                                    importBackupLauncher.launch(effect.mimeTypes)
+                                } catch (_: ActivityNotFoundException) {
+                                    launch {
+                                        snackbarHostState.showSnackbar(getString(R.string.error_no_file_picker))
+                                    }
+                                } catch (_: SecurityException) {
                                     launch {
                                         snackbarHostState.showSnackbar(getString(R.string.error_no_file_picker))
                                     }

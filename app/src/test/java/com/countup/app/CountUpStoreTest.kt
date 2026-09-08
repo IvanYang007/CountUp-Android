@@ -548,4 +548,78 @@ class CountUpStoreTest {
         assertFalse(prefs.contains("solar_rhythm_binding_103"))
         assertEquals(1, store.items().size)
     }
+
+    @Test
+    fun restoreBackupPayloadWithReplaceAllOverwritesItemsAndSettings() {
+        val store = CountUpStore(testContext)
+        store.addItem("Old Habit 1", 19000)
+        store.addItem("Old Habit 2", 19500)
+        store.setSortOrder(SortOrder.DAYS_DESC)
+        store.setThemeMode(ThemeMode.LIGHT)
+        store.setBackgroundTheme(BackgroundTheme.SAND_DUNES)
+
+        val newItems = listOf(
+            CountUpItem(id = "restored-1", name = "Morning Tea", epochDay = 20100),
+            CountUpItem(id = "restored-2", name = "Evening Walk", epochDay = 20200),
+        )
+        val payload = CountUpBackupPayload(
+            sortOrder = SortOrder.DATE_DESC,
+            themeMode = ThemeMode.DARK,
+            backgroundTheme = BackgroundTheme.MOUNTAIN,
+            items = newItems,
+        )
+
+        val result = store.restoreBackupPayload(payload, RestoreStrategy.REPLACE_ALL)
+        assertTrue(result)
+
+        // Read back from a fresh store instance to verify disk persistence
+        val store2 = CountUpStore(testContext)
+        val items = store2.items()
+        assertEquals(2, items.size)
+        assertEquals("restored-1", items[0].id)
+        assertEquals("restored-2", items[1].id)
+        assertEquals(SortOrder.DATE_DESC, store2.getSortOrder())
+        assertEquals(ThemeMode.DARK, store2.getThemeMode())
+        assertEquals(BackgroundTheme.MOUNTAIN, store2.getBackgroundTheme())
+    }
+
+    @Test
+    fun restoreBackupPayloadWithMergeKeepExistingAppendsNovelItemsAndIgnoresDuplicates() {
+        val store = CountUpStore(testContext)
+        val existing1 = store.addItem("Meditation", 20000)!!
+        val existing2 = store.addItem("Yoga", 19800)!!
+        store.setSortOrder(SortOrder.DAYS_DESC)
+        store.setThemeMode(ThemeMode.SYSTEM)
+        store.setBackgroundTheme(BackgroundTheme.AUTO_DAILY)
+
+        val payload = CountUpBackupPayload(
+            sortOrder = SortOrder.DATE_DESC,
+            themeMode = ThemeMode.DARK,
+            backgroundTheme = BackgroundTheme.MOUNTAIN,
+            items = listOf(
+                // Same ID as existing1 -> should be ignored
+                CountUpItem(id = existing1.id, name = "Different Name", epochDay = 20100),
+                // Same normalized name ("yoga") with different ID -> should be ignored
+                CountUpItem(id = "novel-id-1", name = "  YoGa  ", epochDay = 20150),
+                // Completely novel item -> should be appended
+                CountUpItem(id = "novel-id-2", name = "Calligraphy", epochDay = 20250),
+            ),
+        )
+
+        val result = store.restoreBackupPayload(payload, RestoreStrategy.MERGE_KEEP_EXISTING)
+        assertTrue(result)
+
+        val store2 = CountUpStore(testContext)
+        val items = store2.items()
+        assertEquals(3, items.size)
+        assertEquals(existing1.id, items[0].id)
+        assertEquals(existing2.id, items[1].id)
+        assertEquals("novel-id-2", items[2].id)
+        assertEquals("Calligraphy", items[2].name)
+
+        // Verifies settings are preserved
+        assertEquals(SortOrder.DAYS_DESC, store2.getSortOrder())
+        assertEquals(ThemeMode.SYSTEM, store2.getThemeMode())
+        assertEquals(BackgroundTheme.AUTO_DAILY, store2.getBackgroundTheme())
+    }
 }

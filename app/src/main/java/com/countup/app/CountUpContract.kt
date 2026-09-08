@@ -34,6 +34,7 @@ data class CountUpUiState(
     val cardWhispers: Map<String, CardResetWhisper> = emptyMap(),
     val pendingWidgetResets: List<WidgetResetRecord> = emptyList(),
     val pendingTargetItemId: String? = null,
+    val pendingRestorePayload: CountUpBackupPayload? = null,
 ) {
     /**
      * Instant derived filtered & sorted list of items matching [searchQuery] in [sortOrder].
@@ -94,6 +95,10 @@ sealed interface CountUpUiEvent {
     data class SetSearchSortMenuOpen(val open: Boolean) : CountUpUiEvent
     data object RequestExportBackup : CountUpUiEvent
     data class ExportBackupToStream(val outputStream: java.io.OutputStream) : CountUpUiEvent
+    data object RequestImportBackup : CountUpUiEvent
+    data class ImportBackupFromStream(val inputStream: java.io.InputStream) : CountUpUiEvent
+    data class ConfirmRestore(val strategy: RestoreStrategy) : CountUpUiEvent
+    data object DismissRestorePreview : CountUpUiEvent
     data object Refresh : CountUpUiEvent
     data object CheckMidnight : CountUpUiEvent
 }
@@ -109,6 +114,19 @@ sealed interface CountUpUiEffect {
     ) : CountUpUiEffect
 
     data class TriggerExportDocument(val defaultFilename: String) : CountUpUiEffect
+
+    data class TriggerImportDocument(
+        val mimeTypes: Array<String> = arrayOf("application/json", "text/plain", "text/*", "*/*")
+    ) : CountUpUiEffect {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+            other as TriggerImportDocument
+            return mimeTypes.contentEquals(other.mimeTypes)
+        }
+
+        override fun hashCode(): Int = mimeTypes.contentHashCode()
+    }
 
     data object RefreshWidget : CountUpUiEffect
 }
