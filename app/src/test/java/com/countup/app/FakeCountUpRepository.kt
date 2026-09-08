@@ -159,4 +159,12 @@ class FakeCountUpRepository(
         this.sortOrder = order
         return true
     }
+
+    override fun exportBackupPayload(): CountUpBackupPayload =
+        CountUpBackupPayload(
+            sortOrder = sortOrder,
+            themeMode = themeMode,
+            backgroundTheme = theme,
+            items = itemsList.toList(),
+        )
 }

@@ -395,4 +395,12 @@
     <string name="zen_horizon_empty">Tap to select a counter</string>
     <string name="zen_horizon_unit_hint"> ⇄</string>
     <string name="cd_zen_horizon_cycle_unit">Cycle time unit</string>
+
+    <!-- Data Backup & Migration -->
+    <string name="backup_section_title">DATA BACKUP</string>
+    <string name="backup_action_export">Export Backup</string>
+    <string name="backup_action_export_desc">Save a JSON backup of items and appearance settings</string>
+    <string name="backup_export_success">Backup exported successfully</string>
+    <string name="backup_export_failed">Export failed. Please try again.</string>
+    <string name="error_no_file_picker">No document manager available on this device</string>
 </resources>

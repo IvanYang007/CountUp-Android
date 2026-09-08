@@ -486,6 +486,20 @@ class CountUpStore(context: Context) {
     }
 
     /**
+     * Builds a portable [CountUpBackupPayload] snapshot of all current items and user settings.
+     */
+    fun exportBackupPayload(): CountUpBackupPayload {
+        return synchronized(globalStoreLock) {
+            CountUpBackupPayload(
+                sortOrder = getSortOrder(),
+                themeMode = getThemeMode(),
+                backgroundTheme = getBackgroundTheme(),
+                items = items(),
+            )
+        }
+    }
+
+    /**
      * Purges widget instance bindings whose IDs are not in [activeWidgetIds].
      * Protects newly restored or cloned databases from retaining dead widget bindings.
      * @return count of keys purged.

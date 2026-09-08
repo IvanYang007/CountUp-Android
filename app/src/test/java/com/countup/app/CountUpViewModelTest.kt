@@ -975,4 +975,83 @@ class CountUpViewModelTest {
             assertTrue(savedItem!!.isPinned)
         }
     }
+
+    @Test
+    fun `requestExportBackup closes search menu and emits TriggerExportDocument with today filename`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = sampleItems)
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+
+        viewModel.onEvent(CountUpUiEvent.SetSearchSortMenuOpen(true))
+
+        viewModel.effects.test {
+            viewModel.onEvent(CountUpUiEvent.RequestExportBackup)
+
+            val effect = awaitItem()
+            assertTrue(effect is CountUpUiEffect.TriggerExportDocument)
+            assertEquals("CountUp_Backup_2026-08-29.json", (effect as CountUpUiEffect.TriggerExportDocument).defaultFilename)
+        }
+
+        viewModel.state.test {
+            val state = awaitItem()
+            assertFalse(state.isSearchSortMenuOpen)
+        }
+    }
+
+    @Test
+    fun `exportBackupToStream writes valid UTF-8 JSON payload and emits ShowSnackbar success`() = runTest {
+        val repo = FakeCountUpRepository(
+            initialItems = sampleItems,
+            initialTheme = BackgroundTheme.MOUNTAIN,
+            initialSortOrder = SortOrder.DATE_DESC,
+        )
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+
+        val out = java.io.ByteArrayOutputStream()
+        viewModel.effects.test {
+            viewModel.onEvent(CountUpUiEvent.ExportBackupToStream(out))
+
+            val effect = awaitItem()
+            assertTrue(effect is CountUpUiEffect.ShowSnackbar)
+            assertEquals(R.string.backup_export_success, (effect as CountUpUiEffect.ShowSnackbar).messageRes)
+        }
+
+        val json = out.toByteArray().toString(Charsets.UTF_8)
+        val payload = CountUpBackupPayload.decode(json)
+        assertNotNull(payload)
+        assertEquals(3, payload!!.items.size)
+        assertEquals(SortOrder.DATE_DESC, payload.sortOrder)
+        assertEquals(BackgroundTheme.MOUNTAIN, payload.backgroundTheme)
+    }
+
+    @Test
+    fun `exportBackupToStream emits ShowSnackbar failure when stream write throws`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = sampleItems)
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+
+        val failingStream = object : java.io.OutputStream() {
+            override fun write(b: Int) {
+                throw java.io.IOException("Disk full")
+            }
+        }
+
+        viewModel.effects.test {
+            viewModel.onEvent(CountUpUiEvent.ExportBackupToStream(failingStream))
+
+            val effect = awaitItem()
+            assertTrue(effect is CountUpUiEffect.ShowSnackbar)
+            assertEquals(R.string.backup_export_failed, (effect as CountUpUiEffect.ShowSnackbar).messageRes)
+        }
+    }
 }

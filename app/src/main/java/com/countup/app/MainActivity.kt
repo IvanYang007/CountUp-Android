@@ -1,10 +1,12 @@
 package com.countup.app
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
@@ -30,6 +32,16 @@ class MainActivity : ComponentActivity() {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 val store = CountUpStore(applicationContext)
                 return CountUpViewModel(DefaultCountUpRepository(store)) as T
+            }
+        }
+    }
+
+    private val exportBackupLauncher = registerForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        if (uri != null) {
+            contentResolver.openOutputStream(uri)?.let { stream ->
+                viewModel.onEvent(CountUpUiEvent.ExportBackupToStream(stream))
             }
         }
     }
@@ -80,6 +92,15 @@ class MainActivity : ComponentActivity() {
                             }
                             CountUpUiEffect.RefreshWidget -> {
                                 refreshWidget()
+                            }
+                            is CountUpUiEffect.TriggerExportDocument -> {
+                                try {
+                                    exportBackupLauncher.launch(effect.defaultFilename)
+                                } catch (_: ActivityNotFoundException) {
+                                    launch {
+                                        snackbarHostState.showSnackbar(getString(R.string.error_no_file_picker))
+                                    }
+                                }
                             }
                         }
                     }

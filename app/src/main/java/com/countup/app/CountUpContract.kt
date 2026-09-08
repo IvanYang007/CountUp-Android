@@ -92,6 +92,8 @@ sealed interface CountUpUiEvent {
     data class DismissWidgetReset(val recordId: String) : CountUpUiEvent
     data class ToggleWidgetVisibility(val id: String) : CountUpUiEvent
     data class SetSearchSortMenuOpen(val open: Boolean) : CountUpUiEvent
+    data object RequestExportBackup : CountUpUiEvent
+    data class ExportBackupToStream(val outputStream: java.io.OutputStream) : CountUpUiEvent
     data object Refresh : CountUpUiEvent
     data object CheckMidnight : CountUpUiEvent
 }
@@ -105,6 +107,8 @@ sealed interface CountUpUiEffect {
         val formatArg: String? = null,
         @get:StringRes val formatArgRes: Int? = null,
     ) : CountUpUiEffect
+
+    data class TriggerExportDocument(val defaultFilename: String) : CountUpUiEffect
 
     data object RefreshWidget : CountUpUiEffect
 }

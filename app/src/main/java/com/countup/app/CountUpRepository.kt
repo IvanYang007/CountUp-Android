@@ -38,6 +38,7 @@ interface CountUpRepository {
     fun setThemeMode(mode: ThemeMode): Boolean
     fun getSortOrder(): SortOrder
     fun setSortOrder(order: SortOrder): Boolean
+    fun exportBackupPayload(): CountUpBackupPayload
 }
 
 /**
@@ -108,4 +109,7 @@ class DefaultCountUpRepository(
 
     override fun setSortOrder(order: SortOrder): Boolean =
         store.setSortOrder(order)
+
+    override fun exportBackupPayload(): CountUpBackupPayload =
+        store.exportBackupPayload()
 }

@@ -318,4 +318,12 @@
     <string name="solar_rhythm_widget_description">二十四节气流转画卷，融汇个人修持与时令诗意。</string>
     <string name="solar_rhythm_configure_title">时节同行</string>
     <string name="solar_rhythm_configure_subtitle">选择要在此时节画卷上呈现的习惯或纪念日。</string>
+
+    <!-- Data Backup & Migration -->
+    <string name="backup_section_title">数据备份</string>
+    <string name="backup_action_export">导出备份</string>
+    <string name="backup_action_export_desc">保存项目与个性化设置的 JSON 备份文件</string>
+    <string name="backup_export_success">备份导出成功</string>
+    <string name="backup_export_failed">导出失败，请重试</string>
+    <string name="error_no_file_picker">当前设备未找到可用的文档管理器</string>
 </resources>

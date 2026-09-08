@@ -210,6 +210,7 @@ fun CountUpContent(
                         onClearSearch = { onEvent(CountUpUiEvent.ClearSearch) },
                         onSelectSortOrder = { onEvent(CountUpUiEvent.SortOrderSelected(it)) },
                         onSelectThemeMode = { onEvent(CountUpUiEvent.ThemeModeSelected(it)) },
+                        onExportBackup = { onEvent(CountUpUiEvent.RequestExportBackup) },
                     )
                     Spacer(Modifier.padding(top = 8.dp))
 
@@ -648,6 +649,7 @@ private fun SubHeaderRow(
     onClearSearch: () -> Unit,
     onSelectSortOrder: (SortOrder) -> Unit,
     onSelectThemeMode: (ThemeMode) -> Unit,
+    onExportBackup: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     Row(
@@ -951,6 +953,51 @@ private fun SubHeaderRow(
                             }
                         }
                     }
+                }
+
+                Spacer(Modifier.padding(top = 10.dp))
+                Text(
+                    text = stringResource(R.string.backup_section_title),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 11.5.sp,
+                        letterSpacing = 0.8.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
+                )
+                Spacer(Modifier.padding(top = 2.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(6.dp))
+                        .clickable(onClick = onExportBackup)
+                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.backup_action_export),
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontSize = 12.5.sp,
+                                fontWeight = FontWeight.Normal,
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Text(
+                            text = stringResource(R.string.backup_action_export_desc),
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontSize = 10.5.sp,
+                            ),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Text(
+                        text = "↗",
+                        fontSize = 13.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
         }

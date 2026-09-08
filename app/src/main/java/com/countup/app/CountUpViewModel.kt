@@ -260,6 +260,23 @@ class CountUpViewModel(
             is CountUpUiEvent.SetSearchSortMenuOpen -> {
                 _state.update { it.copy(isSearchSortMenuOpen = event.open) }
             }
+            CountUpUiEvent.RequestExportBackup -> {
+                _state.update { it.copy(isSearchSortMenuOpen = false) }
+                val defaultName = "CountUp_Backup_${todayProvider()}.json"
+                emitEffect(CountUpUiEffect.TriggerExportDocument(defaultName))
+            }
+            is CountUpUiEvent.ExportBackupToStream -> {
+                viewModelScope.launch(ioDispatcher) {
+                    try {
+                        val payload = repository.exportBackupPayload()
+                        val json = CountUpBackupPayload.encode(payload)
+                        event.outputStream.bufferedWriter(Charsets.UTF_8).use { it.write(json) }
+                        emitEffect(CountUpUiEffect.ShowSnackbar(R.string.backup_export_success))
+                    } catch (_: Exception) {
+                        emitEffect(CountUpUiEffect.ShowSnackbar(R.string.backup_export_failed))
+                    }
+                }
+            }
             CountUpUiEvent.Refresh -> {
                 viewModelScope.launch(ioDispatcher) {
                     refreshState()
