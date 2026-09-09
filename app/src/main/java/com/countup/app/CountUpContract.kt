@@ -12,6 +12,8 @@ data class CardResetWhisper(
     val itemId: String,
     val releasedDays: Long,
     val snapshot: ResetSnapshot,
+    val fromWidget: Boolean = false,
+    val recordId: String? = null,
 )
 
 /**
@@ -91,6 +93,7 @@ sealed interface CountUpUiEvent {
     data class ConfirmDelete(val id: String) : CountUpUiEvent
     data class ConfirmReset(val id: String) : CountUpUiEvent
     data class UndoReset(val id: String) : CountUpUiEvent
+    data class DismissCardWhisper(val itemId: String) : CountUpUiEvent
     data class RestoreWidgetReset(val record: WidgetResetRecord) : CountUpUiEvent
     data class DismissWidgetReset(val recordId: String) : CountUpUiEvent
     data class ToggleWidgetVisibility(val id: String) : CountUpUiEvent

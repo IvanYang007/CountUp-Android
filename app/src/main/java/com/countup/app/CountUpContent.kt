@@ -237,6 +237,7 @@ fun CountUpContent(
                                 onToggleWidget = { onEvent(CountUpUiEvent.ToggleWidgetVisibility(item.id)) },
                                 whisper = state.cardWhispers[item.id],
                                 onUndoReset = { onEvent(CountUpUiEvent.UndoReset(item.id)) },
+                                onDismissWhisper = { onEvent(CountUpUiEvent.DismissCardWhisper(item.id)) },
                                 modifier = if (reduceMotion) Modifier else Modifier.animateItem(),
                                 today = state.today,
                                 reduceMotion = reduceMotion,
@@ -247,21 +248,6 @@ fun CountUpContent(
                             verticalArrangement = Arrangement.spacedBy(16.dp),
                             contentPadding = PaddingValues(vertical = 8.dp, horizontal = 6.dp),
                         ) {
-                            if (state.searchQuery.isEmpty() && state.pendingWidgetResets.isNotEmpty()) {
-                                items(
-                                    items = state.pendingWidgetResets,
-                                    key = { "widget_reset_${it.id}" },
-                                    contentType = { "widget_reset_notice" },
-                                ) { record ->
-                                    WidgetResetNoticeCard(
-                                        record = record,
-                                        onRestore = { onEvent(CountUpUiEvent.RestoreWidgetReset(record)) },
-                                        onDismiss = { onEvent(CountUpUiEvent.DismissWidgetReset(record.id)) },
-                                        modifier = if (reduceMotion) Modifier else Modifier.animateItem(),
-                                    )
-                                }
-                            }
-
                             items(
                                 items = pinnedItems,
                                 key = { it.id },
@@ -1308,6 +1294,7 @@ fun ItemCard(
     modifier: Modifier = Modifier,
     whisper: CardResetWhisper? = null,
     onUndoReset: () -> Unit = {},
+    onDismissWhisper: () -> Unit = {},
     today: LocalDate = LocalDate.now(),
     reduceMotion: Boolean = false,
 ) {
@@ -1683,9 +1670,14 @@ fun ItemCard(
         ) {
             if (whisper != null) {
                 val undoInteraction = rememberPressSource()
+                val dismissInteraction = rememberPressSource()
                 val whisperBg = if (isDarkCard) Color(0x28FAF7F2) else Color(0x18D97642)
                 val whisperBorder = if (isDarkCard) Color(0x40FAF7F2) else Color(0x30D97642)
-                val whisperText = stringResource(R.string.reset_undo_whisper, whisper.releasedDays)
+                val whisperText = if (whisper.fromWidget) {
+                    stringResource(R.string.widget_reset_whisper)
+                } else {
+                    stringResource(R.string.reset_undo_whisper, whisper.releasedDays)
+                }
                 val undoLabel = stringResource(R.string.action_undo)
 
                 Spacer(Modifier.height(10.dp))
@@ -1712,186 +1704,56 @@ fun ItemCard(
                         overflow = TextOverflow.Ellipsis,
                     )
                     Spacer(Modifier.width(8.dp))
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(
-                                if (isDarkCard) ZenOchre.copy(alpha = 0.25f)
-                                else MaterialTheme.colorScheme.tertiary.copy(alpha = 0.20f)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(
+                                    if (isDarkCard) ZenOchre.copy(alpha = 0.25f)
+                                    else MaterialTheme.colorScheme.tertiary.copy(alpha = 0.20f)
+                                )
+                                .clickable(
+                                    interactionSource = undoInteraction,
+                                    indication = LocalIndication.current,
+                                    onClick = onUndoReset,
+                                )
+                                .pressScale(undoInteraction, ZenTactileHierarchy.Level2PrimaryAction)
+                                .padding(horizontal = 10.dp, vertical = 4.dp),
+                        ) {
+                            Text(
+                                text = undoLabel,
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 11.5.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 0.5.sp,
+                                ),
+                                color = if (isDarkCard) ZenOchre else MaterialTheme.colorScheme.tertiary,
                             )
-                            .clickable(
-                                interactionSource = undoInteraction,
-                                indication = LocalIndication.current,
-                                onClick = onUndoReset,
-                            )
-                            .pressScale(undoInteraction, ZenTactileHierarchy.Level2PrimaryAction)
-                            .padding(horizontal = 10.dp, vertical = 4.dp),
-                    ) {
-                        Text(
-                            text = undoLabel,
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontSize = 11.5.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 0.5.sp,
-                            ),
-                            color = if (isDarkCard) ZenOchre else MaterialTheme.colorScheme.tertiary,
-                        )
+                        }
+                        if (whisper.fromWidget) {
+                            Spacer(Modifier.width(6.dp))
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .clip(CircleShape)
+                                    .clickable(
+                                        interactionSource = dismissInteraction,
+                                        indication = LocalIndication.current,
+                                        onClick = onDismissWhisper,
+                                    )
+                                    .pressScale(dismissInteraction)
+                                    .semantics { contentDescription = "Dismiss reset whisper" },
+                            ) {
+                                Text(
+                                    text = "✕",
+                                    fontSize = 10.sp,
+                                    color = if (isDarkCard) Color(0xFFFAF7F2).copy(alpha = 0.7f) else primaryInk.copy(alpha = 0.6f),
+                                )
+                            }
+                        }
                     }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun WidgetResetNoticeCard(
-    record: WidgetResetRecord,
-    onRestore: () -> Unit,
-    onDismiss: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val restoreInteraction = rememberPressSource()
-    val dismissInteraction = rememberPressSource()
-    val zenColors = LocalZenColors.current
-    val cardShape = RoundedCornerShape(16.dp)
-
-    val currentOnDismiss by rememberUpdatedState(onDismiss)
-    var secondsLeft by remember(record.id) { mutableIntStateOf(3) }
-
-    LaunchedEffect(record.id) {
-        while (secondsLeft > 0) {
-            delay(1000L)
-            secondsLeft--
-        }
-        currentOnDismiss()
-    }
-
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .shadow(
-                elevation = 2.dp,
-                shape = cardShape,
-                clip = false,
-                ambientColor = Color(0x182C2416),
-                spotColor = Color(0x222C2416),
-            )
-            .border(
-                BorderStroke(1.dp, zenColors.hairlineRuleVariant.copy(alpha = 0.6f)),
-                shape = cardShape,
-            )
-            .background(
-                color = MaterialTheme.colorScheme.surface,
-                shape = cardShape,
-            )
-            .padding(14.dp),
-    ) {
-        Column {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(7.dp)
-                            .background(ZenVermilion, CircleShape),
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        text = stringResource(R.string.widget_reset_notice_title),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 0.8.sp,
-                        ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clip(CircleShape)
-                        .clickable(
-                            interactionSource = dismissInteraction,
-                            indication = LocalIndication.current,
-                            onClick = onDismiss,
-                        )
-                        .pressScale(dismissInteraction)
-                        .semantics { contentDescription = "Dismiss widget reset notice" },
-                ) {
-                    Text(
-                        text = "✕",
-                        fontSize = 11.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-            Spacer(Modifier.height(6.dp))
-            Text(
-                text = stringResource(R.string.widget_reset_notice_body, record.itemName, record.releasedDays),
-                style = MaterialTheme.typography.bodySmall.copy(
-                    fontSize = 12.5.sp,
-                    lineHeight = 17.sp,
-                ),
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Spacer(Modifier.height(10.dp))
-            Row(
-                horizontalArrangement = Arrangement.End,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable(
-                            interactionSource = dismissInteraction,
-                            indication = LocalIndication.current,
-                            onClick = onDismiss,
-                        )
-                        .pressScale(dismissInteraction)
-                        .widthIn(min = 76.dp)
-                        .padding(horizontal = 10.dp, vertical = 6.dp),
-                ) {
-                    Text(
-                        text = if (secondsLeft > 0) {
-                            stringResource(R.string.action_dismiss_countdown, secondsLeft)
-                        } else {
-                            stringResource(R.string.action_dismiss)
-                        },
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 12.sp,
-                        ),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                Spacer(Modifier.width(8.dp))
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.tertiary.copy(alpha = 0.18f))
-                        .clickable(
-                            interactionSource = restoreInteraction,
-                            indication = LocalIndication.current,
-                            onClick = onRestore,
-                        )
-                        .pressScale(restoreInteraction, ZenTactileHierarchy.Level2PrimaryAction)
-                        .padding(horizontal = 14.dp, vertical = 6.dp),
-                ) {
-                    Text(
-                        text = stringResource(R.string.action_restore),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp,
-                            letterSpacing = 0.5.sp,
-                        ),
-                        color = MaterialTheme.colorScheme.tertiary,
-                    )
                 }
             }
         }

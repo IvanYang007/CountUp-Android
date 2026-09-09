@@ -368,6 +368,7 @@
 
     <!-- Reset Undo & Widget Recovery -->
     <string name="reset_undo_whisper" tools:ignore="PluralsCandidate">Reset to today · Released %1$d days</string>
+    <string name="widget_reset_whisper">Reset on home screen · Accidental?</string>
     <string name="action_undo">Undo</string>
     <string name="widget_reset_notice_title">Widget Resets</string>
     <string name="widget_reset_notice_body" tools:ignore="PluralsCandidate">“%1$s” was reset to today on the home screen (%2$d days released).</string>

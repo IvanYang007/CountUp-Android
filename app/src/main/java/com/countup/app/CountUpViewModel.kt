@@ -219,13 +219,39 @@ class CountUpViewModel(
             is CountUpUiEvent.UndoReset -> {
                 val whisper = _state.value.cardWhispers[event.id] ?: return
                 viewModelScope.launch(ioDispatcher) {
-                    performRestore(whisper.itemId, whisper.snapshot) { updatedItems ->
+                    performRestore(whisper.itemId, whisper.snapshot, recordId = whisper.recordId) { updatedItems ->
+                        if (whisper.recordId != null) {
+                            repository.dismissWidgetReset(whisper.recordId)
+                        }
                         _state.update {
                             it.copy(
                                 items = updatedItems,
                                 cardWhispers = it.cardWhispers - event.id,
+                                pendingWidgetResets = if (whisper.recordId != null) {
+                                    it.pendingWidgetResets.filterNot { r -> r.id == whisper.recordId }
+                                } else {
+                                    it.pendingWidgetResets
+                                },
                             )
                         }
+                    }
+                }
+            }
+            is CountUpUiEvent.DismissCardWhisper -> {
+                val whisper = _state.value.cardWhispers[event.itemId]
+                _state.update {
+                    it.copy(
+                        cardWhispers = it.cardWhispers - event.itemId,
+                        pendingWidgetResets = if (whisper?.recordId != null) {
+                            it.pendingWidgetResets.filterNot { r -> r.id == whisper.recordId }
+                        } else {
+                            it.pendingWidgetResets
+                        },
+                    )
+                }
+                if (whisper?.recordId != null) {
+                    viewModelScope.launch(ioDispatcher) {
+                        repository.dismissWidgetReset(whisper.recordId)
                     }
                 }
             }
@@ -234,11 +260,11 @@ class CountUpViewModel(
                 viewModelScope.launch(ioDispatcher) {
                     performRestore(record.itemId, record.snapshot, recordId = record.id) { updatedItems ->
                         repository.dismissWidgetReset(record.id)
-                        val pending = repository.getPendingWidgetResets()
                         _state.update {
                             it.copy(
                                 items = updatedItems,
-                                pendingWidgetResets = pending,
+                                pendingWidgetResets = it.pendingWidgetResets.filterNot { r -> r.id == record.id },
+                                cardWhispers = it.cardWhispers - record.itemId,
                             )
                         }
                     }
@@ -246,7 +272,11 @@ class CountUpViewModel(
             }
             is CountUpUiEvent.DismissWidgetReset -> {
                 _state.update { current ->
-                    current.copy(pendingWidgetResets = current.pendingWidgetResets.filterNot { it.id == event.recordId })
+                    val matching = current.pendingWidgetResets.firstOrNull { it.id == event.recordId }
+                    current.copy(
+                        pendingWidgetResets = current.pendingWidgetResets.filterNot { it.id == event.recordId },
+                        cardWhispers = if (matching != null) current.cardWhispers - matching.itemId else current.cardWhispers,
+                    )
                 }
                 viewModelScope.launch(ioDispatcher) {
                     repository.dismissWidgetReset(event.recordId)
@@ -405,6 +435,21 @@ class CountUpViewModel(
         val backgroundTheme = repository.getBackgroundTheme()
         val themeMode = repository.getThemeMode()
         val pendingWidgetResets = repository.getPendingWidgetResets()
+        val widgetWhispers = pendingWidgetResets.associate { record ->
+            record.itemId to CardResetWhisper(
+                itemId = record.itemId,
+                releasedDays = kotlin.math.abs(record.releasedDays),
+                snapshot = record.snapshot,
+                fromWidget = true,
+                recordId = record.id,
+            )
+        }
+        // Mark as acknowledged in persistent storage so next launch is clean (Active Session pattern)
+        if (pendingWidgetResets.isNotEmpty()) {
+            for (record in pendingWidgetResets) {
+                repository.dismissWidgetReset(record.id)
+            }
+        }
         _state.update { current ->
             val pendingId = current.pendingTargetItemId
             val target = if (pendingId != null) items.find { it.id == pendingId } else null
@@ -415,6 +460,7 @@ class CountUpViewModel(
                 backgroundTheme = backgroundTheme,
                 themeMode = themeMode,
                 today = today,
+                cardWhispers = widgetWhispers + current.cardWhispers,
                 pendingWidgetResets = pendingWidgetResets,
                 editorTarget = target ?: current.editorTarget,
                 isEditorOpen = if (target != null) true else current.isEditorOpen,

@@ -493,6 +493,66 @@ class CountUpViewModelTest {
     }
 
     @Test
+    fun `widget reset is mapped to in-card whisper and acknowledged in persistent storage on launch`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = sampleItems)
+        val target = sampleItems.first()
+        val record = WidgetResetRecord(
+            id = "w_whisper_test",
+            itemId = target.id,
+            itemName = target.name,
+            snapshot = target.toResetSnapshot(),
+            releasedDays = 7L,
+            timestampMillis = System.currentTimeMillis(),
+        )
+        repo.recordWidgetReset(record)
+        assertEquals(1, repo.getPendingWidgetResets().size)
+
+        // Launch ViewModel (active session starts)
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
+
+        // Whisper is present on the card with fromWidget = true
+        val whisper = viewModel.state.value.cardWhispers[target.id]
+        assertNotNull("Whisper must be mapped directly to the reset card", whisper)
+        assertEquals(target.id, whisper?.itemId)
+        assertEquals(7L, whisper?.releasedDays)
+        assertTrue(whisper?.fromWidget == true)
+        assertEquals(record.id, whisper?.recordId)
+
+        // Persistent storage was acknowledged/cleared so subsequent launches won't nag
+        assertTrue("Pending resets in persistent storage must be cleared for subsequent launches", repo.getPendingWidgetResets().isEmpty())
+
+        // Undo in-card whisper restores counter and clears whisper
+        viewModel.onEvent(CountUpUiEvent.UndoReset(target.id))
+        assertTrue(viewModel.state.value.cardWhispers.isEmpty())
+
+        // Confirm counter was restored
+        val restoredItem = viewModel.state.value.items.first { it.id == target.id }
+        assertEquals(target.epochDay, restoredItem.epochDay)
+    }
+
+    @Test
+    fun `dismiss card whisper removes in-situ whisper from memory`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = sampleItems)
+        val target = sampleItems.first()
+        val record = WidgetResetRecord(
+            id = "w_dismiss_whisper",
+            itemId = target.id,
+            itemName = target.name,
+            snapshot = target.toResetSnapshot(),
+            releasedDays = 3L,
+            timestampMillis = System.currentTimeMillis(),
+        )
+        repo.recordWidgetReset(record)
+
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
+        assertTrue(viewModel.state.value.cardWhispers.containsKey(target.id))
+
+        // Dismiss whisper manually
+        viewModel.onEvent(CountUpUiEvent.DismissCardWhisper(target.id))
+        assertFalse(viewModel.state.value.cardWhispers.containsKey(target.id))
+    }
+
+    @Test
     fun `delete item purges matching pendingWidgetResets and card whisper`() = runTest {
         val repo = FakeCountUpRepository(initialItems = sampleItems)
         val target = sampleItems.first()
