@@ -13,7 +13,7 @@ import java.io.File
 class WidgetContractInvariantsTest {
 
     @Test
-    fun zenPebbleWidgetEnforcesResizeModeNoneAndConfigurationOptional() {
+    fun zenPebbleWidgetEnforcesResizeModeNoneAndReconfigurable() {
         val candidates = listOf(
             File("app/src/main/res/xml/zen_pebble_widget_info.xml"),
             File("src/main/res/xml/zen_pebble_widget_info.xml"),
@@ -27,12 +27,12 @@ class WidgetContractInvariantsTest {
             xmlContent.contains("android:resizeMode=\"none\"")
         )
         assertTrue(
-            "zen_pebble_widget_info.xml MUST include configuration_optional to allow direct targeted cell drops",
-            xmlContent.contains("configuration_optional")
-        )
-        assertTrue(
             "zen_pebble_widget_info.xml MUST include reconfigurable",
             xmlContent.contains("reconfigurable")
+        )
+        assertTrue(
+            "zen_pebble_widget_info.xml MUST NOT include configuration_optional because it suppresses auto-launch of configure activity on drop",
+            !xmlContent.contains("configuration_optional")
         )
         assertTrue(
             "zen_pebble_widget_info.xml MUST specify ZenPebbleConfigureActivity",

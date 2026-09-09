@@ -105,7 +105,7 @@ One value per item, stored as a JSON array string under key `items_v1` in privat
   - **Hero Milestone (2x1):** Poetic card format with prominent count, icon badge, milestone gold dot, anchor date, and two-tap direct reset.
   - **Zen Horizon Ribbon (4x1 & 2x1):** Horizontal ribbon with on-widget unit cycling (days -> weeks -> months -> years).
   - **Solar Rhythm (4x2 & 2x2):** Seasonal art matching the current Chinese solar term with milestone countdown/countup.
-  - **Zen Pebble (1x1):** Ultra-compact pebble tile with `resizeMode="none"`, `configuration_optional`, and corner radius $\le 16$dp to ensure universal OEM launcher drop targeting.
+  - **Zen Pebble (1x1):** Ultra-compact pebble tile with `resizeMode="none"`, `reconfigurable`, and corner radius $\le 16$dp to ensure universal OEM launcher drop targeting and instant card picker on placement.
 
 ---
 

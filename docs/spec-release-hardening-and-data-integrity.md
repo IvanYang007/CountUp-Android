@@ -146,6 +146,6 @@ Tests must verify externally observable behavior and domain invariants rather th
 ## Further Notes
 
 - **Recurring Widget Guardrail Adherence**: All widget updates must preserve existing contracts specified in `docs/RECURRING_ISSUES.md`:
-  - Zen Pebble widget (`zen_pebble_widget_info.xml`) must maintain `android:resizeMode="none"` and `android:widgetFeatures="reconfigurable|configuration_optional"`.
+  - Zen Pebble widget (`zen_pebble_widget_info.xml`) must maintain `android:resizeMode="none"` and `android:widgetFeatures="reconfigurable"` (omitting `configuration_optional` so card picker auto-launches on placement).
   - Zero background work: no persistent background services or `WorkManager` instances are permitted.
   - Alarm registration continues using low-power, non-wakeup `AlarmManager.RTC` alarms to maintain zero battery drain during overnight sleep.

@@ -4,17 +4,22 @@ This document tracks recurring issues encountered across Android releases, archi
 
 ---
 
-## 1. 1x1 Zen Pebble Grid Placement & Snapping to Slot 0
+## 1. 1x1 Zen Pebble Grid Placement, Snapping to Slot 0, and the Configuration Trap
 
 ### Symptom
-On physical Android devices (Samsung One UI, Xiaomi HyperOS, Nova Launcher, etc.), dragging the 1x1 Zen Pebble widget onto a specific home screen cell fails or snaps immediately to slot 0 (the top-left empty cell). On standard Google Pixel emulator launchers, dragging appears to work, masking the bug during basic emulator testing.
+1. Dragging the 1x1 Zen Pebble widget onto the home screen failed or snapped immediately to slot 0 (top-left empty cell) on physical OEM launchers (Samsung One UI, Xiaomi HyperOS, Nova Launcher).
+2. Alternatively, when `configuration_optional` was added to work around launcher drop issues, dropping the 1x1 widget stopped automatically launching the card picker UI (`ZenPebbleConfigureActivity`). The widget was placed immediately with fallback content and only displayed a small pencil affordance, which users easily miss.
 
 ### Architectural Root Cause
-1. **Mandatory Configuration Trap**: Without `configuration_optional` in `android:widgetFeatures`, OEM launchers treat widget configuration as mandatory *before* placement can complete. When the user drags the widget to an arbitrary cell, the launcher aborts the targeted drop coordinate and forces placement into the default slot 0 while waiting for configuration.
-2. **Resize Mode Confusion on 1x1 Tiles**: Setting `android:resizeMode="horizontal|vertical"` on an icon-sized single-cell widget (`targetCellWidth="1"`, `targetCellHeight="1"`) triggers custom OEM drop handlers to compute resize bounds and padding. This conflicts with single-cell icon grids and breaks launcher drop targeting.
+1. **The Root Cause of OEM Slot-0 Snapping**: Setting `android:resizeMode="horizontal|vertical"` on an icon-sized single-cell widget (`targetCellWidth="1"`, `targetCellHeight="1"`) triggers OEM drop handlers to compute resize bounds and margins. Because a 1x1 tile cannot be resized further in a tight grid (e.g. 56dp–68dp), OEM launchers abort the user's targeted cell coordinate and snap the widget to the first available slot (slot 0). Setting `android:resizeMode="none"` completely fixes this issue.
+2. **The `configuration_optional` Trap**:
+   In Android 12+ (API 31+), `WIDGET_FEATURE_CONFIGURATION_OPTIONAL` (`android:widgetFeatures="configuration_optional"`) explicitly tells the launcher host:
+   > *"The widget provider is happy to be configured at any point after being created, and so the widget host may choose to configure the widget with a default configuration and omit the widget configuration activity at the time the widget is added."*
+   When `configuration_optional` is present, launchers (including Pixel Launcher and OEM launchers) bypass launching `ZenPebbleConfigureActivity` on drag-and-drop. The user is left with an unconfigured widget showing fallback data and a subtle pencil/edit icon on the widget container.
+   For single-item tracking widgets like Zen Pebble (and Hero / Solar Rhythm / Zen Horizon), initial configuration is essential for selecting the milestone to track. Therefore, `configuration_optional` must NOT be used.
 
 ### Hard Invariants
-In `app/src/main/res/xml/zen_pebble_widget_info.xml`, the following attributes are **immutable**:
+In `app/src/main/res/xml/zen_pebble_widget_info.xml`:
 
 ```xml
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
@@ -31,19 +36,19 @@ In `app/src/main/res/xml/zen_pebble_widget_info.xml`, the following attributes a
     android:description="@string/zen_pebble_widget_description"
     android:widgetCategory="home_screen"
     android:resizeMode="none"
-    android:widgetFeatures="reconfigurable|configuration_optional"
+    android:widgetFeatures="reconfigurable"
     android:configure="com.countup.app.ZenPebbleConfigureActivity"
     android:label="@string/zen_pebble_widget_label" />
 ```
 
 ### Prevention Rules
 - **DO NOT** change `android:resizeMode` to `horizontal`, `vertical`, or `horizontal|vertical` on 1x1 widgets. It must remain `none`.
-- **DO NOT** remove `configuration_optional` from `android:widgetFeatures` on 1x1 pebble widgets.
+- **DO NOT** include `configuration_optional` in `android:widgetFeatures` for any widget requiring initial card selection. Keep `reconfigurable` only.
 - **Corner radius**: Must be ≤ 16dp (or use `@android:dimen/system_app_widget_inner_radius` on API 31+). OEM launchers with 56dp cells clip content inside 24dp corners.
 - **Content padding**: Must be ≤ 4dp. The rounded corners provide visual breathing room.
 - **Text sizing**: Use `autoSizeTextType="uniform"` with `autoSizeMaxTextSize="18sp"` and `autoSizeMinTextSize="10sp"` for the number field. Fixed 22sp overflows on tight OEM cells.
 - **Tag text**: Must use `singleLine="true"`, `ellipsize="end"`, and `maxWidth="52dp"` to prevent overflow.
-- **Automated Verification**: `WidgetContractInvariantsTest` must assert `resizeMode="none"`, `configuration_optional`, corner radius ≤ 16dp, auto-size text, and ellipsize.
+- **Automated Verification**: `WidgetContractInvariantsTest` asserts `resizeMode="none"`, `reconfigurable`, absence of `configuration_optional`, corner radius ≤ 16dp, auto-size text, and ellipsize.
 
 #### OEM Launcher Cell Sizes (Reference)
 | Launcher | Typical 1x1 Cell Size | Grid Density |
@@ -146,7 +151,7 @@ After a device reboot, midnight rollover might not fire if `MidnightAlarmReceive
 
 Before committing any widget changes or releasing a new version:
 
-- [ ] **1x1 Widgets**: Does `zen_pebble_widget_info.xml` have `android:resizeMode="none"` and `android:widgetFeatures="reconfigurable|configuration_optional"`?
+- [ ] **1x1 Widgets**: Does `zen_pebble_widget_info.xml` have `android:resizeMode="none"` and `android:widgetFeatures="reconfigurable"` (omitting `configuration_optional` to guarantee automatic configure activity launch on drop)?
 - [ ] **Configurable Widgets**: Does provider XML declare `android:configure` and is the activity registered in `AndroidManifest.xml` with `APPWIDGET_CONFIGURE`?
 - [ ] **Instance Bindings**: Does `onDeleted()` clean up `CountUpStore` widget bindings?
 - [ ] **Midnight Alarm**: Do `onUpdate()` and `onEnabled()` re-register `MidnightAlarmReceiver.scheduleMidnightAlarm(context)`?

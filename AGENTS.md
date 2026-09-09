@@ -22,9 +22,10 @@ When the user asks to **"show emulator"**, **"run in emulator"**, **"test manual
 
 To prevent known regressions when modifying widget providers, configurations, or release builds, consult and adhere strictly to [`docs/RECURRING_ISSUES.md`](docs/RECURRING_ISSUES.md):
 
-1. **1x1 Zen Pebble Grid Placement**:
-   - In `zen_pebble_widget_info.xml`, keep `android:resizeMode="none"` and `android:widgetFeatures="reconfigurable|configuration_optional"`.
-   - Never change `resizeMode` to `horizontal|vertical` or omit `configuration_optional`, or physical OEM launchers (Samsung One UI, HyperOS) will cancel drag-and-drop targeting and force-snap to slot 0.
+1. **1x1 Zen Pebble Grid Placement & Auto-Picker Contract**:
+   - In `zen_pebble_widget_info.xml`, keep `android:resizeMode="none"` and `android:widgetFeatures="reconfigurable"`.
+   - Never set `resizeMode` to `horizontal|vertical` (causes physical OEM launchers like Samsung One UI, HyperOS to cancel drag-and-drop targeting and force-snap to slot 0).
+   - **DO NOT** add `configuration_optional` to `android:widgetFeatures`. Setting `configuration_optional` instructs the launcher to skip opening `ZenPebbleConfigureActivity` upon widget drop and show a pencil icon instead.
 2. **Widget Configuration Contracts**:
    - Every widget that displays item-specific data must declare `android:configure` pointing to a valid `ConfigureActivity` registered with `APPWIDGET_CONFIGURE` in `AndroidManifest.xml`.
    - Widgets must clean up instance bindings in receiver `onDeleted`.
