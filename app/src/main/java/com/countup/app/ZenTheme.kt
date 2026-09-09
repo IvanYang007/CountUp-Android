@@ -49,6 +49,12 @@ enum class ThemeMode(
         DARK -> true
     }
 
+    fun next(): ThemeMode = when (this) {
+        SYSTEM -> LIGHT
+        LIGHT -> DARK
+        DARK -> SYSTEM
+    }
+
     companion object {
         fun fromId(id: String?): ThemeMode = entries.firstOrNull { it.id == id } ?: SYSTEM
     }

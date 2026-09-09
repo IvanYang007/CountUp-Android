@@ -69,6 +69,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
@@ -1068,4 +1069,189 @@ private fun RestoreStrategyOptionCard(
                 .clearAndSetSemantics { },
         )
     }
+}
+
+/**
+ * Modal dialog presenting offline data backup export and restore actions.
+ */
+@Composable
+fun DataBackupSettingsDialog(
+    appVersion: String,
+    onDismiss: () -> Unit,
+    onExportBackup: () -> Unit,
+    onRestoreBackup: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val (dialogSurface, dialogBorder) = zenDialogStyle(RoundedCornerShape(22.dp))
+    val zenColors = LocalZenColors.current
+    val cancelDesc = stringResource(R.string.cancel)
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        modifier = modifier.then(dialogBorder),
+        containerColor = dialogSurface,
+        tonalElevation = 0.dp,
+        shape = RoundedCornerShape(22.dp),
+        title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(
+                    text = stringResource(R.string.settings_dialog_title).uppercase(),
+                    style = MaterialTheme.typography.titleMedium.copy(letterSpacing = 1.2.sp),
+                    fontFamily = FontFamily.SansSerif,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                val closeInteraction = rememberPressSource()
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .minimumInteractiveComponentSize()
+                        .size(44.dp)
+                        .clip(CircleShape)
+                        .clickable(
+                            interactionSource = closeInteraction,
+                            indication = LocalIndication.current,
+                            onClick = onDismiss,
+                        )
+                        .pressScale(closeInteraction)
+                        .semantics { contentDescription = cancelDesc },
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(zenColors.paperCard)
+                            .border(1.dp, zenColors.hairlineRule, CircleShape),
+                    ) {
+                        Text(
+                            text = "✕",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+            ) {
+                // Export Backup Card
+                val exportInteraction = rememberPressSource()
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .border(1.dp, zenColors.hairlineRule, RoundedCornerShape(12.dp))
+                        .background(zenColors.paperCard)
+                        .clickable(
+                            interactionSource = exportInteraction,
+                            indication = LocalIndication.current,
+                            role = Role.Button,
+                            onClick = {
+                                onDismiss()
+                                onExportBackup()
+                            },
+                        )
+                        .pressScale(exportInteraction)
+                        .padding(horizontal = 14.dp, vertical = 12.dp),
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.backup_action_export),
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 13.5.sp,
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            text = stringResource(R.string.backup_action_export_desc),
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "↗",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                Spacer(Modifier.height(10.dp))
+
+                // Restore Backup Card
+                val restoreInteraction = rememberPressSource()
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .border(1.dp, zenColors.hairlineRule, RoundedCornerShape(12.dp))
+                        .background(zenColors.paperCard)
+                        .clickable(
+                            interactionSource = restoreInteraction,
+                            indication = LocalIndication.current,
+                            role = Role.Button,
+                            onClick = {
+                                onDismiss()
+                                onRestoreBackup()
+                            },
+                        )
+                        .pressScale(restoreInteraction)
+                        .padding(horizontal = 14.dp, vertical = 12.dp),
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.backup_action_import),
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 13.5.sp,
+                            ),
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            text = stringResource(R.string.backup_action_import_desc),
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "↙",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                // Versioning & Privacy Footer
+                Text(
+                    text = stringResource(R.string.settings_footer_offline, appVersion),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 10.5.sp,
+                        fontWeight = FontWeight.Normal,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        },
+        confirmButton = {},
+    )
 }

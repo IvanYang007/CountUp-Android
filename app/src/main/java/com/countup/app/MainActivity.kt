@@ -36,6 +36,14 @@ class MainActivity : ComponentActivity() {
 
     private val snackbarHostState = SnackbarHostState()
 
+    private val appVersion: String by lazy {
+        try {
+            packageManager.getPackageInfo(packageName, 0).versionName ?: "2.20.0"
+        } catch (_: Exception) {
+            "2.20.0"
+        }
+    }
+
     private val exportBackupLauncher = registerForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
     ) { uri ->
@@ -150,6 +158,7 @@ class MainActivity : ComponentActivity() {
                 CountUpContent(
                     state = state,
                     onEvent = viewModel::onEvent,
+                    appVersion = appVersion,
                     snackbarHostState = snackbarHostState,
                 )
             }

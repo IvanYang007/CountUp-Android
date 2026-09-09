@@ -14,26 +14,50 @@ enum class SortOrder(
     /** Most days elapsed first (largest count at the top). */
     DAYS_DESC("days_desc", R.string.sort_days_desc, R.string.cd_sort_days_desc),
 
+    /** Fewest days elapsed first (smallest count at the top). */
+    DAYS_ASC("days_asc", R.string.sort_days_asc, R.string.cd_sort_days_asc),
+
     /** Most recent calendar anchor date first. */
     DATE_DESC("date_desc", R.string.sort_date_desc, R.string.cd_sort_date_desc),
 
+    /** Oldest calendar anchor date first. */
+    DATE_ASC("date_asc", R.string.sort_date_asc, R.string.cd_sort_date_asc),
+
     /** Alphabetical order by item name (A to Z). */
-    NAME_ASC("name_asc", R.string.sort_name_asc, R.string.cd_sort_name_asc);
+    NAME_ASC("name_asc", R.string.sort_name_asc, R.string.cd_sort_name_asc),
+
+    /** Reverse alphabetical order by item name (Z to A). */
+    NAME_DESC("name_desc", R.string.sort_name_desc, R.string.cd_sort_name_desc);
 
     /**
-     * Cycles to the next sorting mode in the 3-step loop:
-     * DAYS_DESC -> DATE_DESC -> NAME_ASC -> DAYS_DESC.
+     * Toggles between ascending and descending for the current sort criterion.
+     */
+    fun toggleDirection(): SortOrder = when (this) {
+        DAYS_DESC -> DAYS_ASC
+        DAYS_ASC -> DAYS_DESC
+        DATE_DESC -> DATE_ASC
+        DATE_ASC -> DATE_DESC
+        NAME_ASC -> NAME_DESC
+        NAME_DESC -> NAME_ASC
+    }
+
+    /**
+     * Cycles to the next sorting criterion in the loop:
+     * DAYS -> DATE -> NAME -> DAYS.
      */
     fun next(): SortOrder = when (this) {
-        DAYS_DESC -> DATE_DESC
-        DATE_DESC -> NAME_ASC
-        NAME_ASC -> DAYS_DESC
+        DAYS_DESC, DAYS_ASC -> DATE_DESC
+        DATE_DESC, DATE_ASC -> NAME_ASC
+        NAME_ASC, NAME_DESC -> DAYS_DESC
     }
 
     companion object {
         fun fromId(raw: String?): SortOrder = when (raw) {
+            DAYS_ASC.id -> DAYS_ASC
             DATE_DESC.id -> DATE_DESC
+            DATE_ASC.id -> DATE_ASC
             NAME_ASC.id -> NAME_ASC
+            NAME_DESC.id -> NAME_DESC
             else -> DAYS_DESC
         }
     }
@@ -54,10 +78,19 @@ fun sortItems(
         SortOrder.DAYS_DESC -> compareByDescending<CountUpItem> { daysSince(LocalDate.ofEpochDay(it.epochDay), today) }
             .thenBy { it.name.lowercase() }
             .thenBy { it.id }
+        SortOrder.DAYS_ASC -> compareBy<CountUpItem> { daysSince(LocalDate.ofEpochDay(it.epochDay), today) }
+            .thenBy { it.name.lowercase() }
+            .thenBy { it.id }
         SortOrder.DATE_DESC -> compareByDescending<CountUpItem> { it.epochDay }
             .thenBy { it.name.lowercase() }
             .thenBy { it.id }
+        SortOrder.DATE_ASC -> compareBy<CountUpItem> { it.epochDay }
+            .thenBy { it.name.lowercase() }
+            .thenBy { it.id }
         SortOrder.NAME_ASC -> compareBy<CountUpItem> { it.name.lowercase() }
+            .thenByDescending { daysSince(LocalDate.ofEpochDay(it.epochDay), today) }
+            .thenBy { it.id }
+        SortOrder.NAME_DESC -> compareByDescending<CountUpItem> { it.name.lowercase() }
             .thenByDescending { daysSince(LocalDate.ofEpochDay(it.epochDay), today) }
             .thenBy { it.id }
     }

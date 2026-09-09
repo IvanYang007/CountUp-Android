@@ -181,11 +181,17 @@
     <!-- Sort & Search -->
     <string name="sort_prefix">Sort: </string>
     <string name="sort_days_desc">Days ↓</string>
+    <string name="sort_days_asc">Days ↑</string>
     <string name="sort_date_desc">Date ↓</string>
+    <string name="sort_date_asc">Date ↑</string>
     <string name="sort_name_asc">Name A–Z</string>
-    <string name="cd_sort_days_desc">Sorted by days elapsed</string>
-    <string name="cd_sort_date_desc">Sorted by newest anchor date</string>
-    <string name="cd_sort_name_asc">Sorted alphabetically</string>
+    <string name="sort_name_desc">Name Z–A</string>
+    <string name="cd_sort_days_desc">Most days elapsed first · Tap to reverse</string>
+    <string name="cd_sort_days_asc">Fewest days elapsed first · Tap to reverse</string>
+    <string name="cd_sort_date_desc">Newest anchor date first · Tap to reverse</string>
+    <string name="cd_sort_date_asc">Oldest anchor date first · Tap to reverse</string>
+    <string name="cd_sort_name_asc">Alphabetical A to Z · Tap to reverse</string>
+    <string name="cd_sort_name_desc">Reverse alphabetical Z to A · Tap to reverse</string>
     <string name="items_count" tools:ignore="PluralsCandidate">%1$d items</string>
     <string name="items_count_one">1 item</string>
     <string name="search_placeholder">Search habits…</string>
@@ -207,6 +213,10 @@
     <string name="theme_mode_light_desc">Warm parchment &amp; Chinese soot ink</string>
     <string name="theme_mode_dark_desc">Charcoal slate &amp; moonlight glow</string>
     <string name="theme_switched_toast">Theme: %1$s</string>
+    <string name="cd_theme_cycle">Theme: %1$s. Tap to cycle theme.</string>
+    <string name="cd_settings_button">Settings and data backup</string>
+    <string name="settings_dialog_title">Data &amp; Backup</string>
+    <string name="settings_footer_offline">CountUp v%1$s · 100%% Offline &amp; Private · Zero Trackers</string>
 
     <!-- Card & Badge Style Presets (White, Green, Blackish) -->
     <string name="card_color_label">Card Style</string>

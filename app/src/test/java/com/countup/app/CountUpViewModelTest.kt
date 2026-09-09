@@ -136,6 +136,53 @@ class CountUpViewModelTest {
     }
 
     @Test
+    fun `cycle theme mode cycles through SYSTEM, LIGHT, and DARK sequentially`() = runTest {
+        val repo = FakeCountUpRepository(initialThemeMode = ThemeMode.SYSTEM)
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday })
+
+        assertEquals(ThemeMode.LIGHT, ThemeMode.SYSTEM.next())
+        assertEquals(ThemeMode.DARK, ThemeMode.LIGHT.next())
+        assertEquals(ThemeMode.SYSTEM, ThemeMode.DARK.next())
+
+        viewModel.effects.test {
+            // 1st tap: SYSTEM -> LIGHT
+            viewModel.onEvent(CountUpUiEvent.CycleThemeMode)
+            val effect1 = awaitItem() as CountUpUiEffect.ShowSnackbar
+            assertEquals(ThemeMode.LIGHT.labelRes, effect1.formatArgRes)
+            assertTrue(awaitItem() is CountUpUiEffect.RefreshWidget)
+            assertEquals(ThemeMode.LIGHT, viewModel.state.value.themeMode)
+
+            // 2nd tap: LIGHT -> DARK
+            viewModel.onEvent(CountUpUiEvent.CycleThemeMode)
+            val effect2 = awaitItem() as CountUpUiEffect.ShowSnackbar
+            assertEquals(ThemeMode.DARK.labelRes, effect2.formatArgRes)
+            assertTrue(awaitItem() is CountUpUiEffect.RefreshWidget)
+            assertEquals(ThemeMode.DARK, viewModel.state.value.themeMode)
+
+            // 3rd tap: DARK -> SYSTEM
+            viewModel.onEvent(CountUpUiEvent.CycleThemeMode)
+            val effect3 = awaitItem() as CountUpUiEffect.ShowSnackbar
+            assertEquals(ThemeMode.SYSTEM.labelRes, effect3.formatArgRes)
+            assertTrue(awaitItem() is CountUpUiEffect.RefreshWidget)
+            assertEquals(ThemeMode.SYSTEM, viewModel.state.value.themeMode)
+        }
+    }
+
+    @Test
+    fun `set settings dialog visibility updates state correctly`() = runTest {
+        val repo = FakeCountUpRepository()
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday })
+
+        assertFalse(viewModel.state.value.isSettingsDialogOpen)
+
+        viewModel.onEvent(CountUpUiEvent.SetSettingsDialogOpen(true))
+        assertTrue(viewModel.state.value.isSettingsDialogOpen)
+
+        viewModel.onEvent(CountUpUiEvent.SetSettingsDialogOpen(false))
+        assertFalse(viewModel.state.value.isSettingsDialogOpen)
+    }
+
+    @Test
     fun `save new item adds item and closes editor`() = runTest {
         val repo = FakeCountUpRepository(initialItems = emptyList())
         val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday })

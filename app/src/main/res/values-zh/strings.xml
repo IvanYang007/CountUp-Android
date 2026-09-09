@@ -181,11 +181,17 @@
     <!-- Sort & Search -->
     <string name="sort_prefix">排序：</string>
     <string name="sort_days_desc">天数 ↓</string>
+    <string name="sort_days_asc">天数 ↑</string>
     <string name="sort_date_desc">日期 ↓</string>
+    <string name="sort_date_asc">日期 ↑</string>
     <string name="sort_name_asc">名称 A–Z</string>
-    <string name="cd_sort_days_desc">按已过天数排序</string>
-    <string name="cd_sort_date_desc">按最新日期排序</string>
-    <string name="cd_sort_name_asc">按名称首字母排序</string>
+    <string name="sort_name_desc">名称 Z–A</string>
+    <string name="cd_sort_days_desc">按已过天数最多优先 · 再次点击翻转</string>
+    <string name="cd_sort_days_asc">按已过天数最少优先 · 再次点击翻转</string>
+    <string name="cd_sort_date_desc">按最新日期优先 · 再次点击翻转</string>
+    <string name="cd_sort_date_asc">按最旧日期优先 · 再次点击翻转</string>
+    <string name="cd_sort_name_asc">按名称 A 到 Z 排序 · 再次点击翻转</string>
+    <string name="cd_sort_name_desc">按名称 Z 到 A 翻转排序 · 再次点击翻转</string>
     <string name="items_count">%1$d 项记录</string>
     <string name="items_count_one">1 项记录</string>
     <string name="search_placeholder">搜索记录或备注…</string>
@@ -207,6 +213,10 @@
     <string name="theme_mode_light_desc">暖色宣纸与徽墨意蕴</string>
     <string name="theme_mode_dark_desc">沉稳墨灰与月晕微光</string>
     <string name="theme_switched_toast">主题切换为：%1$s</string>
+    <string name="cd_theme_cycle">外观模式：%1$s。点击切换主题模式。</string>
+    <string name="cd_settings_button">设置与数据备份</string>
+    <string name="settings_dialog_title">数据与备份</string>
+    <string name="settings_footer_offline">CountUp v%1$s · 100%% 本地离线 · 零追踪</string>
 
     <!-- Card & Badge Style Presets (White, Green, Blackish) -->
     <string name="card_color_label">卡片样式</string>

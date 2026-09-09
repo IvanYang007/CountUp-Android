@@ -27,6 +27,7 @@ android {
     }
     val keystorePass = System.getenv("COUNTUP_KEYSTORE_PASS")
         ?: localProps.getProperty("countup.keystore.pass")
+        ?: file("../keystore/keystore-pass.txt").takeIf { it.exists() }?.readText()?.trim()
 
     signingConfigs {
         if (releaseKeystore.exists() && !keystorePass.isNullOrBlank()) {

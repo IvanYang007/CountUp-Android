@@ -72,6 +72,20 @@ class CountUpViewModel(
                     emitEffect(CountUpUiEffect.RefreshWidget)
                 }
             }
+            CountUpUiEvent.CycleThemeMode -> {
+                val next = _state.value.themeMode.next()
+                viewModelScope.launch(ioDispatcher) {
+                    repository.setThemeMode(next)
+                    _state.update { it.copy(themeMode = next) }
+                    emitEffect(
+                        CountUpUiEffect.ShowSnackbar(
+                            messageRes = R.string.theme_switched_toast,
+                            formatArgRes = next.labelRes,
+                        )
+                    )
+                    emitEffect(CountUpUiEffect.RefreshWidget)
+                }
+            }
             CountUpUiEvent.CycleBackground -> {
                 val next = _state.value.backgroundTheme.next()
                 viewModelScope.launch(ioDispatcher) {
@@ -178,7 +192,6 @@ class CountUpViewModel(
                 val targetItem = _state.value.items.firstOrNull { it.id == event.id } ?: return
                 val todayLocalDate = todayProvider()
                 val todayEpochDay = todayLocalDate.toEpochDay()
-                val releasedDays = daysSince(LocalDate.ofEpochDay(targetItem.epochDay), todayLocalDate)
                 // Stop trigger reset when the accumulate date is already 0
                 if (!targetItem.isResettableOn(todayLocalDate)) {
                     return
@@ -187,11 +200,7 @@ class CountUpViewModel(
                 viewModelScope.launch(ioDispatcher) {
                     if (repository.resetTo(event.id, todayEpochDay)) {
                         val updatedItems = repository.getItems()
-                        val whisper = CardResetWhisper(
-                            itemId = targetItem.id,
-                            releasedDays = kotlin.math.abs(releasedDays),
-                            snapshot = targetItem.toResetSnapshot(),
-                        )
+                        val whisper = ResetWhisperTracker.buildWhisper(targetItem, todayLocalDate)
                         _state.update {
                             it.copy(
                                 items = updatedItems,
@@ -202,7 +211,7 @@ class CountUpViewModel(
 
                         // Whisper line auto-dismiss after 5,000 ms
                         launch {
-                            kotlinx.coroutines.delay(5000L)
+                            kotlinx.coroutines.delay(ResetWhisperTracker.WHISPER_DISMISS_DELAY_MS)
                             _state.update { current ->
                                 if (current.cardWhispers[event.id] == whisper) {
                                     current.copy(cardWhispers = current.cardWhispers - event.id)
@@ -219,20 +228,40 @@ class CountUpViewModel(
             is CountUpUiEvent.UndoReset -> {
                 val whisper = _state.value.cardWhispers[event.id] ?: return
                 viewModelScope.launch(ioDispatcher) {
-                    performRestore(whisper.itemId, whisper.snapshot, recordId = whisper.recordId) { updatedItems ->
-                        if (whisper.recordId != null) {
-                            repository.dismissWidgetReset(whisper.recordId)
+                    when (val result = ResetWhisperTracker.restoreReset(
+                        itemId = whisper.itemId,
+                        snapshot = whisper.snapshot,
+                        recordId = whisper.recordId,
+                        repository = repository,
+                        today = todayProvider(),
+                    )) {
+                        is ResetRestoreResult.Success -> {
+                            if (whisper.recordId != null) {
+                                repository.dismissWidgetReset(whisper.recordId)
+                            }
+                            _state.update {
+                                it.copy(
+                                    items = result.updatedItems,
+                                    cardWhispers = it.cardWhispers - event.id,
+                                    pendingWidgetResets = if (whisper.recordId != null) {
+                                        it.pendingWidgetResets.filterNot { r -> r.id == whisper.recordId }
+                                    } else {
+                                        it.pendingWidgetResets
+                                    },
+                                )
+                            }
+                            emitEffect(CountUpUiEffect.RefreshWidget)
                         }
-                        _state.update {
-                            it.copy(
-                                items = updatedItems,
-                                cardWhispers = it.cardWhispers - event.id,
-                                pendingWidgetResets = if (whisper.recordId != null) {
-                                    it.pendingWidgetResets.filterNot { r -> r.id == whisper.recordId }
-                                } else {
-                                    it.pendingWidgetResets
-                                },
-                            )
+                        ResetRestoreResult.AlreadyRestoredOrStale -> {
+                            _state.update { it.copy(cardWhispers = it.cardWhispers - event.id) }
+                        }
+                        is ResetRestoreResult.Failed -> {
+                            if (result.itemMissing && whisper.recordId != null) {
+                                repository.dismissWidgetReset(whisper.recordId)
+                                val pending = repository.getPendingWidgetResets()
+                                _state.update { it.copy(pendingWidgetResets = pending) }
+                            }
+                            emitEffect(CountUpUiEffect.ShowSnackbar(R.string.error_save_failed))
                         }
                     }
                 }
@@ -275,87 +304,64 @@ class CountUpViewModel(
             is CountUpUiEvent.SetSearchSortMenuOpen -> {
                 _state.update { it.copy(isSearchSortMenuOpen = event.open) }
             }
+            is CountUpUiEvent.SetSettingsDialogOpen -> {
+                _state.update { it.copy(isSettingsDialogOpen = event.open) }
+            }
             CountUpUiEvent.RequestExportBackup -> {
-                _state.update { it.copy(isSearchSortMenuOpen = false) }
+                _state.update { it.copy(isSearchSortMenuOpen = false, isSettingsDialogOpen = false) }
                 val defaultName = "CountUp_Backup_${todayProvider()}.json"
                 emitEffect(CountUpUiEffect.TriggerExportDocument(defaultName))
             }
             is CountUpUiEvent.ExportBackupToStream -> {
                 viewModelScope.launch(ioDispatcher) {
-                    try {
-                        val payload = repository.exportBackupPayload()
-                        val json = CountUpBackupPayload.encode(payload)
-                        event.outputStream.bufferedWriter(Charsets.UTF_8).use { it.write(json) }
+                    if (BackupCoordinator.exportToStream(event.outputStream, repository)) {
                         emitEffect(CountUpUiEffect.ShowSnackbar(R.string.backup_export_success))
-                    } catch (_: Exception) {
+                    } else {
                         emitEffect(CountUpUiEffect.ShowSnackbar(R.string.backup_export_failed))
                     }
                 }
             }
             CountUpUiEvent.RequestImportBackup -> {
-                _state.update { it.copy(isSearchSortMenuOpen = false) }
+                _state.update { it.copy(isSearchSortMenuOpen = false, isSettingsDialogOpen = false) }
                 emitEffect(CountUpUiEffect.TriggerImportDocument())
             }
             is CountUpUiEvent.ImportBackupFromStream -> {
                 viewModelScope.launch(ioDispatcher) {
-                    try {
-                        val maxBytes = 2 * 1024 * 1024 // 2 MB strict limit
-                        val buffer = ByteArray(8192)
-                        val baos = java.io.ByteArrayOutputStream()
-                        var totalRead = 0
-                        var exceeded = false
-                        event.inputStream.use { stream ->
-                            while (true) {
-                                val read = stream.read(buffer)
-                                if (read == -1) break
-                                totalRead += read
-                                if (totalRead > maxBytes) {
-                                    exceeded = true
-                                    break
-                                }
-                                baos.write(buffer, 0, read)
-                            }
-                        }
-                        if (exceeded) {
-                            emitEffect(CountUpUiEffect.ShowSnackbar(R.string.backup_restore_file_too_large))
-                            return@launch
-                        }
-                        val raw = baos.toString(Charsets.UTF_8.name())
-                        when (val result = CountUpBackupPayload.validate(raw)) {
-                            is BackupValidationResult.Valid -> {
-                                if (result.payload.items.isNotEmpty()) {
-                                    _state.update {
-                                        it.copy(
-                                            pendingRestorePayload = result.payload,
-                                            isRestorePayloadDamaged = false,
-                                        )
-                                    }
-                                } else {
-                                    emitEffect(CountUpUiEffect.ShowSnackbar(R.string.backup_restore_invalid_file))
-                                }
-                            }
-                            is BackupValidationResult.Damaged -> {
-                                _state.update {
-                                    it.copy(
-                                        pendingRestorePayload = result.salvagedPayload,
-                                        isRestorePayloadDamaged = true,
-                                    )
-                                }
-                            }
-                            is BackupValidationResult.UnsupportedSchema -> {
-                                emitEffect(
-                                    CountUpUiEffect.ShowSnackbar(
-                                        R.string.backup_restore_unsupported_version,
-                                        formatArg = result.detectedVersion.toString(),
-                                    )
+                    when (val result = BackupCoordinator.importFromStream(event.inputStream)) {
+                        is BackupImportResult.Valid -> {
+                            _state.update {
+                                it.copy(
+                                    pendingRestorePayload = result.payload,
+                                    isRestorePayloadDamaged = false,
                                 )
                             }
-                            BackupValidationResult.Corrupted -> {
-                                emitEffect(CountUpUiEffect.ShowSnackbar(R.string.backup_restore_invalid_file))
+                        }
+                        is BackupImportResult.Damaged -> {
+                            _state.update {
+                                it.copy(
+                                    pendingRestorePayload = result.salvagedPayload,
+                                    isRestorePayloadDamaged = true,
+                                )
                             }
                         }
-                    } catch (_: Exception) {
-                        emitEffect(CountUpUiEffect.ShowSnackbar(R.string.backup_restore_failed))
+                        is BackupImportResult.UnsupportedSchema -> {
+                            emitEffect(
+                                CountUpUiEffect.ShowSnackbar(
+                                    R.string.backup_restore_unsupported_version,
+                                    formatArg = result.detectedVersion.toString(),
+                                )
+                            )
+                        }
+                        BackupImportResult.FileTooLarge -> {
+                            emitEffect(CountUpUiEffect.ShowSnackbar(R.string.backup_restore_file_too_large))
+                        }
+                        BackupImportResult.InvalidOrEmpty,
+                        BackupImportResult.Corrupted -> {
+                            emitEffect(CountUpUiEffect.ShowSnackbar(R.string.backup_restore_invalid_file))
+                        }
+                        BackupImportResult.Failed -> {
+                            emitEffect(CountUpUiEffect.ShowSnackbar(R.string.backup_restore_failed))
+                        }
                     }
                 }
             }
@@ -364,14 +370,9 @@ class CountUpViewModel(
                 val isDamaged = _state.value.isRestorePayloadDamaged
                 _state.update { it.copy(pendingRestorePayload = null, isRestorePayloadDamaged = false) }
                 if (payload != null) {
-                    val resolvedStrategy = if (isDamaged && event.strategy == RestoreStrategy.REPLACE_ALL) {
-                        RestoreStrategy.MERGE_KEEP_EXISTING
-                    } else {
-                        event.strategy
-                    }
+                    val strategy = BackupCoordinator.resolveRestoreStrategy(event.strategy, isDamaged)
                     viewModelScope.launch(ioDispatcher) {
-                        val success = repository.restoreBackupPayload(payload, resolvedStrategy)
-                        if (success) {
+                        if (repository.restoreBackupPayload(payload, strategy)) {
                             refreshState()
                             emitEffect(CountUpUiEffect.RefreshWidget)
                             emitEffect(CountUpUiEffect.ShowSnackbar(R.string.backup_restore_success))
@@ -408,15 +409,7 @@ class CountUpViewModel(
         val backgroundTheme = repository.getBackgroundTheme()
         val themeMode = repository.getThemeMode()
         val pendingWidgetResets = repository.getPendingWidgetResets()
-        val widgetWhispers = pendingWidgetResets.associate { record ->
-            record.itemId to CardResetWhisper(
-                itemId = record.itemId,
-                releasedDays = kotlin.math.abs(record.releasedDays),
-                snapshot = record.snapshot,
-                fromWidget = true,
-                recordId = record.id,
-            )
-        }
+        val widgetWhispers = ResetWhisperTracker.buildWidgetWhispers(pendingWidgetResets)
         // Mark as acknowledged in persistent storage so next launch is clean (Active Session pattern)
         if (pendingWidgetResets.isNotEmpty()) {
             for (record in pendingWidgetResets) {
@@ -445,45 +438,6 @@ class CountUpViewModel(
     private fun emitEffect(effect: CountUpUiEffect) {
         viewModelScope.launch {
             _effects.send(effect)
-        }
-    }
-
-    private suspend fun performRestore(
-        itemId: String,
-        snapshot: ResetSnapshot,
-        recordId: String? = null,
-        onSuccess: suspend (List<CountUpItem>) -> Unit,
-    ) {
-        val currentItems = repository.getItems()
-        val currentItem = currentItems.firstOrNull { it.id == itemId }
-        if (currentItem == null) {
-            if (recordId != null) {
-                repository.dismissWidgetReset(recordId)
-                val pending = repository.getPendingWidgetResets()
-                _state.update { it.copy(pendingWidgetResets = pending) }
-            }
-            emitEffect(CountUpUiEffect.ShowSnackbar(R.string.error_save_failed))
-            return
-        }
-
-        val todayEpochDay = todayProvider().toEpochDay()
-        if (recordId == null && currentItem.epochDay != todayEpochDay) {
-            _state.update { it.copy(cardWhispers = it.cardWhispers - itemId) }
-            return
-        }
-
-        if (repository.restoreReset(itemId, snapshot)) {
-            val updatedItems = repository.getItems()
-            onSuccess(updatedItems)
-            emitEffect(CountUpUiEffect.RefreshWidget)
-        } else {
-            val exists = repository.getItems().any { it.id == itemId }
-            if (!exists && recordId != null) {
-                repository.dismissWidgetReset(recordId)
-                val pending = repository.getPendingWidgetResets()
-                _state.update { it.copy(pendingWidgetResets = pending) }
-            }
-            emitEffect(CountUpUiEffect.ShowSnackbar(R.string.error_save_failed))
         }
     }
 }

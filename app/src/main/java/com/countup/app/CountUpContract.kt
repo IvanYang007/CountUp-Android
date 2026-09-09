@@ -31,6 +31,7 @@ data class CountUpUiState(
     val editorTarget: CountUpItem? = null,
     val isEditorOpen: Boolean = false,
     val isSearchSortMenuOpen: Boolean = false,
+    val isSettingsDialogOpen: Boolean = false,
     val pendingDelete: CountUpItem? = null,
     val today: LocalDate = LocalDate.now(),
     val cardWhispers: Map<String, CardResetWhisper> = emptyMap(),
@@ -56,6 +57,7 @@ sealed interface CountUpUiEvent {
     data object ClearSearch : CountUpUiEvent
     data class SortOrderSelected(val order: SortOrder) : CountUpUiEvent
     data class ThemeModeSelected(val mode: ThemeMode) : CountUpUiEvent
+    data object CycleThemeMode : CountUpUiEvent
     data object CycleBackground : CountUpUiEvent
     data class OpenEditor(val target: CountUpItem? = null) : CountUpUiEvent
     data class OpenTargetItem(val itemId: String) : CountUpUiEvent
@@ -96,6 +98,7 @@ sealed interface CountUpUiEvent {
     data class DismissCardWhisper(val itemId: String) : CountUpUiEvent
     data class ToggleWidgetVisibility(val id: String) : CountUpUiEvent
     data class SetSearchSortMenuOpen(val open: Boolean) : CountUpUiEvent
+    data class SetSettingsDialogOpen(val open: Boolean) : CountUpUiEvent
     data object RequestExportBackup : CountUpUiEvent
     data class ExportBackupToStream(val outputStream: java.io.OutputStream) : CountUpUiEvent
     data object RequestImportBackup : CountUpUiEvent

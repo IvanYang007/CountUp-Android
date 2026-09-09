@@ -95,7 +95,6 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.disabled
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.PlatformTextStyle
@@ -131,6 +130,7 @@ fun CountUpContent(
     state: CountUpUiState,
     onEvent: (CountUpUiEvent) -> Unit,
     modifier: Modifier = Modifier,
+    appVersion: String = "2.20.0",
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
     val localContext = LocalContext.current
@@ -211,9 +211,8 @@ fun CountUpContent(
                         onSearchChanged = { onEvent(CountUpUiEvent.SearchQueryChanged(it)) },
                         onClearSearch = { onEvent(CountUpUiEvent.ClearSearch) },
                         onSelectSortOrder = { onEvent(CountUpUiEvent.SortOrderSelected(it)) },
-                        onSelectThemeMode = { onEvent(CountUpUiEvent.ThemeModeSelected(it)) },
-                        onExportBackup = { onEvent(CountUpUiEvent.RequestExportBackup) },
-                        onImportBackup = { onEvent(CountUpUiEvent.RequestImportBackup) },
+                        onCycleThemeMode = { onEvent(CountUpUiEvent.CycleThemeMode) },
+                        onOpenSettings = { onEvent(CountUpUiEvent.SetSettingsDialogOpen(true)) },
                     )
                     Spacer(Modifier.padding(top = 8.dp))
 
@@ -307,6 +306,15 @@ fun CountUpContent(
                     onEvent(CountUpUiEvent.ConfirmRestore(strategy))
                 },
                 isDamaged = state.isRestorePayloadDamaged,
+            )
+        }
+
+        if (state.isSettingsDialogOpen) {
+            DataBackupSettingsDialog(
+                appVersion = appVersion,
+                onDismiss = { onEvent(CountUpUiEvent.SetSettingsDialogOpen(false)) },
+                onExportBackup = { onEvent(CountUpUiEvent.RequestExportBackup) },
+                onRestoreBackup = { onEvent(CountUpUiEvent.RequestImportBackup) },
             )
         }
     }
@@ -555,8 +563,8 @@ private fun HeaderRow(
     backgroundTheme: BackgroundTheme,
     onCycleBackground: () -> Unit,
     onNewItem: () -> Unit,
-    modifier: Modifier = Modifier,
     today: LocalDate = LocalDate.now(),
+    modifier: Modifier = Modifier,
 ) {
     val ensoInteraction = rememberPressSource()
     val themeLabel = stringResource(backgroundTheme.labelRes)
@@ -649,10 +657,9 @@ private fun SubHeaderRow(
     onSearchChanged: (String) -> Unit,
     onClearSearch: () -> Unit,
     onSelectSortOrder: (SortOrder) -> Unit,
-    onSelectThemeMode: (ThemeMode) -> Unit,
+    onCycleThemeMode: () -> Unit,
+    onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
-    onExportBackup: () -> Unit = {},
-    onImportBackup: () -> Unit = {},
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -678,363 +685,252 @@ private fun SubHeaderRow(
 
         val zenColors = LocalZenColors.current
         val sortInteraction = rememberPressSource()
+        val themeInteraction = rememberPressSource()
+        val settingsInteraction = rememberPressSource()
+        val haptic = LocalHapticFeedback.current
+
         val sortDescription = stringResource(R.string.cd_sort_search_pill, stringResource(sortOrder.labelRes))
+        val themeDescription = stringResource(R.string.cd_theme_cycle, stringResource(themeMode.labelRes))
+        val settingsDescription = stringResource(R.string.cd_settings_button)
         val clearSearchDesc = stringResource(R.string.search_clear)
         val searchIconColor = MaterialTheme.colorScheme.onSurfaceVariant
 
-        Box {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color.Transparent)
-                    .clickable(
-                        interactionSource = sortInteraction,
-                        indication = LocalIndication.current,
-                        onClick = { onToggleMenu(!isMenuOpen) },
-                    )
-                    .pressScale(sortInteraction)
-                    .padding(horizontal = 6.dp, vertical = 5.dp)
-                    .semantics { contentDescription = sortDescription },
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    val themeGlyph = themeMode.symbol
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            // Sort & Search Popover Trigger
+            Box {
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color.Transparent)
+                        .clickable(
+                            interactionSource = sortInteraction,
+                            indication = LocalIndication.current,
+                            onClick = { onToggleMenu(!isMenuOpen) },
+                        )
+                        .pressScale(sortInteraction)
+                        .padding(start = 6.dp, end = 3.dp, top = 5.dp, bottom = 5.dp)
+                        .semantics { contentDescription = sortDescription },
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = stringResource(R.string.sort_prefix),
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Normal,
+                            ),
+                            fontFamily = FontFamily.SansSerif,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Text(
+                            text = stringResource(sortOrder.labelRes),
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                            ),
+                            fontFamily = FontFamily.SansSerif,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                        Spacer(Modifier.width(2.dp))
+                        Text(
+                            text = "▾",
+                            fontSize = 11.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
 
+                DropdownMenu(
+                    expanded = isMenuOpen,
+                    onDismissRequest = { onToggleMenu(false) },
+                    shape = RoundedCornerShape(12.dp),
+                    containerColor = if (zenColors.isDark) zenColors.paperSurface else zenColors.paperBackground,
+                    tonalElevation = 0.dp,
+                    border = BorderStroke(1.dp, zenColors.hairlineRule),
+                    shadowElevation = if (zenColors.isDark) 0.dp else 6.dp,
+                    modifier = Modifier
+                        .width(260.dp)
+                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(zenColors.paperCard)
+                            .border(1.dp, zenColors.hairlineRule, RoundedCornerShape(8.dp))
+                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                            Canvas(modifier = Modifier.size(12.dp)) {
+                                val stroke = Stroke(width = 1.4.dp.toPx(), cap = StrokeCap.Round)
+                                val radius = size.width * 0.32f
+                                val centerOffset = Offset(size.width * 0.40f, size.height * 0.40f)
+                                drawCircle(color = searchIconColor, radius = radius, center = centerOffset, style = stroke)
+                                val lineStart = Offset(size.width * 0.64f, size.height * 0.64f)
+                                val lineEnd = Offset(size.width * 0.95f, size.height * 0.95f)
+                                drawLine(color = searchIconColor, start = lineStart, end = lineEnd, strokeWidth = stroke.width, cap = StrokeCap.Round)
+                            }
+                            Spacer(Modifier.width(8.dp))
+                            BasicTextField(
+                                value = searchQuery,
+                                onValueChange = onSearchChanged,
+                                singleLine = true,
+                                textStyle = MaterialTheme.typography.bodySmall.copy(
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                    fontSize = 12.5.sp,
+                                ),
+                                modifier = Modifier.weight(1f),
+                                decorationBox = { innerTextField ->
+                                    if (searchQuery.isEmpty()) {
+                                        Text(
+                                            text = stringResource(R.string.search_placeholder),
+                                            style = MaterialTheme.typography.bodySmall.copy(
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                                fontSize = 12.5.sp,
+                                            ),
+                                        )
+                                    }
+                                    innerTextField()
+                                },
+                            )
+                            if (searchQuery.isNotEmpty()) {
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .clip(CircleShape)
+                                        .background(zenColors.paperSurface)
+                                        .clickable(onClick = onClearSearch)
+                                        .semantics { contentDescription = clearSearchDesc },
+                                ) {
+                                    Text(
+                                        text = "✕",
+                                        fontSize = 11.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(Modifier.padding(top = 8.dp))
                     Text(
-                        text = stringResource(R.string.sort_prefix),
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Normal,
-                        ),
-                        fontFamily = FontFamily.SansSerif,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Text(
-                        text = stringResource(sortOrder.labelRes),
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontSize = 12.sp,
+                        text = stringResource(R.string.sort_section_title),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontSize = 11.5.sp,
+                            letterSpacing = 0.8.sp,
                             fontWeight = FontWeight.SemiBold,
                         ),
-                        fontFamily = FontFamily.SansSerif,
-                        color = MaterialTheme.colorScheme.primary,
-                    )
-                    Spacer(Modifier.width(3.dp))
-                    Text(
-                        text = "·",
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Normal,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
                     )
-                    Spacer(Modifier.width(2.5.dp))
-                    Text(
-                        text = themeGlyph,
-                        fontSize = 11.sp,
-                    )
-                    Spacer(Modifier.width(3.dp))
-                    Text(
-                        text = "▾",
-                        fontSize = 11.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    Spacer(Modifier.width(6.dp))
-                    Canvas(modifier = Modifier.size(13.dp)) {
-                        val stroke = Stroke(width = 1.6.dp.toPx(), cap = StrokeCap.Round)
-                        val radius = size.width * 0.32f
-                        val centerOffset = Offset(size.width * 0.40f, size.height * 0.40f)
-                        drawCircle(color = searchIconColor, radius = radius, center = centerOffset, style = stroke)
-                        val lineStart = Offset(size.width * 0.64f, size.height * 0.64f)
-                        val lineEnd = Offset(size.width * 0.95f, size.height * 0.95f)
-                        drawLine(color = searchIconColor, start = lineStart, end = lineEnd, strokeWidth = stroke.width, cap = StrokeCap.Round)
+                    Spacer(Modifier.padding(top = 2.dp))
+
+                    val primarySortOptions = remember(sortOrder) {
+                        listOf(
+                            if (sortOrder == SortOrder.DAYS_ASC) SortOrder.DAYS_ASC else SortOrder.DAYS_DESC,
+                            if (sortOrder == SortOrder.DATE_ASC) SortOrder.DATE_ASC else SortOrder.DATE_DESC,
+                            if (sortOrder == SortOrder.NAME_DESC) SortOrder.NAME_DESC else SortOrder.NAME_ASC,
+                        )
+                    }
+
+                    primarySortOptions.forEach { option ->
+                        val isSelected = option == sortOrder
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(6.dp))
+                                .background(
+                                    if (isSelected) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
+                                    else Color.Transparent
+                                )
+                                .clickable {
+                                    val target = if (isSelected) option.toggleDirection() else option
+                                    onSelectSortOrder(target)
+                                }
+                                .padding(horizontal = 8.dp, vertical = 6.dp),
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(option.labelRes),
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        fontSize = 12.5.sp,
+                                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                    ),
+                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                )
+                                Text(
+                                    text = stringResource(option.descriptionRes),
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        fontSize = 10.5.sp,
+                                    ),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            if (isSelected) {
+                                Text(
+                                    text = "✓",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                        }
                     }
                 }
             }
 
-            DropdownMenu(
-                expanded = isMenuOpen,
-                onDismissRequest = { onToggleMenu(false) },
-                shape = RoundedCornerShape(12.dp),
-                containerColor = if (zenColors.isDark) zenColors.paperSurface else zenColors.paperBackground,
-                tonalElevation = 0.dp,
-                border = BorderStroke(1.dp, zenColors.hairlineRule),
-                shadowElevation = if (zenColors.isDark) 0.dp else 6.dp,
+            Spacer(Modifier.width(1.dp))
+
+            // 1-Tap Theme Mode Cycle Button
+            Box(
+                contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .width(260.dp)
-                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                    .size(26.dp)
+                    .clip(CircleShape)
+                    .clickable(
+                        interactionSource = themeInteraction,
+                        indication = LocalIndication.current,
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onCycleThemeMode()
+                        },
+                    )
+                    .pressScale(themeInteraction)
+                    .semantics { contentDescription = themeDescription },
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(zenColors.paperCard)
-                        .border(1.dp, zenColors.hairlineRule, RoundedCornerShape(8.dp))
-                        .padding(horizontal = 10.dp, vertical = 6.dp),
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                        Canvas(modifier = Modifier.size(12.dp)) {
-                            val stroke = Stroke(width = 1.4.dp.toPx(), cap = StrokeCap.Round)
-                            val radius = size.width * 0.32f
-                            val centerOffset = Offset(size.width * 0.40f, size.height * 0.40f)
-                            drawCircle(color = searchIconColor, radius = radius, center = centerOffset, style = stroke)
-                            val lineStart = Offset(size.width * 0.64f, size.height * 0.64f)
-                            val lineEnd = Offset(size.width * 0.95f, size.height * 0.95f)
-                            drawLine(color = searchIconColor, start = lineStart, end = lineEnd, strokeWidth = stroke.width, cap = StrokeCap.Round)
-                        }
-                        Spacer(Modifier.width(8.dp))
-                        BasicTextField(
-                            value = searchQuery,
-                            onValueChange = onSearchChanged,
-                            singleLine = true,
-                            textStyle = MaterialTheme.typography.bodySmall.copy(
-                                color = MaterialTheme.colorScheme.onBackground,
-                                fontSize = 12.5.sp,
-                            ),
-                            modifier = Modifier.weight(1f),
-                            decorationBox = { innerTextField ->
-                                if (searchQuery.isEmpty()) {
-                                    Text(
-                                        text = stringResource(R.string.search_placeholder),
-                                        style = MaterialTheme.typography.bodySmall.copy(
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                            fontSize = 12.5.sp,
-                                        ),
-                                    )
-                                }
-                                innerTextField()
-                            },
-                        )
-                        if (searchQuery.isNotEmpty()) {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .clip(CircleShape)
-                                    .background(zenColors.paperSurface)
-                                    .clickable(onClick = onClearSearch)
-                                    .semantics { contentDescription = clearSearchDesc },
-                            ) {
-                                Text(
-                                    text = "✕",
-                                    fontSize = 11.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        }
-                    }
-                }
-
-                Spacer(Modifier.padding(top = 8.dp))
                 Text(
-                    text = stringResource(R.string.sort_section_title),
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontSize = 11.5.sp,
-                        letterSpacing = 0.8.sp,
-                        fontWeight = FontWeight.SemiBold,
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
+                    text = themeMode.symbol,
+                    fontSize = 13.sp,
                 )
-                Spacer(Modifier.padding(top = 2.dp))
+            }
 
-                SortOrder.entries.forEach { option ->
-                    val isSelected = option == sortOrder
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(
-                                if (isSelected) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
-                                else Color.Transparent
-                            )
-                            .clickable { onSelectSortOrder(option) }
-                            .padding(horizontal = 8.dp, vertical = 6.dp),
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(option.labelRes),
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    fontSize = 12.5.sp,
-                                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                ),
-                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                            )
-                            Text(
-                                text = stringResource(option.descriptionRes),
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    fontSize = 10.5.sp,
-                                ),
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                        if (isSelected) {
-                            Text(
-                                text = "✓",
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary,
-                            )
-                        }
-                    }
-                }
+            Spacer(Modifier.width(2.dp))
 
-                Spacer(Modifier.padding(top = 10.dp))
-                Text(
-                    text = stringResource(R.string.theme_section_title),
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontSize = 11.5.sp,
-                        letterSpacing = 0.8.sp,
-                        fontWeight = FontWeight.SemiBold,
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
+            // Settings Gear Button (At Former Magnifying Glass Position)
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(26.dp)
+                    .clip(CircleShape)
+                    .clickable(
+                        interactionSource = settingsInteraction,
+                        indication = LocalIndication.current,
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onOpenSettings()
+                        },
+                    )
+                    .pressScale(settingsInteraction)
+                    .semantics { contentDescription = settingsDescription },
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_settings),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(15.dp),
                 )
-                Spacer(Modifier.padding(top = 4.dp))
-
-                // Segmented Theme Selector (Auto / Sun / Moon)
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(zenColors.hairlineRule.copy(alpha = if (zenColors.isDark) 0.35f else 0.45f))
-                        .padding(3.dp),
-                    horizontalArrangement = Arrangement.spacedBy(3.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    val themeItems = listOf(
-                        ThemeMode.SYSTEM to stringResource(R.string.theme_tab_auto),
-                        ThemeMode.LIGHT to stringResource(R.string.theme_tab_light),
-                        ThemeMode.DARK to stringResource(R.string.theme_tab_dark),
-                    )
-
-                    themeItems.forEach { (mode, label) ->
-                        val isSelected = mode == themeMode
-                        val itemInteraction = rememberPressSource()
-                        val optionDesc = stringResource(mode.labelRes)
-
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(7.dp))
-                                .background(
-                                    if (isSelected) {
-                                        if (zenColors.isDark) zenColors.paperSurface else Color.White
-                                    } else {
-                                        Color.Transparent
-                                    }
-                                )
-                                .clickable(
-                                    interactionSource = itemInteraction,
-                                    indication = LocalIndication.current,
-                                    onClick = { onSelectThemeMode(mode) },
-                                )
-                                .padding(vertical = 6.dp)
-                                .semantics { contentDescription = optionDesc },
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center,
-                            ) {
-                                Text(
-                                    text = mode.symbol,
-                                    fontSize = 12.sp,
-                                )
-                                Spacer(Modifier.width(3.5.dp))
-                                Text(
-                                    text = label,
-                                    style = MaterialTheme.typography.bodySmall.copy(
-                                        fontSize = 11.5.sp,
-                                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                    ),
-                                    color = if (isSelected) {
-                                        MaterialTheme.colorScheme.primary
-                                    } else {
-                                        MaterialTheme.colorScheme.onSurfaceVariant
-                                    },
-                                )
-                            }
-                        }
-                    }
-                }
-
-                Spacer(Modifier.padding(top = 10.dp))
-                Text(
-                    text = stringResource(R.string.backup_section_title),
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontSize = 11.5.sp,
-                        letterSpacing = 0.8.sp,
-                        fontWeight = FontWeight.SemiBold,
-                    ),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 3.dp),
-                )
-                Spacer(Modifier.padding(top = 2.dp))
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(6.dp))
-                        .clickable(role = Role.Button, onClick = onExportBackup)
-                        .padding(horizontal = 8.dp, vertical = 6.dp),
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.backup_action_export),
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                fontSize = 12.5.sp,
-                                fontWeight = FontWeight.Normal,
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
-                        Text(
-                            text = stringResource(R.string.backup_action_export_desc),
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                fontSize = 10.5.sp,
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    Text(
-                        text = "↗",
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-
-                Spacer(Modifier.padding(top = 2.dp))
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(6.dp))
-                        .clickable(role = Role.Button, onClick = onImportBackup)
-                        .padding(horizontal = 8.dp, vertical = 6.dp),
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.backup_action_import),
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                fontSize = 12.5.sp,
-                                fontWeight = FontWeight.Normal,
-                            ),
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
-                        Text(
-                            text = stringResource(R.string.backup_action_import_desc),
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                fontSize = 10.5.sp,
-                            ),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    Text(
-                        text = "↙",
-                        fontSize = 13.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
             }
         }
     }
