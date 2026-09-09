@@ -461,7 +461,7 @@ class CountUpViewModel(
                 themeMode = themeMode,
                 today = today,
                 cardWhispers = widgetWhispers + current.cardWhispers,
-                pendingWidgetResets = pendingWidgetResets,
+                pendingWidgetResets = if (pendingWidgetResets.isNotEmpty()) pendingWidgetResets else current.pendingWidgetResets,
                 editorTarget = target ?: current.editorTarget,
                 isEditorOpen = if (target != null) true else current.isEditorOpen,
                 pendingTargetItemId = if (target != null) null else pendingId,

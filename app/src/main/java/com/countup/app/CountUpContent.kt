@@ -1679,6 +1679,7 @@ fun ItemCard(
                     stringResource(R.string.reset_undo_whisper, whisper.releasedDays)
                 }
                 val undoLabel = stringResource(R.string.action_undo)
+                val dismissLabel = stringResource(R.string.action_dismiss)
 
                 Spacer(Modifier.height(10.dp))
                 Row(
@@ -1736,7 +1737,7 @@ fun ItemCard(
                             Box(
                                 contentAlignment = Alignment.Center,
                                 modifier = Modifier
-                                    .size(20.dp)
+                                    .size(24.dp)
                                     .clip(CircleShape)
                                     .clickable(
                                         interactionSource = dismissInteraction,
@@ -1744,11 +1745,11 @@ fun ItemCard(
                                         onClick = onDismissWhisper,
                                     )
                                     .pressScale(dismissInteraction)
-                                    .semantics { contentDescription = "Dismiss reset whisper" },
+                                    .semantics { contentDescription = dismissLabel },
                             ) {
                                 Text(
                                     text = "✕",
-                                    fontSize = 10.sp,
+                                    fontSize = 11.sp,
                                     color = if (isDarkCard) Color(0xFFFAF7F2).copy(alpha = 0.7f) else primaryInk.copy(alpha = 0.6f),
                                 )
                             }

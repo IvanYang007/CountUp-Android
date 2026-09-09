@@ -553,6 +553,33 @@ class CountUpViewModelTest {
     }
 
     @Test
+    fun `subsequent in-session Refresh retains card whispers and pending resets in active session state`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = sampleItems)
+        val target = sampleItems.first()
+        val record = WidgetResetRecord(
+            id = "w_refresh_retain",
+            itemId = target.id,
+            itemName = target.name,
+            snapshot = target.toResetSnapshot(),
+            releasedDays = 5L,
+            timestampMillis = System.currentTimeMillis(),
+        )
+        repo.recordWidgetReset(record)
+
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
+        assertTrue(viewModel.state.value.cardWhispers.containsKey(target.id))
+        assertEquals(1, viewModel.state.value.pendingWidgetResets.size)
+        assertTrue(repo.getPendingWidgetResets().isEmpty()) // cleared on disk
+
+        // Trigger onResume refresh
+        viewModel.onEvent(CountUpUiEvent.Refresh)
+
+        // Whispers and pendingWidgetResets remain intact in memory for active session
+        assertTrue("Card whisper must persist across onResume refresh during active session", viewModel.state.value.cardWhispers.containsKey(target.id))
+        assertEquals("Pending resets must persist across onResume refresh during active session", 1, viewModel.state.value.pendingWidgetResets.size)
+    }
+
+    @Test
     fun `delete item purges matching pendingWidgetResets and card whisper`() = runTest {
         val repo = FakeCountUpRepository(initialItems = sampleItems)
         val target = sampleItems.first()
