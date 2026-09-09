@@ -94,8 +94,6 @@ sealed interface CountUpUiEvent {
     data class ConfirmReset(val id: String) : CountUpUiEvent
     data class UndoReset(val id: String) : CountUpUiEvent
     data class DismissCardWhisper(val itemId: String) : CountUpUiEvent
-    data class RestoreWidgetReset(val record: WidgetResetRecord) : CountUpUiEvent
-    data class DismissWidgetReset(val recordId: String) : CountUpUiEvent
     data class ToggleWidgetVisibility(val id: String) : CountUpUiEvent
     data class SetSearchSortMenuOpen(val open: Boolean) : CountUpUiEvent
     data object RequestExportBackup : CountUpUiEvent

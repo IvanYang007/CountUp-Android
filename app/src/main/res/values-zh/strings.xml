@@ -139,7 +139,6 @@
     <string name="hero_widget_label">焦点里程碑（单项纪念）</string>
     <string name="hero_widget_description">专注展示单个核心目标与达成里程碑</string>
     <string name="hero_widget_empty">点击选择计数器</string>
-    <string name="widget_item_removed">目标已删除</string>
     <string name="hero_widget_configure_title">选择焦点计数器</string>
     <string name="hero_widget_configure_subtitle">选择在此微件上重点展示的目标</string>
     <string name="hero_widget_reset_prompt">重置为今天？</string>
@@ -369,11 +368,7 @@
     <string name="reset_undo_whisper" tools:ignore="PluralsCandidate">已重置归零 · 释放 %1$d 天</string>
     <string name="widget_reset_whisper">桌面已重置 · 误触？</string>
     <string name="action_undo">撤销</string>
-    <string name="widget_reset_notice_title">桌面小组件重置记录</string>
-    <string name="widget_reset_notice_body" tools:ignore="PluralsCandidate">“%1$s” 已在桌面重置归零（释放 %2$d 天）。</string>
-    <string name="action_restore">恢复</string>
     <string name="action_dismiss">忽略</string>
-    <string name="action_dismiss_countdown">忽略 (%1$d秒)</string>
 
 
     <!-- Solar Rhythm (岁华流转 · 时节同行) -->

@@ -255,33 +255,6 @@ class CountUpViewModel(
                     }
                 }
             }
-            is CountUpUiEvent.RestoreWidgetReset -> {
-                val record = event.record
-                viewModelScope.launch(ioDispatcher) {
-                    performRestore(record.itemId, record.snapshot, recordId = record.id) { updatedItems ->
-                        repository.dismissWidgetReset(record.id)
-                        _state.update {
-                            it.copy(
-                                items = updatedItems,
-                                pendingWidgetResets = it.pendingWidgetResets.filterNot { r -> r.id == record.id },
-                                cardWhispers = it.cardWhispers - record.itemId,
-                            )
-                        }
-                    }
-                }
-            }
-            is CountUpUiEvent.DismissWidgetReset -> {
-                _state.update { current ->
-                    val matching = current.pendingWidgetResets.firstOrNull { it.id == event.recordId }
-                    current.copy(
-                        pendingWidgetResets = current.pendingWidgetResets.filterNot { it.id == event.recordId },
-                        cardWhispers = if (matching != null) current.cardWhispers - matching.itemId else current.cardWhispers,
-                    )
-                }
-                viewModelScope.launch(ioDispatcher) {
-                    repository.dismissWidgetReset(event.recordId)
-                }
-            }
             is CountUpUiEvent.ToggleWidgetVisibility -> {
                 val target = _state.value.items.firstOrNull { it.id == event.id }
                 if (target != null) {

@@ -458,9 +458,10 @@ class CountUpViewModelTest {
 
         val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
         assertEquals(1, viewModel.state.value.pendingWidgetResets.size)
+        assertTrue(viewModel.state.value.cardWhispers.containsKey(target.id))
 
         viewModel.effects.test {
-            viewModel.onEvent(CountUpUiEvent.RestoreWidgetReset(record))
+            viewModel.onEvent(CountUpUiEvent.UndoReset(target.id))
             val refreshEffect = awaitItem()
             assertTrue(refreshEffect is CountUpUiEffect.RefreshWidget)
         }
@@ -469,10 +470,11 @@ class CountUpViewModelTest {
         assertEquals(target.epochDay, restoredItem.epochDay)
         assertEquals(0, restoredItem.resetCount)
         assertTrue(viewModel.state.value.pendingWidgetResets.isEmpty())
+        assertTrue(viewModel.state.value.cardWhispers.isEmpty())
     }
 
     @Test
-    fun `dismiss widget reset removes record from pendingWidgetResets`() = runTest {
+    fun `dismiss card whisper removes pending reset record and clears whisper`() = runTest {
         val repo = FakeCountUpRepository(initialItems = sampleItems)
         val target = sampleItems.first()
         val record = WidgetResetRecord(
@@ -487,9 +489,11 @@ class CountUpViewModelTest {
 
         val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
         assertEquals(1, viewModel.state.value.pendingWidgetResets.size)
+        assertTrue(viewModel.state.value.cardWhispers.containsKey(target.id))
 
-        viewModel.onEvent(CountUpUiEvent.DismissWidgetReset(record.id))
+        viewModel.onEvent(CountUpUiEvent.DismissCardWhisper(target.id))
         assertTrue(viewModel.state.value.pendingWidgetResets.isEmpty())
+        assertFalse(viewModel.state.value.cardWhispers.containsKey(target.id))
     }
 
     @Test
@@ -917,66 +921,6 @@ class CountUpViewModelTest {
         }
     }
 
-    @Test
-    fun `restoreWidgetReset restores snapshot and removes pending widget reset record`() = runTest {
-        val repo = FakeCountUpRepository(initialItems = sampleItems)
-        val target = sampleItems.first()
-        val record = WidgetResetRecord(
-            itemId = target.id,
-            itemName = target.name,
-            snapshot = target.toResetSnapshot(),
-            releasedDays = 5L,
-            timestampMillis = 1000L,
-        )
-        repo.recordWidgetReset(record)
-        repo.resetTo(target.id, fixedToday.toEpochDay())
-
-        val viewModel = CountUpViewModel(
-            repository = repo,
-            todayProvider = { fixedToday },
-            ioDispatcher = mainDispatcherRule.testDispatcher,
-        )
-
-        assertEquals(1, viewModel.state.value.pendingWidgetResets.size)
-
-        viewModel.onEvent(CountUpUiEvent.RestoreWidgetReset(record))
-
-        viewModel.state.test {
-            val state = awaitItem()
-            assertEquals(0, state.pendingWidgetResets.size)
-            val restored = state.items.first { it.id == target.id }
-            assertEquals(target.epochDay, restored.epochDay)
-        }
-    }
-
-    @Test
-    fun `dismissWidgetReset removes pending record from repository and state`() = runTest {
-        val repo = FakeCountUpRepository(initialItems = sampleItems)
-        val target = sampleItems.first()
-        val record = WidgetResetRecord(
-            itemId = target.id,
-            itemName = target.name,
-            snapshot = target.toResetSnapshot(),
-            releasedDays = 5L,
-            timestampMillis = 1000L,
-        )
-        repo.recordWidgetReset(record)
-
-        val viewModel = CountUpViewModel(
-            repository = repo,
-            todayProvider = { fixedToday },
-            ioDispatcher = mainDispatcherRule.testDispatcher,
-        )
-
-        assertEquals(1, viewModel.state.value.pendingWidgetResets.size)
-
-        viewModel.onEvent(CountUpUiEvent.DismissWidgetReset(record.id))
-
-        viewModel.state.test {
-            val state = awaitItem()
-            assertEquals(0, state.pendingWidgetResets.size)
-        }
-    }
 
     @Test
     fun `initial loading state transitions from isLoading true to false on ioDispatcher`() = runTest {

@@ -298,11 +298,7 @@
     <string name="reset_undo_whisper" tools:ignore="PluralsCandidate">已重置歸零 · 釋放 %1$d 天</string>
     <string name="widget_reset_whisper">桌面已重置 · 誤觸？</string>
     <string name="action_undo">撤銷</string>
-    <string name="widget_reset_notice_title">桌面小工具重置記錄</string>
-    <string name="widget_reset_notice_body" tools:ignore="PluralsCandidate">「%1$s」已在桌面重置歸零（釋放 %2$d 天）。</string>
-    <string name="action_restore">恢復</string>
     <string name="action_dismiss">忽略</string>
-    <string name="action_dismiss_countdown">忽略 (%1$d秒)</string>
     <string name="solar_rhythm_widget_label">時節同行</string>
     <string name="solar_rhythm_widget_description">二十四節氣流轉畫卷，融匯個人修持與時令詩意。</string>
     <string name="solar_rhythm_configure_title">時節同行</string>

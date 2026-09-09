@@ -139,7 +139,6 @@
     <string name="hero_widget_label">Hero Milestone (Single Counter)</string>
     <string name="hero_widget_description">Focus on a single sacred counter with milestone accents</string>
     <string name="hero_widget_empty">Tap to choose a counter</string>
-    <string name="widget_item_removed">Counter removed</string>
     <string name="hero_widget_configure_title">Choose Hero Counter</string>
     <string name="hero_widget_configure_subtitle">Select the counter to honor on this widget</string>
     <string name="hero_widget_reset_prompt">Reset to today?</string>
@@ -370,11 +369,7 @@
     <string name="reset_undo_whisper" tools:ignore="PluralsCandidate">Reset to today · Released %1$d days</string>
     <string name="widget_reset_whisper">Reset on home screen · Accidental?</string>
     <string name="action_undo">Undo</string>
-    <string name="widget_reset_notice_title">Widget Resets</string>
-    <string name="widget_reset_notice_body" tools:ignore="PluralsCandidate">“%1$s” was reset to today on the home screen (%2$d days released).</string>
-    <string name="action_restore">Restore</string>
     <string name="action_dismiss">Dismiss</string>
-    <string name="action_dismiss_countdown">Dismiss (%1$ds)</string>
 
 
     <!-- Solar Rhythm (时节同行 · 岁华流转) -->
