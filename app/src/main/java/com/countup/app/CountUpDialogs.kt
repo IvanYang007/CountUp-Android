@@ -891,7 +891,11 @@ fun BackupRestorePreviewDialog(
                 ) {
                     Column {
                         Text(
-                            text = stringResource(R.string.backup_restore_items_count, payload.items.size),
+                            text = if (payload.items.size == 1) {
+                                stringResource(R.string.backup_restore_items_count_one)
+                            } else {
+                                stringResource(R.string.backup_restore_items_count, payload.items.size)
+                            },
                             style = MaterialTheme.typography.titleSmall.copy(
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 15.sp,
@@ -1001,7 +1005,11 @@ private fun RestoreStrategyOptionCard(
             .clip(RoundedCornerShape(12.dp))
             .then(borderModifier)
             .background(if (isSelected) zenColors.paperCard else Color.Transparent)
-            .clickable(onClick = onClick)
+            .clickable(
+                role = Role.RadioButton,
+                onClick = onClick,
+            )
+            .semantics { selected = isSelected }
             .padding(12.dp),
     ) {
         Column(modifier = Modifier.weight(1f)) {

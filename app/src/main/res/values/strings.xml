@@ -405,7 +405,8 @@
     <string name="backup_action_import">Restore Backup</string>
     <string name="backup_action_import_desc">Import and restore items from a JSON backup file</string>
     <string name="backup_restore_preview_title">Restore Backup</string>
-    <string name="backup_restore_items_count">%1$d items found</string>
+    <string name="backup_restore_items_count" tools:ignore="PluralsCandidate">%1$d items found</string>
+    <string name="backup_restore_items_count_one">1 item found</string>
     <string name="backup_restore_version">v%1$s</string>
     <string name="backup_restore_date">%1$s</string>
     <string name="backup_restore_strategy_merge">Merge Non-Duplicates</string>

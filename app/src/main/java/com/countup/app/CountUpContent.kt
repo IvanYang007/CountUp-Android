@@ -95,6 +95,7 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.PlatformTextStyle
@@ -660,9 +661,9 @@ private fun SubHeaderRow(
     onClearSearch: () -> Unit,
     onSelectSortOrder: (SortOrder) -> Unit,
     onSelectThemeMode: (ThemeMode) -> Unit,
+    modifier: Modifier = Modifier,
     onExportBackup: () -> Unit = {},
     onImportBackup: () -> Unit = {},
-    modifier: Modifier = Modifier,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -985,7 +986,7 @@ private fun SubHeaderRow(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(6.dp))
-                        .clickable(onClick = onExportBackup)
+                        .clickable(role = Role.Button, onClick = onExportBackup)
                         .padding(horizontal = 8.dp, vertical = 6.dp),
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
@@ -1019,7 +1020,7 @@ private fun SubHeaderRow(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(6.dp))
-                        .clickable(onClick = onImportBackup)
+                        .clickable(role = Role.Button, onClick = onImportBackup)
                         .padding(horizontal = 8.dp, vertical = 6.dp),
                 ) {
                     Column(modifier = Modifier.weight(1f)) {

@@ -329,6 +329,7 @@
     <string name="backup_action_import_desc">从 JSON 备份文件导入并恢复数据</string>
     <string name="backup_restore_preview_title">恢复备份</string>
     <string name="backup_restore_items_count">包含 %1$d 个条目</string>
+    <string name="backup_restore_items_count_one">包含 1 个条目</string>
     <string name="backup_restore_version">v%1$s</string>
     <string name="backup_restore_date">%1$s</string>
     <string name="backup_restore_strategy_merge">合并新增条目</string>

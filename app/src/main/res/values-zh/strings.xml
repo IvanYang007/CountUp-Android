@@ -392,4 +392,27 @@
     <string name="zen_horizon_empty">点击选择计数器</string>
     <string name="zen_horizon_unit_hint"> ⇄</string>
     <string name="cd_zen_horizon_cycle_unit">切换时间单位</string>
+
+    <!-- Data Backup & Migration -->
+    <string name="backup_section_title">数据备份</string>
+    <string name="backup_action_export">导出备份</string>
+    <string name="backup_action_export_desc">保存项目与个性化设置的 JSON 备份文件</string>
+    <string name="backup_export_success">备份导出成功</string>
+    <string name="backup_export_failed">导出失败，请重试</string>
+    <string name="backup_action_import">恢复备份</string>
+    <string name="backup_action_import_desc">从 JSON 备份文件导入并恢复数据</string>
+    <string name="backup_restore_preview_title">恢复备份</string>
+    <string name="backup_restore_items_count">包含 %1$d 个条目</string>
+    <string name="backup_restore_items_count_one">包含 1 个条目</string>
+    <string name="backup_restore_version">v%1$s</string>
+    <string name="backup_restore_date">%1$s</string>
+    <string name="backup_restore_strategy_merge">合并新增条目</string>
+    <string name="backup_restore_strategy_merge_desc">保留当前设备数据，仅导入不重复的新条目</string>
+    <string name="backup_restore_strategy_replace">完全覆盖</string>
+    <string name="backup_restore_strategy_replace_desc">使用备份内容完全覆盖当前数据与显示设置</string>
+    <string name="backup_restore_confirm">恢复</string>
+    <string name="backup_restore_success">备份恢复成功</string>
+    <string name="backup_restore_failed">恢复失败，请检查文件格式</string>
+    <string name="backup_restore_invalid_file">无效或无法读取的备份文件</string>
+    <string name="error_no_file_picker">当前设备未找到可用的文档管理器</string>
 </resources>
