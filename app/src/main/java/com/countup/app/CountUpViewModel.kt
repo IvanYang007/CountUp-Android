@@ -245,10 +245,11 @@ class CountUpViewModel(
                 }
             }
             is CountUpUiEvent.DismissWidgetReset -> {
+                _state.update { current ->
+                    current.copy(pendingWidgetResets = current.pendingWidgetResets.filterNot { it.id == event.recordId })
+                }
                 viewModelScope.launch(ioDispatcher) {
                     repository.dismissWidgetReset(event.recordId)
-                    val pending = repository.getPendingWidgetResets()
-                    _state.update { it.copy(pendingWidgetResets = pending) }
                 }
             }
             is CountUpUiEvent.ToggleWidgetVisibility -> {

@@ -301,6 +301,7 @@
     <string name="widget_reset_notice_body" tools:ignore="PluralsCandidate">「%1$s」已在桌面重置歸零（釋放 %2$d 天）。</string>
     <string name="action_restore">恢復</string>
     <string name="action_dismiss">忽略</string>
+    <string name="action_dismiss_countdown">忽略 (%1$d秒)</string>
 
     <!-- Data Backup & Migration -->
     <string name="backup_section_title">資料備份</string>

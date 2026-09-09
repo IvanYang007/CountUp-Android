@@ -71,8 +71,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -1754,6 +1756,17 @@ private fun WidgetResetNoticeCard(
     val zenColors = LocalZenColors.current
     val cardShape = RoundedCornerShape(16.dp)
 
+    val currentOnDismiss by rememberUpdatedState(onDismiss)
+    var secondsLeft by remember(record.id) { mutableIntStateOf(3) }
+
+    LaunchedEffect(record.id) {
+        while (secondsLeft > 0) {
+            delay(1000L)
+            secondsLeft--
+        }
+        currentOnDismiss()
+    }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -1840,10 +1853,15 @@ private fun WidgetResetNoticeCard(
                             onClick = onDismiss,
                         )
                         .pressScale(dismissInteraction)
+                        .widthIn(min = 76.dp)
                         .padding(horizontal = 10.dp, vertical = 6.dp),
                 ) {
                     Text(
-                        text = stringResource(R.string.action_dismiss),
+                        text = if (secondsLeft > 0) {
+                            stringResource(R.string.action_dismiss_countdown, secondsLeft)
+                        } else {
+                            stringResource(R.string.action_dismiss)
+                        },
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Medium,
                             fontSize = 12.sp,

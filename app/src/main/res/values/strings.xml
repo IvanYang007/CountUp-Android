@@ -373,6 +373,7 @@
     <string name="widget_reset_notice_body" tools:ignore="PluralsCandidate">“%1$s” was reset to today on the home screen (%2$d days released).</string>
     <string name="action_restore">Restore</string>
     <string name="action_dismiss">Dismiss</string>
+    <string name="action_dismiss_countdown">Dismiss (%1$ds)</string>
 
 
     <!-- Solar Rhythm (时节同行 · 岁华流转) -->
