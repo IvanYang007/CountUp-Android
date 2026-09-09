@@ -8,7 +8,9 @@ An intentionally small, fully offline Android app and home-screen widget suite t
 the **days since a set of anchor dates** (e.g. last haircut, a habit streak, sobriety, an anniversary) or **days until upcoming events**.
 
 - **Calm, Mindful Aesthetic:** Mid-century modern tactile styling with warm paper background, rich card drop shadows, and 30 rotating classical Chinese ink wash landscape themes.
-- **Instant Search & 1-Tap Sorting:** Live query filtering and sorting by days elapsed, anchor date, or alphabetical name.
+- **Decoupled Subheader & Bidirectional Sorting:** Instant search, 1-tap bidirectional sorting (tap again to toggle Asc ⇄ Desc by Days, Date, or Name), direct 1-tap Theme Mode cycling (⚡ System / ☀️ Light / 🌙 Dark), and dedicated Settings access.
+- **Dedicated Data & Backup Settings:** Standalone modal dialog (`ic_settings`) for offline SAF JSON export, pre-validation preview, and Merge/Replace restore strategies.
+- **In-Card Undo Whispers:** Unobtrusive in-situ recovery alerts directly on item cards when counters are reset accidentally, replacing disruptive top-screen banners.
 - **Habit Notes & Countdowns:** 2-line custom notes and automatic "UNTIL" sub-labeling for future target dates.
 - **Full Zen Widget Suite (5 Home-Screen Widgets):**
   - **Count-ups (Multi-Item Grid):** Full-width 3-column / 2-column grid widget displaying active milestones on dynamic ink wash backgrounds with 7-color MCM palettes.
@@ -48,7 +50,7 @@ Prerequisites:
 ./gradlew clean
 ./gradlew assembleDebug             # debug APK
 ./gradlew assembleRelease           # signed release APK & bundle (R8 minified)
-./gradlew test                      # 336 JVM unit tests (100% pass)
+./gradlew test                      # 373 JVM unit tests (100% pass)
 ./gradlew connectedDebugAndroidTest # instrumented tests (emulator/device online)
 ./gradlew lintDebug                 # Android Lint (0 errors)
 ```
@@ -90,7 +92,7 @@ Long-press home screen → **Widgets** → **Zen Pebble** → drag to a slot.
 
 ### 6. Reset Recovery & Accidental Tap Protection
 - **Two-Tap Arming Protection:** Directly on the home screen, tapping a counter numeral displays `"0?"`. A second tap within 1.5 seconds confirms the reset; otherwise it disarms safely.
-- **In-App Undo Whisper & Recovery Banner:** If an item is reset accidentally (from a widget or inside the app), opening the CountUp app immediately presents an in-card undo whisper or top recovery banner allowing you to restore your previous anchor date and historical streak metrics with a single tap.
+- **In-Card Undo Whispers & Recovery:** If an item is reset accidentally (from a widget or inside the app), opening the CountUp app immediately presents an in-situ undo whisper directly on the reset card with a 10-second window to restore your previous anchor date and historical streak metrics with a single tap.
 
 **Widget screenshot (debug builds only):** Renderable on-device via debug-only host activity:
 
@@ -108,7 +110,7 @@ CountUp protects user streaks and history across device upgrades and factory res
   - Backs up primary preferences and the atomic snapshot `countup_backup.json` to encrypted Google Drive backup (on GMS devices) and authorizes Device-to-Device migration tools (Mi Mover, Phone Clone, EasyShare).
   - Includes an automatic **Launcher Widget Sanitizer** on startup that purges invalid widget IDs left behind by previous device launchers.
 - **Tier 2: Self-Sovereign JSON Portability via Storage Access Framework (SAF)**
-  - Accessible directly in the app settings under **Data & Backup**.
+  - Accessible directly in the app via the dedicated **Settings** gear icon (`ic_settings`) in the subheader under **Data & Backup**.
   - **Export:** Generates a clean, UTF-8 encoded, unencrypted `.json` backup file using Android's system document creation picker (`ACTION_CREATE_DOCUMENT`) without requesting storage permissions.
   - **Import & Preview:** Selects a `.json` backup file via `ACTION_OPEN_DOCUMENT`. Displays a pre-restore preview showing item counts, anchor dates, and notes, letting you choose between **Merge** (deduplicates by immutable UUID, preserving distinct milestones that share names) or **Clean Replace**.
   - **Resilience:** Defensive exception handling ensures no crashes on stripped custom ROMs or file managers that misreport JSON MIME types.
@@ -123,8 +125,9 @@ Widgets automatically advance at midnight without requiring battery-draining bac
 
 ## 7. Verification performed
 
-- **336 JVM Unit Tests** (100% passing) across data models, repository fail-safes, MVI ViewModel, JSON salvage parsing, widget reducers, navigation contracts, and backup merge/replace strategies.
+- **373 JVM Unit Tests** (100% passing) across data models, repository fail-safes, MVI ViewModel, JSON salvage parsing, widget reducers, navigation contracts, backup merge/replace strategies, reset whisper lifecycles, and bidirectional sorting.
 - Clean debug and release builds with R8 minification and resource shrinking enabled (`isMinifyEnabled = true`, `isShrinkResources = true`).
+- Automated release bundle signing with multi-tier keystore password fallback resolution (`COUNTUP_KEYSTORE_PASS` -> `local.properties` -> `keystore-pass.txt`).
 - Android Lint (`lintDebug`): **0 errors**.
 - Automated GitHub Actions CI workflow running test, lint, and assemble on all pull requests.
 - Strict zero-permission guard: manifest explicitly strips `WAKE_LOCK`, `ACCESS_NETWORK_STATE`, `RECEIVE_BOOT_COMPLETED`, and `FOREGROUND_SERVICE`. Only `VIBRATE` is declared for tactile haptic feedback.

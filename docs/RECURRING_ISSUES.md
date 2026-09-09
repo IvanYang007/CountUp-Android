@@ -147,6 +147,41 @@ After a device reboot, midnight rollover might not fire if `MidnightAlarmReceive
 
 ---
 
+## 5. Subheader Action Sizing, minimumInteractiveComponentSize, and Layout Spread
+
+### Symptom
+Subheader buttons (Theme Toggle, Settings Gear) appear pushed far apart with large empty gaps (>100px) across the header bar, instead of resting tightly grouped (1–2dp gap) next to the Sort pill.
+
+### Architectural Root Cause
+In Jetpack Compose, calling `Modifier.minimumInteractiveComponentSize()` enforces a minimum touch target bounding box of 48×48 dp by adding invisible layout padding around smaller components. When applied inside a tight row layout like `SubHeaderRow` (which uses 26dp circular buttons), the layout bounds expand from 26dp to 48dp, causing massive visual separation between adjacent controls and breaking the optical density intended to mirror the `ItemCard` action rows.
+
+### Hard Invariants
+1. Do **NOT** apply `minimumInteractiveComponentSize()` or `IconButton` defaults to the subheader action buttons.
+2. Maintain explicit `size(26.dp)` with `padding(horizontal = 1.dp)` or `Arrangement.spacedBy(1.dp)`.
+3. Use tactile scale feedback (`pressScale(0.96f)`) and explicit click handlers with ripple on the bounded surface.
+
+---
+
+## 6. Release Bundle Signing and Multi-Tier Keystore Password Resolution
+
+### Symptom
+`./gradlew bundleRelease` or Google Play Store upload fails with:
+`All uploaded bundles must be signed.`
+
+### Architectural Root Cause
+In CI or local developer machines, release keystores might be present (`keystore/countup-release.jks`), but the password might be stored in a local file (`keystore/keystore-pass.txt`) rather than system environment variables or `local.properties`. If the build script only checks `System.getenv("COUNTUP_KEYSTORE_PASS")`, it silently skips creating the `release` signing configuration. As a result, Gradle produces an unsigned `.aab` bundle that cannot be installed or uploaded.
+
+### Hard Invariants
+In `app/build.gradle.kts`, always resolve release passwords using the 3-tier fallback hierarchy:
+```kotlin
+val keystorePass = System.getenv("COUNTUP_KEYSTORE_PASS")
+    ?: localProps.getProperty("countup.keystore.pass")
+    ?: file("../keystore/keystore-pass.txt").takeIf { it.exists() }?.readText()?.trim()
+```
+And verify bundles with `apksigner` before release distribution.
+
+---
+
 ## Quick Reference Checklist for New Widgets or Refactoring
 
 Before committing any widget changes or releasing a new version:
@@ -155,6 +190,9 @@ Before committing any widget changes or releasing a new version:
 - [ ] **Configurable Widgets**: Does provider XML declare `android:configure` and is the activity registered in `AndroidManifest.xml` with `APPWIDGET_CONFIGURE`?
 - [ ] **Instance Bindings**: Does `onDeleted()` clean up `CountUpStore` widget bindings?
 - [ ] **Midnight Alarm**: Do `onUpdate()` and `onEnabled()` re-register `MidnightAlarmReceiver.scheduleMidnightAlarm(context)`?
+- [ ] **Subheader Density**: Are subheader action buttons sized at 26dp with 1–2dp spacing without `minimumInteractiveComponentSize()`?
 - [ ] **ProGuard Rules**: Are new receivers and configure activities added to `proguard-rules.pro`?
+- [ ] **Release Signing**: Is release bundle signed (verified via `apksigner`)?
 - [ ] **Memory Gate**: Does the widget payload stay strictly below 40 KB (`WidgetMemoryBudgetGateTest`) to prevent `TransactionTooLargeException`?
 - [ ] **Automated Tests**: Do all unit and contract tests pass (`./gradlew testDebugUnitTest`)?
+

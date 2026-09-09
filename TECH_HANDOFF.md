@@ -9,7 +9,7 @@ Purpose of this doc: let another engineer (or agent) pick up the project and und
 **CountUp** is an intentionally small, fully offline Android app and home-screen widget suite that tracks calendar days since user-defined anchor dates ("days since last haircut", a habit streak, sobriety, an anniversary) or countdown days until upcoming events.
 
 - Any number of items; each has a **name**, a custom or randomly-assigned **icon** (Material + Phosphor sets), an **anchor date**, optional **2-line notes**, and **custom surface styling**.
-- App: zen-paper styled list (warm off-white, serif/sans/mono typography, 1px borders), add/edit/delete/reset, instant search & 1-tap sorting, 30 rotatable Chinese ink wash landscape themes.
+- App: zen-paper styled list (warm off-white, serif/sans/mono typography, 1px borders), add/edit/delete/reset, instant search & 1-tap bidirectional sorting (tap to toggle Asc ⇄ Desc), 1-tap theme cycling (⚡ System / ☀️ Light / 🌙 Dark), dedicated Data & Backup settings dialog, in-card undo whispers, 30 rotatable Chinese ink wash landscape themes.
 - Widgets:
   - **Count-ups Grid Widget:** A 3-column / 2-column grid of item cells on dynamic ink wash backgrounds; double-tap resets an item to today.
   - **Hero Milestone Widget:** Dedicated single-milestone widget in **2x1 Poetic Card** layout, configuration picker on placement, milestone gold accent indicator, and safe two-tap in-place reset.
@@ -35,7 +35,7 @@ Versions live in `gradle/libs.versions.toml`.
 | RemoteViews (platform) | — | Home-screen widgets; pure platform RemoteViews for instant battery-efficient updates |
 | compileSdk / targetSdk / minSdk | 37 / 37 / 26 | |
 
-**Key build gotcha:** AGP 9 uses built-in Kotlin — do not re-add `kotlin-android`. Release builds have R8 minification (`isMinifyEnabled = true`) and resource shrinking enabled, falling back to debug signing when release keystores are absent in CI.
+**Key build gotcha:** AGP 9 uses built-in Kotlin — do not re-add `kotlin-android`. Release builds have R8 minification (`isMinifyEnabled = true`) and resource shrinking enabled. Release signing in `app/build.gradle.kts` resolves release keystore passwords via a 3-tier fallback: `COUNTUP_KEYSTORE_PASS` env var -> `local.properties` (`countup.keystore.pass`) -> `../keystore/keystore-pass.txt` fallback file, gracefully falling back to debug signing only when release keystores are absent in CI.
 
 SDK configured via `local.properties` (`sdk.dir`) or standard `ANDROID_HOME` / `ANDROID_SDK_ROOT` environment variables.
 
@@ -47,10 +47,14 @@ Production Kotlin is organized under `app/src/main/java/com/countup/app/`:
 
 | File | Responsibility |
 |---|---|
-| `MainActivity.kt` | Lightweight Compose Activity host: collects `CountUpViewModel` state with lifecycle, binds UI effects to snackbars & widget updates |
-| `CountUpViewModel.kt` | MVI ViewModel: manages atomic `_state.update` transitions, instant search/sort pipeline, dialog state, backup import/export, and effect emissions |
+| `MainActivity.kt` | Lightweight Compose Activity host: collects `CountUpViewModel` state with lifecycle, binds UI effects to snackbars & widget updates, manages SAF launcher intents |
+| `CountUpViewModel.kt` | MVI ViewModel: manages atomic `_state.update` transitions, instant search/sort pipeline, dialog state, delegates file I/O to `BackupCoordinator`, and manages `ResetWhisperTracker` |
 | `CountUpContract.kt` | Unidirectional MVI contract: `@Immutable CountUpUiState`, `CountUpUiEvent`, and `CountUpUiEffect` |
-| `CountUpContent.kt` | Stateless root composable: full-bleed edge-to-edge ink background, odometer digit roll animations, search popover, restore preview dialogs |
+| `CountUpContent.kt` | Stateless root composable: full-bleed edge-to-edge ink background, decoupled subheader (sort pill, 1-tap theme cycle, settings gear), odometer digit roll animations, search popover, item cards with in-situ reset whispers |
+| `CountUpDialogs.kt` | Focused modal dialog composables: `DataBackupSettingsDialog` (offline export/restore, version footer) and `RestorePreviewDialog` (merge vs. replace strategies) |
+| `BackupCoordinator.kt` | Domain coordinator for Storage Access Framework (SAF) JSON export, pre-validation inspection, and restore workflows |
+| `ResetWhisperTracker.kt` | Session-scoped tracker for accidental counter resets; handles in-situ card undo whispers with 10-second auto-dismiss and manual dismissal |
+| `SortOrder.kt` | Bidirectional sort order enum (`SortCriteria` × `SortDirection`: Days, Date, Name; Asc ⇄ Desc) with `toggle()` support |
 | `ZenTheme.kt` | Mid-Century Modern Zen Paper token system via `CompositionLocalProvider(LocalZenColors)`, spring physics `pressScale`, a11y standards |
 | `CountUpRepository.kt` | Clean repository abstraction with `DefaultCountUpRepository` backed by zero-data-loss `CountUpStore` |
 | `BackupRepository.kt` | Storage Access Framework (SAF) JSON backup export and interactive restore pipeline with pre-validation, preview extraction, and UUID-authoritative merge/replace strategies |
@@ -72,7 +76,7 @@ Production Kotlin is organized under `app/src/main/java/com/countup/app/`:
 | (debug) `WidgetHostActivity.kt` | Debug-only activity to render widgets on-device for automated screenshot capture (excluded in release) |
 
 Tests:
-- `app/src/test/...` (JVM): **336 JVM unit tests** (100% green) covering `CountUpViewModelTest` (Turbine), `CountUpRepositoryTest`, `BackupRepositoryTest`, `HeroWidgetTest`, `ZenPebbleTest`, `SolarRhythmConfigurationTest`, `WidgetContractInvariantsTest`, `WidgetMemoryBudgetGateTest`, `CountUpStressAndBoundaryTest`, `DateConversionTest`, `DaysSinceTest`, `MidnightAlarmReceiverTest`, and `CountUpContractAndFlowTest`.
+- `app/src/test/...` (JVM): **373 JVM unit tests** (100% green) covering `CountUpViewModelTest` (Turbine), `BackupCoordinatorTest`, `ResetWhisperTrackerTest`, `SortOrderTest`, `CountUpRepositoryTest`, `BackupRepositoryTest`, `HeroWidgetTest`, `ZenPebbleTest`, `SolarRhythmConfigurationTest`, `WidgetContractInvariantsTest`, `WidgetMemoryBudgetGateTest`, `CountUpStressAndBoundaryTest`, `DateConversionTest`, `DaysSinceTest`, `MidnightAlarmReceiverTest`, and `CountUpContractAndFlowTest`.
 - `app/src/androidTest/...` (device): `ComposeUiSmokeTest` (stateless UI & a11y semantics), `CountUpStoreInstrumentedTest` (CRUD, migration, recovery).
 
 ---
@@ -99,6 +103,13 @@ One value per item, stored as a JSON array string under key `items_v1` in privat
 
 - **Zen-paper theme & Chinese Ink Wash Backgrounds:** Warm paper background `#F7F6F3`, cards white with `1px #EAEAEA` border, radius 12, ink `#2F3437`, muted `#787774`; serif for headings/counts, sans for labels. 30 authentic Chinese ink wash landscape themes anchored to borders with negative space.
 - **Dynamic Anchor Sub-labels:** Count $\ge 0$ renders `SINCE <date>`; count $< 0$ (future event) renders `UNTIL <date>`.
+- **Decoupled Control Surface & Layout Density:**
+  - The subheader separates list filtering from theme configuration and system backup.
+  - **Sort Pill:** Displays active criterion and direction (`Days ↓`, `Date ↑`, `Name ↓`), toggles direction on repeated tap, and opens the search & sort popover.
+  - **1-Tap Theme Cycle:** Adjacent 26dp action button cycling System (⚡) -> Light (☀️) -> Dark (🌙) with immediate tactile haptic feedback.
+  - **Dedicated Settings Gear:** 26dp button (`ic_settings`) opening `DataBackupSettingsDialog` for offline export/restore and app version inspection.
+  - **Button Sizing & Spacing Guardrail:** Subheader buttons maintain an exact 26dp circular bounding box with 1–2dp visual gap, matching `ItemCard` action rows. Avoid `.minimumInteractiveComponentSize()` on these subheader actions as it expands layout bounds to 48dp and blows out horizontal spacing.
+- **In-Situ Reset Whispers:** Counter resets display an in-card recovery whisper (`ResetWhisperTracker`) with a 10-second window and one-tap undo, avoiding intrusive screen-wide banners.
 - **Scale-on-press & Motion:** `0.96` buttons / `0.99` cards via `pressScale()`; list add/remove uses `Modifier.animateItem()`, disabled under system reduce-motion.
 - **Complete Zen Widget Suite:**
   - **Count-ups Multi-Grid:** 3x2 and 2x2 grid with double-tap direct reset.
@@ -116,7 +127,7 @@ export JAVA_HOME="/path/to/jdk-17"   # or set via Android Studio / system PATH
 ./gradlew clean
 ./gradlew assembleDebug             # debug APK
 ./gradlew assembleRelease           # signed release APK + AAB bundle (R8 minified)
-./gradlew test                      # 336 JVM unit tests (100% green)
+./gradlew test                      # 373 JVM unit tests (100% green)
 ./gradlew connectedDebugAndroidTest # device tests (emulator/device online)
 ./gradlew lintDebug                 # 0 errors
 ```
@@ -148,6 +159,7 @@ adb shell am start -n com.countup.app/.MainActivity
 4. **CI Automation:** [`.github/workflows/ci.yml`](.github/workflows/ci.yml) validates `lintDebug`, `test`, and `assembleRelease` on Ubuntu runners on every push and PR to `main`.
 5. **Keystore Management & Rotation:** [`docs/CREDENTIAL_ROTATION.md`](docs/CREDENTIAL_ROTATION.md) outlines production release key rotation and history scrubbing commands via `git-filter-repo`.
 6. **Zero-Permission Reboot Rollover:** `MidnightAlarmReceiver` uses battery-friendly RTC alarms (`setAndAllowWhileIdle`), re-registering on reboot whenever widget providers are updated or enabled.
+7. **Decoupled Header Specification:** Full requirements, visual hierarchy, and before/after comparisons documented in [`docs/spec-decoupled-header-controls.md`](docs/spec-decoupled-header-controls.md).
 
 ---
 
