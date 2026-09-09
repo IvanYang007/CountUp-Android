@@ -42,7 +42,7 @@ class CountUpBackupPayloadTest {
         val original = CountUpBackupPayload(
             schemaVersion = 1,
             exportTimestamp = 1757365200000L,
-            appVersion = "2.19.3",
+            appVersion = CountUpBackupPayload.CURRENT_APP_VERSION,
             sortOrder = SortOrder.DATE_DESC,
             themeMode = ThemeMode.DARK,
             backgroundTheme = BackgroundTheme.DREAM_BOAT,
@@ -51,7 +51,7 @@ class CountUpBackupPayloadTest {
 
         val json = CountUpBackupPayload.encode(original)
         assertTrue(json.contains("\"schemaVersion\": 1"))
-        assertTrue(json.contains("\"appVersion\": \"2.19.3\""))
+        assertTrue(json.contains("\"appVersion\": \"${CountUpBackupPayload.CURRENT_APP_VERSION}\""))
         assertTrue(json.contains("Meditation"))
         assertTrue(json.contains("Guitar"))
 
