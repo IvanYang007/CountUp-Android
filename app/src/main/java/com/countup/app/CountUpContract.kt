@@ -35,6 +35,8 @@ data class CountUpUiState(
     val pendingWidgetResets: List<WidgetResetRecord> = emptyList(),
     val pendingTargetItemId: String? = null,
     val pendingRestorePayload: CountUpBackupPayload? = null,
+    val isRestorePayloadDamaged: Boolean = false,
+    val isSaving: Boolean = false,
 ) {
     /**
      * Instant derived filtered & sorted list of items matching [searchQuery] in [sortOrder].

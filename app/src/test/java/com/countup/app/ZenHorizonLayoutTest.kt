@@ -78,8 +78,9 @@ class ZenHorizonLayoutTest {
         // 1. Explicit bound item takes priority
         assertEquals("item-3", ZenWidgetReducer.resolveTargetItem(items, "item-3")?.id)
 
-        // 2. Fallback to pinned visible item
-        assertEquals("item-2", ZenWidgetReducer.resolveTargetItem(items, "non-existent")?.id)
+        // 2. Fallback when binding does not exist must be null / Deleted (never silently replace)
+        assertNull(ZenWidgetReducer.resolveTargetItem(items, "non-existent"))
+        assertTrue(ZenWidgetReducer.resolveTarget(items, "non-existent") is WidgetTargetResolution.Deleted)
         assertEquals("item-2", ZenWidgetReducer.resolveTargetItem(items, null)?.id)
 
         // 3. Fallback when no pinned item exists

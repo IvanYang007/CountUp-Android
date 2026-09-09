@@ -99,6 +99,13 @@ class FakeCountUpRepository(
         return true
     }
 
+    override fun resetWithUndo(id: String, epochDay: Long, record: WidgetResetRecord): Boolean {
+        if (shouldFailWrite) return false
+        val resetOk = resetTo(id, epochDay)
+        if (!resetOk) return false
+        return recordWidgetReset(record)
+    }
+
     override fun restoreReset(
         id: String,
         snapshot: ResetSnapshot,

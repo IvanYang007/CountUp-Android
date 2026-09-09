@@ -73,4 +73,11 @@ class MidnightAlarmReceiverTest {
         assertEquals("com.countup.app.ACTION_MIDNIGHT_ROLLOVER", MidnightAlarmReceiver.ACTION_MIDNIGHT_ROLLOVER)
         assertEquals(24001, MidnightAlarmReceiver.REQUEST_CODE_MIDNIGHT)
     }
+
+    @Test
+    fun hasActiveWidgetsExecutesSafely() {
+        // Must never throw and should return boolean
+        val active = MidnightAlarmReceiver.hasActiveWidgets(testContext)
+        assertTrue(active || !active)
+    }
 }

@@ -27,6 +27,8 @@ class CountUpStore(context: Context) {
     private val filesDir: File = context.filesDir
     private val backupFile: File = File(filesDir, BACKUP_FILE_NAME)
     private val backupTempFile: File = File(filesDir, "$BACKUP_FILE_NAME.tmp")
+    private val backupRevFile: File = File(filesDir, BACKUP_REV_FILE_NAME)
+    private val preRestoreFile: File = File(filesDir, PRE_RESTORE_SAFETY_FILE_NAME)
 
     /** Current items, never null; guarantees zero data loss via multi-tier fallback. */
     fun items(): List<CountUpItem> {
@@ -51,13 +53,16 @@ class CountUpStore(context: Context) {
                 val backupRaw = readBackup()
                 val backupDecoded = if (!backupRaw.isNullOrBlank()) decodeItems(backupRaw) else null
                 val backupCount = backupDecoded?.size ?: 0
+                val prefsRevision = prefs.getLong(KEY_REVISION, 0L)
+                val backupRevision = readBackupRevision()
 
                 quarantineRawPayload(raw)
 
-                if (backupDecoded != null && backupCount >= salvaged.size && backupCount > 0) {
+                if (backupDecoded != null && (backupRevision > prefsRevision || (backupRevision == prefsRevision && backupCount >= salvaged.size && backupCount > 0))) {
                     // Backup has equal or more items than salvage: self-heal from backup snapshot
                     prefs.edit()
                         .putString(KEY_ITEMS, backupRaw)
+                        .putLong(KEY_REVISION, backupRevision)
                         .putBoolean(KEY_MIGRATED, true)
                         .commit()
                     return@synchronized backupDecoded
@@ -68,6 +73,7 @@ class CountUpStore(context: Context) {
                 } else if (backupDecoded != null && backupCount > 0) {
                     prefs.edit()
                         .putString(KEY_ITEMS, backupRaw)
+                        .putLong(KEY_REVISION, backupRevision)
                         .putBoolean(KEY_MIGRATED, true)
                         .commit()
                     return@synchronized backupDecoded
@@ -79,29 +85,40 @@ class CountUpStore(context: Context) {
             if (!backupRaw.isNullOrBlank()) {
                 val backupDecoded = decodeItems(backupRaw)
                 if (!backupDecoded.isNullOrEmpty()) {
+                    val backupRevision = readBackupRevision()
                     // Self-heal SharedPreferences from backup snapshot
                     prefs.edit()
                         .putString(KEY_ITEMS, backupRaw)
+                        .putLong(KEY_REVISION, backupRevision)
                         .putBoolean(KEY_MIGRATED, true)
                         .commit()
                     return@synchronized backupDecoded
                 }
             }
 
-            // Tier 3: Legacy migration from haircut_prefs
+            // Tier 3: Pre-restore safety snapshot fallback
+            if (hasPreRestoreSafetySnapshot()) {
+                if (restorePreRestoreSafetySnapshot()) {
+                    val restored = decodeItems(prefs.getString(KEY_ITEMS, null))
+                    if (!restored.isNullOrEmpty()) return@synchronized restored
+                }
+            }
+
+            // Tier 4: Legacy migration from haircut_prefs
             val legacyMigrated = tryMigrateFromLegacy()
             if (legacyMigrated != null) {
                 return@synchronized legacyMigrated
             }
 
-            // Tier 4: Unrecoverable payload quarantine or clean initial install
+            // Tier 5: Unrecoverable payload quarantine or clean initial install
             if (!raw.isNullOrBlank()) {
                 quarantineRawPayload(raw)
             }
             if (!prefs.getBoolean(KEY_MIGRATED, false) || !backupFile.exists()) {
                 val emptyEncoded = encodeItems(emptyList())
-                prefs.edit().putString(KEY_ITEMS, emptyEncoded).putBoolean(KEY_MIGRATED, true).commit()
-                writeBackup(emptyEncoded)
+                val revision = nextRevision()
+                prefs.edit().putString(KEY_ITEMS, emptyEncoded).putLong(KEY_REVISION, revision).putBoolean(KEY_MIGRATED, true).commit()
+                writeBackup(emptyEncoded, revision)
             }
             emptyList()
         }
@@ -183,12 +200,49 @@ class CountUpStore(context: Context) {
         return synchronized(globalStoreLock) {
             val list = items()
             if (list.none { it.id == id }) return false
-            val deleted = persist(list.filterNot { it.id == id })
-            if (deleted) {
-                val pending = getPendingWidgetResets().filterNot { it.itemId == id }
-                persistWidgetResets(pending)
-            }
-            deleted
+            val remaining = list.filterNot { it.id == id }
+            val pending = getPendingWidgetResets().filterNot { it.itemId == id }
+            val revision = nextRevision()
+            val encodedItems = encodeItems(remaining)
+            writeBackup(encodedItems, revision)
+            prefs.edit()
+                .putString(KEY_ITEMS, encodedItems)
+                .putString(KEY_PENDING_WIDGET_RESETS, encodeWidgetResets(pending))
+                .putLong(KEY_REVISION, revision)
+                .putBoolean(KEY_MIGRATED, true)
+                .commit()
+        }
+    }
+
+    /**
+     * Atomically resets the item with [id] to [epochDay] and records [record] in the
+     * pending widget reset queue within a single transactional disk operation.
+     * @return false if not found, already 0 accumulated days, or the write failed.
+     */
+    fun resetWithUndo(id: String, epochDay: Long, record: WidgetResetRecord): Boolean {
+        return synchronized(globalStoreLock) {
+            val list = items().toMutableList()
+            val index = list.indexOfFirst { it.id == id }
+            if (index < 0) return false
+            val current = list[index]
+            if (!current.isResettableOn(epochDay)) return false
+            val updated = current.resetTo(epochDay)
+            if (updated === current) return false
+            list[index] = updated
+
+            val currentResets = getPendingWidgetResets().filterNot { it.id == record.id }
+            val updatedResets = (listOf(record) + currentResets).take(MAX_PENDING_WIDGET_RESETS)
+
+            val revision = nextRevision()
+            val encodedItems = encodeItems(list)
+            writeBackup(encodedItems, revision)
+
+            prefs.edit()
+                .putString(KEY_ITEMS, encodedItems)
+                .putString(KEY_PENDING_WIDGET_RESETS, encodeWidgetResets(updatedResets))
+                .putLong(KEY_REVISION, revision)
+                .putBoolean(KEY_MIGRATED, true)
+                .commit()
         }
     }
 
@@ -510,14 +564,80 @@ class CountUpStore(context: Context) {
      * Retains all existing items on this device. Appends only novel items whose
      * ID (UUID) is not already present. Preserves existing appearance settings.
      */
+    /** Writes an ephemeral pre-restore safety snapshot to disk before replacing database. */
+    fun writePreRestoreSafetySnapshot(snapshot: CountUpBackupPayload = exportBackupPayload()): Boolean {
+        return try {
+            if (!filesDir.exists()) filesDir.mkdirs()
+            preRestoreFile.writeText(CountUpBackupPayload.encode(snapshot), Charsets.UTF_8)
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    /** Reverts storage to the pre-restore safety snapshot if available. */
+    fun restorePreRestoreSafetySnapshot(): Boolean {
+        return try {
+            if (!preRestoreFile.exists()) return false
+            val raw = preRestoreFile.readText(Charsets.UTF_8)
+            val payload = CountUpBackupPayload.decode(raw) ?: return false
+            val revision = nextRevision()
+            val encodedItems = encodeItems(payload.items)
+            writeBackup(encodedItems, revision)
+            prefs.edit()
+                .putString(KEY_SORT_ORDER, payload.sortOrder.id)
+                .putString(KEY_THEME_MODE, payload.themeMode.id)
+                .remove(KEY_THEME_MODE_LEGACY)
+                .putString(KEY_BACKGROUND_THEME, payload.backgroundTheme.id)
+                .putString(KEY_ITEMS, encodedItems)
+                .putLong(KEY_REVISION, revision)
+                .putBoolean(KEY_MIGRATED, true)
+                .commit()
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    /** Returns true if a pre-restore safety snapshot currently exists on disk. */
+    fun hasPreRestoreSafetySnapshot(): Boolean = preRestoreFile.exists() && preRestoreFile.length() > 0L
+
+    private fun deletePreRestoreSafetySnapshot() {
+        try {
+            if (preRestoreFile.exists()) {
+                preRestoreFile.delete()
+            }
+        } catch (_: Exception) {}
+    }
+
     fun restoreBackupPayload(payload: CountUpBackupPayload, strategy: RestoreStrategy): Boolean {
         return synchronized(globalStoreLock) {
             when (strategy) {
                 RestoreStrategy.REPLACE_ALL -> {
-                    setSortOrder(payload.sortOrder)
-                    setThemeMode(payload.themeMode)
-                    setBackgroundTheme(payload.backgroundTheme)
-                    persist(payload.items)
+                    writePreRestoreSafetySnapshot()
+                    try {
+                        val revision = nextRevision()
+                        val encodedItems = encodeItems(payload.items)
+                        writeBackup(encodedItems, revision)
+                        val success = prefs.edit()
+                            .putString(KEY_SORT_ORDER, payload.sortOrder.id)
+                            .putString(KEY_THEME_MODE, payload.themeMode.id)
+                            .remove(KEY_THEME_MODE_LEGACY)
+                            .putString(KEY_BACKGROUND_THEME, payload.backgroundTheme.id)
+                            .putString(KEY_ITEMS, encodedItems)
+                            .putLong(KEY_REVISION, revision)
+                            .putBoolean(KEY_MIGRATED, true)
+                            .commit()
+
+                        if (!success) {
+                            restorePreRestoreSafetySnapshot()
+                            return@synchronized false
+                        }
+                        deletePreRestoreSafetySnapshot()
+                        true
+                    } catch (_: Exception) {
+                        restorePreRestoreSafetySnapshot()
+                        false
+                    }
                 }
                 RestoreStrategy.MERGE_KEEP_EXISTING -> {
                     val currentItems = items().toMutableList()
@@ -631,6 +751,10 @@ class CountUpStore(context: Context) {
     }
 
     private fun persistWidgetResets(records: List<WidgetResetRecord>): Boolean {
+        return prefs.edit().putString(KEY_PENDING_WIDGET_RESETS, encodeWidgetResets(records)).commit()
+    }
+
+    private fun encodeWidgetResets(records: List<WidgetResetRecord>): String {
         val arr = org.json.JSONArray()
         for (r in records) {
             val obj = org.json.JSONObject()
@@ -645,7 +769,7 @@ class CountUpStore(context: Context) {
                 .put("timestampMillis", r.timestampMillis)
             arr.put(obj)
         }
-        return prefs.edit().putString(KEY_PENDING_WIDGET_RESETS, arr.toString()).commit()
+        return arr.toString()
     }
 
     private fun decodeWidgetResets(raw: String): List<WidgetResetRecord> {
@@ -688,15 +812,26 @@ class CountUpStore(context: Context) {
     }
 
     private fun persist(items: List<CountUpItem>): Boolean {
+        val revision = nextRevision()
         val encoded = encodeItems(items)
-        writeBackup(encoded)
+        writeBackup(encoded, revision)
         return prefs.edit()
             .putString(KEY_ITEMS, encoded)
+            .putLong(KEY_REVISION, revision)
             .putBoolean(KEY_MIGRATED, true)
             .commit()
     }
 
-    private fun writeBackup(encodedJson: String) {
+    private fun nextRevision(): Long {
+        val current = prefs.getLong(KEY_REVISION, 0L)
+        val now = System.currentTimeMillis()
+        return if (now > current) now else current + 1L
+    }
+
+    /** Returns the current monotonic storage revision number. */
+    fun getRevision(): Long = prefs.getLong(KEY_REVISION, 0L)
+
+    private fun writeBackup(encodedJson: String, revision: Long) {
         try {
             if (!filesDir.exists()) filesDir.mkdirs()
             val bytes = encodedJson.toByteArray(Charsets.UTF_8)
@@ -723,6 +858,15 @@ class CountUpStore(context: Context) {
                     )
                 }
             }
+            try {
+                java.nio.file.Files.write(
+                    backupRevFile.toPath(),
+                    revision.toString().toByteArray(Charsets.UTF_8),
+                    java.nio.file.StandardOpenOption.CREATE,
+                    java.nio.file.StandardOpenOption.TRUNCATE_EXISTING,
+                    java.nio.file.StandardOpenOption.WRITE,
+                )
+            } catch (_: Exception) {}
         } catch (_: Exception) {
             // Backup write failure must not crash the primary persistence flow
         }
@@ -740,10 +884,24 @@ class CountUpStore(context: Context) {
         }
     }
 
+    private fun readBackupRevision(): Long {
+        return try {
+            if (backupRevFile.exists()) {
+                backupRevFile.readText(Charsets.UTF_8).trim().toLongOrNull() ?: backupFile.lastModified()
+            } else if (backupFile.exists()) {
+                backupFile.lastModified()
+            } else {
+                0L
+            }
+        } catch (_: Exception) {
+            0L
+        }
+    }
+
     private fun ensureBackupInSync(encodedJson: String) {
         try {
             if (!backupFile.exists() || backupFile.length() == 0L) {
-                writeBackup(encodedJson)
+                writeBackup(encodedJson, prefs.getLong(KEY_REVISION, 0L))
             }
         } catch (_: Exception) {
             // Best effort sync
@@ -765,9 +923,12 @@ class CountUpStore(context: Context) {
         private const val KEY_THEME_MODE = "theme_mode"
         private const val KEY_THEME_MODE_LEGACY = "theme_mode_v1"
         private const val KEY_SORT_ORDER = "sort_order_v1"
+        private const val KEY_REVISION = "storage_revision_v1"
         private const val LEGACY_PREFS_NAME = "haircut_prefs"
         private const val LEGACY_KEY_EPOCH_DAY = "last_haircut_epoch_day"
         private const val BACKUP_FILE_NAME = "countup_backup.json"
+        private const val BACKUP_REV_FILE_NAME = "countup_backup.rev"
+        private const val PRE_RESTORE_SAFETY_FILE_NAME = "countup_pre_restore_safety.json"
         private const val PREFIX_HERO_BINDING = "hero_widget_binding_"
         private const val PREFIX_HERO_DISPLAY_MODE = "hero_widget_mode_"
         private const val PREFIX_ZEN_HORIZON_BINDING = "zen_horizon_binding_"

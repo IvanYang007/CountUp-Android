@@ -1223,4 +1223,162 @@ class CountUpViewModelTest {
             assertNull(state.pendingRestorePayload)
         }
     }
+
+    @Test
+    fun `requestImportBackup emits TriggerImportDocument when items are empty`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = emptyList())
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+
+        viewModel.effects.test {
+            viewModel.onEvent(CountUpUiEvent.RequestImportBackup)
+            val effect = awaitItem()
+            assertTrue(effect is CountUpUiEffect.TriggerImportDocument)
+        }
+    }
+
+    @Test
+    fun `saveItem debounces duplicate submissions while isSaving`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = emptyList())
+        val testDispatcher = StandardTestDispatcher(testScheduler)
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = testDispatcher,
+        )
+
+        val draft = ItemDraft(name = "Meditation", epochDay = fixedToday.toEpochDay())
+
+        viewModel.onEvent(CountUpUiEvent.SaveItem(draft))
+        viewModel.onEvent(CountUpUiEvent.SaveItem(draft))
+
+        testScheduler.advanceUntilIdle()
+
+        assertEquals(1, repo.getItems().size)
+        assertFalse(viewModel.state.value.isEditorOpen)
+    }
+
+    @Test
+    fun `importBackupFromStream rejects stream exceeding 2MB limit`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = emptyList())
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+
+        val oversizedBytes = ByteArray(2 * 1024 * 1024 + 10)
+        val stream = java.io.ByteArrayInputStream(oversizedBytes)
+
+        viewModel.effects.test {
+            viewModel.onEvent(CountUpUiEvent.ImportBackupFromStream(stream))
+            val effect = awaitItem()
+            assertTrue(effect is CountUpUiEffect.ShowSnackbar)
+            assertEquals(R.string.backup_restore_file_too_large, (effect as CountUpUiEffect.ShowSnackbar).messageRes)
+        }
+
+        assertNull(viewModel.state.value.pendingRestorePayload)
+    }
+
+    @Test
+    fun `importBackupFromStream with unsupported schema version emits ShowSnackbar`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = emptyList())
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+
+        val futureJson = """
+            {
+              "schemaVersion": 99,
+              "itemsJson": "[]"
+            }
+        """.trimIndent()
+        val stream = java.io.ByteArrayInputStream(futureJson.toByteArray(Charsets.UTF_8))
+
+        viewModel.effects.test {
+            viewModel.onEvent(CountUpUiEvent.ImportBackupFromStream(stream))
+            val effect = awaitItem()
+            assertTrue(effect is CountUpUiEffect.ShowSnackbar)
+            val snackbar = effect as CountUpUiEffect.ShowSnackbar
+            assertEquals(R.string.backup_restore_unsupported_version, snackbar.messageRes)
+            assertEquals("99", snackbar.formatArg)
+        }
+
+        assertNull(viewModel.state.value.pendingRestorePayload)
+    }
+
+    @Test
+    fun `importBackupFromStream with damaged payload marks isRestorePayloadDamaged and coerces REPLACE_ALL to MERGE`() = runTest {
+        val initialItem = CountUpItem(id = "existing", name = "Existing", epochDay = 19000L)
+        val repo = FakeCountUpRepository(initialItems = listOf(initialItem))
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+
+        val damagedJson = """
+            {
+              "schemaVersion": 1,
+              "itemsJson": "[{\"id\":\"salvaged\",\"name\":\"Salvaged Habit\",\"epochDay\":20000},{\"id\":\"broken"
+        """.trimIndent()
+        val stream = java.io.ByteArrayInputStream(damagedJson.toByteArray(Charsets.UTF_8))
+
+        viewModel.onEvent(CountUpUiEvent.ImportBackupFromStream(stream))
+
+        val state = viewModel.state.value
+        assertNotNull(state.pendingRestorePayload)
+        assertTrue(state.isRestorePayloadDamaged)
+        val payload = state.pendingRestorePayload!!
+        assertEquals(1, payload.items.size)
+        assertEquals("salvaged", payload.items[0].id)
+
+        // Attempting REPLACE_ALL on damaged payload must be coerced to MERGE_KEEP_EXISTING
+        viewModel.onEvent(CountUpUiEvent.ConfirmRestore(RestoreStrategy.REPLACE_ALL))
+
+        // In MERGE_KEEP_EXISTING, existing items are preserved and novel items appended
+        val finalItems = repo.getItems()
+        assertEquals(2, finalItems.size)
+        assertEquals("existing", finalItems[0].id)
+        assertEquals("salvaged", finalItems[1].id)
+        assertFalse(viewModel.state.value.isRestorePayloadDamaged)
+    }
+
+    @Test
+    fun `save item synchronizes isSaving state in CountUpUiState`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = emptyList())
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+
+        viewModel.onEvent(CountUpUiEvent.OpenEditor(null))
+        assertFalse(viewModel.state.value.isSaving)
+
+        viewModel.state.test {
+            val initialState = awaitItem()
+            assertFalse(initialState.isSaving)
+
+            viewModel.onEvent(
+                CountUpUiEvent.SaveItem(
+                    name = "Meditation",
+                    epochDay = fixedToday.toEpochDay(),
+                    comment = "Zen",
+                )
+            )
+
+            val savingState = awaitItem()
+            assertTrue(savingState.isSaving)
+
+            val finishedState = awaitItem()
+            assertFalse(finishedState.isSaving)
+            assertEquals(1, finishedState.items.size)
+        }
+    }
 }

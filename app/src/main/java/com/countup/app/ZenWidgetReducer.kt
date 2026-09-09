@@ -24,6 +24,15 @@ enum class ZenWidgetDisplayUnit {
 }
 
 /**
+ * Sealed resolution result for widget counter target resolution.
+ */
+sealed interface WidgetTargetResolution {
+    data class Resolved(val item: CountUpItem) : WidgetTargetResolution
+    data object Unconfigured : WidgetTargetResolution
+    data class Deleted(val boundItemId: String) : WidgetTargetResolution
+}
+
+/**
  * Immutable, decoupled view state for Zen widgets, computed cleanly by [ZenWidgetReducer].
  */
 @Immutable
@@ -51,12 +60,36 @@ object ZenWidgetReducer {
 
     /**
      * Resolves the target item for a widget based on explicit binding, pin status, and widget visibility.
+     * When a specific [boundItemId] was assigned but no longer exists in [items], it resolves to [WidgetTargetResolution.Deleted]
+     * to avoid silently displaying an arbitrary or private item on the home screen.
      */
-    fun resolveTargetItem(items: List<CountUpItem>, boundItemId: String?): CountUpItem? =
-        items.firstOrNull { it.id == boundItemId }
-            ?: items.firstOrNull { it.isPinned && it.showInWidget }
+    fun resolveTarget(items: List<CountUpItem>, boundItemId: String?): WidgetTargetResolution {
+        if (boundItemId != null) {
+            val found = items.firstOrNull { it.id == boundItemId }
+            return if (found != null) {
+                WidgetTargetResolution.Resolved(found)
+            } else {
+                WidgetTargetResolution.Deleted(boundItemId)
+            }
+        }
+        val fallback = items.firstOrNull { it.isPinned && it.showInWidget }
             ?: items.firstOrNull { it.showInWidget }
             ?: items.firstOrNull()
+        return if (fallback != null) {
+            WidgetTargetResolution.Resolved(fallback)
+        } else {
+            WidgetTargetResolution.Unconfigured
+        }
+    }
+
+    /**
+     * Resolves the target item for a widget. Returns null if unconfigured or bound target was deleted.
+     */
+    fun resolveTargetItem(items: List<CountUpItem>, boundItemId: String?): CountUpItem? =
+        when (val res = resolveTarget(items, boundItemId)) {
+            is WidgetTargetResolution.Resolved -> res.item
+            else -> null
+        }
 
     /**
      * Resolves the nearest upcoming milestone goal strictly greater than [count].

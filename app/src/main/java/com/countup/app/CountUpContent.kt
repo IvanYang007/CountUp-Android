@@ -197,6 +197,7 @@ fun CountUpContent(
                 } else if (state.items.isEmpty()) {
                     EmptyState(
                         onNewItem = { onEvent(CountUpUiEvent.OpenEditor(null)) },
+                        onImportBackup = { onEvent(CountUpUiEvent.RequestImportBackup) },
                         modifier = Modifier.fillMaxWidth().padding(top = 48.dp),
                     )
                 } else {
@@ -296,6 +297,7 @@ fun CountUpContent(
             ItemEditorDialog(
                 item = state.editorTarget,
                 today = state.today,
+                isSaving = state.isSaving,
                 onDismiss = { onEvent(CountUpUiEvent.CloseEditor) },
                 onSave = { draft ->
                     onEvent(CountUpUiEvent.SaveItem(draft))
@@ -318,6 +320,7 @@ fun CountUpContent(
                 onConfirmRestore = { strategy ->
                     onEvent(CountUpUiEvent.ConfirmRestore(strategy))
                 },
+                isDamaged = state.isRestorePayloadDamaged,
             )
         }
     }
@@ -1908,7 +1911,11 @@ private fun EmptySearchState(onClearSearch: () -> Unit, modifier: Modifier = Mod
 }
 
 @Composable
-private fun EmptyState(onNewItem: () -> Unit, modifier: Modifier = Modifier) {
+private fun EmptyState(
+    onNewItem: () -> Unit,
+    onImportBackup: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(Modifier.padding(top = 8.dp))
         Text(
@@ -1936,6 +1943,16 @@ private fun EmptyState(onNewItem: () -> Unit, modifier: Modifier = Modifier) {
             modifier = Modifier.pressScale(emptyInteraction),
         ) {
             Text(stringResource(R.string.new_item))
+        }
+        Spacer(Modifier.padding(top = 10.dp))
+        val restoreInteraction = rememberPressSource()
+        OutlinedButton(
+            onClick = onImportBackup,
+            interactionSource = restoreInteraction,
+            shape = RoundedCornerShape(percent = 50),
+            modifier = Modifier.pressScale(restoreInteraction),
+        ) {
+            Text(stringResource(R.string.backup_action_import))
         }
     }
 }

@@ -139,6 +139,7 @@
     <string name="hero_widget_label">焦点里程碑（单项纪念）</string>
     <string name="hero_widget_description">专注展示单个核心目标与达成里程碑</string>
     <string name="hero_widget_empty">点击选择计数器</string>
+    <string name="widget_item_removed">目标已删除</string>
     <string name="hero_widget_configure_title">选择焦点计数器</string>
     <string name="hero_widget_configure_subtitle">选择在此微件上重点展示的目标</string>
     <string name="hero_widget_reset_prompt">重置为今天？</string>

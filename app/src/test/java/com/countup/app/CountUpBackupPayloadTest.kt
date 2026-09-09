@@ -152,4 +152,59 @@ class CountUpBackupPayloadTest {
         assertEquals("item-1", decoded.items[0].id)
         assertEquals("Meditation", decoded.items[0].name)
     }
+
+    @Test
+    fun validateReturnsValidForIntactPayload() {
+        val payload = CountUpBackupPayload(
+            items = listOf(CountUpItem(id = "i1", name = "Test", epochDay = 20000L))
+        )
+        val json = CountUpBackupPayload.encode(payload)
+        val result = CountUpBackupPayload.validate(json)
+
+        assertTrue(result is BackupValidationResult.Valid)
+        val valid = result as BackupValidationResult.Valid
+        assertEquals(1, valid.payload.items.size)
+        assertEquals("i1", valid.payload.items[0].id)
+    }
+
+    @Test
+    fun validateReturnsUnsupportedSchemaWhenVersionExceedsCurrent() {
+        val futureJson = """
+            {
+              "schemaVersion": 2,
+              "appVersion": "3.0.0",
+              "itemsJson": "[{\"id\":\"i1\",\"name\":\"Future Item\",\"epochDay\":25000}]"
+            }
+        """.trimIndent()
+
+        val result = CountUpBackupPayload.validate(futureJson)
+        assertTrue(result is BackupValidationResult.UnsupportedSchema)
+        val unsupported = result as BackupValidationResult.UnsupportedSchema
+        assertEquals(2, unsupported.detectedVersion)
+        assertEquals(1, unsupported.maxSupportedVersion)
+    }
+
+    @Test
+    fun validateReturnsDamagedForTruncatedPayloadWithSalvageableItems() {
+        val truncatedJson = """
+            {
+              "schemaVersion": 1,
+              "itemsJson": "[{\"id\":\"i1\",\"name\":\"Salvaged\",\"epochDay\":20000},{\"id\":\"broken"
+        """.trimIndent()
+
+        val result = CountUpBackupPayload.validate(truncatedJson)
+        assertTrue(result is BackupValidationResult.Damaged)
+        val damaged = result as BackupValidationResult.Damaged
+        assertEquals(1, damaged.recoveredCount)
+        assertEquals(1, damaged.salvagedPayload.items.size)
+        assertEquals("i1", damaged.salvagedPayload.items[0].id)
+    }
+
+    @Test
+    fun validateReturnsCorruptedForEmptyOrUnparseablePayload() {
+        assertTrue(CountUpBackupPayload.validate(null) is BackupValidationResult.Corrupted)
+        assertTrue(CountUpBackupPayload.validate("") is BackupValidationResult.Corrupted)
+        assertTrue(CountUpBackupPayload.validate("not json") is BackupValidationResult.Corrupted)
+        assertTrue(CountUpBackupPayload.validate("{\"invalid\":true}") is BackupValidationResult.Corrupted)
+    }
 }

@@ -624,4 +624,126 @@ class CountUpStoreTest {
         assertEquals(ThemeMode.SYSTEM, store2.getThemeMode())
         assertEquals(BackgroundTheme.AUTO_DAILY, store2.getBackgroundTheme())
     }
+
+    @Test
+    fun monotonicRevisionIncrementsOnMutations() {
+        val store = CountUpStore(testContext)
+        val initialRev = store.getRevision()
+
+        val item = store.addItem("Revision Test", 20000L)!!
+        val addRev = store.getRevision()
+        assertTrue(addRev > initialRev)
+
+        store.updateItem(item.id, "Revision Test Updated", 20001L)
+        val updateRev = store.getRevision()
+        assertTrue(updateRev > addRev)
+
+        val record = WidgetResetRecord(
+            itemId = item.id,
+            itemName = item.name,
+            snapshot = item.toResetSnapshot(),
+            releasedDays = 1L,
+            timestampMillis = System.currentTimeMillis(),
+        )
+        store.resetWithUndo(item.id, 20050L, record)
+        val resetRev = store.getRevision()
+        assertTrue(resetRev > updateRev)
+
+        store.deleteItem(item.id)
+        val deleteRev = store.getRevision()
+        assertTrue(deleteRev > resetRev)
+    }
+
+    @Test
+    fun newerPreferencesRevisionDoesNotResurrectDeletedItemsFromOlderBackup() {
+        val store = CountUpStore(testContext)
+        val item1 = store.addItem("Keep", 20000L)!!
+        val item2 = store.addItem("Delete", 20000L)!!
+
+        // Simulate an older disk backup containing both item1 and item2 with older revision
+        val backupFile = File(tempDir, "countup_backup.json")
+        val backupRevFile = File(tempDir, "countup_backup.rev")
+        val oldRevision = store.getRevision()
+
+        // Now user deletes item2 in the app -> revision increments
+        store.deleteItem(item2.id)
+        val newRevision = store.getRevision()
+        assertTrue(newRevision > oldRevision)
+
+        // Force the disk backup file and rev to older revision
+        backupFile.writeText(encodeItems(listOf(item1, item2)), Charsets.UTF_8)
+        backupRevFile.writeText(oldRevision.toString(), Charsets.UTF_8)
+
+        // Corrupt primary preferences such that only item1 is salvaged
+        val prefs = testContext.getSharedPreferences("countup_prefs", Context.MODE_PRIVATE)
+        val corrupted = "[{\"id\":\"${item1.id}\",\"name\":\"Keep\",\"epochDay\":20000},{\"id\":\"damaged_end"
+        prefs.edit().putString("items_v1", corrupted).commit()
+
+        // When reading items, store must NOT resurrect item2 from the older backup
+        val store2 = CountUpStore(testContext)
+        val items = store2.items()
+        assertEquals(1, items.size)
+        assertEquals(item1.id, items[0].id)
+    }
+
+    @Test
+    fun atomicResetWithUndoPersistsBothItemAndPendingReset() {
+        val store = CountUpStore(testContext)
+        val item = store.addItem("Reset Target", 20000L)!!
+
+        val snap = item.toResetSnapshot()
+        val record = WidgetResetRecord(
+            id = "w_reset_1",
+            itemId = item.id,
+            itemName = item.name,
+            snapshot = snap,
+            releasedDays = 50L,
+            timestampMillis = 1000L,
+        )
+
+        val success = store.resetWithUndo(item.id, 20050L, record)
+        assertTrue(success)
+
+        // Verify with fresh store instance
+        val store2 = CountUpStore(testContext)
+        val reloadedItem = store2.items().first { it.id == item.id }
+        assertEquals(20050L, reloadedItem.epochDay)
+        assertEquals(1, reloadedItem.resetCount)
+        assertEquals(50L, reloadedItem.totalResetDays)
+
+        val pending = store2.getPendingWidgetResets()
+        assertEquals(1, pending.size)
+        assertEquals("w_reset_1", pending[0].id)
+        assertEquals(item.id, pending[0].itemId)
+    }
+
+    @Test
+    fun replaceRestoreRollbackFromPreRestoreSafetySnapshot() {
+        val store = CountUpStore(testContext)
+        store.addItem("Original Item", 20000L)
+        store.setSortOrder(SortOrder.NAME_ASC)
+        store.setThemeMode(ThemeMode.LIGHT)
+        store.setBackgroundTheme(BackgroundTheme.SAND_DUNES)
+
+        // Write safety snapshot
+        assertTrue(store.writePreRestoreSafetySnapshot())
+        assertTrue(store.hasPreRestoreSafetySnapshot())
+
+        // Simulate a corrupted replace attempt
+        val prefs = testContext.getSharedPreferences("countup_prefs", Context.MODE_PRIVATE)
+        prefs.edit()
+            .putString("items_v1", "corrupted_incomplete_state")
+            .putString("sort_order_v1", SortOrder.DAYS_DESC.id)
+            .commit()
+
+        // Rollback
+        assertTrue(store.restorePreRestoreSafetySnapshot())
+
+        val store2 = CountUpStore(testContext)
+        assertEquals(1, store2.items().size)
+        assertEquals("Original Item", store2.items()[0].name)
+        assertEquals(SortOrder.NAME_ASC, store2.getSortOrder())
+        assertEquals(ThemeMode.LIGHT, store2.getThemeMode())
+        assertEquals(BackgroundTheme.SAND_DUNES, store2.getBackgroundTheme())
+    }
 }

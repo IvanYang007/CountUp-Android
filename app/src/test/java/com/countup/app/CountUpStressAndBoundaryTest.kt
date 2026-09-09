@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -111,11 +112,17 @@ class CountUpStressAndBoundaryTest {
 
             // Sequential rapid user events
             viewModel.onEvent(CountUpUiEvent.SaveItem(name = "Meditation Morning", epochDay = fixedToday.minusDays(10).toEpochDay()))
+            val s1Loading = awaitItem()
+            assertTrue(s1Loading.isSaving)
             val s1 = awaitItem()
+            assertFalse(s1.isSaving)
             assertEquals(1, s1.items.size)
 
             viewModel.onEvent(CountUpUiEvent.SaveItem(name = "Bonsai Care", epochDay = fixedToday.minusDays(20).toEpochDay()))
+            val s2Loading = awaitItem()
+            assertTrue(s2Loading.isSaving)
             val s2 = awaitItem()
+            assertFalse(s2.isSaving)
             assertEquals(2, s2.items.size)
 
             viewModel.onEvent(CountUpUiEvent.SearchQueryChanged("Morning"))

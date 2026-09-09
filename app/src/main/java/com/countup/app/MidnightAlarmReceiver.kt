@@ -42,6 +42,21 @@ class MidnightAlarmReceiver : BroadcastReceiver() {
                 val intent = Intent(context, MidnightAlarmReceiver::class.java).apply {
                     action = ACTION_MIDNIGHT_ROLLOVER
                 }
+
+                if (!hasActiveWidgets(context)) {
+                    val existing = PendingIntent.getBroadcast(
+                        context,
+                        REQUEST_CODE_MIDNIGHT,
+                        intent,
+                        PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE,
+                    )
+                    if (existing != null) {
+                        alarmManager.cancel(existing)
+                        existing.cancel()
+                    }
+                    return
+                }
+
                 val pendingIntent = PendingIntent.getBroadcast(
                     context,
                     REQUEST_CODE_MIDNIGHT,
@@ -64,6 +79,22 @@ class MidnightAlarmReceiver : BroadcastReceiver() {
                 // Defensive fallback: must never crash app
             }
         }
+
+        fun hasActiveWidgets(context: Context): Boolean {
+            return try {
+                val manager = android.appwidget.AppWidgetManager.getInstance(context) ?: return false
+                val providers = listOf(
+                    HeroWidgetReceiver::class.java,
+                    ZenHorizonWidgetReceiver::class.java,
+                    SolarRhythmWidgetReceiver::class.java,
+                    ZenPebbleWidgetReceiver::class.java,
+                    CountUpWidgetReceiver::class.java,
+                )
+                providers.any { manager.getAppWidgetIds(android.content.ComponentName(context, it)).isNotEmpty() }
+            } catch (_: Throwable) {
+                true
+            }
+        }
     }
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -77,15 +108,26 @@ class MidnightAlarmReceiver : BroadcastReceiver() {
 
         val appContext = context.applicationContext
         launchAsync {
-            // Push update pass across all active widget varieties
-            pushWidgetUpdate(appContext)
-            pushAllHeroWidgetsUpdate(appContext)
-            pushAllZenHorizonWidgetsUpdate(appContext)
-            pushAllSolarRhythmWidgetsUpdate(appContext)
-            pushAllZenPebbleWidgetsUpdate(appContext)
-
-            // Re-arm next midnight rollover
-            scheduleMidnightAlarm(appContext)
+            try {
+                // Push update pass across all active widget varieties with failure isolation
+                val updates = listOf<(Context) -> Unit>(
+                    { pushWidgetUpdate(it) },
+                    { pushAllHeroWidgetsUpdate(it) },
+                    { pushAllZenHorizonWidgetsUpdate(it) },
+                    { pushAllSolarRhythmWidgetsUpdate(it) },
+                    { pushAllZenPebbleWidgetsUpdate(it) },
+                )
+                for (update in updates) {
+                    try {
+                        update(appContext)
+                    } catch (_: Throwable) {
+                        // Isolate individual provider failure so sibling providers still update
+                    }
+                }
+            } finally {
+                // Re-arm next midnight rollover in finally block to ensure it is never dropped
+                scheduleMidnightAlarm(appContext)
+            }
         }
     }
 }

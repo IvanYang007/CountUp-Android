@@ -218,8 +218,7 @@ class ResetCountReceiver : BroadcastReceiver() {
                     releasedDays = kotlin.math.abs(releasedDays),
                     timestampMillis = System.currentTimeMillis(),
                 )
-                if (store.resetTo(id, today)) {
-                    store.recordWidgetReset(record)
+                if (store.resetWithUndo(id, today, record)) {
                     pushWidgetUpdate(appContext)
                     pushAllHeroWidgetsUpdate(appContext)
                     pushAllZenHorizonWidgetsUpdate(appContext)

@@ -19,7 +19,7 @@ data class CountUpBackupPayload(
 ) {
     companion object {
         const val CURRENT_SCHEMA_VERSION = 1
-        const val CURRENT_APP_VERSION = "2.19.4"
+        const val CURRENT_APP_VERSION = "2.20.0"
 
         /**
          * Encodes [payload] into a formatted JSON string.
@@ -38,34 +38,93 @@ data class CountUpBackupPayload(
         }
 
         /**
-         * Decodes a raw JSON string into a [CountUpBackupPayload].
-         * Resilient to partially corrupted or truncated payloads by leveraging [salvageItems].
+         * Validates and parses a raw JSON string into a [BackupValidationResult].
+         * Evaluates schema versions and separates fully valid payloads from damaged (salvaged)
+         * or corrupted/unsupported inputs.
          */
-        fun decode(raw: String?): CountUpBackupPayload? {
-            if (raw.isNullOrBlank()) return null
+        fun validate(raw: String?): BackupValidationResult {
+            if (raw.isNullOrBlank()) return BackupValidationResult.Corrupted
+
+            // Check schemaVersion across both intact and damaged envelopes
+            val detectedSchema = extractSchemaVersion(raw)
+            if (detectedSchema != null && detectedSchema > CURRENT_SCHEMA_VERSION) {
+                return BackupValidationResult.UnsupportedSchema(
+                    detectedVersion = detectedSchema,
+                    maxSupportedVersion = CURRENT_SCHEMA_VERSION,
+                )
+            }
+
             return try {
                 val obj = JSONObject(raw)
+                val schemaVersion = obj.optInt("schemaVersion", CURRENT_SCHEMA_VERSION)
+                if (schemaVersion > CURRENT_SCHEMA_VERSION) {
+                    return BackupValidationResult.UnsupportedSchema(
+                        detectedVersion = schemaVersion,
+                        maxSupportedVersion = CURRENT_SCHEMA_VERSION,
+                    )
+                }
                 val itemsJson = obj.optString("itemsJson", "")
-                val items = decodeItems(itemsJson)
-                    ?: salvageItems(itemsJson).ifEmpty { salvageFromTruncatedRaw(raw) }
-                CountUpBackupPayload(
-                    schemaVersion = obj.optInt("schemaVersion", CURRENT_SCHEMA_VERSION),
-                    exportTimestamp = obj.optLong("exportTimestamp", 0L),
-                    appVersion = obj.optString("appVersion", CURRENT_APP_VERSION),
-                    sortOrder = SortOrder.fromId(obj.optString("sortOrder", "")),
-                    themeMode = ThemeMode.fromId(obj.optString("themeMode", "")),
-                    backgroundTheme = BackgroundTheme.fromId(obj.optString("backgroundTheme", "")),
-                    items = items,
-                )
+                val decodedItems = decodeItems(itemsJson)
+                if (decodedItems != null) {
+                    val payload = CountUpBackupPayload(
+                        schemaVersion = schemaVersion,
+                        exportTimestamp = obj.optLong("exportTimestamp", 0L),
+                        appVersion = obj.optString("appVersion", CURRENT_APP_VERSION),
+                        sortOrder = SortOrder.fromId(obj.optString("sortOrder", "")),
+                        themeMode = ThemeMode.fromId(obj.optString("themeMode", "")),
+                        backgroundTheme = BackgroundTheme.fromId(obj.optString("backgroundTheme", "")),
+                        items = decodedItems,
+                    )
+                    BackupValidationResult.Valid(payload)
+                } else {
+                    val salvaged = salvageItems(itemsJson).ifEmpty { salvageFromTruncatedRaw(raw) }
+                    if (salvaged.isNotEmpty()) {
+                        val payload = CountUpBackupPayload(
+                            schemaVersion = schemaVersion,
+                            exportTimestamp = obj.optLong("exportTimestamp", 0L),
+                            appVersion = obj.optString("appVersion", CURRENT_APP_VERSION),
+                            sortOrder = SortOrder.fromId(obj.optString("sortOrder", "")),
+                            themeMode = ThemeMode.fromId(obj.optString("themeMode", "")),
+                            backgroundTheme = BackgroundTheme.fromId(obj.optString("backgroundTheme", "")),
+                            items = salvaged,
+                        )
+                        BackupValidationResult.Damaged(
+                            salvagedPayload = payload,
+                            recoveredCount = salvaged.size,
+                        )
+                    } else {
+                        BackupValidationResult.Corrupted
+                    }
+                }
             } catch (_: Exception) {
                 // If outer envelope is truncated or damaged, salvage valid item tokens directly
                 val salvaged = salvageFromTruncatedRaw(raw)
                 if (salvaged.isNotEmpty()) {
-                    CountUpBackupPayload(items = salvaged)
+                    BackupValidationResult.Damaged(
+                        salvagedPayload = CountUpBackupPayload(items = salvaged),
+                        recoveredCount = salvaged.size,
+                    )
                 } else {
-                    null
+                    BackupValidationResult.Corrupted
                 }
             }
+        }
+
+        /**
+         * Decodes a raw JSON string into a [CountUpBackupPayload].
+         * Resilient to partially corrupted or truncated payloads by leveraging [validate].
+         */
+        fun decode(raw: String?): CountUpBackupPayload? {
+            return when (val result = validate(raw)) {
+                is BackupValidationResult.Valid -> result.payload
+                is BackupValidationResult.Damaged -> result.salvagedPayload
+                else -> null
+            }
+        }
+
+        private fun extractSchemaVersion(raw: String): Int? {
+            val match = Regex("\"schemaVersion\"\\s*:\\s*(\\d+)").find(raw)
+            return match?.groupValues?.getOrNull(1)?.toIntOrNull()
         }
 
         private fun salvageFromTruncatedRaw(raw: String): List<CountUpItem> {
@@ -97,4 +156,14 @@ enum class RestoreStrategy {
 
     /** Overwrites all local items and appearance settings with the backup snapshot. */
     REPLACE_ALL,
+}
+
+/**
+ * Outcome hierarchy when validating an imported backup file.
+ */
+sealed interface BackupValidationResult {
+    data class Valid(val payload: CountUpBackupPayload) : BackupValidationResult
+    data class UnsupportedSchema(val detectedVersion: Int, val maxSupportedVersion: Int) : BackupValidationResult
+    data class Damaged(val salvagedPayload: CountUpBackupPayload, val recoveredCount: Int) : BackupValidationResult
+    data object Corrupted : BackupValidationResult
 }

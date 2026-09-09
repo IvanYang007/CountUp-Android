@@ -36,12 +36,24 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private val snackbarHostState = SnackbarHostState()
+
     private val exportBackupLauncher = registerForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
     ) { uri ->
         if (uri != null) {
-            contentResolver.openOutputStream(uri)?.let { stream ->
-                viewModel.onEvent(CountUpUiEvent.ExportBackupToStream(stream))
+            try {
+                contentResolver.openOutputStream(uri)?.let { stream ->
+                    viewModel.onEvent(CountUpUiEvent.ExportBackupToStream(stream))
+                } ?: run {
+                    lifecycleScope.launch {
+                        snackbarHostState.showSnackbar(getString(R.string.backup_io_error))
+                    }
+                }
+            } catch (_: Exception) {
+                lifecycleScope.launch {
+                    snackbarHostState.showSnackbar(getString(R.string.backup_io_error))
+                }
             }
         }
     }
@@ -53,9 +65,15 @@ class MainActivity : ComponentActivity() {
             try {
                 contentResolver.openInputStream(uri)?.let { stream ->
                     viewModel.onEvent(CountUpUiEvent.ImportBackupFromStream(stream))
+                } ?: run {
+                    lifecycleScope.launch {
+                        snackbarHostState.showSnackbar(getString(R.string.backup_io_error))
+                    }
                 }
             } catch (_: Exception) {
-                // Handled gracefully without crash
+                lifecycleScope.launch {
+                    snackbarHostState.showSnackbar(getString(R.string.backup_io_error))
+                }
             }
         }
     }
@@ -88,8 +106,6 @@ class MainActivity : ComponentActivity() {
             val isDark = state.themeMode.isDark(systemDark)
 
             ZenTheme(darkTheme = isDark) {
-                val snackbarHostState = remember { SnackbarHostState() }
-
                 LaunchedEffect(Unit) {
                     handleIntent(intent)
                     viewModel.effects.collect { effect ->
@@ -155,8 +171,11 @@ class MainActivity : ComponentActivity() {
             intent.data?.toString() == "countup://new"
         if (targetItemId != null) {
             viewModel.onEvent(CountUpUiEvent.OpenTargetItem(targetItemId))
+            intent.removeExtra(WidgetNavigationContract.EXTRA_TARGET_ITEM_ID)
         } else if (isAdd) {
             viewModel.onEvent(CountUpUiEvent.OpenEditor(target = null))
+            intent.action = null
+            intent.data = null
         } else {
             val pinProviderClass = when (intent.data?.toString()) {
                 "countup://pin_hero" -> HeroWidgetReceiver::class.java
@@ -165,6 +184,7 @@ class MainActivity : ComponentActivity() {
                 else -> null
             }
             if (pinProviderClass != null) {
+                intent.data = null
                 val manager = getSystemService(android.appwidget.AppWidgetManager::class.java)
                 if (manager.isRequestPinAppWidgetSupported) {
                     val myProvider = android.content.ComponentName(this, pinProviderClass)

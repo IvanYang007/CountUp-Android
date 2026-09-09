@@ -4,8 +4,12 @@
 -keep class com.countup.app.CountUpItem { *; }
 -keep class com.countup.app.BackgroundTheme { *; }
 -keep class com.countup.app.SortOrder { *; }
+-keep class com.countup.app.ThemeMode { *; }
 -keep class com.countup.app.CountUpBackupPayload { *; }
 -keep class com.countup.app.RestoreStrategy { *; }
+-keep class com.countup.app.WidgetResetRecord { *; }
+-keep class com.countup.app.ResetSnapshot { *; }
+-keep class com.countup.app.BackupValidationResult* { *; }
 
 # Keep Enum values and valueOf methods for reflection/serialization
 -keepclassmembers enum * {

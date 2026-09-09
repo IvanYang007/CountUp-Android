@@ -53,13 +53,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -93,6 +96,7 @@ fun ItemEditorDialog(
     onDismiss: () -> Unit,
     onSave: (ItemDraft) -> Unit,
     modifier: Modifier = Modifier,
+    isSaving: Boolean = false,
 ) {
     var name by rememberSaveable { mutableStateOf(item?.name ?: "") }
     var comment by rememberSaveable { mutableStateOf(item?.comment ?: "") }
@@ -628,6 +632,7 @@ fun ItemEditorDialog(
                         )
                     )
                 },
+                enabled = !isSaving,
                 modifier = Modifier.pressScale(saveInteraction, ZenTactileHierarchy.Level2PrimaryAction),
                 interactionSource = saveInteraction,
                 shape = RoundedCornerShape(10.dp),
@@ -845,6 +850,7 @@ fun BackupRestorePreviewDialog(
     onDismiss: () -> Unit,
     onConfirmRestore: (RestoreStrategy) -> Unit,
     modifier: Modifier = Modifier,
+    isDamaged: Boolean = false,
 ) {
     var selectedStrategy by rememberSaveable { mutableStateOf(RestoreStrategy.MERGE_KEEP_EXISTING) }
     val (dialogSurface, dialogBorder) = zenDialogStyle(RoundedCornerShape(20.dp))
@@ -882,6 +888,24 @@ fun BackupRestorePreviewDialog(
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState()),
             ) {
+                if (isDamaged) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f))
+                            .border(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.6f), RoundedCornerShape(12.dp))
+                            .padding(horizontal = 14.dp, vertical = 10.dp),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.backup_restore_damaged_notice, payload.items.size),
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp, lineHeight = 16.sp),
+                            color = MaterialTheme.colorScheme.error,
+                        )
+                    }
+                    Spacer(Modifier.height(12.dp))
+                }
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -942,15 +966,16 @@ fun BackupRestorePreviewDialog(
                 RestoreStrategyOptionCard(
                     title = stringResource(R.string.backup_restore_strategy_replace),
                     description = stringResource(R.string.backup_restore_strategy_replace_desc),
-                    isSelected = selectedStrategy == RestoreStrategy.REPLACE_ALL,
-                    onClick = { selectedStrategy = RestoreStrategy.REPLACE_ALL },
+                    isSelected = !isDamaged && selectedStrategy == RestoreStrategy.REPLACE_ALL,
+                    enabled = !isDamaged,
+                    onClick = { if (!isDamaged) selectedStrategy = RestoreStrategy.REPLACE_ALL },
                 )
             }
         },
         confirmButton = {
             val confirmInteraction = rememberPressSource()
             Button(
-                onClick = { onConfirmRestore(selectedStrategy) },
+                onClick = { onConfirmRestore(if (isDamaged) RestoreStrategy.MERGE_KEEP_EXISTING else selectedStrategy) },
                 modifier = Modifier.pressScale(
                     interactionSource = confirmInteraction,
                     targetScale = ZenTactileHierarchy.Level2PrimaryAction,
@@ -988,11 +1013,12 @@ private fun RestoreStrategyOptionCard(
     title: String,
     description: String,
     isSelected: Boolean,
+    enabled: Boolean = true,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val zenColors = LocalZenColors.current
-    val borderModifier = if (isSelected) {
+    val borderModifier = if (isSelected && enabled) {
         Modifier.border(1.5.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp))
     } else {
         Modifier.border(1.dp, zenColors.hairlineRule, RoundedCornerShape(12.dp))
@@ -1004,19 +1030,24 @@ private fun RestoreStrategyOptionCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .then(borderModifier)
-            .background(if (isSelected) zenColors.paperCard else Color.Transparent)
+            .background(if (isSelected && enabled) zenColors.paperCard else Color.Transparent)
+            .alpha(if (enabled) 1f else 0.45f)
             .clickable(
+                enabled = enabled,
                 role = Role.RadioButton,
                 onClick = onClick,
             )
-            .semantics { selected = isSelected }
+            .semantics {
+                selected = isSelected
+                if (!enabled) disabled()
+            }
             .padding(12.dp),
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                    fontWeight = if (isSelected && enabled) FontWeight.SemiBold else FontWeight.Normal,
                     fontSize = 13.5.sp,
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
@@ -1029,10 +1060,12 @@ private fun RestoreStrategyOptionCard(
             )
         }
         Text(
-            text = if (isSelected) "●" else "○",
+            text = if (isSelected && enabled) "●" else "○",
             fontSize = 14.sp,
-            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(start = 8.dp),
+            color = if (isSelected && enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .clearAndSetSemantics { },
         )
     }
 }
