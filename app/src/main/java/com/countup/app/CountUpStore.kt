@@ -508,7 +508,7 @@ class CountUpStore(context: Context) {
      *
      * In [RestoreStrategy.MERGE_KEEP_EXISTING]:
      * Retains all existing items on this device. Appends only novel items whose
-     * ID and normalized name are not already present. Preserves existing appearance settings.
+     * ID (UUID) is not already present. Preserves existing appearance settings.
      */
     fun restoreBackupPayload(payload: CountUpBackupPayload, strategy: RestoreStrategy): Boolean {
         return synchronized(globalStoreLock) {
@@ -522,15 +522,12 @@ class CountUpStore(context: Context) {
                 RestoreStrategy.MERGE_KEEP_EXISTING -> {
                     val currentItems = items().toMutableList()
                     val existingIds = currentItems.map { it.id }.toMutableSet()
-                    val existingNames = currentItems.map { it.name.trim().lowercase() }.toMutableSet()
 
                     val itemsToAdd = mutableListOf<CountUpItem>()
                     for (item in payload.items) {
-                        val normName = item.name.trim().lowercase()
-                        if (item.id !in existingIds && normName !in existingNames) {
+                        if (item.id !in existingIds) {
                             itemsToAdd.add(item)
                             existingIds.add(item.id)
-                            existingNames.add(normName)
                         }
                     }
                     currentItems.addAll(itemsToAdd)

@@ -180,13 +180,10 @@ class FakeCountUpRepository(
             }
             RestoreStrategy.MERGE_KEEP_EXISTING -> {
                 val existingIds = itemsList.map { it.id }.toMutableSet()
-                val existingNames = itemsList.map { it.name.trim().lowercase() }.toMutableSet()
                 for (item in payload.items) {
-                    val normName = item.name.trim().lowercase()
-                    if (item.id !in existingIds && normName !in existingNames) {
+                    if (item.id !in existingIds) {
                         itemsList.add(item)
                         existingIds.add(item.id)
-                        existingNames.add(normName)
                     }
                 }
             }

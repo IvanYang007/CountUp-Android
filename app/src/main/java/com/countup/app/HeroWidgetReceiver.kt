@@ -53,11 +53,16 @@ class HeroWidgetReceiver : AppWidgetProvider() {
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
         val appContext = context.applicationContext
+        MidnightAlarmReceiver.scheduleMidnightAlarm(appContext)
         launchAsync {
             for (appWidgetId in appWidgetIds) {
                 pushHeroWidgetUpdate(appContext, appWidgetId)
             }
         }
+    }
+
+    override fun onEnabled(context: Context) {
+        MidnightAlarmReceiver.scheduleMidnightAlarm(context.applicationContext)
     }
 
     override fun onAppWidgetOptionsChanged(

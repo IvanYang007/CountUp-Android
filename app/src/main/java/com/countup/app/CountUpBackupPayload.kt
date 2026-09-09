@@ -92,7 +92,7 @@ data class CountUpBackupPayload(
  * Strategy for reconciling imported backup items with existing on-device data.
  */
 enum class RestoreStrategy {
-    /** Retains all existing items; appends novel items ignoring duplicate IDs and names. */
+    /** Retains all existing items; appends novel items by unique ID, allowing distinct items with shared names. */
     MERGE_KEEP_EXISTING,
 
     /** Overwrites all local items and appearance settings with the backup snapshot. */

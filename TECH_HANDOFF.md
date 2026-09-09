@@ -35,9 +35,9 @@ Versions live in `gradle/libs.versions.toml`.
 | RemoteViews (platform) | — | Home-screen widgets; pure platform RemoteViews for instant battery-efficient updates |
 | compileSdk / targetSdk / minSdk | 37 / 37 / 26 | |
 
-**Key build gotcha:** AGP 9 has built-in Kotlin — do not re-add `kotlin-android`. The `kotlin { compilerOptions {} }` block was also removed; `compileOptions` JDK 17 covers the JVM target. Release builds have R8 minification (`isMinifyEnabled = true`) and resource shrinking enabled.
+**Key build gotcha:** AGP 9 uses built-in Kotlin — do not re-add `kotlin-android`. Release builds have R8 minification (`isMinifyEnabled = true`) and resource shrinking enabled, falling back to debug signing when release keystores are absent in CI.
 
-Local SDK at `D:\Android\Sdk` (see `local.properties`).
+SDK configured via `local.properties` (`sdk.dir`) or standard `ANDROID_HOME` / `ANDROID_SDK_ROOT` environment variables.
 
 ---
 
@@ -53,10 +53,10 @@ Production Kotlin is organized under `app/src/main/java/com/countup/app/`:
 | `CountUpContent.kt` | Stateless root composable: full-bleed edge-to-edge ink background, odometer digit roll animations, search popover, restore preview dialogs |
 | `ZenTheme.kt` | Mid-Century Modern Zen Paper token system via `CompositionLocalProvider(LocalZenColors)`, spring physics `pressScale`, a11y standards |
 | `CountUpRepository.kt` | Clean repository abstraction with `DefaultCountUpRepository` backed by zero-data-loss `CountUpStore` |
-| `BackupRepository.kt` | Storage Access Framework (SAF) JSON backup export and interactive restore pipeline with pre-validation, preview extraction, and merge/replace strategies |
+| `BackupRepository.kt` | Storage Access Framework (SAF) JSON backup export and interactive restore pipeline with pre-validation, preview extraction, and UUID-authoritative merge/replace strategies |
 | `CountUpStore.kt` | Zero-data-loss persistence: 5-tier fail-safe hierarchy (Primary Prefs -> JSON Salvage -> Atomic Disk Backup `countup_backup.json` -> Legacy Migration -> Timestamped Quarantine) + widget preference bindings |
 | `CountUpItem.kt` | `@Immutable` data class (`id`, `name`, `epochDay`, `comment`, `icon`, `futureFlag`, `showInWidget`, `cardColor`) + JSON `encodeItems`/`decodeItems` + balanced-brace stream `salvageItems` |
-| `MidnightAlarmReceiver.kt` | Battery-friendly AlarmManager RTC broadcast receiver waking at `00:00:01` local time to advance day counts across all placed widgets |
+| `MidnightAlarmReceiver.kt` | Battery-friendly AlarmManager RTC broadcast receiver (`setAndAllowWhileIdle`) advancing day counts without persistent background services, re-registered on widget updates post-reboot |
 | `WidgetNavigationContract.kt` | Partitioned pending intent request codes and navigation routing for widget cell taps, resets, and unit cycling |
 | `ZenWidgetReducer.kt` | Centralized state reduction and palette resolution for all widget families |
 | `WidgetThemeTokens.kt` | Visual styling tokens, contrast definitions, and dimensions for widget canvases |
@@ -72,7 +72,7 @@ Production Kotlin is organized under `app/src/main/java/com/countup/app/`:
 | (debug) `WidgetHostActivity.kt` | Debug-only activity to render widgets on-device for automated screenshot capture (excluded in release) |
 
 Tests:
-- `app/src/test/...` (JVM): **335 JVM unit tests** (100% green) covering `CountUpViewModelTest` (Turbine), `CountUpRepositoryTest`, `BackupRepositoryTest`, `HeroWidgetTest`, `ZenPebbleTest`, `SolarRhythmConfigurationTest`, `WidgetContractInvariantsTest`, `WidgetMemoryBudgetGateTest`, `CountUpStressAndBoundaryTest`, `DateConversionTest`, `DaysSinceTest`, and `CountUpContractAndFlowTest`.
+- `app/src/test/...` (JVM): **336 JVM unit tests** (100% green) covering `CountUpViewModelTest` (Turbine), `CountUpRepositoryTest`, `BackupRepositoryTest`, `HeroWidgetTest`, `ZenPebbleTest`, `SolarRhythmConfigurationTest`, `WidgetContractInvariantsTest`, `WidgetMemoryBudgetGateTest`, `CountUpStressAndBoundaryTest`, `DateConversionTest`, `DaysSinceTest`, `MidnightAlarmReceiverTest`, and `CountUpContractAndFlowTest`.
 - `app/src/androidTest/...` (device): `ComposeUiSmokeTest` (stateless UI & a11y semantics), `CountUpStoreInstrumentedTest` (CRUD, migration, recovery).
 
 ---
@@ -91,7 +91,7 @@ One value per item, stored as a JSON array string under key `items_v1` in privat
 - **Writes use `commit()` and `fd.sync()`** synchronously before updating widgets (write-before-update ordering).
 - **Two-Tier Backup Architecture:**
   1. **Tier 1 (Automated OS Sync):** `android:allowBackup="true"` with `backup_rules.xml` and `data_extraction_rules.xml` synchronizing `countup_prefs.xml` and `countup_backup.json` to encrypted cloud storage (GMS) or D2D transfer tools (Mi Mover, Phone Clone).
-  2. **Tier 2 (Offline SAF Export/Import):** User-triggered unencrypted JSON archive using Android's system document picker without requesting runtime storage permissions. Pre-validation preview screen offers Merge (duplicate-aware) or Clean Replace strategies.
+  2. **Tier 2 (Offline SAF Export/Import):** User-triggered unencrypted JSON archive using Android's system document picker without requesting runtime storage permissions. Pre-validation preview screen offers Merge (UUID deduplicated, preserving distinct items with identical names) or Clean Replace strategies.
 
 ---
 
@@ -112,11 +112,11 @@ One value per item, stored as a JSON array string under key `items_v1` in privat
 ## 6. Build / test / run
 
 ```bash
-export JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-17.0.20.8-hotspot"
+export JAVA_HOME="/path/to/jdk-17"   # or set via Android Studio / system PATH
 ./gradlew clean
 ./gradlew assembleDebug             # debug APK
 ./gradlew assembleRelease           # signed release APK + AAB bundle (R8 minified)
-./gradlew test                      # 335 JVM unit tests (100% green)
+./gradlew test                      # 336 JVM unit tests (100% green)
 ./gradlew connectedDebugAndroidTest # device tests (emulator/device online)
 ./gradlew lintDebug                 # 0 errors
 ```
@@ -145,6 +145,9 @@ adb shell am start -n com.countup.app/.MainActivity
 1. **Widget screenshot (debug builds only):** Renderable via `WidgetHostActivity.kt` for visual auditing.
 2. **Interactive Design Lab:** `prototype_zen_widgets.html` and `artifacts/prototype_hero_1x1_exploration.html` provide standalone interactive testbeds for exploring widget typography and layouts across multiple screen densities.
 3. **Icons:** Google Material Icons (Apache 2.0) and Phosphor Icons (MIT).
+4. **CI Automation:** [`.github/workflows/ci.yml`](.github/workflows/ci.yml) validates `lintDebug`, `test`, and `assembleRelease` on Ubuntu runners on every push and PR to `main`.
+5. **Keystore Management & Rotation:** [`docs/CREDENTIAL_ROTATION.md`](docs/CREDENTIAL_ROTATION.md) outlines production release key rotation and history scrubbing commands via `git-filter-repo`.
+6. **Zero-Permission Reboot Rollover:** `MidnightAlarmReceiver` uses battery-friendly RTC alarms (`setAndAllowWhileIdle`), re-registering on reboot whenever widget providers are updated or enabled.
 
 ---
 

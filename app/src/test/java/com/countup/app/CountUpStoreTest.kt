@@ -597,9 +597,9 @@ class CountUpStoreTest {
             themeMode = ThemeMode.DARK,
             backgroundTheme = BackgroundTheme.MOUNTAIN,
             items = listOf(
-                // Same ID as existing1 -> should be ignored
+                // Same ID as existing1 -> should be ignored (deduped by UUID)
                 CountUpItem(id = existing1.id, name = "Different Name", epochDay = 20100),
-                // Same normalized name ("yoga") with different ID -> should be ignored
+                // Same normalized name ("yoga") with different ID -> should be preserved (distinct milestone)
                 CountUpItem(id = "novel-id-1", name = "  YoGa  ", epochDay = 20150),
                 // Completely novel item -> should be appended
                 CountUpItem(id = "novel-id-2", name = "Calligraphy", epochDay = 20250),
@@ -611,11 +611,13 @@ class CountUpStoreTest {
 
         val store2 = CountUpStore(testContext)
         val items = store2.items()
-        assertEquals(3, items.size)
+        assertEquals(4, items.size)
         assertEquals(existing1.id, items[0].id)
         assertEquals(existing2.id, items[1].id)
-        assertEquals("novel-id-2", items[2].id)
-        assertEquals("Calligraphy", items[2].name)
+        assertEquals("novel-id-1", items[2].id)
+        assertEquals("YoGa", items[2].name)
+        assertEquals("novel-id-2", items[3].id)
+        assertEquals("Calligraphy", items[3].name)
 
         // Verifies settings are preserved
         assertEquals(SortOrder.DAYS_DESC, store2.getSortOrder())

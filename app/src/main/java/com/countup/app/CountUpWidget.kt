@@ -58,9 +58,14 @@ class CountUpWidgetReceiver : AppWidgetProvider() {
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
         val appContext = context.applicationContext
+        MidnightAlarmReceiver.scheduleMidnightAlarm(appContext)
         launchAsync {
             pushWidgetUpdate(appContext)
         }
+    }
+
+    override fun onEnabled(context: Context) {
+        MidnightAlarmReceiver.scheduleMidnightAlarm(context.applicationContext)
     }
 
     override fun onAppWidgetOptionsChanged(

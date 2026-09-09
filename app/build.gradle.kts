@@ -18,22 +18,25 @@ android {
         versionName = "2.19.4"
     }
 
+    val releaseKeystore = file("../keystore/countup-release.jks")
     signingConfigs {
-        create("release") {
-            storeFile = file("../keystore/countup-release.jks")
-            val localProps = Properties().apply {
-                val propFile = rootProject.file("local.properties")
-                if (propFile.exists()) {
-                    FileInputStream(propFile).use { load(it) }
+        if (releaseKeystore.exists()) {
+            create("release") {
+                storeFile = releaseKeystore
+                val localProps = Properties().apply {
+                    val propFile = rootProject.file("local.properties")
+                    if (propFile.exists()) {
+                        FileInputStream(propFile).use { load(it) }
+                    }
                 }
+                val pass = System.getenv("COUNTUP_KEYSTORE_PASS")
+                    ?: localProps.getProperty("countup.keystore.pass")
+                    ?: file("../keystore/keystore-pass.txt").takeIf { it.exists() }?.readText()?.trim()
+                    ?: ""
+                storePassword = pass
+                keyAlias = "countup"
+                keyPassword = pass
             }
-            val pass = System.getenv("COUNTUP_KEYSTORE_PASS")
-                ?: localProps.getProperty("countup.keystore.pass")
-                ?: file("../keystore/keystore-pass.txt").takeIf { it.exists() }?.readText()?.trim()
-                ?: ""
-            storePassword = pass
-            keyAlias = "countup"
-            keyPassword = pass
         }
     }
 
@@ -41,7 +44,7 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            signingConfig = signingConfigs.getByName("release")
+            signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
             ndk {
                 debugSymbolLevel = "FULL"
             }

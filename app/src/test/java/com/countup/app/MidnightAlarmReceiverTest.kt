@@ -60,6 +60,15 @@ class MidnightAlarmReceiverTest {
     }
 
     @Test
+    fun widgetReceiversReRegisterMidnightAlarmOnEnabled() {
+        CountUpWidgetReceiver().onEnabled(testContext)
+        HeroWidgetReceiver().onEnabled(testContext)
+        ZenHorizonWidgetReceiver().onEnabled(testContext)
+        SolarRhythmWidgetReceiver().onEnabled(testContext)
+        ZenPebbleWidgetReceiver().onEnabled(testContext)
+    }
+
+    @Test
     fun midnightAlarmConstantsAreProperlyDefined() {
         assertEquals("com.countup.app.ACTION_MIDNIGHT_ROLLOVER", MidnightAlarmReceiver.ACTION_MIDNIGHT_ROLLOVER)
         assertEquals(24001, MidnightAlarmReceiver.REQUEST_CODE_MIDNIGHT)

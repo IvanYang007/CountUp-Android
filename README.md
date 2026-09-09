@@ -1,5 +1,7 @@
 # CountUp
 
+[![CI](https://github.com/IvanYang007/CountUp-Android/actions/workflows/ci.yml/badge.svg)](https://github.com/IvanYang007/CountUp-Android/actions/workflows/ci.yml)
+
 ## 1. What the app does
 
 An intentionally small, fully offline Android app and home-screen widget suite that tracks
@@ -21,29 +23,24 @@ the **days since a set of anchor dates** (e.g. last haircut, a habit streak, sob
 - **Accessibility First:** Full TalkBack screen reader semantics, descriptive action labels, and tactile haptic feedback.
 - **Privacy First:** 100% offline, zero runtime permissions, no accounts, no ads, no trackers, no cloud servers, and no background daemon.
 
-## 2. Build requirements and pinned versions
+## 2. Build requirements
 
-Versions are pinned in `gradle/libs.versions.toml` and deliberately **not** upgraded.
+Versions are pinned in `gradle/libs.versions.toml`.
 
 | Component | Version |
 |---|---|
-| Android Gradle Plugin | `9.4.0` (built-in Kotlin) |
+| Android Gradle Plugin | `9.3.0` / `9.4.0` (built-in Kotlin) |
 | Gradle | `9.7.1` |
 | JDK | `17` |
 | Kotlin | `2.3.21` |
 | Compose BOM | `2026.06.00` |
 | compileSdk / targetSdk / minSdk | `37` / `37` / `26` |
 
-> AGP 9 uses built-in Kotlin, so no `kotlin-android` plugin is applied; Kotlin
-> `2.3.21` is provided via a `buildscript` classpath (above AGP's bundled KGP).
+Prerequisites:
 
-Requirements on this machine:
-
-- JDK 17 (`JAVA_HOME` set to the Temurin 17 install).
-- Android SDK at `D:\Android\Sdk` (`local.properties` → `sdk.dir`).
-- SDK packages: `platforms;android-37.1`, `platforms;android-26`, `build-tools;37.0.0`,
-  `platform-tools`, `emulator`, and system images `android-26;google_apis;x86_64`
-  and `android-36;google_apis;x86_64` (AVDs `countUp_api26`, `countUp_api36`).
+- JDK 17 (`JAVA_HOME` set, or detected via Gradle).
+- Android SDK (`local.properties` → `sdk.dir=<path_to_sdk>` or `ANDROID_HOME` / `ANDROID_SDK_ROOT` environment variable).
+- SDK packages: `platforms;android-37`, `build-tools;37.0.0`, `platform-tools`.
 
 ## 3. How to build and run
 
@@ -51,7 +48,7 @@ Requirements on this machine:
 ./gradlew clean
 ./gradlew assembleDebug             # debug APK
 ./gradlew assembleRelease           # signed release APK & bundle (R8 minified)
-./gradlew test                      # 335 JVM unit tests (100% pass)
+./gradlew test                      # 336 JVM unit tests (100% pass)
 ./gradlew connectedDebugAndroidTest # instrumented tests (emulator/device online)
 ./gradlew lintDebug                 # Android Lint (0 errors)
 ```
@@ -91,6 +88,10 @@ Long-press home screen → **Widgets** → **Solar Rhythm** → drag to a slot.
 Long-press home screen → **Widgets** → **Zen Pebble** → drag to a slot.
 - **Universal OEM Grid Resilience:** Hardened specifically for OEM launchers (Samsung One UI, Xiaomi HyperOS, Vivo OriginOS, OPPO ColorOS) with `resizeMode="none"`, uniform auto-sizing text, and bounded 16dp corners to prevent slot-0 drop snapping.
 
+### 6. Reset Recovery & Accidental Tap Protection
+- **Two-Tap Arming Protection:** Directly on the home screen, tapping a counter numeral displays `"0?"`. A second tap within 1.5 seconds confirms the reset; otherwise it disarms safely.
+- **In-App Undo Whisper & Recovery Banner:** If an item is reset accidentally (from a widget or inside the app), opening the CountUp app immediately presents an in-card undo whisper or top recovery banner allowing you to restore your previous anchor date and historical streak metrics with a single tap.
+
 **Widget screenshot (debug builds only):** Renderable on-device via debug-only host activity:
 
 ```bash
@@ -109,25 +110,30 @@ CountUp protects user streaks and history across device upgrades and factory res
 - **Tier 2: Self-Sovereign JSON Portability via Storage Access Framework (SAF)**
   - Accessible directly in the app settings under **Data & Backup**.
   - **Export:** Generates a clean, UTF-8 encoded, unencrypted `.json` backup file using Android's system document creation picker (`ACTION_CREATE_DOCUMENT`) without requesting storage permissions.
-  - **Import & Preview:** Selects a `.json` backup file via `ACTION_OPEN_DOCUMENT`. Displays a pre-restore preview showing item counts, anchor dates, and notes, letting you choose between **Merge** (detects duplicates by ID and name) or **Clean Replace**.
+  - **Import & Preview:** Selects a `.json` backup file via `ACTION_OPEN_DOCUMENT`. Displays a pre-restore preview showing item counts, anchor dates, and notes, letting you choose between **Merge** (deduplicates by immutable UUID, preserving distinct milestones that share names) or **Clean Replace**.
   - **Resilience:** Defensive exception handling ensures no crashes on stripped custom ROMs or file managers that misreport JSON MIME types.
 
-## 6. Midnight Rollover (Zero-Battery RTC Alarm)
+## 6. Midnight Rollover (Zero-Battery Inexact RTC Alarm)
 
 Widgets automatically advance at midnight without requiring battery-draining background services or `WorkManager`:
-- `MidnightAlarmReceiver` registers a single, idempotent alarm with Android's `AlarmManager` targeting `00:00:01` local time.
+- `MidnightAlarmReceiver` registers a battery-friendly, low-power RTC alarm (`setAndAllowWhileIdle`) targeting `00:00:01` local time.
+- Preserves the zero-permission model by avoiding `SCHEDULE_EXACT_ALARM` or `WAKE_LOCK`. Alarms respect Android Doze mode and advance widget counters during Doze maintenance windows or immediately upon screen wake.
+- Automatically re-registers idempotently across device reboots whenever home-screen widgets update or become enabled.
 - Handles time zone changes (`ACTION_TIMEZONE_CHANGED`) and manual clock adjustments (`ACTION_TIME_SET`) to recalculate and refresh immediately.
 
 ## 7. Verification performed
 
-- **335 JVM Unit Tests** (100% passing) across data models, repository fail-safes, MVI ViewModel, JSON salvage parsing, widget reducers, navigation contracts, and backup merge/replace strategies.
+- **336 JVM Unit Tests** (100% passing) across data models, repository fail-safes, MVI ViewModel, JSON salvage parsing, widget reducers, navigation contracts, and backup merge/replace strategies.
 - Clean debug and release builds with R8 minification and resource shrinking enabled (`isMinifyEnabled = true`, `isShrinkResources = true`).
 - Android Lint (`lintDebug`): **0 errors**.
+- Automated GitHub Actions CI workflow running test, lint, and assemble on all pull requests.
 - Strict zero-permission guard: manifest explicitly strips `WAKE_LOCK`, `ACCESS_NETWORK_STATE`, `RECEIVE_BOOT_COMPLETED`, and `FOREGROUND_SERVICE`. Only `VIBRATE` is declared for tactile haptic feedback.
 - Physical device & emulator verification on Android 8.0 (API 26) through Android 15/16 (API 36/37).
 
-## 8. Icons & licensing
+## 8. Licensing
+
+CountUp is open source licensed under the [Apache License 2.0](LICENSE).
 
 Item icons are a curated set from **Google Material Icons** (fonts.google.com/icons)
 and **Phosphor Icons**, licensed under the **Apache License 2.0** and **MIT License**, which permit
-free commercial use. A copy of the Apache license is at https://www.apache.org/licenses/LICENSE-2.0.
+free commercial use. A copy of the Apache license is provided in the repository root [LICENSE](LICENSE) and at https://www.apache.org/licenses/LICENSE-2.0.

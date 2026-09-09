@@ -130,6 +130,18 @@ Debug builds run smoothly in the emulator, but release builds (`assembleRelease`
 
 ---
 
+## 4. Reboot Midnight Alarm Rollover & Zero-Permission Invariant
+
+### Symptom
+After a device reboot, midnight rollover might not fire if `MidnightAlarmReceiver` was only scheduled on app startup and `RECEIVE_BOOT_COMPLETED` is omitted.
+
+### Architectural Root Cause & Solution
+1. **Zero-Permission Model**: `RECEIVE_BOOT_COMPLETED` is explicitly stripped from the merged manifest via `tools:node="remove"` to preserve 100% offline privacy and zero battery-drain background services.
+2. **Launcher Boot Dispatch**: The Android framework automatically dispatches `onUpdate()` and `onEnabled()` broadcasts to active home-screen widget providers after device boot.
+3. **Idempotent Alarm Restoration**: Every widget provider (`CountUpWidget`, `HeroWidgetReceiver`, `SolarRhythmWidget`, `ZenHorizonWidgetReceiver`, `ZenPebbleWidgetReceiver`) calls `MidnightAlarmReceiver.scheduleMidnightAlarm(context)` inside `onUpdate()` and `onEnabled()`. Alarms are idempotently refreshed without requiring a boot broadcast receiver.
+
+---
+
 ## Quick Reference Checklist for New Widgets or Refactoring
 
 Before committing any widget changes or releasing a new version:
@@ -137,6 +149,7 @@ Before committing any widget changes or releasing a new version:
 - [ ] **1x1 Widgets**: Does `zen_pebble_widget_info.xml` have `android:resizeMode="none"` and `android:widgetFeatures="reconfigurable|configuration_optional"`?
 - [ ] **Configurable Widgets**: Does provider XML declare `android:configure` and is the activity registered in `AndroidManifest.xml` with `APPWIDGET_CONFIGURE`?
 - [ ] **Instance Bindings**: Does `onDeleted()` clean up `CountUpStore` widget bindings?
+- [ ] **Midnight Alarm**: Do `onUpdate()` and `onEnabled()` re-register `MidnightAlarmReceiver.scheduleMidnightAlarm(context)`?
 - [ ] **ProGuard Rules**: Are new receivers and configure activities added to `proguard-rules.pro`?
 - [ ] **Memory Gate**: Does the widget payload stay strictly below 40 KB (`WidgetMemoryBudgetGateTest`) to prevent `TransactionTooLargeException`?
 - [ ] **Automated Tests**: Do all unit and contract tests pass (`./gradlew testDebugUnitTest`)?
