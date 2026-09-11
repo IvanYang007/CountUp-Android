@@ -1,6 +1,5 @@
 package com.countup.app
 
-import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
@@ -101,16 +100,26 @@ fun buildZenPebbleRemoteViews(
     views.setInt(R.id.zen_pebble_bg, "setColorFilter", widgetState.palette.canvasBg)
 
     // Unified TalkBack semantic description for accessibility
-    val unitDays = context.getString(R.string.unit_days)
-    val a11yDesc = "${item.name}: ${widgetState.compactValueText} $unitDays"
+    val unitRes = when {
+        widgetState.isFuture -> R.string.unit_until
+        widgetState.daysCount == 1L -> R.string.unit_day_singular
+        else -> R.string.unit_days
+    }
+    val unitDays = context.getString(unitRes)
+    val a11yDesc = if (widgetState.isFuture) {
+        val daysUnit = context.getString(if (widgetState.daysCount == 1L) R.string.unit_day_singular else R.string.unit_days)
+        "${item.name}: ${widgetState.compactValueText} $daysUnit $unitDays"
+    } else {
+        "${item.name}: ${widgetState.compactValueText} $unitDays"
+    }
     views.setContentDescription(android.R.id.background, a11yDesc)
 
     // Bold compact numeral
-    views.setTextViewText(R.id.zen_pebble_number, widgetState.compactValueText)
+    views.setTextViewText(R.id.zen_pebble_number, widgetState.pebbleNumberText)
     views.setTextColor(R.id.zen_pebble_number, widgetState.palette.primaryInk)
 
     // Micro-unit label
-    views.setTextViewText(R.id.zen_pebble_unit, context.getString(R.string.unit_days))
+    views.setTextViewText(R.id.zen_pebble_unit, unitDays)
     views.setTextColor(R.id.zen_pebble_unit, widgetState.palette.secondaryInk)
 
     // Hairline ink dash using semantic theme token

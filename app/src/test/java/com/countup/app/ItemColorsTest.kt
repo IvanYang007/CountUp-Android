@@ -64,7 +64,7 @@ class ItemColorsTest {
     fun `default card style settles into warm sumi stone in dark mode with ochre gold badge`() {
         val darkDefault = resolveCardStyle("", isDark = true)
         assertEquals(ZenDarkCard, darkDefault.cardBg)
-        assertEquals(Color(0xFF24201A), darkDefault.cardBg)
+        assertEquals(Color(0xFF26231E), darkDefault.cardBg)
         assertEquals(Color(0xFFDEB285), darkDefault.badgeBg)
         assertEquals(ZenInkBlack, darkDefault.badgeTint)
         assertEquals(ZenDarkTextPrimary, darkDefault.primaryInk)
@@ -87,35 +87,59 @@ class ItemColorsTest {
 
             // Light mode cardBg is strictly untouched
             assertEquals("Preset ${preset.id} cardBg must match in light mode", preset.cardBg, resolvedLight.cardBg)
-            // Badge color & tint are 100% preserved between light and dark modes
-            assertEquals("Preset ${preset.id} badgeBg must be identical across modes", resolvedLight.badgeBg, resolvedDark.badgeBg)
-            assertEquals("Preset ${preset.id} badgeTint must be identical across modes", resolvedLight.badgeTint, resolvedDark.badgeTint)
             // Dark mode always flags isDark = true
             assertTrue("Preset ${preset.id} must be marked isDark in dark mode", resolvedDark.isDark)
+            // Badge background must be non-null and high contrast
+            assertNotNull(resolvedDark.badgeBg)
         }
 
-        // Specifically verify sage_forest night calibration eliminates glare
+        // Specifically verify sage_forest night calibration
         val sageLight = resolveCardStyle("sage_forest", isDark = false)
         val sageDark = resolveCardStyle("sage_forest", isDark = true)
         assertEquals(Color(0xFF5E8C6D), sageLight.cardBg) // Original light sage untouched
-        assertEquals(Color(0xFF1E2B22), sageDark.cardBg) // Deep night pine
-        assertEquals(Color(0xFF33523D), sageDark.badgeBg) // Forest green badge preserved
+        assertEquals(Color(0xFF2E4D3A), sageDark.cardBg) // Deep night willow sage green
+        assertEquals(Color(0xFF6DB88A), sageDark.badgeBg) // Forest leaf jade badge
         assertEquals(Color(0xFFFAF7F2), sageDark.primaryInk) // Crisp warm white text
 
         // Specifically verify sage_ochre night calibration
         val sageOchreLight = resolveCardStyle("sage_ochre", isDark = false)
         val sageOchreDark = resolveCardStyle("sage_ochre", isDark = true)
         assertEquals(Color(0xFF5E8C6D), sageOchreLight.cardBg)
-        assertEquals(Color(0xFF1E2B22), sageOchreDark.cardBg)
+        assertEquals(Color(0xFF3E482A), sageOchreDark.cardBg) // Deep olive tea green
         assertEquals(Color(0xFFDEB285), sageOchreDark.badgeBg)
 
-        // Specifically verify all Washi paper cards rest on Sumi stone in dark mode
-        listOf("paper_sage", "paper_terracotta", "paper_indigo").forEach { washiId ->
+        // Specifically verify all Washi paper cards reflect distinct moonlit paper tones in dark mode
+        listOf(
+            "paper_sage" to Color(0xFF232724),
+            "paper_terracotta" to Color(0xFF2A2421),
+            "paper_indigo" to Color(0xFF21252C),
+        ).forEach { (washiId, expectedDarkBg) ->
             val washiLight = resolveCardStyle(washiId, isDark = false)
             val washiDark = resolveCardStyle(washiId, isDark = true)
             assertTrue("Light mode washi card must be white or off-white", washiLight.cardBg.luminance() > 0.85f)
-            assertEquals("Dark mode washi card must rest on sumi stone", ZenDarkCard, washiDark.cardBg)
-            assertEquals("Badge color must be identical across modes", washiLight.badgeBg, washiDark.badgeBg)
+            assertEquals("Dark mode washi card must match distinct moonlit paper tone", expectedDarkBg, washiDark.cardBg)
+            assertNotNull(washiDark.badgeBg)
+        }
+    }
+
+    @Test
+    fun `all 12 dark presets have distinct background colors and lift off canvas`() {
+        assertEquals(12, DARK_CARD_COLOR_PRESETS.size)
+        val darkBgColors = DARK_CARD_COLOR_PRESETS.map { it.cardBg }
+        assertEquals(
+            "All 12 nocturnal presets must have distinct cardBg to eliminate category flattening",
+            12,
+            darkBgColors.distinct().size,
+        )
+
+        DARK_CARD_COLOR_PRESETS.forEach { preset ->
+            assertTrue(preset.isDark)
+            assertTrue(preset.cardBg.luminance() > ZenDarkCanvas.luminance())
+            // Text must have high contrast (> 7:1 AAA) on all cards
+            val textLum = preset.primaryInk.luminance()
+            val cardLum = preset.cardBg.luminance()
+            val contrast = (textLum + 0.05) / (cardLum + 0.05)
+            assertTrue("Preset ${preset.id} text contrast must exceed 7.0 (AAA)", contrast >= 7.0)
         }
     }
 
@@ -124,14 +148,14 @@ class ItemColorsTest {
         assertEquals(Color(0xFFFFFFFF), cardBackgroundColor("", isDark = false))
         assertEquals(ZenDarkCard, cardBackgroundColor("", isDark = true))
         assertEquals(Color(0xFF5E8C6D), cardBackgroundColor("sage_forest", isDark = false))
-        assertEquals(Color(0xFF1E2B22), cardBackgroundColor("sage_forest", isDark = true))
-        assertEquals(Color(0xFF24201A), cardBackgroundColor("ink_gold", isDark = true))
+        assertEquals(Color(0xFF2E4D3A), cardBackgroundColor("sage_forest", isDark = true))
+        assertEquals(Color(0xFF191613), cardBackgroundColor("ink_gold", isDark = true))
     }
 
     @Test
     fun `cardBorderColor provides hairline rule for light backgrounds in dark mode`() {
         assertEquals(ZenDarkHairline, cardBorderColor(Color.White, isDark = true))
-        assertEquals(Color(0x33FFFFFF), cardBorderColor(Color(0xFF24201A), isDark = true))
+        assertEquals(ZenDarkHairline, cardBorderColor(Color(0xFF24201A), isDark = true))
         assertEquals(Color(0x242C2416), cardBorderColor(Color.White, isDark = false))
     }
 

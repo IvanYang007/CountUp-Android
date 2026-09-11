@@ -24,11 +24,11 @@ class WidgetThemeTokensTest {
     fun `dark palette matches forest charcoal and ink stone design tokens`() {
         val dark = WidgetThemeTokens.resolve(isDarkMode = true)
 
-        assertEquals(0xFF24201A.toInt(), dark.canvasBg)
-        assertEquals(0xFF2A2620.toInt(), dark.surfaceBg)
-        assertEquals(0xFFF1EBDD.toInt(), dark.primaryInk)
-        assertEquals(0xFFC4BEAE.toInt(), dark.secondaryInk)
-        assertEquals(0xFF3A3D35.toInt(), dark.hairline)
+        assertEquals(WidgetThemeTokens.DARK_CANVAS_BG, dark.canvasBg)
+        assertEquals(WidgetThemeTokens.DARK_SURFACE_BG, dark.surfaceBg)
+        assertEquals(WidgetThemeTokens.DARK_PRIMARY_INK, dark.primaryInk)
+        assertEquals(WidgetThemeTokens.DARK_SECONDARY_INK, dark.secondaryInk)
+        assertEquals(WidgetThemeTokens.DARK_HAIRLINE, dark.hairline)
         assertEquals(0xFF8FAF84.toInt(), dark.accentPrimary)
         assertEquals(0xFFDEB285.toInt(), dark.accentGold)
         assertEquals(0xFFD6A848.toInt(), dark.accentKintsugi)

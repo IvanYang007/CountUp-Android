@@ -98,6 +98,7 @@ class ZenPebbleCompactTest {
             isDarkMode = false,
         )
         assertEquals("42", state.compactValueText)
+        assertEquals("42", state.pebbleNumberText)
         assertEquals(WidgetThemeTokens.LIGHT_CANVAS_BG, state.palette.canvasBg)
         assertEquals(WidgetThemeTokens.LIGHT_PRIMARY_INK, state.palette.primaryInk)
 
@@ -116,6 +117,83 @@ class ZenPebbleCompactTest {
     }
 
     @Test
+    fun zenPebbleFutureDatesResolvePositiveNumeralAndUntilSemantics() {
+        val futureItem = CountUpItem(
+            id = "future-pebble",
+            name = "Anniversary",
+            epochDay = today.plusDays(1).toEpochDay(),
+            futureFlag = true,
+        )
+
+        val state = ZenWidgetReducer.resolveZenWidgetState(
+            item = futureItem,
+            today = today,
+            unit = ZenWidgetDisplayUnit.DAYS,
+        )
+
+        assertTrue(state.isFuture)
+        assertEquals(1L, state.daysCount)
+        assertEquals("1", state.compactValueText)
+        assertEquals("1D", state.pebbleNumberText)
+        assertEquals("UNTIL", state.unitLabelText)
+    }
+
+    @Test
+    fun zenPebbleFutureDatesSelectUnitUntilResource() {
+        val futureItem = CountUpItem(
+            id = "future-pebble",
+            name = "Anniversary",
+            epochDay = today.plusDays(10).toEpochDay(),
+            futureFlag = true,
+        )
+
+        val state = ZenWidgetReducer.resolveZenWidgetState(
+            item = futureItem,
+            today = today,
+            unit = ZenWidgetDisplayUnit.DAYS,
+        )
+
+        val unitRes = when {
+            state.isFuture -> R.string.unit_until
+            state.daysCount == 1L -> R.string.unit_day_singular
+            else -> R.string.unit_days
+        }
+        assertEquals(R.string.unit_until, unitRes)
+        assertEquals("UNTIL", state.unitLabelText)
+    }
+
+    @Test
+    fun zenPebblePastDatesSelectUnitDaysOrSingularResource() {
+        val pastItem1 = CountUpItem(
+            id = "past-1",
+            name = "Gym",
+            epochDay = today.minusDays(1).toEpochDay(),
+        )
+        val state1 = ZenWidgetReducer.resolveZenWidgetState(pastItem1, today)
+        val unitRes1 = when {
+            state1.isFuture -> R.string.unit_until
+            state1.daysCount == 1L -> R.string.unit_day_singular
+            else -> R.string.unit_days
+        }
+        assertEquals(R.string.unit_day_singular, unitRes1)
+        assertEquals("DAY", state1.unitLabelText)
+
+        val pastItem5 = CountUpItem(
+            id = "past-5",
+            name = "Gym",
+            epochDay = today.minusDays(5).toEpochDay(),
+        )
+        val state5 = ZenWidgetReducer.resolveZenWidgetState(pastItem5, today)
+        val unitRes5 = when {
+            state5.isFuture -> R.string.unit_until
+            state5.daysCount == 1L -> R.string.unit_day_singular
+            else -> R.string.unit_days
+        }
+        assertEquals(R.string.unit_days, unitRes5)
+        assertEquals("DAYS", state5.unitLabelText)
+    }
+
+    @Test
     fun zenPebbleResourceAssetsAreConfigured() {
         assertTrue(R.layout.widget_zen_pebble_1x1 != 0)
         assertTrue(R.xml.zen_pebble_widget_info != 0)
@@ -123,6 +201,7 @@ class ZenPebbleCompactTest {
         assertTrue(R.string.zen_pebble_widget_description != 0)
         assertTrue(R.string.zen_pebble_configure_title != 0)
         assertTrue(R.string.zen_pebble_configure_subtitle != 0)
+        assertTrue(R.string.unit_until != 0)
     }
 
     @Test

@@ -84,6 +84,33 @@ class DaysSinceTest {
     }
 
     @Test
+    fun `decomposeTime formats DAYS mode with singular DAY for exactly 1 day interval`() {
+        val today = LocalDate.of(2026, 7, 21)
+
+        // 1 day in past
+        val pastYesterday = today.minusDays(1)
+        val pastResult = decomposeTime(pastYesterday, today, TimeDisplayMode.DAYS)
+        assertEquals("1", pastResult.valueText)
+        assertEquals(R.string.unit_day_singular, pastResult.unitLabelRes)
+
+        // 1 day in future
+        val futureTomorrow = today.plusDays(1)
+        val futureResult = decomposeTime(futureTomorrow, today, TimeDisplayMode.DAYS)
+        assertEquals("1", futureResult.valueText)
+        assertEquals(R.string.unit_day_singular, futureResult.unitLabelRes)
+
+        // 0 days
+        val zeroResult = decomposeTime(today, today, TimeDisplayMode.DAYS)
+        assertEquals("0", zeroResult.valueText)
+        assertEquals(R.string.unit_days, zeroResult.unitLabelRes)
+
+        // 2 days
+        val twoDaysResult = decomposeTime(today.minusDays(2), today, TimeDisplayMode.DAYS)
+        assertEquals("2", twoDaysResult.valueText)
+        assertEquals(R.string.unit_days, twoDaysResult.unitLabelRes)
+    }
+
+    @Test
     fun `decomposeTime formats ELAPSED_BREAKDOWN mode for multi-year and partial intervals`() {
         val today = LocalDate.of(2026, 7, 21)
 

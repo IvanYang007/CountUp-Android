@@ -2,6 +2,7 @@ package com.countup.app
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 
@@ -238,12 +239,12 @@ private val LEGACY_ID_MAP: Map<String, String> = mapOf(
 )
 
 /**
- * Dark Mode Default Card Style (Warm Sumi Stone #24201A + Ochre Gold badge #DEB285).
+ * Dark Mode Default Card Style (Warm Amber Charcoal Washi #26231E + Ochre Gold badge #DEB285).
  */
 val DEFAULT_DARK_CARD_PRESET = CardColorPreset(
     id = "",
     nameRes = R.string.color_paper_gold,
-    cardBg = ZenDarkCard,
+    cardBg = Color(0xFF26231E),
     badgeBg = Color(0xFFDEB285),
     badgeTint = ZenInkBlack,
     primaryInk = ZenDarkTextPrimary,
@@ -252,42 +253,157 @@ val DEFAULT_DARK_CARD_PRESET = CardColorPreset(
 )
 
 /**
- * Dark-Mode Calibrated Presets:
- * In dark mode, card surfaces settle into twilight elevation:
- * - Washi (Paper) cards rest on Sumi stone (#24201A) to prevent OLED glare, preserving badge identity.
- * - Earth (Nature) cards deepen into rich botanical night tones (#1E2B22 Deep Pine, #1C2621 Celadon, #26221C Sandalwood).
- * - Sumi (Ink) cards naturally retain their deep contemplative surfaces.
+ * 12 Curated Nocturnal Zen Presets ("Moonlight on Ancient Bricks" / 月映青砖 · 五墨六彩):
+ * - Washi (宣纸四品): Charcoal washi slates reflecting subtle botanical & mineral paper fiber.
+ * - Earth (泥陶四品): Rich ceramic glazes & aged timber (深瓷天青, 老檀沉木, 苍松夜黛, 岩壁幽苔).
+ * - Sumi (夜墨四品): Deep obsidian lacquerware infused with mineral pigments (松烟, 凝翠, 辰砂, 宿墨).
  * All badge colors remain 100% identical between light and dark modes.
  */
-val DARK_CARD_COLOR_PRESETS: List<CardColorPreset> = CARD_COLOR_PRESETS.map { base ->
-    when (base.id) {
-        "" -> DEFAULT_DARK_CARD_PRESET
-        "paper_sage", "paper_terracotta", "paper_indigo" -> base.copy(
-            cardBg = ZenDarkCard,
-            primaryInk = ZenDarkTextPrimary,
-            mutedInk = ZenDarkTextSecondary,
-            isDark = true,
-        )
-        "sage_forest", "sage_ochre" -> base.copy(
-            cardBg = Color(0xFF1E2B22),
-            primaryInk = Color(0xFFFAF7F2),
-            mutedInk = Color(0xFFD6E4DB),
-            isDark = true,
-        )
-        "celadon_bamboo" -> base.copy(
-            cardBg = Color(0xFF1C2621),
-            primaryInk = Color(0xFFFAF7F2),
-            mutedInk = Color(0xFFD6E4DB),
-            isDark = true,
-        )
-        "linen_sandalwood" -> base.copy(
-            cardBg = Color(0xFF26221C),
-            primaryInk = Color(0xFFFAF7F2),
-            mutedInk = Color(0xFFD6C8B7),
-            isDark = true,
-        )
-        else -> base // Sumi presets already have isDark = true and dark cardBg
-    }
+val DARK_CARD_COLOR_PRESETS: List<CardColorPreset> = listOf(
+    // --- SUITE I: WASHI (宣纸四品：月下纸韵，素笺生辉) ---
+    // 1. 宣白 · 沉金 (Default)
+    DEFAULT_DARK_CARD_PRESET,
+    // 2. 宣白 · 柳叶
+    CardColorPreset(
+        id = "paper_sage",
+        nameRes = R.string.color_paper_sage,
+        cardBg = Color(0xFF232724),
+        badgeBg = Color(0xFF68B285),
+        badgeTint = Color.White,
+        primaryInk = ZenDarkTextPrimary,
+        mutedInk = ZenDarkTextSecondary,
+        isDark = true,
+    ),
+    // 3. 素白 · 陶土
+    CardColorPreset(
+        id = "paper_terracotta",
+        nameRes = R.string.color_paper_terracotta,
+        cardBg = Color(0xFF2A2421),
+        badgeBg = Color(0xFFE58356),
+        badgeTint = Color.White,
+        primaryInk = ZenDarkTextPrimary,
+        mutedInk = ZenDarkTextSecondary,
+        isDark = true,
+    ),
+    // 4. 宣白 · 黛蓝
+    CardColorPreset(
+        id = "paper_indigo",
+        nameRes = R.string.color_paper_indigo,
+        cardBg = Color(0xFF21252C),
+        badgeBg = Color(0xFF6BA2C7),
+        badgeTint = Color.White,
+        primaryInk = ZenDarkTextPrimary,
+        mutedInk = ZenDarkTextSecondary,
+        isDark = true,
+    ),
+
+    // --- SUITE II: EARTH (泥陶四品：大地自然，温润如玉) ---
+    // 5. 天青 · 墨竹 (Ru Ware Celadon Mist -> Moonlit Celadon Slate)
+    CardColorPreset(
+        id = "celadon_bamboo",
+        nameRes = R.string.color_celadon_bamboo,
+        cardBg = Color(0xFF26423A),
+        badgeBg = Color(0xFF60A880),
+        badgeTint = Color.White,
+        primaryInk = Color(0xFFFAF7F2),
+        mutedInk = Color(0xFFD6E4DB),
+        isDark = true,
+    ),
+    // 6. 素麻 · 白檀 (Raw Linen & Sandalwood -> Smoked Sandalwood Earth)
+    CardColorPreset(
+        id = "linen_sandalwood",
+        nameRes = R.string.color_linen_sandalwood,
+        cardBg = Color(0xFF463625),
+        badgeBg = Color(0xFFD1A16E),
+        badgeTint = ZenInkBlack,
+        primaryInk = Color(0xFFFAF7F2),
+        mutedInk = Color(0xFFD6C8B7),
+        isDark = true,
+    ),
+    // 7. 柳绿 · 幽森 (Willow Sage & Forest -> Deep Willow Sage Green)
+    CardColorPreset(
+        id = "sage_forest",
+        nameRes = R.string.color_sage_forest,
+        cardBg = Color(0xFF2E4D3A),
+        badgeBg = Color(0xFF6DB88A),
+        badgeTint = Color.White,
+        primaryInk = Color(0xFFFAF7F2),
+        mutedInk = Color(0xFFD6E4DB),
+        isDark = true,
+    ),
+    // 8. 柳绿 · 赭石 (Willow Sage & Ochre -> Olive Tea Green)
+    CardColorPreset(
+        id = "sage_ochre",
+        nameRes = R.string.color_sage_ochre,
+        cardBg = Color(0xFF3E482A),
+        badgeBg = Color(0xFFDEB285),
+        badgeTint = ZenInkBlack,
+        primaryInk = Color(0xFFFAF7F2),
+        mutedInk = Color(0xFFD6E4DB),
+        isDark = true,
+    ),
+
+    // --- SUITE III: SUMI (夜墨四品：松烟焦墨，沉着深远) ---
+    // 9. 墨黑 · 沉金 (Lampblack & Gold)
+    CardColorPreset(
+        id = "ink_gold",
+        nameRes = R.string.color_ink_gold,
+        cardBg = Color(0xFF191613),
+        badgeBg = Color(0xFFDEB285),
+        badgeTint = ZenInkBlack,
+        primaryInk = Color(0xFFFAF7F2),
+        mutedInk = Color(0xFFD6C8B7),
+        isDark = true,
+    ),
+    // 10. 墨黑 · 碧翠 (Pine Obsidian)
+    CardColorPreset(
+        id = "ink_jade",
+        nameRes = R.string.color_ink_jade,
+        cardBg = Color(0xFF141A16),
+        badgeBg = Color(0xFF54A874),
+        badgeTint = Color.White,
+        primaryInk = Color(0xFFFAF7F2),
+        mutedInk = Color(0xFFD6C8B7),
+        isDark = true,
+    ),
+    // 11. 墨黑 · 辰砂 (Cinnabar Lacquer)
+    CardColorPreset(
+        id = "ink_crimson",
+        nameRes = R.string.color_ink_crimson,
+        cardBg = Color(0xFF1F1515),
+        badgeBg = Color(0xFFDE584C),
+        badgeTint = Color.White,
+        primaryInk = Color(0xFFFAF7F2),
+        mutedInk = Color(0xFFD6C8B7),
+        isDark = true,
+    ),
+    // 12. 暮夜 · 银霜 (Midnight Indigo Obsidian)
+    CardColorPreset(
+        id = "night_mist",
+        nameRes = R.string.color_night_mist,
+        cardBg = Color(0xFF15202D),
+        badgeBg = Color(0xFF8AB0C7),
+        badgeTint = Color.White,
+        primaryInk = Color(0xFFFAF7F2),
+        mutedInk = Color(0xFFCCD7E0),
+        isDark = true,
+    ),
+)
+
+/**
+ * Resolves an unobtrusive directional specular parting-line border for dark mode surfaces.
+ * Natural ambient light falls from above:
+ * - Top edge catches soft specular reflection (28% opacity of the badge accent or gold).
+ * - Mid-body transitions smoothly to 14%.
+ * - Bottom dissolves into the canvas (5% opacity).
+ */
+fun cardDarkBorderBrush(style: CardColorPreset): Brush {
+    val accent = style.badgeBg
+    return Brush.verticalGradient(
+        0.0f to accent.copy(alpha = 0.28f),
+        0.4f to accent.copy(alpha = 0.14f),
+        1.0f to accent.copy(alpha = 0.05f),
+    )
 }
 
 private val DARK_PRESET_MAP: Map<String, CardColorPreset> = DARK_CARD_COLOR_PRESETS.associateBy { it.id }
@@ -344,7 +460,7 @@ fun cardMutedInk(backgroundColor: Color): Color =
  * Returns a high-contrast card border brush/tint for the given [backgroundColor].
  */
 fun cardBorderColor(backgroundColor: Color, isDark: Boolean = false): Color =
-    if (isDarkCardBackground(backgroundColor)) Color(0x33FFFFFF) else if (isDark) ZenDarkHairline else Color(0x242C2416)
+    if (isDark) ZenDarkHairline else if (isDarkCardBackground(backgroundColor)) Color(0x33FFFFFF) else Color(0x242C2416)
 
 /**
  * Computes an icon badge container color that complements the [backgroundColor] / [colorId].

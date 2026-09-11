@@ -67,6 +67,8 @@ class ZenWidgetReducerTest {
         )
         val state = ZenWidgetReducer.resolveZenWidgetState(item412, fixedToday)
         assertEquals(412L, state.daysCount)
+        assertEquals("412", state.compactValueText)
+        assertEquals("412", state.pebbleNumberText)
         assertEquals(500L, state.milestoneGoal)
         assertEquals(88L, state.milestoneRemainingDays)
         // 412 is between 365 and 500: (412 - 365) / (500 - 365) = 47 / 135 ≈ 0.348
@@ -97,6 +99,58 @@ class ZenWidgetReducerTest {
 
         val darkState = ZenWidgetReducer.resolveZenWidgetState(item, fixedToday, isDarkMode = true)
         assertEquals(WidgetThemeTokens.DARK_CANVAS_BG, darkState.palette.canvasBg)
+    }
+
+    @Test
+    fun `future anchor date resolves positive count, until label, and UNTIL unit`() {
+        val futureItem1 = CountUpItem(
+            id = "launch",
+            name = "Product Launch",
+            epochDay = fixedToday.plusDays(1).toEpochDay(),
+            futureFlag = true,
+        )
+
+        val state = ZenWidgetReducer.resolveZenWidgetState(futureItem1, fixedToday)
+        assertTrue(state.isFuture)
+        assertEquals(1L, state.daysCount)
+        assertEquals("1", state.compactValueText)
+        assertEquals("1D", state.pebbleNumberText)
+        assertEquals("1", state.primaryValueText)
+        assertEquals("UNTIL", state.unitLabelText)
+        assertTrue(state.startDateFormatted.startsWith("Until "))
+
+        val futureItem5 = CountUpItem(
+            id = "vacation",
+            name = "Summer Trip",
+            epochDay = fixedToday.plusDays(5).toEpochDay(),
+            futureFlag = true,
+        )
+        val state5 = ZenWidgetReducer.resolveZenWidgetState(futureItem5, fixedToday)
+        assertTrue(state5.isFuture)
+        assertEquals(5L, state5.daysCount)
+        assertEquals("5", state5.compactValueText)
+        assertEquals("5D", state5.pebbleNumberText)
+        assertEquals("UNTIL", state5.unitLabelText)
+        assertTrue(state5.startDateFormatted.startsWith("Until "))
+    }
+
+    @Test
+    fun `singular DAY returned for 1 day count, UNTIL for negative or future in decomposeUnit`() {
+        val (val1, unit1) = ZenWidgetReducer.decomposeUnit(1L, ZenWidgetDisplayUnit.DAYS)
+        assertEquals("1", val1)
+        assertEquals("DAY", unit1)
+
+        val (valMinus1, unitMinus1) = ZenWidgetReducer.decomposeUnit(-1L, ZenWidgetDisplayUnit.DAYS)
+        assertEquals("1", valMinus1)
+        assertEquals("UNTIL", unitMinus1)
+
+        val (valFuture, unitFuture) = ZenWidgetReducer.decomposeUnit(1L, ZenWidgetDisplayUnit.DAYS, isFuture = true)
+        assertEquals("1", valFuture)
+        assertEquals("UNTIL", unitFuture)
+
+        val (val2, unit2) = ZenWidgetReducer.decomposeUnit(2L, ZenWidgetDisplayUnit.DAYS)
+        assertEquals("2", val2)
+        assertEquals("DAYS", unit2)
     }
 
     @Test

@@ -4,13 +4,10 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -62,6 +59,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.material3.ripple
@@ -87,6 +85,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -108,9 +107,11 @@ import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
 import androidx.compose.ui.zIndex
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.coroutineScope
@@ -130,7 +131,7 @@ fun CountUpContent(
     state: CountUpUiState,
     onEvent: (CountUpUiEvent) -> Unit,
     modifier: Modifier = Modifier,
-    appVersion: String = "2.20.0",
+    appVersion: String = "2.20.2",
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
     val localContext = LocalContext.current
@@ -343,25 +344,21 @@ private fun SolarTermCapsule(
         getSeasonColor(solarTerm.seasonRes, zenColors)
     }
 
-    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
-    val pulseAlpha by infiniteTransition.animateFloat(
-        initialValue = if (reduceMotion) 0.7f else 0.35f,
-        targetValue = if (reduceMotion) 0.7f else 0.95f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(if (reduceMotion) 0 else 1750, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-        label = "pulseAlpha",
-    )
-    val pulseScale by infiniteTransition.animateFloat(
-        initialValue = if (reduceMotion) 1f else 0.85f,
-        targetValue = if (reduceMotion) 1f else 1.25f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(if (reduceMotion) 0 else 1750, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
-        label = "pulseScale",
-    )
+    val pulseProgress = remember { Animatable(0.5f) }
+    LaunchedEffect(morphStep, reduceMotion) {
+        if (reduceMotion) {
+            pulseProgress.snapTo(0.5f)
+            return@LaunchedEffect
+        }
+        // Run 3 calm breathing cycles on view entry or morph step change, then gracefully settle to resting equilibrium
+        repeat(3) {
+            pulseProgress.animateTo(1f, animationSpec = tween(1750, easing = FastOutSlowInEasing))
+            pulseProgress.animateTo(0f, animationSpec = tween(1750, easing = FastOutSlowInEasing))
+        }
+        pulseProgress.animateTo(0.5f, animationSpec = tween(1000, easing = FastOutSlowInEasing))
+    }
+    val pulseScale = if (reduceMotion) 1f else 0.85f + (pulseProgress.value * 0.40f)
+    val pulseAlpha = if (reduceMotion) 0.7f else 0.35f + (pulseProgress.value * 0.60f)
 
     val celestialCountdown = remember(today) {
         SolarTermCalendar.getNextCardinalAnchor(today)
@@ -563,8 +560,8 @@ private fun HeaderRow(
     backgroundTheme: BackgroundTheme,
     onCycleBackground: () -> Unit,
     onNewItem: () -> Unit,
-    today: LocalDate = LocalDate.now(),
     modifier: Modifier = Modifier,
+    today: LocalDate = LocalDate.now(),
 ) {
     val ensoInteraction = rememberPressSource()
     val themeLabel = stringResource(backgroundTheme.labelRes)
@@ -946,8 +943,16 @@ private fun MechanicalResetButton(
     enabled: Boolean = true,
 ) {
     var isPressed by remember { mutableStateOf(false) }
+    var showTapHint by remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
     val holdProgress = remember { Animatable(0f) }
+
+    LaunchedEffect(showTapHint) {
+        if (showTapHint) {
+            delay(1800L)
+            showTapHint = false
+        }
+    }
 
     LaunchedEffect(isPressed, enabled) {
         if (isPressed && enabled) {
@@ -993,8 +998,7 @@ private fun MechanicalResetButton(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .size(30.dp)
-            .zIndex(if (isPressed) 1f else 0f)
-            .minimumInteractiveComponentSize()
+            .zIndex(if (isPressed || showTapHint) 5f else 0f)
             .pointerInput(enabled) {
                 if (!enabled) return@pointerInput
                 detectTapGestures(
@@ -1005,6 +1009,10 @@ private fun MechanicalResetButton(
                         } finally {
                             isPressed = false
                         }
+                    },
+                    onTap = {
+                        showTapHint = true
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                     },
                 )
             }
@@ -1025,6 +1033,37 @@ private fun MechanicalResetButton(
                 }
             },
     ) {
+        if ((isPressed && holdProgress.value > 0.08f) || showTapHint) {
+            val popupOffsetY = with(LocalDensity.current) { (-38).dp.roundToPx() }
+            Popup(
+                alignment = Alignment.TopCenter,
+                offset = IntOffset(0, popupOffsetY),
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = if (isDarkCard) Color(0xFF2C2416) else Color(0xFF3B322A),
+                    shadowElevation = 4.dp,
+                    border = BorderStroke(1.dp, if (isDarkCard) Color(0xFF5A4A3A) else Color(0x33000000)),
+                ) {
+                    val label = if (isPressed) {
+                        val pct = (holdProgress.value * 100).toInt()
+                        stringResource(R.string.reset_holding) + " $pct%"
+                    } else {
+                        stringResource(R.string.reset_hold_to_reset)
+                    }
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFFFAF7F2),
+                            letterSpacing = 0.3.sp,
+                        ),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    )
+                }
+            }
+        }
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
@@ -1262,7 +1301,7 @@ fun ItemCard(
 
     val cardModifier = if (isCustomCardColor) {
         val customBorder = if (isSystemDark) {
-            Modifier.border(width = 1.dp, color = cardBorderColor(baseBgColor, isDark = true), shape = cardShape)
+            Modifier.border(width = 1.dp, brush = cardDarkBorderBrush(style), shape = cardShape)
         } else {
             if (isFutureEvent) {
                 Modifier.border(width = 1.5.dp, color = cardBorderColor(baseBgColor), shape = cardShape)
@@ -1295,7 +1334,7 @@ fun ItemCard(
                 .fillMaxWidth()
                 .border(
                     width = 1.dp,
-                    color = zenColors.hairlineRule,
+                    brush = cardDarkBorderBrush(style),
                     shape = cardShape,
                 )
                 .background(
@@ -1382,6 +1421,7 @@ fun ItemCard(
                     )
                 }
             }
+            Spacer(Modifier.width(8.dp))
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier

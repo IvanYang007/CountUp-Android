@@ -74,9 +74,10 @@ fun decomposeTime(
 
     return when (mode) {
         TimeDisplayMode.DAYS -> {
+            val absDays = abs(totalDays)
             DecomposedTime(
-                valueText = abs(totalDays).toString(),
-                unitLabelRes = R.string.unit_days,
+                valueText = absDays.toString(),
+                unitLabelRes = if (absDays == 1L) R.string.unit_day_singular else R.string.unit_days,
                 mode = TimeDisplayMode.DAYS,
             )
         }

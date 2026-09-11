@@ -118,8 +118,9 @@ fun ItemEditorDialog(
         mutableStateOf(item != null && (item.cardColor.isNotBlank() || item.icon.isNotBlank()))
     }
     var hasCustomizedManually by rememberSaveable { mutableStateOf(false) }
+    val isDarkTheme = LocalZenColors.current.isDark
     var selectedColorCategoryIndex by rememberSaveable {
-        val initialPresetId = resolveCardStyle(selectedCardColor).id
+        val initialPresetId = resolveCardStyle(selectedCardColor, isDark = isDarkTheme).id
         val idx = CARD_COLOR_CATEGORIES.indexOfFirst { cat -> cat.presetIds.contains(initialPresetId) }
         mutableIntStateOf(if (idx >= 0) idx else 0)
     }
@@ -361,8 +362,7 @@ fun ItemEditorDialog(
                                 fontWeight = FontWeight.Medium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
-                            val activePreset = CARD_COLOR_PRESETS.firstOrNull { it.id == selectedCardColor }
-                                ?: resolveCardStyle(selectedCardColor)
+                            val activePreset = resolveCardStyle(selectedCardColor, isDark = isDarkTheme)
                             Text(
                                 text = stringResource(activePreset.nameRes),
                                 style = MaterialTheme.typography.labelSmall,
@@ -419,7 +419,7 @@ fun ItemEditorDialog(
 
                         // Single clean row of 4 chips for active category
                         val activeColorCategory = CARD_COLOR_CATEGORIES.getOrElse(selectedColorCategoryIndex) { CARD_COLOR_CATEGORIES[0] }
-                        val currentCategoryPresets = activeColorCategory.presetIds.map { resolveCardStyle(it) }
+                        val currentCategoryPresets = activeColorCategory.presetIds.map { resolveCardStyle(it, isDark = isDarkTheme) }
 
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -428,7 +428,7 @@ fun ItemEditorDialog(
                         ) {
                             currentCategoryPresets.forEach { preset ->
                                 key(preset.id) {
-                                    val isSelected = resolveCardStyle(selectedCardColor).id == preset.id
+                                    val isSelected = resolveCardStyle(selectedCardColor, isDark = isDarkTheme).id == preset.id
                                     val colorInteraction = rememberPressSource()
                                     val colorName = stringResource(preset.nameRes)
                                     val colorDescription = if (preset.id == DEFAULT_CARD_COLOR) {
@@ -450,7 +450,7 @@ fun ItemEditorDialog(
                                                 color = if (isSelected) {
                                                     if (preset.isDark) Color(0xFFDEB285) else MaterialTheme.colorScheme.primary
                                                 } else {
-                                                    if (preset.isDark) Color(0x44FFFFFF) else Color(0x332C2416)
+                                                    if (preset.isDark) Color(0x24FFFFFF) else Color(0x332C2416)
                                                 },
                                                 shape = RoundedCornerShape(10.dp),
                                             )
@@ -473,13 +473,13 @@ fun ItemEditorDialog(
                                         Box(
                                             contentAlignment = Alignment.Center,
                                             modifier = Modifier
-                                                .size(15.dp)
+                                                .size(16.dp)
                                                 .background(preset.badgeBg, CircleShape)
                                                 .border(
-                                                width = 0.5.dp,
-                                                color = if (preset.isDark) Color(0x33FFFFFF) else Color(0x22000000),
-                                                shape = CircleShape,
-                                            ),
+                                                    width = 0.5.dp,
+                                                    color = if (preset.isDark) Color(0x26FFFFFF) else Color(0x22000000),
+                                                    shape = CircleShape,
+                                                ),
                                         ) {
                                             if (isSelected) {
                                                 Box(
@@ -1014,9 +1014,9 @@ private fun RestoreStrategyOptionCard(
     title: String,
     description: String,
     isSelected: Boolean,
-    enabled: Boolean = true,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
 ) {
     val zenColors = LocalZenColors.current
     val borderModifier = if (isSelected && enabled) {

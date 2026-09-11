@@ -14,8 +14,8 @@ android {
         applicationId = "com.countup.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 46
-        versionName = "2.20.0"
+        versionCode = 48
+        versionName = "2.20.2"
     }
 
     val releaseKeystore = file("../keystore/countup-release.jks")

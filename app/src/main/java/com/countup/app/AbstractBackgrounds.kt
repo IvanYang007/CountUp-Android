@@ -2,7 +2,7 @@ package com.countup.app
 
 import androidx.annotation.StringRes
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -122,13 +122,21 @@ fun resolveActiveTheme(theme: BackgroundTheme, epochDay: Long = LocalDate.now().
     return cycle[index]
 }
 
+// ponytail: deliberate simplification using ThreadLocal to dynamically supply dark-mode moonlight mineral
+// pigments without rewriting 30+ standalone Canvas drawing functions. Safe because all Android Compose UI
+// drawing executes on the main thread and the draw block is strictly try/finally bounded.
+// Upgrade path if multi-threaded drawing is ever introduced: pass a Theme/Palette data class into DrawScope.
+private val isDarkLandscapeDraw = ThreadLocal.withInitial { false }
+
 // Chinese Ink & Mineral Pigment Palette (国画水墨与矿物色)
-private val InkBlack = Color(0xFF1E2124)       // 浓墨 / 焦墨
-private val InkMuted = Color(0xFF4A4E54)       // 淡墨 / 宿墨
-private val InkOchre = Color(0xFFC48B58)       // 赭石 / 浅绛
-private val InkVermilion = Color(0xFFD3523B)   // 朱砂 / 丹霞
-private val InkIndigo = Color(0xFF4E6B7A)      // 花青 / 黛蓝
-private val InkSage = Color(0xFF4A7C59)        // 柳绿 / 苔绿
+// Light: Traditional rich Sumi inks on washi paper.
+// Dark: Ethereal moonlight & mineral pigments on aged kiln slate ("月映青砖 · 五墨六彩").
+private val InkBlack: Color get() = if (isDarkLandscapeDraw.get() == true) Color(0xFF7A8B99) else Color(0xFF1E2124)       // 霜天寒雾 / 焦墨
+private val InkMuted: Color get() = if (isDarkLandscapeDraw.get() == true) Color(0xFF5B7E94) else Color(0xFF4A4E54)       // 寒潭碧月 / 淡墨
+private val InkOchre: Color get() = if (isDarkLandscapeDraw.get() == true) Color(0xFFE5A869) else Color(0xFFC48B58)       // 孤灯暖光 / 赭石
+private val InkVermilion: Color get() = if (isDarkLandscapeDraw.get() == true) Color(0xFFC75A4C) else Color(0xFFD3523B)   // 晚霞渔火 / 朱砂
+private val InkIndigo: Color get() = if (isDarkLandscapeDraw.get() == true) Color(0xFF6B8FA3) else Color(0xFF4E6B7A)      // 寒江黛蓝 / 花青
+private val InkSage: Color get() = if (isDarkLandscapeDraw.get() == true) Color(0xFF5F8C6E) else Color(0xFF4A7C59)        // 露华竹影 / 柳绿
 
 /**
  * Renders the chosen abstract Zen/Ink Wash background behind content.
@@ -137,43 +145,50 @@ fun Modifier.drawAbstractBackground(
     theme: BackgroundTheme,
     epochDay: Long = LocalDate.now().toEpochDay(),
     isDark: Boolean = false,
-): Modifier = this.drawBehind {
-    if (isDark) {
-        drawNightZenWash()
-    }
+): Modifier = this.drawWithCache {
     val active = resolveActiveTheme(theme, epochDay)
-    when (active) {
-        BackgroundTheme.MOUNTAIN -> drawInkMountainTheme()
-        BackgroundTheme.SAND_DUNES -> drawInkSandDunesTheme()
-        BackgroundTheme.SEA_HORIZON -> drawInkSeaHorizonTheme()
-        BackgroundTheme.SOLITARY_ISLE -> drawInkSolitaryIsleTheme()
-        BackgroundTheme.WILLOW_LEAVES -> drawInkWillowLeavesTheme()
-        BackgroundTheme.ZEN_BAMBOO -> drawInkZenBambooTheme()
-        BackgroundTheme.DREAM_BOAT -> drawDreamBoatTheme()
-        BackgroundTheme.CLEAR_SPRING -> drawClearSpringTheme()
-        BackgroundTheme.DESERT_SUNSET -> drawDesertSunsetTheme()
-        BackgroundTheme.EGRETS_ASCENDING -> drawEgretsAscendingTheme()
-        BackgroundTheme.PLUM_SHADOW -> drawPlumShadowTheme()
-        BackgroundTheme.ANCIENT_ROAD -> drawAncientRoadTheme()
-        BackgroundTheme.SPRING_RAIN -> drawSpringRainTheme()
-        BackgroundTheme.LOTUS_DRAGONFLY -> drawLotusDragonflyTheme()
-        BackgroundTheme.CRISP_SPRING_RAIN -> drawCrispSpringRainTheme()
-        BackgroundTheme.SOLITARY_SAIL_RIVER -> drawSolitarySailRiverTheme()
-        BackgroundTheme.OCEAN_MOON_TIDE -> drawOceanMoonTideTheme()
-        BackgroundTheme.WILD_SKY_RIVER_MOON -> drawWildSkyRiverMoonTheme()
-        BackgroundTheme.GREEN_HILLS_SAIL -> drawGreenHillsSailTheme()
-        BackgroundTheme.STARS_FALL_RIVER_FLOW -> drawStarsFallRiverFlowTheme()
-        BackgroundTheme.CLOUDS_COTTAGE -> drawCloudsCottageTheme()
-        BackgroundTheme.WINE_SPRING_MOON -> drawWineSpringMoonTheme()
-        BackgroundTheme.APRICOT_RAIN -> drawApricotRainTheme()
-        BackgroundTheme.DEEP_FOREST_DEER -> drawDeepForestDeerTheme()
-        BackgroundTheme.PEAR_BLOSSOM_WILLOW -> drawPearBlossomWillowTheme()
-        BackgroundTheme.SPRING_WATER_SLEEP -> drawSpringWaterSleepTheme()
-        BackgroundTheme.READING_LAMP_MOON -> drawReadingLampMoonTheme()
-        BackgroundTheme.MOON_IN_HAND_WIND -> drawMoonInHandWindTheme()
-        BackgroundTheme.MOSS_COURTYARD_PLANTAIN -> drawMossCourtyardPlantainTheme()
-        BackgroundTheme.FISH_JUMPING_DUCKWEED -> drawFishJumpingDuckweedTheme()
-        BackgroundTheme.AUTO_DAILY -> drawInkMountainTheme()
+    onDrawBehind {
+        isDarkLandscapeDraw.set(isDark)
+        try {
+            if (isDark) {
+                drawNightZenWash()
+            }
+            when (active) {
+            BackgroundTheme.MOUNTAIN -> drawInkMountainTheme()
+            BackgroundTheme.SAND_DUNES -> drawInkSandDunesTheme()
+            BackgroundTheme.SEA_HORIZON -> drawInkSeaHorizonTheme()
+            BackgroundTheme.SOLITARY_ISLE -> drawInkSolitaryIsleTheme()
+            BackgroundTheme.WILLOW_LEAVES -> drawInkWillowLeavesTheme()
+            BackgroundTheme.ZEN_BAMBOO -> drawInkZenBambooTheme()
+            BackgroundTheme.DREAM_BOAT -> drawDreamBoatTheme()
+            BackgroundTheme.CLEAR_SPRING -> drawClearSpringTheme()
+            BackgroundTheme.DESERT_SUNSET -> drawDesertSunsetTheme()
+            BackgroundTheme.EGRETS_ASCENDING -> drawEgretsAscendingTheme()
+            BackgroundTheme.PLUM_SHADOW -> drawPlumShadowTheme()
+            BackgroundTheme.ANCIENT_ROAD -> drawAncientRoadTheme()
+            BackgroundTheme.SPRING_RAIN -> drawSpringRainTheme()
+            BackgroundTheme.LOTUS_DRAGONFLY -> drawLotusDragonflyTheme()
+            BackgroundTheme.CRISP_SPRING_RAIN -> drawCrispSpringRainTheme()
+            BackgroundTheme.SOLITARY_SAIL_RIVER -> drawSolitarySailRiverTheme()
+            BackgroundTheme.OCEAN_MOON_TIDE -> drawOceanMoonTideTheme()
+            BackgroundTheme.WILD_SKY_RIVER_MOON -> drawWildSkyRiverMoonTheme()
+            BackgroundTheme.GREEN_HILLS_SAIL -> drawGreenHillsSailTheme()
+            BackgroundTheme.STARS_FALL_RIVER_FLOW -> drawStarsFallRiverFlowTheme()
+            BackgroundTheme.CLOUDS_COTTAGE -> drawCloudsCottageTheme()
+            BackgroundTheme.WINE_SPRING_MOON -> drawWineSpringMoonTheme()
+            BackgroundTheme.APRICOT_RAIN -> drawApricotRainTheme()
+            BackgroundTheme.DEEP_FOREST_DEER -> drawDeepForestDeerTheme()
+            BackgroundTheme.PEAR_BLOSSOM_WILLOW -> drawPearBlossomWillowTheme()
+            BackgroundTheme.SPRING_WATER_SLEEP -> drawSpringWaterSleepTheme()
+            BackgroundTheme.READING_LAMP_MOON -> drawReadingLampMoonTheme()
+            BackgroundTheme.MOON_IN_HAND_WIND -> drawMoonInHandWindTheme()
+            BackgroundTheme.MOSS_COURTYARD_PLANTAIN -> drawMossCourtyardPlantainTheme()
+            BackgroundTheme.FISH_JUMPING_DUCKWEED -> drawFishJumpingDuckweedTheme()
+            BackgroundTheme.AUTO_DAILY -> drawInkMountainTheme()
+        }
+    } finally {
+        isDarkLandscapeDraw.set(false)
+    }
     }
 }
 
@@ -601,11 +616,12 @@ private fun DrawScope.drawFishJumpingDuckweedTheme() {
 private fun DrawScope.drawNightZenWash() {
     val w = size.width
     val h = size.height
+    // Soft celestial moonlight wash across the night sky ("月光如水")
     drawRect(
         brush = Brush.radialGradient(
-            colors = listOf(Color(0x0DE5A36F), Color.Transparent),
-            center = Offset(w * 0.85f, h * 0.85f),
-            radius = w * 0.6f,
+            colors = listOf(Color(0x18D6E2EC), Color(0x0AE5A869), Color.Transparent),
+            center = Offset(w * 0.82f, h * 0.22f),
+            radius = w * 0.80f,
         ),
     )
 }

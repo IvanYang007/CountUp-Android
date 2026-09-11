@@ -202,10 +202,6 @@
     <string name="cd_sort_search_pill">Sort and search options. Currently sorted by %1$s. Tap to search or change sort.</string>
 
     <!-- Theme Mode -->
-    <string name="theme_section_title">APPEARANCE</string>
-    <string name="theme_tab_auto">Auto</string>
-    <string name="theme_tab_light">Light</string>
-    <string name="theme_tab_dark">Dark</string>
     <string name="theme_mode_system">System Default</string>
     <string name="theme_mode_light">Light (Washi)</string>
     <string name="theme_mode_dark">Dark (Twilight)</string>
@@ -351,8 +347,12 @@
 
     <!-- Time Decomposition Units -->
     <string name="unit_none"></string>
+    <string name="unit_day_singular">DAY</string>
     <string name="unit_days">DAYS</string>
+    <string name="unit_until">UNTIL</string>
     <string name="unit_today">TODAY</string>
+    <string name="reset_hold_to_reset">Press and hold to reset</string>
+    <string name="reset_holding">Hold to reset…</string>
     <string name="cd_tap_to_decompose">Displaying %1$s. Tap to toggle time format.</string>
 
     <!-- Card Color Warmth Shift (Patina) Phases -->
@@ -405,7 +405,6 @@
     <string name="cd_zen_horizon_cycle_unit">Cycle time unit</string>
 
     <!-- Data Backup & Migration -->
-    <string name="backup_section_title">DATA BACKUP</string>
     <string name="backup_action_export">Export Backup</string>
     <string name="backup_action_export_desc">Save a JSON backup of items and appearance settings</string>
     <string name="backup_export_success">Backup exported successfully</string>
@@ -428,6 +427,6 @@
     <string name="error_no_file_picker">No document manager available on this device</string>
     <string name="backup_restore_file_too_large">Backup file exceeds 2 MB limit</string>
     <string name="backup_restore_unsupported_version">Unsupported backup version (v%1$s). Please update the app.</string>
-    <string name="backup_restore_damaged_notice">Backup file is partially damaged (%1$d items recovered). \"Replace All\" is disabled to prevent data loss.</string>
+    <string name="backup_restore_damaged_notice" tools:ignore="PluralsCandidate">Backup file is partially damaged (%1$d items recovered). \"Replace All\" is disabled to prevent data loss.</string>
     <string name="backup_io_error">Could not access backup file</string>
 </resources>

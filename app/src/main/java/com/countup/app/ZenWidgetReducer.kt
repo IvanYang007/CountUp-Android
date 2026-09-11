@@ -43,11 +43,13 @@ data class ZenWidgetViewState(
     val primaryValueText: String,
     val unitLabelText: String,
     val compactValueText: String,
+    val pebbleNumberText: String,
     val startDateFormatted: String,
     val milestoneGoal: Long,
     val milestoneRemainingDays: Long,
     val milestoneProgress: Float, // 0.0f..1.0f
     val palette: WidgetColorPalette,
+    val isFuture: Boolean = false,
 )
 
 object ZenWidgetReducer {
@@ -135,23 +137,34 @@ object ZenWidgetReducer {
     /**
      * Decomposes [days] into value text and uppercase unit string for [unit].
      */
-    fun decomposeUnit(days: Long, unit: ZenWidgetDisplayUnit): Pair<String, String> {
+    fun decomposeUnit(days: Long, unit: ZenWidgetDisplayUnit, isFuture: Boolean = false): Pair<String, String> {
+        val absDays = abs(days)
+        val isCountdown = isFuture || days < 0
         return when (unit) {
-            ZenWidgetDisplayUnit.DAYS -> days.toString() to "DAYS"
+            ZenWidgetDisplayUnit.DAYS -> {
+                val unitStr = if (isCountdown) {
+                    "UNTIL"
+                } else if (absDays == 1L) {
+                    "DAY"
+                } else {
+                    "DAYS"
+                }
+                absDays.toString() to unitStr
+            }
             ZenWidgetDisplayUnit.MONTHS -> {
-                val months = days / 30.4375
+                val months = absDays / 30.4375
                 String.format(Locale.US, "%.1f", months) to "MONTHS"
             }
             ZenWidgetDisplayUnit.WEEKS -> {
-                val weeks = days / 7.0
+                val weeks = absDays / 7.0
                 String.format(Locale.US, "%.1f", weeks) to "WEEKS"
             }
             ZenWidgetDisplayUnit.HOURS -> {
-                val hours = days * 24L
+                val hours = absDays * 24L
                 String.format(Locale.US, "%,d", hours) to "HOURS"
             }
             ZenWidgetDisplayUnit.YEARS -> {
-                val years = days / 365.25
+                val years = absDays / 365.25
                 String.format(Locale.US, "%.1f", years) to "YEARS"
             }
         }
@@ -167,10 +180,13 @@ object ZenWidgetReducer {
         isDarkMode: Boolean = false,
     ): ZenWidgetViewState {
         val anchorDate = LocalDate.ofEpochDay(item.epochDay)
-        val days = java.time.temporal.ChronoUnit.DAYS.between(anchorDate, today)
+        val rawDays = java.time.temporal.ChronoUnit.DAYS.between(anchorDate, today)
+        val isFuture = rawDays < 0
+        val days = abs(rawDays)
 
-        val (valueText, unitLabel) = decomposeUnit(days, unit)
+        val (valueText, unitLabel) = decomposeUnit(days, unit, isFuture = isFuture)
         val compactText = formatCompactNumber(days)
+        val pebbleNumber = if (isFuture) "${compactText}D" else compactText
 
         val nextMilestone = resolveNextMilestone(days)
         val prevMilestone = resolvePreviousMilestone(days)
@@ -179,7 +195,7 @@ object ZenWidgetReducer {
         val progress = ((days - prevMilestone).toFloat() / range).coerceIn(0f, 1f)
         val remaining = max(0L, nextMilestone - days)
 
-        val formattedStart = "Since " + anchorDate.format(DATE_FORMATTER)
+        val formattedStart = (if (isFuture) "Until " else "Since ") + anchorDate.format(DATE_FORMATTER)
         val palette = WidgetThemeTokens.resolveWithItem(item, isDarkMode = isDarkMode)
 
         return ZenWidgetViewState(
@@ -189,11 +205,13 @@ object ZenWidgetReducer {
             primaryValueText = valueText,
             unitLabelText = unitLabel,
             compactValueText = compactText,
+            pebbleNumberText = pebbleNumber,
             startDateFormatted = formattedStart,
             milestoneGoal = nextMilestone,
             milestoneRemainingDays = remaining,
             milestoneProgress = progress,
             palette = palette,
+            isFuture = isFuture,
         )
     }
 }

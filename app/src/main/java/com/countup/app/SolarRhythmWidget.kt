@@ -1,18 +1,15 @@
 package com.countup.app
 
-import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.os.Build
 import android.util.SizeF
 import android.view.View
 import android.widget.RemoteViews
-import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.createBitmap
 import java.time.LocalDate
 

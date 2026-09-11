@@ -139,10 +139,6 @@
     <string name="cd_sort_search_pill">排序与搜索选项。当前按 %1$s 排序。点击进行搜索或更改排序。</string>
 
     <!-- Theme Mode -->
-    <string name="theme_section_title">外观模式</string>
-    <string name="theme_tab_auto">自动</string>
-    <string name="theme_tab_light">浅色</string>
-    <string name="theme_tab_dark">深色</string>
     <string name="theme_mode_system">跟随系统</string>
     <string name="theme_mode_light">浅色（宣纸）</string>
     <string name="theme_mode_dark">深色（夜墨）</string>
@@ -284,8 +280,12 @@
 
     <!-- Time Decomposition Units -->
     <string name="unit_none"></string>
+    <string name="unit_day_singular">天</string>
     <string name="unit_days">天</string>
+    <string name="unit_until">倒数</string>
     <string name="unit_today">今日</string>
+    <string name="reset_hold_to_reset">长按以重置</string>
+    <string name="reset_holding">按住重置…</string>
     <string name="cd_tap_to_decompose">当前显示 %1$s。点击切换时间格式。</string>
 
     <!-- Card Color Warmth Shift (Patina) Phases -->
@@ -318,7 +318,6 @@
     <string name="solar_rhythm_configure_subtitle">选择要在此时节画卷上呈现的习惯或纪念日。</string>
 
     <!-- Data Backup & Migration -->
-    <string name="backup_section_title">数据备份</string>
     <string name="backup_action_export">导出备份</string>
     <string name="backup_action_export_desc">保存项目与个性化设置的 JSON 备份文件</string>
     <string name="backup_export_success">备份导出成功</string>

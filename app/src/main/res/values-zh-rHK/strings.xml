@@ -271,8 +271,12 @@
 
     <!-- Time Decomposition Units -->
     <string name="unit_none"></string>
+    <string name="unit_day_singular">天</string>
     <string name="unit_days">天</string>
+    <string name="unit_until">倒數</string>
     <string name="unit_today">今日</string>
+    <string name="reset_hold_to_reset">長按以重設</string>
+    <string name="reset_holding">按住重設…</string>
     <string name="cd_tap_to_decompose">當前顯示 %1$s。點擊切換時間格式。</string>
 
     <!-- Card Color Warmth Shift (Patina) Phases -->
@@ -301,7 +305,6 @@
     <string name="action_dismiss">忽略</string>
 
     <!-- Data Backup & Migration -->
-    <string name="backup_section_title">資料備份</string>
     <string name="backup_action_export">匯出備份</string>
     <string name="backup_action_export_desc">將所有記錄與外觀設定匯出為 JSON 備份檔案</string>
     <string name="backup_export_success">備份匯出成功</string>

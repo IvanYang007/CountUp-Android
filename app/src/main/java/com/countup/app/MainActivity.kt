@@ -204,17 +204,23 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         viewModel.onEvent(CountUpUiEvent.Refresh)
-        refreshWidget()
+        refreshWidget(immediate = true)
     }
 
     override fun onPause() {
         super.onPause()
-        refreshWidget()
+        refreshWidget(immediate = true)
     }
 
-    private fun refreshWidget() {
+    private var refreshWidgetJob: kotlinx.coroutines.Job? = null
+
+    private fun refreshWidget(immediate: Boolean = false) {
         val appContext = applicationContext
-        widgetReceiverScope.launch {
+        refreshWidgetJob?.cancel()
+        refreshWidgetJob = widgetReceiverScope.launch {
+            if (!immediate) {
+                kotlinx.coroutines.delay(350L)
+            }
             runCatching { CountUpStore(appContext).sanitizeOrphanedWidgetBindings(appContext) }
             runCatching { pushWidgetUpdate(appContext) }
             runCatching { pushAllHeroWidgetsUpdate(appContext) }

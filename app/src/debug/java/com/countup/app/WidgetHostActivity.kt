@@ -127,14 +127,14 @@ class WidgetHostActivity : Activity() {
             emptyView?.visibility = android.view.View.GONE
             grid?.visibility = android.view.View.VISIBLE
             val circleDrawables = intArrayOf(
-                R.drawable.ic_circle_olive,
+                R.drawable.ic_circle_plate,
                 R.drawable.ic_circle_orange,
-                R.drawable.ic_circle_mustard,
+                R.drawable.ic_circle_green,
             )
             val numberInks = intArrayOf(
-                android.graphics.Color.WHITE,
-                android.graphics.Color.WHITE,
                 android.graphics.Color.parseColor("#2C2416"),
+                android.graphics.Color.WHITE,
+                android.graphics.Color.WHITE,
             )
             grid?.adapter = object : android.widget.BaseAdapter() {
                 override fun getCount(): Int = items.size

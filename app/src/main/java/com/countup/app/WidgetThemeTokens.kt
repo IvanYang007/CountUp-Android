@@ -38,11 +38,11 @@ object WidgetThemeTokens {
     const val LIGHT_MILESTONE_ACCENT = 0xFFC2410C.toInt() // Radiant persimmon milestone dot
 
     // --- Dark Theme: Twilight Sumi Stone Palette matching App Dark Card ---
-    const val DARK_CANVAS_BG = 0xFF24201A.toInt()    // Sumi stone / ZenDarkCard
-    const val DARK_SURFACE_BG = 0xFF2A2620.toInt()   // Elevated ink stone
-    const val DARK_PRIMARY_INK = 0xFFF1EBDD.toInt()  // Warm rice-white ink
-    const val DARK_SECONDARY_INK = 0xFFC4BEAE.toInt() // Muted parchment ink
-    const val DARK_HAIRLINE = 0xFF3A3D35.toInt()     // Dark slate hairline
+    const val DARK_CANVAS_BG = 0xFF26231E.toInt()    // Aligns with ZenDarkCard / Washi Dark Card (#26231E)
+    const val DARK_SURFACE_BG = 0xFF232620.toInt()   // Aligns with ZenDarkSurface (#232620)
+    const val DARK_PRIMARY_INK = 0xFFF4EFE6.toInt()  // Aligns with ZenDarkTextPrimary (#F4EFE6)
+    const val DARK_SECONDARY_INK = 0xFFABA494.toInt() // Aligns with ZenDarkTextSecondary (#ABA494)
+    const val DARK_HAIRLINE = 0xFF3A3D35.toInt()     // Dark slate hairline (#3A3D35)
     const val DARK_ACCENT_PRIMARY = 0xFF8FAF84.toInt() // Tea moss green
     const val DARK_ACCENT_GOLD = 0xFFDEB285.toInt()    // Filament Gold
     const val DARK_ACCENT_KINTSUGI = 0xFFD6A848.toInt() // Kintsugi Gold

@@ -226,15 +226,19 @@ class CountUpViewModelTest {
         viewModel.onEvent(CountUpUiEvent.OpenEditor(target))
         assertEquals(target, viewModel.state.value.editorTarget)
 
-        viewModel.onEvent(
-            CountUpUiEvent.SaveItem(
-                name = "Water Bonsai Trees",
-                epochDay = target.epochDay,
-                comment = "Updated note",
-                icon = "yard",
-                cardColor = "terracotta",
+        viewModel.effects.test {
+            viewModel.onEvent(
+                CountUpUiEvent.SaveItem(
+                    name = "Water Bonsai Trees",
+                    epochDay = target.epochDay,
+                    comment = "Updated note",
+                    icon = "yard",
+                    cardColor = "terracotta",
+                )
             )
-        )
+            val effect = awaitItem()
+            assertTrue(effect is CountUpUiEffect.RefreshWidget)
+        }
 
         viewModel.state.test {
             val state = awaitItem()

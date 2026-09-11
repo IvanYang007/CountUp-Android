@@ -19,6 +19,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$PSNativeCommandUseErrorActionPreference = $false
 
 # 1. Resolve Android SDK Path
 $sdkDir = $null
