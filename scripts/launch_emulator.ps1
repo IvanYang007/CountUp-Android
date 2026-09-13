@@ -18,7 +18,7 @@ param(
     [switch]$OpenDialog
 )
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue"
 $PSNativeCommandUseErrorActionPreference = $false
 
 # 1. Resolve Android SDK Path
