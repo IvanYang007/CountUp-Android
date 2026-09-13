@@ -32,7 +32,7 @@ class ZenPebbleWidgetReceiver : AppWidgetProvider() {
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {
         val appContext = context.applicationContext
         launchAsync {
-            val store = CountUpStore(appContext)
+            val store = CountUpStore.getInstance(appContext)
             for (id in appWidgetIds) {
                 store.removeZenPebbleBinding(id)
             }
@@ -53,7 +53,7 @@ fun pushAllZenPebbleWidgetsUpdate(context: Context) {
 /** Renders and pushes RemoteViews for a single Zen Pebble widget. */
 fun pushZenPebbleWidgetUpdate(context: Context, appWidgetId: Int) {
     val manager = AppWidgetManager.getInstance(context)
-    val store = CountUpStore(context)
+    val store = CountUpStore.getInstance(context)
     val items = store.items()
     val boundItemId = store.getZenPebbleBinding(appWidgetId)
     val targetItem = ZenWidgetReducer.resolveTargetItem(items, boundItemId)
@@ -66,7 +66,7 @@ fun pushZenPebbleWidgetUpdate(context: Context, appWidgetId: Int) {
 }
 
 /** Builds the RemoteViews hierarchy for the 1x1 Zen Pebble widget. */
-fun buildZenPebbleRemoteViews(
+private fun buildZenPebbleRemoteViews(
     context: Context,
     item: CountUpItem?,
     today: LocalDate,

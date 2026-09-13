@@ -32,6 +32,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -419,7 +420,9 @@ fun ItemEditorDialog(
 
                         // Single clean row of 4 chips for active category
                         val activeColorCategory = CARD_COLOR_CATEGORIES.getOrElse(selectedColorCategoryIndex) { CARD_COLOR_CATEGORIES[0] }
-                        val currentCategoryPresets = activeColorCategory.presetIds.map { resolveCardStyle(it, isDark = isDarkTheme) }
+                        val currentCategoryPresets = remember(selectedColorCategoryIndex, isDarkTheme) {
+                            activeColorCategory.presetIds.map { resolveCardStyle(it, isDark = isDarkTheme) }
+                        }
 
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -507,7 +510,9 @@ fun ItemEditorDialog(
 
                         // Category Tabs
                         val categoryScroll = rememberScrollState()
-                        val categories = listOf("all" to R.string.category_all) + ICON_CATEGORIES.map { it.id to it.labelRes }
+                        val categories = remember {
+                            listOf("all" to R.string.category_all) + ICON_CATEGORIES.map { it.id to it.labelRes }
+                        }
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -547,15 +552,15 @@ fun ItemEditorDialog(
 
                         Spacer(Modifier.padding(top = 8.dp))
 
-                        // Displayed icons for selected category
-                        val currentIcons = if (selectedCategoryIndex == 0) {
-                            ALL_ICON_NAMES
-                        } else {
-                            ICON_CATEGORIES[selectedCategoryIndex - 1].iconNames
-                        }
-
                         // Grid layout (6 columns per row)
-                        val chunkedIcons = currentIcons.chunked(6)
+                        val chunkedIcons = remember(selectedCategoryIndex) {
+                            val currentIcons = if (selectedCategoryIndex == 0) {
+                                ALL_ICON_NAMES
+                            } else {
+                                ICON_CATEGORIES[selectedCategoryIndex - 1].iconNames
+                            }
+                            currentIcons.chunked(6)
+                        }
                         Column(
                             verticalArrangement = Arrangement.spacedBy(6.dp),
                             modifier = Modifier.fillMaxWidth(),
@@ -745,8 +750,9 @@ fun DeleteConfirmDialog(
 /**
  * Fullscreen date picker dialog for selecting an anchor date.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DatePickerDialog(
+private fun DatePickerDialog(
     initialDate: LocalDate,
     onDismiss: () -> Unit,
     onDatePicked: (LocalDate) -> Unit,
@@ -757,49 +763,27 @@ fun DatePickerDialog(
     )
     val (dialogSurface, dialogBorder) = zenDialogStyle(RoundedCornerShape(24.dp))
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
-        modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp).then(dialogBorder),
+    val datePickerColors = DatePickerDefaults.colors(
         containerColor = dialogSurface,
-        tonalElevation = 0.dp,
-        shape = RoundedCornerShape(24.dp),
-        title = {
-            Text(
-                text = stringResource(R.string.pick_date_title).uppercase(),
-                style = MaterialTheme.typography.titleMedium.copy(letterSpacing = 1.2.sp),
-                fontFamily = FontFamily.SansSerif,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        },
-        text = {
-            val datePickerColors = DatePickerDefaults.colors(
-                containerColor = dialogSurface,
-                titleContentColor = MaterialTheme.colorScheme.onSurface,
-                headlineContentColor = MaterialTheme.colorScheme.onSurface,
-                weekdayContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                subheadContentColor = MaterialTheme.colorScheme.onSurface,
-                yearContentColor = MaterialTheme.colorScheme.onSurface,
-                currentYearContentColor = MaterialTheme.colorScheme.primary,
-                selectedYearContentColor = MaterialTheme.colorScheme.onPrimary,
-                selectedYearContainerColor = MaterialTheme.colorScheme.primary,
-                dayContentColor = MaterialTheme.colorScheme.onSurface,
-                selectedDayContentColor = MaterialTheme.colorScheme.onPrimary,
-                selectedDayContainerColor = MaterialTheme.colorScheme.primary,
-                todayContentColor = MaterialTheme.colorScheme.primary,
-                todayDateBorderColor = MaterialTheme.colorScheme.primary,
-                navigationContentColor = MaterialTheme.colorScheme.onSurface,
-                dividerColor = MaterialTheme.colorScheme.outline,
-            )
-            DatePicker(
-                state = state,
-                title = null,
-                headline = null,
-                colors = datePickerColors,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        },
+        titleContentColor = MaterialTheme.colorScheme.onSurface,
+        headlineContentColor = MaterialTheme.colorScheme.onSurface,
+        weekdayContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        subheadContentColor = MaterialTheme.colorScheme.onSurface,
+        yearContentColor = MaterialTheme.colorScheme.onSurface,
+        currentYearContentColor = MaterialTheme.colorScheme.primary,
+        selectedYearContentColor = MaterialTheme.colorScheme.onPrimary,
+        selectedYearContainerColor = MaterialTheme.colorScheme.primary,
+        dayContentColor = MaterialTheme.colorScheme.onSurface,
+        selectedDayContentColor = MaterialTheme.colorScheme.onPrimary,
+        selectedDayContainerColor = MaterialTheme.colorScheme.primary,
+        todayContentColor = MaterialTheme.colorScheme.primary,
+        todayDateBorderColor = MaterialTheme.colorScheme.primary,
+        navigationContentColor = MaterialTheme.colorScheme.onSurface,
+        dividerColor = MaterialTheme.colorScheme.outline,
+    )
+
+    androidx.compose.material3.DatePickerDialog(
+        onDismissRequest = onDismiss,
         confirmButton = {
             val dateConfirmInteraction = rememberPressSource()
             Button(
@@ -839,7 +823,28 @@ fun DatePickerDialog(
                 )
             }
         },
-    )
+        modifier = modifier.then(dialogBorder),
+        shape = RoundedCornerShape(24.dp),
+        tonalElevation = 0.dp,
+        colors = datePickerColors,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        DatePicker(
+            state = state,
+            title = {
+                Text(
+                    text = stringResource(R.string.pick_date_title).uppercase(),
+                    style = MaterialTheme.typography.titleMedium.copy(letterSpacing = 1.2.sp),
+                    fontFamily = FontFamily.SansSerif,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(start = 24.dp, end = 12.dp, top = 16.dp),
+                )
+            },
+            colors = datePickerColors,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
 }
 
 /**

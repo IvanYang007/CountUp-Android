@@ -28,7 +28,7 @@ class MainActivity : ComponentActivity() {
         object : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                val store = CountUpStore(applicationContext)
+                val store = CountUpStore.getInstance(applicationContext)
                 return CountUpViewModel(DefaultCountUpRepository(store)) as T
             }
         }
@@ -38,9 +38,9 @@ class MainActivity : ComponentActivity() {
 
     private val appVersion: String by lazy {
         try {
-            packageManager.getPackageInfo(packageName, 0).versionName ?: "2.20.0"
+            packageManager.getPackageInfo(packageName, 0).versionName ?: "3.0.0"
         } catch (_: Exception) {
-            "2.20.0"
+            "3.0.0"
         }
     }
 
@@ -221,7 +221,7 @@ class MainActivity : ComponentActivity() {
             if (!immediate) {
                 kotlinx.coroutines.delay(350L)
             }
-            runCatching { CountUpStore(appContext).sanitizeOrphanedWidgetBindings(appContext) }
+            runCatching { CountUpStore.getInstance(appContext).sanitizeOrphanedWidgetBindings(appContext) }
             runCatching { pushWidgetUpdate(appContext) }
             runCatching { pushAllHeroWidgetsUpdate(appContext) }
             runCatching { pushAllZenHorizonWidgetsUpdate(appContext) }

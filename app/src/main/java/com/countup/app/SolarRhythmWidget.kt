@@ -89,7 +89,7 @@ class SolarRhythmWidgetReceiver : AppWidgetProvider() {
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {
         val appContext = context.applicationContext
         launchAsync {
-            val store = CountUpStore(appContext)
+            val store = CountUpStore.getInstance(appContext)
             for (id in appWidgetIds) {
                 store.removeSolarRhythmBinding(id)
             }
@@ -110,7 +110,7 @@ fun pushAllSolarRhythmWidgetsUpdate(context: Context) {
 /** Renders and pushes RemoteViews for a single Solar Rhythm widget. */
 fun pushSolarRhythmWidgetUpdate(context: Context, appWidgetId: Int) {
     val manager = AppWidgetManager.getInstance(context)
-    val store = CountUpStore(context)
+    val store = CountUpStore.getInstance(context)
     val items = store.items()
     val boundId = store.getSolarRhythmBinding(appWidgetId)
     val targetItem = ZenWidgetReducer.resolveTargetItem(items, boundId)
@@ -162,7 +162,7 @@ fun pushSolarRhythmWidgetUpdate(context: Context, appWidgetId: Int) {
 }
 
 /** Builds the RemoteViews hierarchy for a Solar Rhythm widget. */
-fun buildSolarRhythmRemoteViews(
+private fun buildSolarRhythmRemoteViews(
     context: Context,
     targetItem: CountUpItem?,
     daysCount: Long,

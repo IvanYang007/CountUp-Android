@@ -338,6 +338,96 @@
     <string name="cd_icon_tent">帐篷（户外徒步）</string>
     <string name="cd_icon_compass">指南针（导航与探索）</string>
     <string name="cd_icon_camera">照相机（摄影记录）</string>
+    <string name="cd_icon_wedding_ring">钻戒（婚礼与订婚）</string>
+    <string name="cd_icon_champagne_flutes">香槟杯（庆祝与举杯）</string>
+    <string name="cd_icon_fasting_plate">时钟餐盘（轻断食）</string>
+    <string name="cd_icon_hourglass_spark">沙漏（专注与断食打卡）</string>
+    <string name="cd_icon_phone_slash">斜杠手机（数字戒断）</string>
+    <string name="cd_icon_sprout_device">屏幕嫩芽（数字健康）</string>
+
+    <!-- Pillar A: Health, Wellness & Body (18 icons) -->
+    <string name="cd_icon_period_moon">月牙与水滴（经期追踪）</string>
+    <string name="cd_icon_period_lotus">莲花与水滴（生理节律）</string>
+    <string name="cd_icon_cold_tub">冰水浴（冰浴复健）</string>
+    <string name="cd_icon_frost_spark">霜晶（冷疗打卡）</string>
+    <string name="cd_icon_skincare_dropper">精华滴管（护肤日常）</string>
+    <string name="cd_icon_sun_shield">防晒盾牌（防晒护肤）</string>
+    <string name="cd_icon_rx_bottle">处方药瓶（服药周期）</string>
+    <string name="cd_icon_vaccine_syringe">注射器（疫苗与接种）</string>
+    <string name="cd_icon_glasses_round">圆框眼镜（视力与验光）</string>
+    <string name="cd_icon_eye_focus">聚焦准星（视力健康）</string>
+    <string name="cd_icon_dental_floss">牙线盒（口腔清洁）</string>
+    <string name="cd_icon_tooth_sparkle">闪亮牙齿（牙齿美白）</string>
+    <string name="cd_icon_yoga_mat">瑜伽垫（拉伸与柔韧）</string>
+    <string name="cd_icon_flex_wave">延展弧线（体态活力）</string>
+    <string name="cd_icon_hair_tint_brush">染发刷（美发与理发）</string>
+    <string name="cd_icon_hair_swirl">发丝旋涡（头皮与护发）</string>
+    <string name="cd_icon_mind_heart">宁静心境（心理健康）</string>
+    <string name="cd_icon_kintsugi_bowl">金缮陶碗（治愈与疗愈）</string>
+
+    <!-- Pillar B: Habits & Discipline (18 icons) -->
+    <string name="cd_icon_sugar_slash">戒糖方糖（控糖减糖）</string>
+    <string name="cd_icon_clean_apple">脆苹果（健康饮食）</string>
+    <string name="cd_icon_sober_glass_inverted">倒置酒杯（戒酒清醒）</string>
+    <string name="cd_icon_sober_dawn">晨光破晓（无酒新生）</string>
+    <string name="cd_icon_journal_ribbon">丝带日记（每日手账）</string>
+    <string name="cd_icon_fountain_pen">钢笔尖（深思书写）</string>
+    <string name="cd_icon_wallet_padlock">上锁钱包（不消费挑战）</string>
+    <string name="cd_icon_coin_sprout">萌芽金币（储蓄理财）</string>
+    <string name="cd_icon_alarm_five_am">五点闹钟（晨起打卡）</string>
+    <string name="cd_icon_dawn_ridge">山脊晨曦（清晨破晓）</string>
+    <string name="cd_icon_translate_bubbles">对话气泡（语言学习）</string>
+    <string name="cd_icon_language_bridge">拱桥（语言流利）</string>
+    <string name="cd_icon_watering_can">浇水壶（植物浇灌）</string>
+    <string name="cd_icon_monstera_pot">龟背竹盆栽（绿植养护）</string>
+    <string name="cd_icon_pomodoro_timer">番茄钟（专注冲刺）</string>
+    <string name="cd_icon_zen_bell">颂钵（正念专注）</string>
+    <string name="cd_icon_book_stack">叠放书籍（阅读打卡）</string>
+    <string name="cd_icon_reading_beacon">灯塔光束（求知阅读）</string>
+
+    <!-- Pillar C: Milestones & Relationships (14 icons) -->
+    <string name="cd_icon_house_keyhole">锁孔小屋（乔迁与新居）</string>
+    <string name="cd_icon_moving_box">封箱包裹（搬家入伙）</string>
+    <string name="cd_icon_mended_heart">缝合的心（愈合前行）</string>
+    <string name="cd_icon_bird_flight">飞鸟腾跃（释怀释然）</string>
+    <string name="cd_icon_mortarboard_cap">学士帽（毕业典礼）</string>
+    <string name="cd_icon_diploma_scroll">毕业证书（学位达成）</string>
+    <string name="cd_icon_paw_heart">爱心爪印（宠物领养）</string>
+    <string name="cd_icon_pet_collar">宠物项圈（爱宠陪伴）</string>
+    <string name="cd_icon_passport_book">护照本（签证旅行）</string>
+    <string name="cd_icon_compass_rose">罗盘星芒（环球探索）</string>
+    <string name="cd_icon_steering_wheel">方向盘（驾照考试）</string>
+    <string name="cd_icon_highway_horizon">公路地平线（公路旅行）</string>
+    <string name="cd_icon_tattoo_machine">纹身机（个性纹身）</string>
+    <string name="cd_icon_ink_constellation">星辰墨滴（身体艺术）</string>
+
+    <!-- Pillar D: Work, Career & Finance (14 icons) -->
+    <string name="cd_icon_tax_form">报税表单（税务申报）</string>
+    <string name="cd_icon_tax_balance">天平（退税核算）</string>
+    <string name="cd_icon_bank_check">银行支票（分红奖励）</string>
+    <string name="cd_icon_coin_stack">金币堆（收入利润）</string>
+    <string name="cd_icon_briefcase_star">公文包与星标（升职加薪）</string>
+    <string name="cd_icon_career_ladder">登高阶梯（职场晋升）</string>
+    <string name="cd_icon_receipt_cut">剪断小票（清偿债务）</string>
+    <string name="cd_icon_chain_broken">断开锁链（财务自由）</string>
+    <string name="cd_icon_card_cut">剪断信用卡（理性消费）</string>
+    <string name="cd_icon_padlock_open">开启挂锁（零负债）</string>
+    <string name="cd_icon_shipping_crate">货箱打包（产品发布）</string>
+    <string name="cd_icon_beacon_light">引航灯塔（版本发布）</string>
+    <string name="cd_icon_clipboard_check">勾选画板（季度复盘）</string>
+    <string name="cd_icon_gauge_high">仪表盘（冲刺复盘）</string>
+
+    <!-- Pillar E: Social, Leisure & Life Goals (10 icons) -->
+    <string name="cd_icon_twin_candles">双生蜡烛（烛光约会）</string>
+    <string name="cd_icon_shared_umbrella">爱心雨伞（亲密相伴）</string>
+    <string name="cd_icon_stage_mic">舞台麦克风（现场演出）</string>
+    <string name="cd_icon_stadium_beam">舞台聚光灯（音乐节）</string>
+    <string name="cd_icon_clapperboard">场记板（电影之夜）</string>
+    <string name="cd_icon_film_reel">胶片胶卷（观影记录）</string>
+    <string name="cd_icon_camper_van">露营车（房车自驾）</string>
+    <string name="cd_icon_mountain_pass">盘山公路（沿途风光）</string>
+    <string name="cd_icon_beach_chair">沙滩躺椅（FIRE退休）</string>
+    <string name="cd_icon_soaring_kite">迎风风筝（财务独立）</string>
 
     <!-- Quick Add & Shortcuts -->
     <string name="cd_widget_add">添加新计数器</string>

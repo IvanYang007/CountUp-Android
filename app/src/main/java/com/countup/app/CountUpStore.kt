@@ -914,6 +914,25 @@ class CountUpStore(context: Context) {
         /** Serializes read-modify-write mutations across all store instances in the application process. */
         private val globalStoreLock = Any()
 
+        @Volatile
+        private var instance: CountUpStore? = null
+
+        /**
+         * Returns the process-wide cached singleton instance of [CountUpStore].
+         * Thread-safe and safe for concurrent access from any thread, activity, or receiver.
+         */
+        fun getInstance(context: Context): CountUpStore =
+            instance ?: synchronized(globalStoreLock) {
+                instance ?: CountUpStore(context.applicationContext ?: context).also { instance = it }
+            }
+
+        /** Clears the singleton instance cache for unit test isolation. */
+        internal fun resetInstanceForTesting() {
+            synchronized(globalStoreLock) {
+                instance = null
+            }
+        }
+
         private const val PREFS_NAME = "countup_prefs"
         private const val KEY_ITEMS = "items_v1"
         private const val KEY_ITEMS_QUARANTINE = "items_v1_quarantine"

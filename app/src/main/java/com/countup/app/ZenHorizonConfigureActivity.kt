@@ -63,7 +63,7 @@ class ZenHorizonConfigureActivity : ComponentActivity() {
             return
         }
 
-        store = CountUpStore(this)
+        store = CountUpStore.getInstance(this)
         val today = LocalDate.now()
         val itemsState = mutableStateOf<List<CountUpItem>>(emptyList())
 

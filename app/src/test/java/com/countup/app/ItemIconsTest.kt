@@ -110,9 +110,59 @@ class ItemIconsTest {
         val savings = matchKeywordStyle("Save money for vacation")
         assertEquals(KeywordStyleMatch("piggy_bank", "ink_gold"), savings)
 
+        val wedding = matchKeywordStyle("Wedding Anniversary")
+        assertEquals(KeywordStyleMatch("wedding_ring", "paper_terracotta"), wedding)
+
+        val fasting = matchKeywordStyle("Intermittent Fasting 16:8")
+        assertEquals(KeywordStyleMatch("fasting_plate", "paper_sage"), fasting)
+
+        val detox = matchKeywordStyle("Digital detox weekend")
+        assertEquals(KeywordStyleMatch("phone_slash", "paper_indigo"), detox)
+
+        val cheers = matchKeywordStyle("Cheers champagne celebration")
+        assertEquals(KeywordStyleMatch("champagne_flutes", "ink_gold"), cheers)
+
+        val wellness = matchKeywordStyle("Digital wellness routine")
+        assertEquals(KeywordStyleMatch("sprout_device", "sage_forest"), wellness)
+
+        // Substring collision safety (ensuring word boundaries prevent false positive matches like 'tent' in 'intermittent')
+        assertEquals(KeywordStyleMatch("restaurant", "paper_terracotta"), matchKeywordStyle("Dinner at a restaurant"))
+        assertEquals(KeywordStyleMatch("flight", "paper_indigo"), matchKeywordStyle("Summer vacation in Paris"))
+        assertEquals(KeywordStyleMatch("skincare_dropper", "paper_sage"), matchKeywordStyle("Skincare routine"))
+        assertEquals(KeywordStyleMatch("heartbeat", "ink_crimson"), matchKeywordStyle("Cardio heart rate"))
+        assertEquals(KeywordStyleMatch("game_controller", "ink_gold"), matchKeywordStyle("Xbox gaming session"))
+        assertEquals(KeywordStyleMatch("tent", "sage_forest"), matchKeywordStyle("Camp in a tent"))
+
+        // New Pillar assertions
+        assertEquals(KeywordStyleMatch("period_moon", "ink_crimson"), matchKeywordStyle("Period tracker"))
+        assertEquals(KeywordStyleMatch("cold_tub", "paper_indigo"), matchKeywordStyle("Cold plunge routine"))
+        assertEquals(KeywordStyleMatch("sober_glass_inverted", "paper_indigo"), matchKeywordStyle("Sober anniversary"))
+        assertEquals(KeywordStyleMatch("journal_ribbon", "paper_terracotta"), matchKeywordStyle("Daily journal reflection"))
+        assertEquals(KeywordStyleMatch("alarm_five_am", "ink_gold"), matchKeywordStyle("5 am club"))
+        assertEquals(KeywordStyleMatch("translate_bubbles", "paper_indigo"), matchKeywordStyle("Duolingo streak"))
+        assertEquals(KeywordStyleMatch("watering_can", "sage_forest"), matchKeywordStyle("Watering houseplants"))
+        assertEquals(KeywordStyleMatch("pomodoro_timer", "ink_crimson"), matchKeywordStyle("Pomodoro focus"))
+        assertEquals(KeywordStyleMatch("house_keyhole", "ink_gold"), matchKeywordStyle("Moving into new house"))
+        assertEquals(KeywordStyleMatch("mortarboard_cap", "ink_gold"), matchKeywordStyle("College graduation day"))
+        assertEquals(KeywordStyleMatch("tax_form", "paper_sage"), matchKeywordStyle("Annual tax return"))
+        assertEquals(KeywordStyleMatch("briefcase_star", "ink_gold"), matchKeywordStyle("Promotion anniversary"))
+        assertEquals(KeywordStyleMatch("twin_candles", "paper_terracotta"), matchKeywordStyle("Romantic date night"))
+        assertEquals(KeywordStyleMatch("stage_mic", "ink_crimson"), matchKeywordStyle("Rock concert tonight"))
+        assertEquals(KeywordStyleMatch("camper_van", "ink_gold"), matchKeywordStyle("Summer road trip"))
+        assertEquals(KeywordStyleMatch("beach_chair", "sage_forest"), matchKeywordStyle("Early FIRE retirement"))
+
         // Chinese keywords
         val hairZh = matchKeywordStyle("上次剪发")
         assertEquals(KeywordStyleMatch("content_cut", ""), hairZh)
+
+        val weddingZh = matchKeywordStyle("结婚纪念日")
+        assertEquals(KeywordStyleMatch("wedding_ring", "paper_terracotta"), weddingZh)
+
+        val fastingZh = matchKeywordStyle("轻断食打卡")
+        assertEquals(KeywordStyleMatch("fasting_plate", "paper_sage"), fastingZh)
+
+        val detoxZh = matchKeywordStyle("戒手机记录")
+        assertEquals(KeywordStyleMatch("phone_slash", "paper_indigo"), detoxZh)
 
         val zazenZh = matchKeywordStyle("晨间冥想")
         assertEquals(KeywordStyleMatch("self_improvement", "sage_forest"), zazenZh)

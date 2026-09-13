@@ -116,7 +116,6 @@ import androidx.compose.ui.zIndex
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
@@ -131,18 +130,19 @@ fun CountUpContent(
     state: CountUpUiState,
     onEvent: (CountUpUiEvent) -> Unit,
     modifier: Modifier = Modifier,
-    appVersion: String = "2.20.2",
+    appVersion: String = "3.0.0",
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
 ) {
     val localContext = LocalContext.current
     val reduceMotion = remember(localContext) { isReducedMotion(localContext) }
     val displayItems = state.displayItems
 
-    LaunchedEffect(Unit) {
-        while (isActive) {
-            kotlinx.coroutines.delay(60_000L)
-            onEvent(CountUpUiEvent.CheckMidnight)
-        }
+    LaunchedEffect(state.today) {
+        val now = java.time.ZonedDateTime.now()
+        val nextMidnight = now.toLocalDate().plusDays(1).atStartOfDay(now.zone)
+        val millisUntilMidnight = java.time.Duration.between(now, nextMidnight).toMillis() + 500L
+        kotlinx.coroutines.delay(millisUntilMidnight.coerceAtLeast(1000L))
+        onEvent(CountUpUiEvent.CheckMidnight)
     }
 
     val zenColors = LocalZenColors.current
@@ -1115,7 +1115,7 @@ private fun MechanicalResetButton(
  * that emphasizes digits with semi-bold primary ink while keeping interval unit characters (WEEKS, DAYS, YEARS, etc.)
  * in a small, muted 12sp font to harmonize with the Mid-Century Zen design language.
  */
-fun buildDecomposedAnnotatedString(
+private fun buildDecomposedAnnotatedString(
     text: String,
     mode: TimeDisplayMode,
     primaryColor: Color,

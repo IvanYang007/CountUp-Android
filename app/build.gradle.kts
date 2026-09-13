@@ -14,8 +14,8 @@ android {
         applicationId = "com.countup.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 48
-        versionName = "2.20.2"
+        versionCode = 51
+        versionName = "3.0.0"
     }
 
     val releaseKeystore = file("../keystore/countup-release.jks")
@@ -71,8 +71,6 @@ android {
     buildFeatures {
         compose = true
     }
-
-
 
     bundle {
         language {

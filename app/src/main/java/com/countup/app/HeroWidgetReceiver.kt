@@ -36,7 +36,7 @@ class HeroWidgetReceiver : AppWidgetProvider() {
                 }
                 val appContext = context.applicationContext
                 launchAsync {
-                    val store = CountUpStore(appContext)
+                    val store = CountUpStore.getInstance(appContext)
                     val boundItemId = store.getHeroWidgetBinding(appWidgetId)
                     val items = store.items()
                     val targetItem = ZenWidgetReducer.resolveTargetItem(items, boundItemId)
@@ -79,7 +79,7 @@ class HeroWidgetReceiver : AppWidgetProvider() {
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {
         val appContext = context.applicationContext
         launchAsync {
-            val store = CountUpStore(appContext)
+            val store = CountUpStore.getInstance(appContext)
             for (id in appWidgetIds) {
                 store.removeHeroWidgetBinding(id)
             }
@@ -100,7 +100,7 @@ fun pushAllHeroWidgetsUpdate(context: Context) {
 /** Renders and pushes RemoteViews for a single Hero Milestone widget (2x1 Poetic Card). */
 fun pushHeroWidgetUpdate(context: Context, appWidgetId: Int) {
     val manager = AppWidgetManager.getInstance(context)
-    val store = CountUpStore(context)
+    val store = CountUpStore.getInstance(context)
     val items = store.items()
     val boundItemId = store.getHeroWidgetBinding(appWidgetId)
     val targetItem = ZenWidgetReducer.resolveTargetItem(items, boundItemId)
@@ -204,7 +204,7 @@ private fun buildHero2x1RemoteViews(
         )
     } else {
         // Normal active state with tap-to-decompose ephemeris odometer
-        val store = CountUpStore(context)
+        val store = CountUpStore.getInstance(context)
         val canShowWeeks = abs(count) >= 7L
         val rawMode = store.getHeroWidgetDisplayMode(appWidgetId)
         val displayMode = if (!canShowWeeks && rawMode == TimeDisplayMode.TOTAL_WEEKS) TimeDisplayMode.DAYS else rawMode

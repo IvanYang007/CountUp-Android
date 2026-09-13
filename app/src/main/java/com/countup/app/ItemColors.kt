@@ -241,7 +241,7 @@ private val LEGACY_ID_MAP: Map<String, String> = mapOf(
 /**
  * Dark Mode Default Card Style (Warm Amber Charcoal Washi #26231E + Ochre Gold badge #DEB285).
  */
-val DEFAULT_DARK_CARD_PRESET = CardColorPreset(
+private val DEFAULT_DARK_CARD_PRESET = CardColorPreset(
     id = "",
     nameRes = R.string.color_paper_gold,
     cardBg = Color(0xFF26231E),

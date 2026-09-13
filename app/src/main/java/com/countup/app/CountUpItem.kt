@@ -238,7 +238,7 @@ internal fun salvageItems(raw: String?): List<CountUpItem> {
  * properly tracking string literal boundaries (`"..."`) and escape characters (`\`).
  * This correctly preserves user comments and names that contain curly braces (e.g. `"{warmup}"`).
  */
-internal fun extractJsonObjects(raw: String): List<String> {
+private fun extractJsonObjects(raw: String): List<String> {
     val objects = ArrayList<String>()
     var depth = 0
     var startIndex = -1
@@ -287,7 +287,7 @@ internal fun extractJsonObjects(raw: String): List<String> {
  * - Defaults [comment] to "", [icon] to "", [futureFlag] to false, and [showInWidget] to true.
  * - Safely ignores any extra/unknown future fields.
  */
-internal fun decodeElement(o: JSONObject?): CountUpItem? {
+private fun decodeElement(o: JSONObject?): CountUpItem? {
     if (o == null) return null
     return try {
         val epochDay = when (val rawVal = o.opt("epochDay")) {

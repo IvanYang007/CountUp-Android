@@ -34,7 +34,7 @@ class ZenHorizonWidgetReceiver : AppWidgetProvider() {
                 }
                 val appContext = context.applicationContext
                 launchAsync {
-                    val store = CountUpStore(appContext)
+                    val store = CountUpStore.getInstance(appContext)
                     val currentUnit = store.getZenHorizonUnit(appWidgetId)
                     val nextUnit = currentUnit.next()
                     store.setZenHorizonUnit(appWidgetId, nextUnit)
@@ -73,7 +73,7 @@ class ZenHorizonWidgetReceiver : AppWidgetProvider() {
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {
         val appContext = context.applicationContext
         launchAsync {
-            val store = CountUpStore(appContext)
+            val store = CountUpStore.getInstance(appContext)
             for (id in appWidgetIds) {
                 store.removeZenHorizonBinding(id)
             }
@@ -94,7 +94,7 @@ fun pushAllZenHorizonWidgetsUpdate(context: Context) {
 /** Renders and pushes RemoteViews for a single Zen Horizon widget. */
 fun pushZenHorizonWidgetUpdate(context: Context, appWidgetId: Int) {
     val manager = AppWidgetManager.getInstance(context)
-    val store = CountUpStore(context)
+    val store = CountUpStore.getInstance(context)
     val items = store.items()
     val boundItemId = store.getZenHorizonBinding(appWidgetId)
     val targetItem = ZenWidgetReducer.resolveTargetItem(items, boundItemId)
@@ -106,7 +106,7 @@ fun pushZenHorizonWidgetUpdate(context: Context, appWidgetId: Int) {
 }
 
 /** Builds responsive RemoteViews handling 4x1 and 2x1 layouts. */
-fun buildResponsiveZenHorizonRemoteViews(
+private fun buildResponsiveZenHorizonRemoteViews(
     context: Context,
     item: CountUpItem?,
     today: LocalDate,
@@ -132,7 +132,7 @@ fun buildResponsiveZenHorizonRemoteViews(
 }
 
 /** Builds a single RemoteViews layout for either 4x1 or 2x1. */
-fun buildZenHorizonRemoteViews(
+private fun buildZenHorizonRemoteViews(
     context: Context,
     item: CountUpItem?,
     today: LocalDate,
@@ -159,7 +159,7 @@ fun buildZenHorizonRemoteViews(
     views.setViewVisibility(R.id.zen_horizon_left_section, View.VISIBLE)
     views.setViewVisibility(R.id.zen_horizon_right_section, View.VISIBLE)
 
-    val store = CountUpStore(context)
+    val store = CountUpStore.getInstance(context)
     val unit = store.getZenHorizonUnit(appWidgetId)
     val state = ZenWidgetReducer.resolveZenWidgetState(
         item = item,

@@ -746,4 +746,13 @@ class CountUpStoreTest {
         assertEquals(ThemeMode.LIGHT, store2.getThemeMode())
         assertEquals(BackgroundTheme.SAND_DUNES, store2.getBackgroundTheme())
     }
+
+    @Test
+    fun getInstanceReturnsSameInstanceAcrossCalls() {
+        CountUpStore.resetInstanceForTesting()
+        val first = CountUpStore.getInstance(testContext)
+        val second = CountUpStore.getInstance(testContext)
+        org.junit.Assert.assertSame(first, second)
+        CountUpStore.resetInstanceForTesting()
+    }
 }

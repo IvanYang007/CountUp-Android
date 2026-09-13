@@ -147,4 +147,27 @@ class WidgetContractInvariantsTest {
         assertTrue(backupRulesContent.contains("<include domain=\"sharedpref\" path=\"countup_prefs.xml\" />"))
         assertTrue(backupRulesContent.contains("<include domain=\"file\" path=\"countup_backup.json\" />"))
     }
+
+    @Test
+    fun manifestEnforcesZeroPermissions() {
+        val manifestCandidates = listOf(
+            File("app/src/main/AndroidManifest.xml"),
+            File("src/main/AndroidManifest.xml"),
+        )
+        val manifestFile = manifestCandidates.firstOrNull { it.exists() }
+        assertNotNull("AndroidManifest.xml must exist", manifestFile)
+        val manifestContent = manifestFile!!.readText(Charsets.UTF_8)
+
+        // All declared <uses-permission> elements must have tools:node="remove" to prevent transitive library permissions
+        val permissionRegex = Regex("""<uses-permission\s+([^>]+)/>""")
+        val matches = permissionRegex.findAll(manifestContent).toList()
+        assertTrue("Manifest must have defensive permission removal elements", matches.isNotEmpty())
+        for (match in matches) {
+            val element = match.groupValues[1]
+            assertTrue(
+                "Every uses-permission element must be explicitly removed with tools:node=\"remove\" ($element)",
+                element.contains("""tools:node="remove"""")
+            )
+        }
+    }
 }

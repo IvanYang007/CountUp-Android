@@ -37,7 +37,7 @@ import kotlinx.coroutines.launch
  * Curated Chinese Bronze Gold & Ink Pill Palette Tokens (中国青铜金 / 泥金).
  * WCAG AA / AAA contrast compliant, antique, calm, and dignified.
  */
-object ZenBronzeTokens {
+private object ZenBronzeTokens {
     // Light Paper Cards (#FFFFFF / #FAFAF7) - 沉香古铜 (WCAG AA 5.27:1 contrast)
     val BronzeGoldDeep = Color(0xFF785D2A)
 
@@ -160,7 +160,7 @@ fun ResetRhythmBadge(
  * Zen Paper & Ink Tooltip Box.
  */
 @Composable
-fun ZenPaperTooltip(
+private fun ZenPaperTooltip(
     resets: Int,
     avgDays: Int,
     modifier: Modifier = Modifier,

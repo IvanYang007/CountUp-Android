@@ -19,7 +19,7 @@ data class CountUpBackupPayload(
 ) {
     companion object {
         const val CURRENT_SCHEMA_VERSION = 1
-        const val CURRENT_APP_VERSION = "2.20.0"
+        const val CURRENT_APP_VERSION = "3.0.0"
 
         /**
          * Encodes [payload] into a formatted JSON string.

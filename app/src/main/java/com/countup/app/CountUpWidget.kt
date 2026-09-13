@@ -121,7 +121,7 @@ internal fun buildBaseViews(context: Context, appWidgetOptions: android.os.Bundl
     views.setInt(R.id.widget_root, "setBackgroundColor", paperColor)
 
     // Calculate row count and dynamic height so background graphics scale with widget rows
-    val store = CountUpStore(context)
+    val store = CountUpStore.getInstance(context)
     val theme = store.getBackgroundTheme()
     val widgetItems = store.items().filter { it.showInWidget }
     val itemCount = widgetItems.size
@@ -197,7 +197,7 @@ class ResetCountReceiver : BroadcastReceiver() {
         val appContext = context.applicationContext
 
         launchAsync {
-            val store = CountUpStore(appContext)
+            val store = CountUpStore.getInstance(appContext)
             val item = store.items().firstOrNull { it.id == id } ?: return@launchAsync
 
             val todayLocalDate = LocalDate.now()
@@ -338,7 +338,7 @@ internal fun arrivedFuture(row: WidgetRowData): Boolean = row.futureFlag && row.
  * Count label for the widget cell. RemoteViews has no typeface API, so bold is
  * applied as a character style on the text itself.
  */
-internal fun widgetCountText(count: Long, arrived: Boolean): CharSequence =
+private fun widgetCountText(count: Long, arrived: Boolean): CharSequence =
     if (arrived) {
         val s = SpannableString(count.toString())
         s.setSpan(StyleSpan(Typeface.BOLD), 0, s.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
@@ -360,7 +360,7 @@ internal class WidgetViewsFactory(private val context: Context) : RemoteViewsSer
         // Re-read the store: triggered by pushWidgetUpdate's
         // notifyAppWidgetViewDataChanged after every app-side write.
         night = isNightMode(context)
-        val store = CountUpStore(context)
+        val store = CountUpStore.getInstance(context)
         val today = LocalDate.now()
         val sorted = sortItems(store.items(), store.getSortOrder(), today)
         rows = widgetRows(sorted, today)
@@ -473,7 +473,7 @@ internal fun resolveWidgetCircleStyle(row: WidgetRowData, isDark: Boolean = fals
 
 /** Whether the widget should render in dark (night) mode based on theme setting and system night mode. */
 internal fun isNightMode(context: Context): Boolean {
-    val store = CountUpStore(context)
+    val store = CountUpStore.getInstance(context)
     val mode = store.getThemeMode()
     val isSystemNight = (context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) ==
         android.content.res.Configuration.UI_MODE_NIGHT_YES

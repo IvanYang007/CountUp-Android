@@ -338,6 +338,96 @@
     <string name="cd_icon_tent">Tent (Outdoors &amp; backpacking)</string>
     <string name="cd_icon_compass">Compass (Navigation &amp; exploration)</string>
     <string name="cd_icon_camera">Camera (Photography)</string>
+    <string name="cd_icon_wedding_ring">Diamond ring (Wedding &amp; engagement)</string>
+    <string name="cd_icon_champagne_flutes">Champagne flutes (Celebration &amp; toast)</string>
+    <string name="cd_icon_fasting_plate">Plate clock (Intermittent fasting)</string>
+    <string name="cd_icon_hourglass_spark">Hourglass (Focus &amp; fasting streak)</string>
+    <string name="cd_icon_phone_slash">Phone with slash (Digital detox)</string>
+    <string name="cd_icon_sprout_device">Sprout from screen (Digital wellness)</string>
+
+    <!-- Pillar A: Health, Wellness & Body (18 icons) -->
+    <string name="cd_icon_period_moon">Crescent moon with droplet (Menstrual cycle)</string>
+    <string name="cd_icon_period_lotus">Lotus bloom with droplet (Cycle rhythm)</string>
+    <string name="cd_icon_cold_tub">Ice tub bath (Cold plunge)</string>
+    <string name="cd_icon_frost_spark">Frost crystal (Cryotherapy streak)</string>
+    <string name="cd_icon_skincare_dropper">Serum dropper with droplet (Skincare routine)</string>
+    <string name="cd_icon_sun_shield">Sun protection shield (SPF &amp; sun safety)</string>
+    <string name="cd_icon_rx_bottle">Prescription bottle (Medication schedule)</string>
+    <string name="cd_icon_vaccine_syringe">Syringe (Vaccine &amp; injection)</string>
+    <string name="cd_icon_glasses_round">Round glasses (Vision &amp; eye exam)</string>
+    <string name="cd_icon_eye_focus">Eye focus reticle (Optometry &amp; clarity)</string>
+    <string name="cd_icon_dental_floss">Dental floss dispenser (Oral care)</string>
+    <string name="cd_icon_tooth_sparkle">Gleaming tooth (Teeth whitening)</string>
+    <string name="cd_icon_yoga_mat">Rolled yoga mat (Stretching &amp; mobility)</string>
+    <string name="cd_icon_flex_wave">Flex wave arc (Flexibility &amp; movement)</string>
+    <string name="cd_icon_hair_tint_brush">Salon tint brush (Haircut &amp; color)</string>
+    <string name="cd_icon_hair_swirl">Hair curl swirl (Scalp &amp; hair care)</string>
+    <string name="cd_icon_mind_heart">Heart with peaceful aura (Mental health)</string>
+    <string name="cd_icon_kintsugi_bowl">Kintsugi bowl (Healing &amp; therapy)</string>
+
+    <!-- Pillar B: Habits & Discipline (18 icons) -->
+    <string name="cd_icon_sugar_slash">Sugar cube slash (Zero sugar)</string>
+    <string name="cd_icon_clean_apple">Crisp apple (Clean eating nutrition)</string>
+    <string name="cd_icon_sober_glass_inverted">Inverted cocktail glass (Sobriety)</string>
+    <string name="cd_icon_sober_dawn">Horizon sunrise (Alcohol-free dawn)</string>
+    <string name="cd_icon_journal_ribbon">Journal with bookmark ribbon (Daily diary)</string>
+    <string name="cd_icon_fountain_pen">Fountain pen nib (Reflective writing)</string>
+    <string name="cd_icon_wallet_padlock">Locked wallet (No-spend challenge)</string>
+    <string name="cd_icon_coin_sprout">Sprouting coin (Budget savings)</string>
+    <string name="cd_icon_alarm_five_am">Twin-bell alarm at 5 (Early rising)</string>
+    <string name="cd_icon_dawn_ridge">Sun rising over ridge (5 AM dawn)</string>
+    <string name="cd_icon_translate_bubbles">Speech bubbles (Language learning)</string>
+    <string name="cd_icon_language_bridge">Arched bridge (Fluency &amp; vocabulary)</string>
+    <string name="cd_icon_watering_can">Watering can (Plant hydration)</string>
+    <string name="cd_icon_monstera_pot">Potted monstera leaf (Botanical care)</string>
+    <string name="cd_icon_pomodoro_timer">Dial timer (Pomodoro focus sprint)</string>
+    <string name="cd_icon_zen_bell">Singing bell bowl (Mindful focus)</string>
+    <string name="cd_icon_book_stack">Stack of three books (Reading streak)</string>
+    <string name="cd_icon_reading_beacon">Lighthouse beam (Knowledge &amp; books)</string>
+
+    <!-- Pillar C: Milestones & Relationships (14 icons) -->
+    <string name="cd_icon_house_keyhole">Keyhole house (New home &amp; keys)</string>
+    <string name="cd_icon_moving_box">Taped moving parcel (Relocation)</string>
+    <string name="cd_icon_mended_heart">Stitched heart (Healing &amp; moving forward)</string>
+    <string name="cd_icon_bird_flight">Soaring songbird (Emotional release)</string>
+    <string name="cd_icon_mortarboard_cap">Academic cap (Graduation)</string>
+    <string name="cd_icon_diploma_scroll">Tied diploma scroll (Degree completion)</string>
+    <string name="cd_icon_paw_heart">Paw print with heart (Pet adoption)</string>
+    <string name="cd_icon_pet_collar">Pet collar with tag (Companion animal)</string>
+    <string name="cd_icon_passport_book">Biometric passport (Visa &amp; travel)</string>
+    <string name="cd_icon_compass_rose">Compass rose star (Global exploration)</string>
+    <string name="cd_icon_steering_wheel">Steering wheel (Driver license)</string>
+    <string name="cd_icon_highway_horizon">Highway vanishing point (Open road)</string>
+    <string name="cd_icon_tattoo_machine">Rotary tattoo machine (Fresh ink)</string>
+    <string name="cd_icon_ink_constellation">Ink droplet with stars (Body art)</string>
+
+    <!-- Pillar D: Work, Career & Finance (14 icons) -->
+    <string name="cd_icon_tax_form">Tax form with seal (Tax filing)</string>
+    <string name="cd_icon_tax_balance">Balance scale (Tax return &amp; deductions)</string>
+    <string name="cd_icon_bank_check">Bank check with pen (Dividend &amp; bonus)</string>
+    <string name="cd_icon_coin_stack">Stacked coins with spark (Payout &amp; profit)</string>
+    <string name="cd_icon_briefcase_star">Briefcase with star (Promotion)</string>
+    <string name="cd_icon_career_ladder">Ascending ladder with star (Career milestone)</string>
+    <string name="cd_icon_receipt_cut">Scissored receipt (Debt payoff)</string>
+    <string name="cd_icon_chain_broken">Severed chain link (Financial freedom)</string>
+    <string name="cd_icon_card_cut">Cut credit card (Card freeze)</string>
+    <string name="cd_icon_padlock_open">Unlocked padlock (Zero balances)</string>
+    <string name="cd_icon_shipping_crate">Shipping crate with parcel (Product launch)</string>
+    <string name="cd_icon_beacon_light">Guiding beacon (Release deployment)</string>
+    <string name="cd_icon_clipboard_check">Checked clipboard (Quarterly review)</string>
+    <string name="cd_icon_gauge_high">Speed gauge meter (Sprint audit)</string>
+
+    <!-- Pillar E: Social, Leisure & Life Goals (10 icons) -->
+    <string name="cd_icon_twin_candles">Twin dinner candles (Date night)</string>
+    <string name="cd_icon_shared_umbrella">Sheltering umbrella with hearts (Shared intimacy)</string>
+    <string name="cd_icon_stage_mic">Stage microphone (Live concert)</string>
+    <string name="cd_icon_stadium_beam">Concert spotlights (Live festival)</string>
+    <string name="cd_icon_clapperboard">Film clapperboard (Cinema &amp; movie night)</string>
+    <string name="cd_icon_film_reel">Spooling film reel (Movie streak)</string>
+    <string name="cd_icon_camper_van">Camper van with roof rack (Road trip)</string>
+    <string name="cd_icon_mountain_pass">Mountain pass highway (Scenic road trip)</string>
+    <string name="cd_icon_beach_chair">Beach lounger and parasol (FIRE retirement)</string>
+    <string name="cd_icon_soaring_kite">Diamond kite soaring in breeze (Financial independence)</string>
 
     <!-- Quick Add & Shortcuts -->
     <string name="cd_widget_add">Add new counter</string>
