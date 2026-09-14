@@ -30,6 +30,7 @@ object WidgetNavigationContract {
     const val HERO_RESET_PENDING_INTENT_OFFSET = 4004
     const val ZEN_HORIZON_CYCLE_PENDING_INTENT_OFFSET = 8888
     const val HERO_CYCLE_PENDING_INTENT_OFFSET = 9009
+    const val REQUEST_CODE_APP_LAUNCH_BASE = 50_000
 
     fun createLaunchIntent(context: Context, targetItemId: String? = null): Intent {
         return Intent(context, MainActivity::class.java).apply {
@@ -49,10 +50,23 @@ object WidgetNavigationContract {
         appWidgetId: Int,
         viewId: Int,
     ) {
+        attachAppLaunchIntent(views, context, appWidgetId, viewId)
+    }
+
+    /**
+     * Attaches a pending intent to [viewId] that opens MainActivity.
+     */
+    fun attachAppLaunchIntent(
+        views: RemoteViews,
+        context: Context,
+        appWidgetId: Int,
+        viewId: Int,
+    ) {
         val launchIntent = createLaunchIntent(context)
+        val requestCode = resolveRequestCode(null, appWidgetId, 0)
         val pendingIntent = PendingIntent.getActivity(
             context,
-            appWidgetId,
+            requestCode,
             launchIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
@@ -104,9 +118,9 @@ object WidgetNavigationContract {
 
     fun resolveRequestCode(targetItemId: String?, appWidgetId: Int, offset: Int): Int {
         val base = if (targetItemId != null) {
-            targetItemId.hashCode() * 31 + appWidgetId
+            100_000 + (targetItemId.hashCode() * 31 + appWidgetId)
         } else {
-            appWidgetId
+            REQUEST_CODE_APP_LAUNCH_BASE + appWidgetId
         }
         return (base + offset) and 0x7FFFFFFF
     }

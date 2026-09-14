@@ -16,6 +16,7 @@ android {
         targetSdk = 37
         versionCode = 51
         versionName = "3.0.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     val releaseKeystore = file("../keystore/countup-release.jks")
@@ -27,7 +28,6 @@ android {
     }
     val keystorePass = System.getenv("COUNTUP_KEYSTORE_PASS")
         ?: localProps.getProperty("countup.keystore.pass")
-        ?: file("../keystore/keystore-pass.txt").takeIf { it.exists() }?.readText()?.trim()
 
     signingConfigs {
         if (releaseKeystore.exists() && !keystorePass.isNullOrBlank()) {
@@ -45,9 +45,6 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             signingConfig = signingConfigs.findByName("release")
-            ndk {
-                debugSymbolLevel = "FULL"
-            }
             vcsInfo {
                 include = false
             }
@@ -80,7 +77,7 @@ android {
 
     lint {
         abortOnError = true
-        checkReleaseBuilds = false
+        checkReleaseBuilds = true
         disable += setOf(
             "GradleDependency",
             "AndroidGradlePluginVersion",

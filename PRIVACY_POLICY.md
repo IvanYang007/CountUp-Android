@@ -8,7 +8,7 @@ CountUp ("the App") is developed as a free, 100% offline utility and home-screen
 CountUp does not collect, store, transmit, track, or share any personal information, device data, or usage metrics.
 
 ### 2. Permissions
-The App requests zero dangerous runtime permissions. It does not access your internet connection, device identifiers, location, contacts, camera, or microphone. An install-time vibration permission is declared strictly to deliver tactile haptic feedback during widget and counter interactions.
+The App requests zero runtime or install-time permissions across both debug and release builds. It does not access your internet connection, device identifiers, location, contacts, camera, or microphone. Tactile haptics are driven entirely through Android's standard view haptic APIs without declaring any permissions.
 
 ### 3. Local Data Storage & Offline Backup
 All information you enter into the App (such as your milestone names, anchor dates, and notes) is stored locally on your device only.

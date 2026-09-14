@@ -202,7 +202,7 @@ internal fun decodeItems(raw: String?): List<CountUpItem>? {
         for (i in 0 until arr.length()) {
             decodeElement(arr.optJSONObject(i))?.let { out.add(it) }
         }
-        if (out.isEmpty() && arr.length() > 0) null else out
+        if (out.size < arr.length()) null else out
     } catch (_: Exception) {
         null
     }

@@ -271,8 +271,8 @@ class CountUpStoreInstrumentedTest {
     }
 
     @Test
-    fun partiallyCorruptArrayKeepsParseableItems() {
-        // One malformed element: the valid element survives, nothing is quarantined.
+    fun partiallyCorruptArrayQuarantinesAndRecoversParseableItems() {
+        // One malformed element: the valid element is salvaged, and raw payload is safely quarantined
         countupPrefs().edit()
             .putString(
                 "items_v1",
@@ -282,7 +282,7 @@ class CountUpStoreInstrumentedTest {
         val items = CountUpStore(context).items()
         assertEquals(1, items.size)
         assertEquals("Good", items[0].name)
-        assertFalse(countupPrefs().contains("items_v1_quarantine"))
+        assertTrue(countupPrefs().contains("items_v1_quarantine"))
     }
 
     @Test

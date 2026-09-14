@@ -58,8 +58,6 @@ object ZenWidgetReducer {
         7L, 30L, 50L, 100L, 200L, 365L, 500L, 1000L
     )
 
-    private val DATE_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.US)
-
     /**
      * Resolves the target item for a widget based on explicit binding, pin status, and widget visibility.
      * When a specific [boundItemId] was assigned but no longer exists in [items], it resolves to [WidgetTargetResolution.Deleted]
@@ -178,6 +176,8 @@ object ZenWidgetReducer {
         today: LocalDate,
         unit: ZenWidgetDisplayUnit = ZenWidgetDisplayUnit.DAYS,
         isDarkMode: Boolean = false,
+        sinceTemplate: String? = null,
+        untilTemplate: String? = null,
     ): ZenWidgetViewState {
         val anchorDate = LocalDate.ofEpochDay(item.epochDay)
         val rawDays = java.time.temporal.ChronoUnit.DAYS.between(anchorDate, today)
@@ -195,7 +195,13 @@ object ZenWidgetReducer {
         val progress = ((days - prevMilestone).toFloat() / range).coerceIn(0f, 1f)
         val remaining = max(0L, nextMilestone - days)
 
-        val formattedStart = (if (isFuture) "Until " else "Since ") + anchorDate.format(DATE_FORMATTER)
+        val localizedDate = formatLocalized(anchorDate)
+        val formattedStart = if (sinceTemplate != null && untilTemplate != null) {
+            val template = if (isFuture) untilTemplate else sinceTemplate
+            String.format(template, localizedDate)
+        } else {
+            (if (isFuture) "Until " else "Since ") + localizedDate
+        }
         val palette = WidgetThemeTokens.resolveWithItem(item, isDarkMode = isDarkMode)
 
         return ZenWidgetViewState(

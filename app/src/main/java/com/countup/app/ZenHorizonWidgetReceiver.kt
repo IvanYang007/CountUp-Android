@@ -166,6 +166,8 @@ private fun buildZenHorizonRemoteViews(
         today = today,
         unit = unit,
         isDarkMode = isDark,
+        sinceTemplate = context.getString(R.string.since_label),
+        untilTemplate = context.getString(R.string.until_label),
     )
 
     // Set tranquil background color

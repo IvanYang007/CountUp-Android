@@ -125,12 +125,12 @@ Widgets automatically advance at midnight without requiring battery-draining bac
 
 ## 7. Verification performed
 
-- **373 JVM Unit Tests** (100% passing) across data models, repository fail-safes, MVI ViewModel, JSON salvage parsing, widget reducers, navigation contracts, backup merge/replace strategies, reset whisper lifecycles, and bidirectional sorting.
+- **393 JVM Unit Tests** (100% passing) across data models, repository fail-safes, MVI ViewModel, JSON salvage parsing, widget reducers, navigation contracts, backup merge/replace strategies, reset whisper lifecycles, and bidirectional sorting.
 - Clean debug and release builds with R8 minification and resource shrinking enabled (`isMinifyEnabled = true`, `isShrinkResources = true`).
-- Automated release bundle signing with multi-tier keystore password fallback resolution (`COUNTUP_KEYSTORE_PASS` -> `local.properties` -> `keystore-pass.txt`).
+- Automated release bundle signing with keystore password resolution (`COUNTUP_KEYSTORE_PASS` -> `local.properties`).
 - Android Lint (`lintDebug`): **0 errors**.
 - Automated GitHub Actions CI workflow running test, lint, and assemble on all pull requests.
-- Strict zero-permission guard: manifest explicitly strips `WAKE_LOCK`, `ACCESS_NETWORK_STATE`, `RECEIVE_BOOT_COMPLETED`, and `FOREGROUND_SERVICE`. Only `VIBRATE` is declared for tactile haptic feedback.
+- Strict zero-permission architecture: the app requests zero Android permissions across both debug and release builds. The manifest explicitly strips `WAKE_LOCK`, `ACCESS_NETWORK_STATE`, `RECEIVE_BOOT_COMPLETED`, and `FOREGROUND_SERVICE`. Tactile haptic feedback operates via standard system view haptic channels without requiring `android.permission.VIBRATE`.
 - Physical device & emulator verification on Android 8.0 (API 26) through Android 15/16 (API 36/37).
 
 ## 8. Licensing

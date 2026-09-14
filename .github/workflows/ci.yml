@@ -38,6 +38,8 @@ jobs:
         run: ./gradlew lintDebug --no-daemon
 
       - name: Assemble Release APK & Bundle
+        env:
+          COUNTUP_KEYSTORE_PASS: ${{ secrets.COUNTUP_KEYSTORE_PASS }}
         run: ./gradlew assembleRelease bundleRelease --no-daemon
 
       - name: Upload Test Results on Failure

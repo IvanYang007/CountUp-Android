@@ -147,18 +147,19 @@ After a device reboot, midnight rollover might not fire if `MidnightAlarmReceive
 
 ---
 
-## 5. Subheader Action Sizing, minimumInteractiveComponentSize, and Layout Spread
+## 5. Action Row Sizing, minimumInteractiveComponentSize, and Layout Spread (SubHeaderRow & ItemCard)
 
 ### Symptom
-Subheader buttons (Theme Toggle, Settings Gear) appear pushed far apart with large empty gaps (>100px) across the header bar, instead of resting tightly grouped (1–2dp gap) next to the Sort pill.
+Subheader buttons (Theme Toggle, Settings Gear) or ItemCard action buttons (Widget Toggle, MechanicalResetButton, Delete) appear pushed far apart with large empty gaps across the row, instead of resting tightly grouped (1–2dp gap).
 
 ### Architectural Root Cause
-In Jetpack Compose, calling `Modifier.minimumInteractiveComponentSize()` enforces a minimum touch target bounding box of 48×48 dp by adding invisible layout padding around smaller components. When applied inside a tight row layout like `SubHeaderRow` (which uses 26dp circular buttons), the layout bounds expand from 26dp to 48dp, causing massive visual separation between adjacent controls and breaking the optical density intended to mirror the `ItemCard` action rows.
+In Jetpack Compose, calling `Modifier.minimumInteractiveComponentSize()` or `.sizeIn(minWidth = 48.dp, minHeight = 48.dp)` enforces a minimum touch target bounding box of 48×48 dp by adding invisible layout padding around smaller components. When applied inside tight row layouts like `SubHeaderRow` (which uses 26dp circular buttons) or `ItemCard` action clusters (which use 30dp buttons with 2dp spacers), the layout bounds expand to 48dp, causing massive visual separation between adjacent controls and breaking the app's signature compact optical density.
 
 ### Hard Invariants
-1. Do **NOT** apply `minimumInteractiveComponentSize()` or `IconButton` defaults to the subheader action buttons.
-2. Maintain explicit `size(26.dp)` with `padding(horizontal = 1.dp)` or `Arrangement.spacedBy(1.dp)`.
-3. Use tactile scale feedback (`pressScale(0.96f)`) and explicit click handlers with ripple on the bounded surface.
+1. Do **NOT** apply `minimumInteractiveComponentSize()`, `sizeIn(48.dp)`, or `IconButton` defaults to `SubHeaderRow` action buttons or `ItemCard` action buttons (`MechanicalResetButton`, widget toggle, delete button).
+2. Maintain explicit `size(26.dp)` in `SubHeaderRow` (with `padding(horizontal = 1.dp)` or `Arrangement.spacedBy(1.dp)`).
+3. Maintain explicit `size(30.dp)` with `Spacer(Modifier.width(2.dp))` in `ItemCard` action clusters.
+4. Use tactile scale feedback (`pressScale(0.96f)`) and explicit click/gesture handlers with haptics on bounded surfaces.
 
 ---
 
@@ -190,7 +191,7 @@ Before committing any widget changes or releasing a new version:
 - [ ] **Configurable Widgets**: Does provider XML declare `android:configure` and is the activity registered in `AndroidManifest.xml` with `APPWIDGET_CONFIGURE`?
 - [ ] **Instance Bindings**: Does `onDeleted()` clean up `CountUpStore` widget bindings?
 - [ ] **Midnight Alarm**: Do `onUpdate()` and `onEnabled()` re-register `MidnightAlarmReceiver.scheduleMidnightAlarm(context)`?
-- [ ] **Subheader Density**: Are subheader action buttons sized at 26dp with 1–2dp spacing without `minimumInteractiveComponentSize()`?
+- [ ] **Action Row Density**: Are subheader action buttons sized at 26dp and ItemCard buttons at 30dp with 1–2dp spacing, strictly omitting `minimumInteractiveComponentSize()` to prevent layout spread?
 - [ ] **ProGuard Rules**: Are new receivers and configure activities added to `proguard-rules.pro`?
 - [ ] **Release Signing**: Is release bundle signed (verified via `apksigner`)?
 - [ ] **Memory Gate**: Does the widget payload stay strictly below 40 KB (`WidgetMemoryBudgetGateTest`) to prevent `TransactionTooLargeException`?

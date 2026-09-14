@@ -127,10 +127,12 @@ class CountUpItemTest {
 
     @Test
     fun oneMalformedElementDoesNotDestroyTheRest() {
-        // A single corrupt element is dropped; parseable siblings survive.
+        // A single corrupt element causes decodeItems to return null (triggering quarantine),
+        // while salvageItems safely extracts the parseable siblings.
         val raw = "[{\"id\":\"a\",\"name\":\"Good\",\"epochDay\":5},{\"id\":123},{\"id\":\"b\",\"name\":\"Also good\",\"epochDay\":9}]"
-        val decoded = decodeItems(raw)!!
-        assertEquals(listOf("Good", "Also good"), decoded.map { it.name })
+        assertNull(decodeItems(raw))
+        val salvaged = salvageItems(raw)
+        assertEquals(listOf("Good", "Also good"), salvaged.map { it.name })
     }
 
     @Test
@@ -143,13 +145,14 @@ class CountUpItemTest {
 
     @Test
     fun outOfRangeEpochDayElementIsDropped() {
-        // An epochDay outside LocalDate's range would crash LocalDate.ofEpochDay
-        // at render time; decode drops it while keeping valid siblings.
+        // An epochDay outside LocalDate's range causes decodeItems to return null (quarantine),
+        // while salvageItems keeps the valid siblings.
         val raw =
             "[{\"id\":\"a\",\"name\":\"Valid\",\"epochDay\":5},{\"id\":\"b\",\"name\":\"Insane\",\"epochDay\":9223372036854775807}]"
-        val decoded = decodeItems(raw)!!
-        assertEquals(listOf("Valid"), decoded.map { it.name })
-        assertEquals(5L, decoded[0].epochDay)
+        assertNull(decodeItems(raw))
+        val salvaged = salvageItems(raw)
+        assertEquals(listOf("Valid"), salvaged.map { it.name })
+        assertEquals(5L, salvaged[0].epochDay)
     }
 
     @Test

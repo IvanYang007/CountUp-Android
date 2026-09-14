@@ -127,7 +127,7 @@ export JAVA_HOME="/path/to/jdk-17"   # or set via Android Studio / system PATH
 ./gradlew clean
 ./gradlew assembleDebug             # debug APK
 ./gradlew assembleRelease           # signed release APK + AAB bundle (R8 minified)
-./gradlew test                      # 373 JVM unit tests (100% green)
+./gradlew test                      # 393 JVM unit tests (100% green)
 ./gradlew connectedDebugAndroidTest # device tests (emulator/device online)
 ./gradlew lintDebug                 # 0 errors
 ```
@@ -142,12 +142,12 @@ adb shell am start -n com.countup.app/.MainActivity
 
 ## 7. Security posture
 
-- **Zero dangerous `<uses-permission>`** in merged debug & release manifests. `WAKE_LOCK`, `ACCESS_NETWORK_STATE`, `RECEIVE_BOOT_COMPLETED`, and `FOREGROUND_SERVICE` are explicitly stripped via manifest removal rules. Only `android.permission.VIBRATE` is declared for tactile haptics.
+- **Zero `<uses-permission>` declared**: The app requests zero Android permissions across both debug and release builds. `WAKE_LOCK`, `ACCESS_NETWORK_STATE`, `RECEIVE_BOOT_COMPLETED`, and `FOREGROUND_SERVICE` are explicitly stripped via manifest removal rules. Tactile haptics operate through standard system view haptic channels without requiring `android.permission.VIBRATE`.
 - **Encrypted OS Backup:** Native backup governed by `dataExtractionRules` and `backup_rules` targeting only local preferences and JSON snapshots.
 - **Scoped Storage:** Manual file backup uses system Storage Access Framework (`ACTION_CREATE_DOCUMENT`, `ACTION_OPEN_DOCUMENT`) with zero storage permission requests.
 - No network, no WebView, no analytics, no `Log.*`, no secrets in source.
 - `MainActivity` and widget configure activities are `exported=true` with strict intent filters; all widget broadcast receivers are `exported=false`.
-- R8 minification and resource shrinking enabled for production release builds with explicit `-keep` rules for domain models and widget providers.
+- R8 minification and resource shrinking enabled for production release builds with explicit `-keep` rules for domain data models and reflection targets.
 
 ---
 

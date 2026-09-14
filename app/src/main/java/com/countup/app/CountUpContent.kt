@@ -32,6 +32,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -87,6 +89,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
@@ -166,12 +169,27 @@ fun CountUpContent(
                 }
             },
         ) { innerPadding ->
+            val layoutDirection = LocalLayoutDirection.current
+            val topInset = innerPadding.calculateTopPadding()
+            val bottomInset = innerPadding.calculateBottomPadding()
+            val startInset = innerPadding.calculateStartPadding(layoutDirection)
+            val endInset = innerPadding.calculateEndPadding(layoutDirection)
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding)
-                    .consumeWindowInsets(innerPadding)
-                    .padding(horizontal = 20.dp),
+                    .padding(
+                        top = topInset,
+                        start = startInset + 20.dp,
+                        end = endInset + 20.dp,
+                    )
+                    .consumeWindowInsets(
+                        PaddingValues(
+                            top = topInset,
+                            start = startInset,
+                            end = endInset,
+                        ),
+                    ),
             ) {
                 Spacer(Modifier.padding(top = 16.dp))
                 HeaderRow(
@@ -186,7 +204,8 @@ fun CountUpContent(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .weight(1f),
+                            .weight(1f)
+                            .padding(bottom = bottomInset),
                         contentAlignment = Alignment.Center,
                     ) {
                         CircularProgressIndicator(
@@ -199,7 +218,9 @@ fun CountUpContent(
                     EmptyState(
                         onNewItem = { onEvent(CountUpUiEvent.OpenEditor(null)) },
                         onImportBackup = { onEvent(CountUpUiEvent.RequestImportBackup) },
-                        modifier = Modifier.fillMaxWidth().padding(top = 48.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 48.dp, bottom = bottomInset),
                     )
                 } else {
                     SubHeaderRow(
@@ -220,7 +241,9 @@ fun CountUpContent(
                     if (displayItems.isEmpty() && state.searchQuery.isNotEmpty()) {
                         EmptySearchState(
                             onClearSearch = { onEvent(CountUpUiEvent.ClearSearch) },
-                            modifier = Modifier.fillMaxWidth().padding(top = 48.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 48.dp, bottom = bottomInset),
                         )
                     } else {
                         val pinnedItems = remember(displayItems) { displayItems.filter { it.isPinned } }
@@ -244,7 +267,15 @@ fun CountUpContent(
 
                         LazyColumn(
                             verticalArrangement = Arrangement.spacedBy(16.dp),
-                            contentPadding = PaddingValues(vertical = 8.dp, horizontal = 6.dp),
+                            contentPadding = PaddingValues(
+                                top = 8.dp,
+                                bottom = 8.dp + bottomInset,
+                                start = 6.dp,
+                                end = 6.dp,
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .consumeWindowInsets(PaddingValues(bottom = bottomInset)),
                         ) {
                             items(
                                 items = pinnedItems,

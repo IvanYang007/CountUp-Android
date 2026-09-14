@@ -73,9 +73,21 @@ class MidnightAlarmReceiverTest {
     }
 
     @Test
-    fun hasActiveWidgetsExecutesSafely() {
-        // Must never throw and should return boolean
+    fun hasActiveWidgetsDefensivelyDefaultsToTrueOnStubContext() {
+        // When running with a stub context where AppWidgetManager is unmocked,
+        // hasActiveWidgets must defensively return true so midnight rollover is never dropped.
         val active = MidnightAlarmReceiver.hasActiveWidgets(testContext)
-        assertTrue(active || !active)
+        assertTrue("Stub context without AppWidgetManager service must defensively return true", active)
+    }
+
+    @Test
+    fun targetMidnightMillisIsAlwaysStrictlyInFuture() {
+        val now = ZonedDateTime.now()
+        val targetMillis = MidnightAlarmReceiver.calculateNextMidnightMillis(now)
+        val targetZoned = ZonedDateTime.ofInstant(java.time.Instant.ofEpochMilli(targetMillis), now.zone)
+        assertTrue(targetMillis > now.toInstant().toEpochMilli())
+        assertEquals(0, targetZoned.hour)
+        assertEquals(0, targetZoned.minute)
+        assertEquals(1, targetZoned.second)
     }
 }

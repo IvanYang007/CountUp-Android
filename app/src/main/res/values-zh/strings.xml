@@ -512,4 +512,10 @@
     <string name="backup_restore_failed">恢复失败，请检查文件格式</string>
     <string name="backup_restore_invalid_file">无效或无法读取的备份文件</string>
     <string name="error_no_file_picker">当前设备未找到可用的文档管理器</string>
+    <string name="solar_rhythm_configure_title">时节同行</string>
+    <string name="solar_rhythm_configure_subtitle">选择要在此时节画卷上呈现的习惯或纪念日。</string>
+    <string name="backup_restore_file_too_large">备份文件超过 2 MB 限制</string>
+    <string name="backup_restore_unsupported_version">不支持的备份版本（v%1$s），请更新应用。</string>
+    <string name="backup_restore_damaged_notice">备份文件部分损坏（已恢复 %1$d 个条目）。为防止数据丢失，已禁用“完全覆盖”。</string>
+    <string name="backup_io_error">无法访问备份文件</string>
 </resources>

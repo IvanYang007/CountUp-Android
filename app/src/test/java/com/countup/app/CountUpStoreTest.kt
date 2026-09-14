@@ -4,6 +4,7 @@ import android.content.Context
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -754,5 +755,94 @@ class CountUpStoreTest {
         val second = CountUpStore.getInstance(testContext)
         org.junit.Assert.assertSame(first, second)
         CountUpStore.resetInstanceForTesting()
+    }
+
+    @Test
+    fun schemaVersionIsInitializedOnStoreCreation() {
+        val store = CountUpStore(testContext)
+        assertEquals(CountUpStore.CURRENT_STORE_SCHEMA_VERSION, store.getSchemaVersion())
+    }
+
+    @Test
+    fun partiallyCorruptJsonPayloadIsQuarantinedAndValidItemsSalvaged() {
+        val prefs = testContext.getSharedPreferences("countup_prefs", Context.MODE_PRIVATE)
+        prefs.edit()
+            .putString(
+                "items_v1",
+                "[{\"id\":\"valid1\",\"name\":\"Valid One\",\"epochDay\":20000},{\"id\":123}]"
+            )
+            .commit()
+
+        val store = CountUpStore(testContext)
+        val items = store.items()
+        assertEquals(1, items.size)
+        assertEquals("Valid One", items[0].name)
+        assertTrue(prefs.contains("items_v1_quarantine"))
+        assertEquals(
+            "[{\"id\":\"valid1\",\"name\":\"Valid One\",\"epochDay\":20000},{\"id\":123}]",
+            prefs.getString("items_v1_quarantine", null)
+        )
+    }
+
+    @Test
+    fun widgetDisplayModeAndUnitSurviveSerializationWithStableCodes() {
+        val store = CountUpStore(testContext)
+        val appWidgetId = 101
+
+        store.setHeroWidgetDisplayMode(appWidgetId, TimeDisplayMode.ELAPSED_BREAKDOWN)
+        assertEquals(TimeDisplayMode.ELAPSED_BREAKDOWN, store.getHeroWidgetDisplayMode(appWidgetId))
+
+        store.setHeroWidgetDisplayMode(appWidgetId, TimeDisplayMode.TOTAL_WEEKS)
+        assertEquals(TimeDisplayMode.TOTAL_WEEKS, store.getHeroWidgetDisplayMode(appWidgetId))
+
+        store.setZenHorizonUnit(appWidgetId, ZenWidgetDisplayUnit.MONTHS)
+        assertEquals(ZenWidgetDisplayUnit.MONTHS, store.getZenHorizonUnit(appWidgetId))
+
+        store.setZenHorizonUnit(appWidgetId, ZenWidgetDisplayUnit.HOURS)
+        assertEquals(ZenWidgetDisplayUnit.HOURS, store.getZenHorizonUnit(appWidgetId))
+    }
+
+    @Test
+    fun deleteItemPurgesAssociatedWidgetBindingsAcrossAllWidgetTypes() {
+        val store = CountUpStore(testContext)
+        val item1 = store.addItem("Reading Habit", 20000L)!!
+        val item2 = store.addItem("Running Habit", 20000L)!!
+
+        // Bind widget instances to item1
+        store.setHeroWidgetBinding(101, item1.id)
+        store.setHeroWidgetDisplayMode(101, TimeDisplayMode.ELAPSED_BREAKDOWN)
+        store.setZenHorizonBinding(102, item1.id)
+        store.setZenHorizonUnit(102, ZenWidgetDisplayUnit.MONTHS)
+        store.setZenPebbleBinding(103, item1.id)
+        store.setZenPebbleTag(103, "Focus")
+        store.setSolarRhythmBinding(104, item1.id)
+
+        // Bind widget instances to item2
+        store.setHeroWidgetBinding(201, item2.id)
+        store.setHeroWidgetDisplayMode(201, TimeDisplayMode.DAYS)
+        store.setZenHorizonBinding(202, item2.id)
+        store.setZenHorizonUnit(202, ZenWidgetDisplayUnit.DAYS)
+        store.setZenPebbleBinding(203, item2.id)
+        store.setZenPebbleTag(203, "Run")
+        store.setSolarRhythmBinding(204, item2.id)
+
+        // Delete item1
+        assertTrue(store.deleteItem(item1.id))
+
+        // All bindings and specific configs for item1 must be purged
+        assertNull(store.getHeroWidgetBinding(101))
+        assertNull(store.getZenHorizonBinding(102))
+        assertNull(store.getZenPebbleBinding(103))
+        assertNull(store.getZenPebbleTag(103))
+        assertNull(store.getSolarRhythmBinding(104))
+
+        // Item2 bindings and configs must remain intact
+        assertEquals(item2.id, store.getHeroWidgetBinding(201))
+        assertEquals(TimeDisplayMode.DAYS, store.getHeroWidgetDisplayMode(201))
+        assertEquals(item2.id, store.getZenHorizonBinding(202))
+        assertEquals(ZenWidgetDisplayUnit.DAYS, store.getZenHorizonUnit(202))
+        assertEquals(item2.id, store.getZenPebbleBinding(203))
+        assertEquals("Run", store.getZenPebbleTag(203))
+        assertEquals(item2.id, store.getSolarRhythmBinding(204))
     }
 }

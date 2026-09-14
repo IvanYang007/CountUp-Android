@@ -18,3 +18,5 @@ keystore/
 
 # Local artifacts and test screenshots
 artifacts/
+playstore_package/
+.scratch/

@@ -30,6 +30,15 @@ class CountUpStore(context: Context) {
     private val backupRevFile: File = File(filesDir, BACKUP_REV_FILE_NAME)
     private val preRestoreFile: File = File(filesDir, PRE_RESTORE_SAFETY_FILE_NAME)
 
+    init {
+        if (!prefs.contains(KEY_SCHEMA_VERSION)) {
+            prefs.edit().putInt(KEY_SCHEMA_VERSION, CURRENT_STORE_SCHEMA_VERSION).commit()
+        }
+    }
+
+    /** Returns the persisted schema version of local storage. */
+    fun getSchemaVersion(): Int = prefs.getInt(KEY_SCHEMA_VERSION, CURRENT_STORE_SCHEMA_VERSION)
+
     /** Current items, never null; guarantees zero data loss via multi-tier fallback. */
     fun items(): List<CountUpItem> {
         return synchronized(globalStoreLock) {
@@ -205,12 +214,45 @@ class CountUpStore(context: Context) {
             val revision = nextRevision()
             val encodedItems = encodeItems(remaining)
             writeBackup(encodedItems, revision)
-            prefs.edit()
+            val editor = prefs.edit()
                 .putString(KEY_ITEMS, encodedItems)
                 .putString(KEY_PENDING_WIDGET_RESETS, encodeWidgetResets(pending))
                 .putLong(KEY_REVISION, revision)
                 .putBoolean(KEY_MIGRATED, true)
-                .commit()
+
+            for ((key, value) in prefs.all) {
+                if (value == id) {
+                    when {
+                        key.startsWith(PREFIX_HERO_BINDING) -> {
+                            val widgetId = key.removePrefix(PREFIX_HERO_BINDING).toIntOrNull()
+                            editor.remove(key)
+                            if (widgetId != null) {
+                                editor.remove(PREFIX_HERO_DISPLAY_MODE + widgetId)
+                                editor.remove(PREFIX_ZEN_HORIZON_UNIT + widgetId)
+                            }
+                        }
+                        key.startsWith(PREFIX_ZEN_HORIZON_BINDING) -> {
+                            val widgetId = key.removePrefix(PREFIX_ZEN_HORIZON_BINDING).toIntOrNull()
+                            editor.remove(key)
+                            if (widgetId != null) {
+                                editor.remove(PREFIX_ZEN_HORIZON_UNIT + widgetId)
+                            }
+                        }
+                        key.startsWith(PREFIX_ZEN_PEBBLE_BINDING) -> {
+                            val widgetId = key.removePrefix(PREFIX_ZEN_PEBBLE_BINDING).toIntOrNull()
+                            editor.remove(key)
+                            if (widgetId != null) {
+                                editor.remove(PREFIX_ZEN_PEBBLE_TAG + widgetId)
+                            }
+                        }
+                        key.startsWith(PREFIX_SOLAR_RHYTHM_BINDING) -> {
+                            editor.remove(key)
+                        }
+                    }
+                }
+            }
+
+            editor.commit()
         }
     }
 
@@ -412,35 +454,59 @@ class CountUpStore(context: Context) {
 
     /** Retrieves the saved [TimeDisplayMode] for a Hero Widget instance, defaulting to [TimeDisplayMode.DAYS]. */
     fun getHeroWidgetDisplayMode(appWidgetId: Int): TimeDisplayMode {
-        val raw = prefs.getString(PREFIX_HERO_DISPLAY_MODE + appWidgetId, null)
-        return try {
-            if (raw != null) TimeDisplayMode.valueOf(raw) else TimeDisplayMode.DAYS
-        } catch (_: IllegalArgumentException) {
-            TimeDisplayMode.DAYS
+        val raw = prefs.getString(PREFIX_HERO_DISPLAY_MODE + appWidgetId, null) ?: return TimeDisplayMode.DAYS
+        return when (raw) {
+            "DAYS" -> TimeDisplayMode.DAYS
+            "ELAPSED_BREAKDOWN" -> TimeDisplayMode.ELAPSED_BREAKDOWN
+            "TOTAL_WEEKS" -> TimeDisplayMode.TOTAL_WEEKS
+            else -> try {
+                TimeDisplayMode.valueOf(raw)
+            } catch (_: IllegalArgumentException) {
+                TimeDisplayMode.DAYS
+            }
         }
     }
 
     /** Persists the [TimeDisplayMode] for a Hero Widget instance. */
     fun setHeroWidgetDisplayMode(appWidgetId: Int, mode: TimeDisplayMode): Boolean {
+        val code = when (mode) {
+            TimeDisplayMode.DAYS -> "DAYS"
+            TimeDisplayMode.ELAPSED_BREAKDOWN -> "ELAPSED_BREAKDOWN"
+            TimeDisplayMode.TOTAL_WEEKS -> "TOTAL_WEEKS"
+        }
         return prefs.edit()
-            .putString(PREFIX_HERO_DISPLAY_MODE + appWidgetId, mode.name)
+            .putString(PREFIX_HERO_DISPLAY_MODE + appWidgetId, code)
             .commit()
     }
 
     /** Retrieves the saved [ZenWidgetDisplayUnit] for a Zen Horizon instance, defaulting to [ZenWidgetDisplayUnit.DAYS]. */
     fun getZenHorizonUnit(appWidgetId: Int): ZenWidgetDisplayUnit {
-        val raw = prefs.getString(PREFIX_ZEN_HORIZON_UNIT + appWidgetId, null)
-        return try {
-            if (raw != null) ZenWidgetDisplayUnit.valueOf(raw) else ZenWidgetDisplayUnit.DAYS
-        } catch (_: IllegalArgumentException) {
-            ZenWidgetDisplayUnit.DAYS
+        val raw = prefs.getString(PREFIX_ZEN_HORIZON_UNIT + appWidgetId, null) ?: return ZenWidgetDisplayUnit.DAYS
+        return when (raw) {
+            "DAYS" -> ZenWidgetDisplayUnit.DAYS
+            "MONTHS" -> ZenWidgetDisplayUnit.MONTHS
+            "WEEKS" -> ZenWidgetDisplayUnit.WEEKS
+            "HOURS" -> ZenWidgetDisplayUnit.HOURS
+            "YEARS" -> ZenWidgetDisplayUnit.YEARS
+            else -> try {
+                ZenWidgetDisplayUnit.valueOf(raw)
+            } catch (_: IllegalArgumentException) {
+                ZenWidgetDisplayUnit.DAYS
+            }
         }
     }
 
     /** Persists the [ZenWidgetDisplayUnit] for a Zen Horizon instance. */
     fun setZenHorizonUnit(appWidgetId: Int, unit: ZenWidgetDisplayUnit): Boolean {
+        val code = when (unit) {
+            ZenWidgetDisplayUnit.DAYS -> "DAYS"
+            ZenWidgetDisplayUnit.MONTHS -> "MONTHS"
+            ZenWidgetDisplayUnit.WEEKS -> "WEEKS"
+            ZenWidgetDisplayUnit.HOURS -> "HOURS"
+            ZenWidgetDisplayUnit.YEARS -> "YEARS"
+        }
         return prefs.edit()
-            .putString(PREFIX_ZEN_HORIZON_UNIT + appWidgetId, unit.name)
+            .putString(PREFIX_ZEN_HORIZON_UNIT + appWidgetId, code)
             .commit()
     }
 
@@ -934,6 +1000,8 @@ class CountUpStore(context: Context) {
         }
 
         private const val PREFS_NAME = "countup_prefs"
+        private const val KEY_SCHEMA_VERSION = "schema_version"
+        const val CURRENT_STORE_SCHEMA_VERSION = 1
         private const val KEY_ITEMS = "items_v1"
         private const val KEY_ITEMS_QUARANTINE = "items_v1_quarantine"
         private const val KEY_LEGACY_DAY_QUARANTINE = "legacy_day_quarantine"

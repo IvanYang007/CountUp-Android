@@ -63,6 +63,16 @@ class SolarRhythmConfigureActivity : ComponentActivity() {
             return
         }
 
+        val widgetInfo = try {
+            AppWidgetManager.getInstance(this).getAppWidgetInfo(appWidgetId)
+        } catch (_: Exception) {
+            null
+        }
+        if (widgetInfo == null || widgetInfo.provider.packageName != packageName) {
+            finish()
+            return
+        }
+
         store = CountUpStore.getInstance(this)
         val today = LocalDate.now()
         val itemsState = mutableStateOf<List<CountUpItem>>(emptyList())
