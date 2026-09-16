@@ -521,7 +521,7 @@
     <string name="backup_io_error">Could not access backup file</string>
 
     <!-- Voice Quick Add -->
-    <string name="voice_add_prompt">What would you like to count from today?</string>
+    <string name="voice_listening_hint">Speak an item name to count from today</string>
     <string name="voice_added_prefix">Added for today</string>
     <string name="voice_item_undone">Counter removed</string>
     <string name="action_edit">Edit</string>

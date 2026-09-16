@@ -328,4 +328,11 @@
     <string name="backup_restore_failed">恢复失败，请检查文件格式</string>
     <string name="backup_restore_invalid_file">无效或无法读取的备份文件</string>
     <string name="error_no_file_picker">当前设备未找到可用的文档管理器</string>
+
+    <!-- 语音快捷添加 -->
+    <string name="voice_listening_hint">说出要从今天开始记录的事项</string>
+    <string name="voice_added_prefix">已从今天开始记录</string>
+    <string name="voice_item_undone">已撤销添加</string>
+    <string name="action_edit">编辑</string>
+    <string name="cd_widget_voice_add">语音添加计数</string>
 </resources>

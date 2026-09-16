@@ -325,4 +325,11 @@
     <string name="backup_restore_failed">還原失敗，請檢查備份檔案。</string>
     <string name="backup_restore_invalid_file">無效或無法讀取的備份檔案</string>
     <string name="error_no_file_picker">目前裝置未找到可用的文件選擇器</string>
+
+    <!-- 語音快捷添加 -->
+    <string name="voice_listening_hint">說出要從今天開始記錄的事項</string>
+    <string name="voice_added_prefix">已從今天開始記錄</string>
+    <string name="voice_item_undone">已撤銷添加</string>
+    <string name="action_edit">編輯</string>
+    <string name="cd_widget_voice_add">語音添加計數</string>
 </resources>

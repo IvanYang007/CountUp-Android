@@ -160,7 +160,7 @@ internal fun buildBaseViews(context: Context, appWidgetOptions: android.os.Bundl
 
     // Minimal title, voice add, & '+' quick add button in muted ink typography
     views.setTextColor(R.id.widget_title, if (night) NIGHT_MUTED else MUTED)
-    views.setTextColor(R.id.widget_voice_button, if (night) NIGHT_MUTED else MUTED)
+    views.setInt(R.id.widget_voice_button, "setColorFilter", if (night) NIGHT_MUTED else MUTED)
     views.setTextColor(R.id.widget_add_button, if (night) NIGHT_MUTED else MUTED)
     views.setInt(R.id.widget_divider, "setBackgroundColor", if (night) NIGHT_DIVIDER else DIVIDER)
 

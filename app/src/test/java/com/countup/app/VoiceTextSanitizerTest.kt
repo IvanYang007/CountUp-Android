@@ -26,6 +26,8 @@ class VoiceTextSanitizerTest {
         assertEquals("Cold shower", VoiceTextSanitizer.sanitize(listOf("“Cold shower”")))
         assertEquals("Meditation", VoiceTextSanitizer.sanitize(listOf("'Meditation'")))
         assertEquals("Deep breathing", VoiceTextSanitizer.sanitize(listOf("‘Deep breathing’")))
+        assertEquals("跑步", VoiceTextSanitizer.sanitize(listOf("“跑步”")))
+        assertEquals("早起背单词", VoiceTextSanitizer.sanitize(listOf("‘早起背单词’")))
     }
 
     @Test

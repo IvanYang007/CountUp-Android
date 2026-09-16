@@ -1,8 +1,8 @@
 package com.countup.app
 
-import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
 import android.widget.Toast
@@ -15,38 +15,60 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.util.UUID
+import java.util.Locale
 
 /**
  * Lightweight, translucent activity dedicated to voice quick-add from widgets.
- * Launches the platform speech recognizer, sanitizes speech results, commits the
- * item anchored to today, immediately refreshes all widgets, and shows a transient
- * confirmation card with Undo and Edit actions.
+ * Launches the native platform speech recognizer (zero permissions required),
+ * sanitizes speech results, commits the item anchored to today, immediately refreshes
+ * all widgets, and shows a transient Zen confirmation pill with light/dark theme aesthetics.
  */
 class VoiceAddActivity : ComponentActivity() {
 
-    private val sessionId = UUID.randomUUID().toString()
     private var anchorEpochDay: Long = 0L
     private var createdItem: CountUpItem? by mutableStateOf(null)
 
     private val speechLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK && result.data != null) {
+        if (result.resultCode == RESULT_OK && result.data != null) {
             val candidates = result.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
             val recognizedText = VoiceTextSanitizer.sanitize(candidates)
             if (!recognizedText.isNullOrBlank()) {
@@ -69,24 +91,35 @@ class VoiceAddActivity : ComponentActivity() {
             launchSpeechRecognition()
         }
 
+        val store = CountUpStore.getInstance(applicationContext)
+        val themeMode = store.getThemeMode()
+
         setContent {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = { finishSilently() }
-                    ),
-                contentAlignment = Alignment.BottomCenter
-            ) {
-                createdItem?.let { item ->
-                    VoiceConfirmationPill(
-                        item = item,
-                        onUndo = { undoItem(item) },
-                        onEdit = { editItem(item) },
-                        onDismiss = { finishSilently() }
-                    )
+            val systemDark = isSystemInDarkTheme()
+            val isDark = themeMode.isDark(systemDark)
+
+            ZenTheme(darkTheme = isDark) {
+                val zenColors = LocalZenColors.current
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(if (createdItem != null) Color.Black.copy(alpha = 0.40f) else Color.Transparent)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = { finishSilently() }
+                        ),
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    createdItem?.let { item ->
+                        VoiceConfirmationPill(
+                            item = item,
+                            zenColors = zenColors,
+                            onUndo = { undoItem(item) },
+                            onEdit = { editItem(item) },
+                            onDismiss = { finishSilently() }
+                        )
+                    }
                 }
             }
         }
@@ -98,9 +131,12 @@ class VoiceAddActivity : ComponentActivity() {
     }
 
     private fun launchSpeechRecognition() {
+        val localeTag = Locale.getDefault().toLanguageTag()
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-            putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.voice_add_prompt))
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, localeTag)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, localeTag)
+            putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.voice_listening_hint))
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
         }
         try {
@@ -121,7 +157,6 @@ class VoiceAddActivity : ComponentActivity() {
         val item = store.addItem(
             name = text,
             epochDay = anchorEpochDay,
-            id = sessionId
         )
         if (item != null) {
             createdItem = item
@@ -148,7 +183,7 @@ class VoiceAddActivity : ComponentActivity() {
 
     private fun finishSilently() {
         finish()
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, 0, 0)
         } else {
             @Suppress("DEPRECATION")
@@ -164,9 +199,11 @@ class VoiceAddActivity : ComponentActivity() {
 @Composable
 private fun VoiceConfirmationPill(
     item: CountUpItem,
+    zenColors: ZenColorScheme,
     onUndo: () -> Unit,
     onEdit: () -> Unit,
     onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     // 3.5s auto-dismiss
     LaunchedEffect(item.id) {
@@ -180,41 +217,65 @@ private fun VoiceConfirmationPill(
         exit = slideOutVertically { it } + fadeOut()
     ) {
         Card(
-            modifier = Modifier
-                .padding(horizontal = 20.dp, vertical = 24.dp)
+            modifier = modifier
                 .fillMaxWidth()
-                .navigationBarsPadding(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                .navigationBarsPadding()
+                .padding(horizontal = 20.dp, vertical = 24.dp)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = {} // Consume touch events inside pill
+                ),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = zenColors.paperCard),
+            border = BorderStroke(1.dp, zenColors.hairlineRule),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Row(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .padding(horizontal = 18.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
                     Text(
                         text = stringResource(R.string.voice_added_prefix),
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        color = zenColors.inkMuted
                     )
                     Text(
                         text = item.name,
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = zenColors.inkBlack,
                         maxLines = 1
                     )
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(onClick = onEdit) {
-                        Text(stringResource(R.string.action_edit))
+                    TextButton(
+                        onClick = onEdit,
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.action_edit),
+                            color = zenColors.inkMuted,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
-                    FilledTonalButton(onClick = onUndo) {
-                        Text(stringResource(R.string.action_undo))
+                    Button(
+                        onClick = onUndo,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (zenColors.isDark) ZenDarkSage else zenColors.willowSage,
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.action_undo),
+                            fontWeight = FontWeight.Medium
+                        )
                     }
                 }
             }

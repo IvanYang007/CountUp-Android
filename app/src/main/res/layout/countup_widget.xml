@@ -41,23 +41,14 @@
                 android:textColor="#5D5043"
                 android:text="@string/app_name" />
 
-            <TextView
+            <ImageView
                 android:id="@+id/widget_voice_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_toStartOf="@id/widget_add_button"
                 android:layout_centerVertical="true"
-                android:paddingStart="6dp"
-                android:paddingTop="2dp"
-                android:paddingEnd="6dp"
-                android:paddingBottom="2dp"
-                android:minWidth="48dp"
-                android:minHeight="48dp"
-                android:gravity="center"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:textColor="#5D5043"
-                android:text="🎙"
+                android:scaleType="center"
+                android:src="@drawable/ic_voice_zen"
                 android:contentDescription="@string/cd_widget_voice_add" />
 
             <TextView
