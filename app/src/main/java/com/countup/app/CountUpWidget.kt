@@ -95,6 +95,23 @@ fun pushWidgetUpdate(context: Context) {
 }
 
 /**
+ * Imperatively updates all 5 widget families and synchronizes the midnight alarm.
+ * Safe to call from any background coroutine or thread.
+ */
+fun pushAllWidgetsUpdate(context: Context) {
+    val appContext = context.applicationContext
+    widgetReceiverScope.launch {
+        runCatching { CountUpStore.getInstance(appContext).sanitizeOrphanedWidgetBindings(appContext) }
+        runCatching { pushWidgetUpdate(appContext) }
+        runCatching { pushAllHeroWidgetsUpdate(appContext) }
+        runCatching { pushAllZenHorizonWidgetsUpdate(appContext) }
+        runCatching { pushAllSolarRhythmWidgetsUpdate(appContext) }
+        runCatching { pushAllZenPebbleWidgetsUpdate(appContext) }
+        runCatching { MidnightAlarmReceiver.scheduleMidnightAlarm(appContext) }
+    }
+}
+
+/**
  * Calculates bounded canvas dimensions (width x height in px) for the widget background bitmap.
  * Keeps the uncompressed ARGB_8888 bitmap parcel <= 375 KB, well below Android's 1MB
  * Binder IPC transaction buffer limit (preventing TransactionTooLargeException).
@@ -141,8 +158,9 @@ internal fun buildBaseViews(context: Context, appWidgetOptions: android.os.Bundl
         views.setImageViewBitmap(R.id.widget_bg_image, bgBitmap)
     }
 
-    // Minimal title & '+' quick add button in muted ink typography
+    // Minimal title, voice add, & '+' quick add button in muted ink typography
     views.setTextColor(R.id.widget_title, if (night) NIGHT_MUTED else MUTED)
+    views.setTextColor(R.id.widget_voice_button, if (night) NIGHT_MUTED else MUTED)
     views.setTextColor(R.id.widget_add_button, if (night) NIGHT_MUTED else MUTED)
     views.setInt(R.id.widget_divider, "setBackgroundColor", if (night) NIGHT_DIVIDER else DIVIDER)
 
@@ -155,6 +173,18 @@ internal fun buildBaseViews(context: Context, appWidgetOptions: android.os.Bundl
     )
     views.setOnClickPendingIntent(R.id.widget_root, launch)
     views.setOnClickPendingIntent(R.id.widget_title, launch)
+
+    // Tap voice button -> open VoiceAddActivity
+    val voiceIntent = Intent(context, VoiceAddActivity::class.java).apply {
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+    }
+    val voicePendingIntent = PendingIntent.getActivity(
+        context,
+        REQUEST_VOICE_ADD,
+        voiceIntent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+    )
+    views.setOnClickPendingIntent(R.id.widget_voice_button, voicePendingIntent)
 
     // Tap '+' quick add action or empty state -> open the app straight into Add Item dialog.
     val addIntent = Intent(context, MainActivity::class.java).apply {
@@ -501,3 +531,4 @@ const val ACTION_ADD_ITEM: String = "com.countup.app.ACTION_ADD_ITEM"
 private const val REQUEST_LAUNCH = 1
 private const val REQUEST_RESET = 2
 private const val REQUEST_ADD = 3
+private const val REQUEST_VOICE_ADD = 4

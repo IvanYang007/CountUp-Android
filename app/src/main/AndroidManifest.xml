@@ -14,6 +14,16 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" tools:node="remove" />
     <uses-permission android:name="com.countup.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" tools:node="remove" />
 
+    <!-- Package visibility: Android 11+ requires explicit query declarations for speech services -->
+    <queries>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.RECOGNIZE_SPEECH" />
+        </intent>
+    </queries>
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -44,6 +54,16 @@
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts" />
         </activity>
+
+        <!-- Dedicated Translucent Voice Quick Add Activity -->
+        <activity
+            android:name=".VoiceAddActivity"
+            android:exported="false"
+            android:theme="@style/Theme.CountUp.Translucent"
+            android:launchMode="singleTop"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:windowSoftInputMode="adjustResize" />
 
         <receiver
             android:name=".CountUpWidgetReceiver"

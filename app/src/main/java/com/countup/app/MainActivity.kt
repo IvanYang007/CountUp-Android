@@ -221,13 +221,7 @@ class MainActivity : ComponentActivity() {
             if (!immediate) {
                 kotlinx.coroutines.delay(350L)
             }
-            runCatching { CountUpStore.getInstance(appContext).sanitizeOrphanedWidgetBindings(appContext) }
-            runCatching { pushWidgetUpdate(appContext) }
-            runCatching { pushAllHeroWidgetsUpdate(appContext) }
-            runCatching { pushAllZenHorizonWidgetsUpdate(appContext) }
-            runCatching { pushAllSolarRhythmWidgetsUpdate(appContext) }
-            runCatching { pushAllZenPebbleWidgetsUpdate(appContext) }
-            runCatching { MidnightAlarmReceiver.scheduleMidnightAlarm(appContext) }
+            pushAllWidgetsUpdate(appContext)
         }
     }
 }

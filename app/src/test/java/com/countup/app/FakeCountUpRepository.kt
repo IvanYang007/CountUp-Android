@@ -29,10 +29,13 @@ class FakeCountUpRepository(
         icon: String,
         cardColor: String,
         isPinned: Boolean,
+        id: String,
     ): CountUpItem? {
         if (shouldFailWrite) return null
+        val existing = itemsList.firstOrNull { it.id == id }
+        if (existing != null) return existing
         val item = CountUpItem(
-            id = UUID.randomUUID().toString(),
+            id = id,
             name = name.ifBlank { DEFAULT_ITEM_NAME },
             epochDay = epochDay,
             comment = comment,

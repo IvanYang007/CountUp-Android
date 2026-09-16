@@ -15,6 +15,7 @@ interface CountUpRepository {
         icon: String = "",
         cardColor: String = "",
         isPinned: Boolean = false,
+        id: String = CountUpStore.newId(),
     ): CountUpItem?
     fun updateItem(
         id: String,
@@ -63,8 +64,9 @@ class DefaultCountUpRepository(
         icon: String,
         cardColor: String,
         isPinned: Boolean,
+        id: String,
     ): CountUpItem? =
-        store.addItem(name, epochDay, comment, icon, cardColor, isPinned)
+        store.addItem(name, epochDay, comment, icon, cardColor, isPinned, id)
 
     override fun updateItem(
         id: String,

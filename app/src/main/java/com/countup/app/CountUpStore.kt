@@ -145,11 +145,12 @@ class CountUpStore(context: Context) {
         icon: String = "",
         cardColor: String = "",
         isPinned: Boolean = false,
+        id: String = newId(),
     ): CountUpItem? {
         val trimmed = name.trim()
         val resolvedIcon = icon.trim().ifEmpty { ALL_ICON_NAMES.random() }
         val item = CountUpItem(
-            id = newId(),
+            id = id,
             name = trimmed.ifEmpty { DEFAULT_ITEM_NAME },
             epochDay = epochDay,
             comment = comment.trim(),
@@ -159,7 +160,10 @@ class CountUpStore(context: Context) {
             pinnedTimestamp = if (isPinned) System.currentTimeMillis() else null,
         )
         return synchronized(globalStoreLock) {
-            val updated = items() + item
+            val current = items()
+            val existing = current.firstOrNull { it.id == id }
+            if (existing != null) return@synchronized existing
+            val updated = current + item
             if (persist(updated)) item else null
         }
     }
@@ -974,9 +978,9 @@ class CountUpStore(context: Context) {
         }
     }
 
-    private fun newId(): String = UUID.randomUUID().toString()
-
     companion object {
+        fun newId(): String = UUID.randomUUID().toString()
+
         /** Serializes read-modify-write mutations across all store instances in the application process. */
         private val globalStoreLock = Any()
 

@@ -519,4 +519,11 @@
     <string name="backup_restore_unsupported_version">Unsupported backup version (v%1$s). Please update the app.</string>
     <string name="backup_restore_damaged_notice" tools:ignore="PluralsCandidate">Backup file is partially damaged (%1$d items recovered). \"Replace All\" is disabled to prevent data loss.</string>
     <string name="backup_io_error">Could not access backup file</string>
+
+    <!-- Voice Quick Add -->
+    <string name="voice_add_prompt">What would you like to count from today?</string>
+    <string name="voice_added_prefix">Added for today</string>
+    <string name="voice_item_undone">Counter removed</string>
+    <string name="action_edit">Edit</string>
+    <string name="cd_widget_voice_add">Add counter by voice</string>
 </resources>

@@ -845,4 +845,32 @@ class CountUpStoreTest {
         assertEquals("Run", store.getZenPebbleTag(203))
         assertEquals(item2.id, store.getSolarRhythmBinding(204))
     }
+
+    @Test
+    fun addItemWithExplicitIdIsIdempotent() {
+        val store = CountUpStore(testContext)
+        val customId = "voice-session-uuid-12345"
+
+        // First insertion succeeds and persists item
+        val firstAdd = store.addItem(
+            name = "Morning Meditation",
+            epochDay = 20000L,
+            id = customId,
+        )
+        assertNotNull(firstAdd)
+        assertEquals(customId, firstAdd!!.id)
+        assertEquals("Morning Meditation", firstAdd.name)
+        assertEquals(1, store.items().size)
+
+        // Second insertion with the exact same ID returns existing item without duplicate
+        val secondAdd = store.addItem(
+            name = "Morning Meditation",
+            epochDay = 20000L,
+            id = customId,
+        )
+        assertNotNull(secondAdd)
+        assertEquals(customId, secondAdd!!.id)
+        assertEquals(1, store.items().size)
+        assertEquals(firstAdd, secondAdd)
+    }
 }
