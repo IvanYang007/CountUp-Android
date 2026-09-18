@@ -175,22 +175,27 @@ fun CountUpContent(
             val startInset = innerPadding.calculateStartPadding(layoutDirection)
             val endInset = innerPadding.calculateEndPadding(layoutDirection)
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(
-                        top = topInset,
-                        start = startInset + 20.dp,
-                        end = endInset + 20.dp,
-                    )
-                    .consumeWindowInsets(
-                        PaddingValues(
-                            top = topInset,
-                            start = startInset,
-                            end = endInset,
-                        ),
-                    ),
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.TopCenter,
             ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .widthIn(max = 640.dp)
+                        .padding(
+                            top = topInset,
+                            start = startInset + 20.dp,
+                            end = endInset + 20.dp,
+                        )
+                        .consumeWindowInsets(
+                            PaddingValues(
+                                top = topInset,
+                                start = startInset,
+                                end = endInset,
+                            ),
+                        ),
+                ) {
                 Spacer(Modifier.padding(top = 16.dp))
                 HeaderRow(
                     backgroundTheme = state.backgroundTheme,
@@ -246,8 +251,7 @@ fun CountUpContent(
                                 .padding(top = 48.dp, bottom = bottomInset),
                         )
                     } else {
-                        val pinnedItems = remember(displayItems) { displayItems.filter { it.isPinned } }
-                        val unpinnedItems = remember(displayItems) { displayItems.filter { !it.isPinned } }
+                        val (pinnedItems, unpinnedItems) = remember(displayItems) { displayItems.partition { it.isPinned } }
 
                         val renderItemCard: @Composable LazyItemScope.(CountUpItem) -> Unit = { item ->
                             ItemCard(
@@ -308,6 +312,7 @@ fun CountUpContent(
                 }
             }
         }
+    }
 
         // Dialogs
         if (state.isEditorOpen) {

@@ -1,6 +1,6 @@
 # Privacy Policy for CountUp
 
-**Last updated:** September 9, 2026
+**Last updated:** September 16, 2026
 
 CountUp ("the App") is developed as a free, 100% offline utility and home-screen widget suite. This Privacy Policy explains our approach to user data and privacy.
 
@@ -8,7 +8,7 @@ CountUp ("the App") is developed as a free, 100% offline utility and home-screen
 CountUp does not collect, store, transmit, track, or share any personal information, device data, or usage metrics.
 
 ### 2. Permissions
-The App requests zero runtime or install-time permissions across both debug and release builds. It does not access your internet connection, device identifiers, location, contacts, camera, or microphone. Tactile haptics are driven entirely through Android's standard view haptic APIs without declaring any permissions.
+The App requests zero runtime or install-time permissions across both debug and release builds. It does not access your internet connection, device identifiers, location, contacts, camera, or microphone. The optional Voice Quick Add feature delegates speech capture out-of-process to the Android platform's native speech recognition service (`RecognizerIntent.ACTION_RECOGNIZE_SPEECH`) and requires zero microphone or audio permissions within CountUp. Tactile haptics are driven entirely through Android's standard view haptic APIs without declaring any permissions.
 
 ### 3. Local Data Storage & Offline Backup
 All information you enter into the App (such as your milestone names, anchor dates, and notes) is stored locally on your device only.

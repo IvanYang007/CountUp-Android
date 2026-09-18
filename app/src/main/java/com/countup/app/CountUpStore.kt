@@ -32,7 +32,7 @@ class CountUpStore(context: Context) {
 
     init {
         if (!prefs.contains(KEY_SCHEMA_VERSION)) {
-            prefs.edit().putInt(KEY_SCHEMA_VERSION, CURRENT_STORE_SCHEMA_VERSION).commit()
+            prefs.edit().putInt(KEY_SCHEMA_VERSION, CURRENT_STORE_SCHEMA_VERSION).apply()
         }
     }
 

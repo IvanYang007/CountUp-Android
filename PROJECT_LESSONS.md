@@ -1,0 +1,289 @@
+# Project Lessons — CountUp-Android
+
+> Derived from git history. Last analyzed commit: `966928a035a944120572c8ce82fbfb5dfbaf4f23` (2026-09-16T07:47:58-04:00).
+> Range: `32f6f36211113906d4bc4f8c03e519b711b198e1` .. `966928a035a944120572c8ce82fbfb5dfbaf4f23` (176 commits, 2026-08-20 .. 2026-09-16).
+> Grades: `[observed]` stated in a commit/PR, `[inferred]` deduced from diffs,
+> `[weak]` one data point or ambiguous.
+
+## Executive summary
+
+CountUp-Android is a zero-permission, offline-first milestone count-up app built with Jetpack Compose Material 3 and six RemoteViews home-screen widget providers. Developed over four weeks across 176 commits, its history is dominated by widget configuration contracts, release minification traps, and data integrity safeguards. The highest-risk module is `app/src/main/res/xml/zen_pebble_widget_info.xml` alongside `app/src/main/java/com/countup/app/CountUpStore.kt`. The project repeatedly struggled with 1x1 widget launcher placement, oscillating between resize modes and configuration flags before locking hard invariants. The single most important constraint is the zero-permission model: no runtime permissions, no WorkManager, and no background services are permitted.
+
+**Read this first if you are about to touch:** `app/src/main/res/xml/zen_pebble_widget_info.xml` (see Known risk areas).
+
+## Lessons learned from past commits
+
+### L1. Omit configuration_optional from widgets requiring card selection — [observed]
+
+- **What happened:** Adding `configuration_optional` to `zen_pebble_widget_info.xml` caused Android 12+ launchers to skip `ZenPebbleConfigureActivity` on drag-and-drop, placing an unconfigured widget with fallback data and an easily-missed pencil affordance.
+- **Evidence:** `1cd6e29d1` fix(widget): lock 1x1 pebble resizeMode to none and restore configuration_optional, `433f1d47b` fix(widget): restore auto-launch picker for 1x1 Zen Pebble by removing configuration_optional
+- **Why it recurs:** Developers mistakenly treat `configuration_optional` as a placement fix, unaware that it instructs launcher hosts to omit initial configuration.
+- **The rule:** Never include `configuration_optional` in `android:widgetFeatures` for item-tracking widgets; declare `reconfigurable` only.
+
+### L2. Set resizeMode to none on 1x1 widgets to prevent OEM slot-0 snapping — [observed]
+
+- **What happened:** Setting `android:resizeMode="horizontal|vertical"` on single-cell widgets caused Samsung One UI and Xiaomi HyperOS drop handlers to abort targeted drop coordinates and snap tiles to slot 0.
+- **Evidence:** `b6b4ce0ba` fix(widget): fix 1x1 pebble grid slotting, `471e4cc69` fix(widget): universal 1x1 pebble layout for all OEM launchers
+- **Why it recurs:** Standard Pixel emulator launchers tolerate resize flags on 1x1 cells, masking the failure during emulator testing.
+- **The rule:** Set `android:resizeMode="none"` on single-cell widget provider XML definitions.
+
+### L3. Strip transitive InitializationProvider to prevent background service leaks — [observed]
+
+- **What happened:** Transitive AndroidX dependencies injected `androidx.startup.InitializationProvider`, booting unauthorized WorkManager initializers and crashing release cold start.
+- **Evidence:** `3c8663262` fix(release): resolve startup crash by suppressing unused WorkManagerInitializer, `625f2c387` fix(security,ui): harden credentials
+- **Why it recurs:** Modern AndroidX libraries automatically bundle startup providers into merged manifests unless explicitly stripped.
+- **The rule:** Strip `androidx.startup.InitializationProvider` via `tools:node="remove"` in `AndroidManifest.xml`.
+
+### L4. Persist stable string codes or full field keeps for enums under R8 — [observed]
+
+- **What happened:** Persisting `TimeDisplayMode` and `ZenWidgetDisplayUnit` via `.name` failed under R8 because default enum rules only keep `values()` and `valueOf()`, renaming constants to `f` and silently resetting values to `DAYS`.
+- **Evidence:** `0162fc3` (audit finding P0-2), `92262bb43` feat: harden security, persist widget bindings, refine edge-to-edge, and optimize R8
+- **Why it recurs:** Debug builds do not obfuscate enums, and read-path exception handlers swallow `IllegalArgumentException`.
+- **The rule:** Store stable serialization codes or specify `-keepclassmembers,allowoptimization enum * { <fields>; }` in `proguard-rules.pro`.
+
+### L5. Quarantine malformed JSON payloads instead of dropping items — [observed]
+
+- **What happened:** `decodeItems` skipped invalid JSON elements and returned partial lists; `CountUpStore` accepted the reduced list and wrote it over `countup_backup.json`, permanently deleting counters.
+- **Evidence:** `c678dd3fd` fix: harden data recovery, `92262bb43` feat: harden security, persist widget bindings
+- **Why it recurs:** Error-handling logic treating partial decodes as valid reads without validating element counts against array length.
+- **The rule:** Quarantine corrupted raw payloads to `items_v1_quarantine` and abort backup overwriting whenever item decoding fails.
+
+### L6. Synchronize store mutations with companion locks and atomic file replacement — [observed]
+
+- **What happened:** Concurrent updates between home-screen widget receivers and main-app viewmodels caused race conditions and partial file corruption in SharedPreferences and JSON backups.
+- **Evidence:** `c678dd3fd` fix: harden data recovery, lock store writes, `625f2c387` fix(security,ui): harden credentials, concurrency
+- **Why it recurs:** Widget receivers run in independent broadcast threads concurrently with UI viewmodel coroutine dispatchers.
+- **The rule:** Wrap all persistence mutations in `synchronized(globalStoreLock)` and write disk backups via temporary file replacement.
+
+### L7. Purge orphaned widget bindings across all families on item deletion — [observed]
+
+- **What happened:** Deleting an item removed it from `items_v1` but left dangling preference references across `hero_widget_item_<id>`, `zen_horizon_widget_item_<id>`, and `solar_rhythm_widget_item_<id>`.
+- **Evidence:** `92262bb43` feat: harden security, persist widget bindings, refine edge-to-edge
+- **Why it recurs:** Widget instance bindings reside in separate preference keys from core item storage and are bypassed by simple item deletions.
+- **The rule:** Invoke `purgeWidgetBindingsForItem(itemId)` across all four configurable widget families inside `CountUpStore.deleteItem()`.
+
+### L8. Restrict RemoteViews parcel payload below 40KB to prevent IPC Binder crashes — [observed]
+
+- **What happened:** Pushing high-resolution vector assets or uncompressed tracks via `RemoteViews` risked exceeding Android's 1MB Binder transaction limit during concurrent widget updates.
+- **Evidence:** `227b2f372` feat(widgets): implement Zen & Efficient Widget Suite, `82e9024d7` fix(review): resolve all code standards review findings
+- **Why it recurs:** The 1MB Binder transaction limit is shared across all inter-process communication in the system.
+- **The rule:** Verify that serialized RemoteViews parcels stay strictly under 40KB via `WidgetMemoryBudgetGateTest`.
+
+### L9. Omit minimumInteractiveComponentSize and inner clipping on compact rows — [observed]
+
+- **What happened:** Compose `minimumInteractiveComponentSize()` expanded 26dp subheader and 30dp card buttons to 48dp, blowing out row spacing; inner column clipping truncated bottom-left `SINCE` dates.
+- **Evidence:** `92262bb43` feat: harden security, persist widget bindings, refine edge-to-edge
+- **Why it recurs:** Jetpack Compose Material 3 components enforce 48dp touch target bounds by default unless explicitly overridden.
+- **The rule:** Use explicit `size(26.dp)` or `size(30.dp)` on action clusters and apply `clip()` exclusively to outer card containers.
+
+### L10. Delegate speech recognition out-of-process to maintain zero permissions — [observed]
+
+- **What happened:** Adding voice quick-add risked introducing `android.permission.RECORD_AUDIO` or crashing with `ActivityNotFoundException` on Android 11+ due to package filtering.
+- **Evidence:** `6d9fe4f` feat(widget): implement Voice Quick Add with zero-permission speech delegation, `966928a` feat(voice): refine voice add aesthetics
+- **Why it recurs:** Developers default to in-app audio recording instead of delegating speech capture to platform intents.
+- **The rule:** Maintain `<queries>` for `RecognitionService` and `RECOGNIZE_SPEECH` and delegate audio capture out-of-process via `RecognizerIntent`.
+
+### L11. Verify calling package ownership and validate appWidgetId in configure activities — [observed]
+
+- **What happened:** Exported configuration activities required by `APPWIDGET_CONFIGURE` could be invoked by third-party applications to spoof widget bindings or redirect intents.
+- **Evidence:** `92262bb43` feat: harden security, persist widget bindings, refine edge-to-edge
+- **Why it recurs:** Widget configuration activities must declare `android:exported="true"` to allow launcher invocation, exposing an external attack surface.
+- **The rule:** Validate `appWidgetId != INVALID_APPWIDGET_ID`, verify caller identity, and return results containing only `EXTRA_APPWIDGET_ID`.
+
+### L12. Re-register midnight alarm rollover inside widget receivers on boot — [observed]
+
+- **What happened:** Without `RECEIVE_BOOT_COMPLETED`, device reboots dropped the scheduled midnight alarm required for rolling over daily milestone counters.
+- **Evidence:** `625f2c387` fix(security,ui): harden credentials, `92262bb43` feat: harden security
+- **Why it recurs:** Zero-permission architecture prohibits listening for boot broadcasts directly.
+- **The rule:** Invoke `MidnightAlarmReceiver.scheduleMidnightAlarm(context)` with `RTC_WAKEUP` inside widget `onUpdate()` and `onEnabled()`.
+
+## Project-specific implementation rules
+
+**Layout** — Place app UI components in `app/src/main/java/com/countup/app/`. Model new screens after `CountUpContent.kt`. Build new home-screen widget providers following `ZenPebbleWidgetReceiver.kt`.
+
+**Naming** — Use the domain terms established in store and persistence models.
+
+| Concept | Use this word | Never use | Evidence |
+| --- | --- | --- | --- |
+| Milestone counter | `CountUpItem` | `Habit`, `Task`, `Counter` | `32f6f3621`, `c678dd3fd` |
+| Shared preferences file | `countup_prefs` | `user_prefs`, `app_settings` | `32f6f3621`, `625f2c387` |
+| Backup JSON file | `countup_backup.json` | `backup.json`, `export.json` | `625f2c387`, `92262bb43` |
+| Concurrency lock | `globalStoreLock` | `storeLock`, `mutex` | `625f2c387` |
+
+**Errors** — Return nullable types (`CountUpItem?`) or sealed UI results. Quarantine corrupted raw payloads in `items_v1_quarantine` rather than failing silently.
+
+**Validation** — Validate date strings using `LocalDate` parse boundaries. Validate `appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID` before writing widget preferences.
+
+**State and data access** — Drive all UI state through unidirectional MVI via `CountUpViewModel` and `CountUpContract`. Route all state mutations through `CountUpStore` under `globalStoreLock`.
+
+**Migrations in flight** — Maintain backwards compatibility during ongoing persistence refactoring.
+
+| Area | Old shape | New shape | Status | Evidence |
+| --- | --- | --- | --- | --- |
+| Data schema | `items_v0` JSON | `items_v1` with quarantine fallback | Complete | `92262bb43` |
+| Hero widget layout | 1x1 Compact & 2x1 Card | 2x1 Wide Poetic Card only | Complete | `20cd2677f` |
+| Widget configuration | Direct drop placement | Mandatory configure activity | Complete | `433f1d47b` |
+
+**Intentional inconsistencies** — Two deliberate deviations exist from standard platform conventions.
+
+| Area | Shape A (where) | Shape B (where) | Why it is intentional | Evidence |
+| --- | --- | --- | --- | --- |
+| Touch target size | Standard Material 48dp | Explicit 26dp/30dp (`SubHeaderRow`, `ItemCard`) | Preserves dense optical design without layout spread | `92262bb43` |
+| Background alarms | Zero battery drain (no services) | `RTC_WAKEUP` in `MidnightAlarmReceiver` | Wakes device briefly at 00:00 to update daily counts | `92262bb43` |
+
+**Commit and branch style** — Use Conventional Commits (`feat:`, `fix(widget):`, `refactor:`, `release:`). Write imperative present-tense subjects under 72 characters.
+
+**Testing** — Execute `./gradlew testDebugUnitTest` with JUnit 4. Enforce repository invariants by writing tests that read source XML and manifest files directly (`WidgetContractInvariantsTest.kt`).
+
+## Known risk areas
+
+| Rank | Path | Risk | Churn | Fix commits | Couplings | Evidence |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | `app/build.gradle.kts` | 233.0 | 57 | 9 | 16 | `7b1c9c36a`, `662675d61`, `92262bb43` |
+| 2 | `app/src/main/java/com/countup/app/CountUpContent.kt` | 223.8 | 52 | 12 | 18 | `45dd6e198`, `5522dec24`, `a2039e72c` |
+| 3 | `app/src/main/java/com/countup/app/CountUpStore.kt` | 134.2 | 26 | 4 | 14 | `c678dd3fd`, `625f2c387`, `92262bb43` |
+| 4 | `app/src/main/java/com/countup/app/HeroWidgetReceiver.kt` | 131.6 | 32 | 5 | 12 | `58618f707`, `20cd2677f`, `625f2c387` |
+| 5 | `app/src/main/res/xml/zen_pebble_widget_info.xml` | 91.0 | 8 | 7 | 4 | `b6b4ce0ba`, `1cd6e29d1`, `433f1d47b` |
+| 6 | `app/src/main/AndroidManifest.xml` | 115.6 | 21 | 4 | 13 | `3c8663262`, `625f2c387`, `6d9fe4f` |
+
+### `keystore/keystore-pass.txt` — Committed plain-text release signing secret in git packfile (BLOCKING)
+
+- **Failure mode:** Historical packfile object `8370ad4c87436d41ea4c8c3701b4f2c6756d4986` contains the production keystore password, exposed on upstream remote.
+- **Guard:** Rotate the upload key in Google Play Console and execute `git filter-repo` to scrub history before any public repository release.
+- **Evidence:** `32f6f36211113906d4bc4f8c03e519b711b198e1` (added), `625f2c387078c9ed3ff583d715bafa1eecb19d28` (untracked)
+
+### `app/src/main/res/xml/zen_pebble_widget_info.xml` — Launcher placement and configuration contracts
+
+- **Failure mode:** Modifying resize flags snaps widgets to slot 0; adding `configuration_optional` bypasses configuration activities.
+- **Guard:** `WidgetContractInvariantsTest.zenPebbleWidgetEnforcesResizeModeNoneAndReconfigurable()`
+- **Evidence:** `1cd6e29d1` fix(widget): lock 1x1 pebble resizeMode to none, `433f1d47b` fix(widget): restore auto-launch picker
+
+### `app/src/main/java/com/countup/app/CountUpStore.kt` — Data loss during corrupted payload decoding
+
+- **Failure mode:** Partial JSON decoding truncated item lists, overwriting disk backups with partial data.
+- **Guard:** `CountUpStoreTest` testing corrupted array recovery and quarantine fallbacks.
+- **Evidence:** `c678dd3fd` fix: harden data recovery, `92262bb43` feat: harden security
+
+### Change couplings — files that must move together
+
+| Pair | Co-changes | What the hidden contract is | Evidence |
+| --- | --- | --- | --- |
+| `CountUpContent.kt` + `CountUpViewModel.kt` | 18 | MVI UiState rendering and user intent dispatch | `a1539bc2a`, `2fa5b4e1a`, `71b0531e9` |
+| `CountUpContent.kt` + `CountUpDialogs.kt` | 17 | Dialog presentation state and action callbacks | `a1539bc2a`, `92262bb43` |
+| `CountUpContract.kt` + `CountUpViewModel.kt` | 15 | Sealed intent classes and state property updates | `a1539bc2a`, `71b0531e9` |
+| `CountUpContent.kt` + `CountUpStore.kt` | 14 | Direct preference reads and display settings | `c678dd3fd`, `625f2c387`, `92262bb43` |
+| `HeroWidgetReceiver.kt` + `ZenHorizonWidgetReceiver.kt` | 12 | Parallel widget broadcast dispatch and theme sync | `227b2f372`, `edafee3ad`, `92262bb43` |
+| `CountUpItem.kt` + `CountUpStore.kt` | 10 | Model serialization and JSON schema versioning | `c678dd3fd`, `92262bb43` |
+| `HeroWidgetReceiver.kt` + `ZenPebbleWidgetReceiver.kt` | 10 | Widget provider lifecycle and store binding sync | `227b2f372`, `92262bb43` |
+
+### Removed and abandoned work — do not reintroduce
+
+| Removed | When | Reason (quoted) | Evidence |
+| --- | --- | --- | --- |
+| `keystore/keystore-pass.txt` | `625f2c387` | "Untrack keystore/keystore-pass.txt and support hierarchical password loading" | `625f2c387` |
+| `countup_hero_widget_1x1.xml` | `20cd2677f` | "make 2x1 wide card the exclusive default and only layout for Hero widget" | `20cd2677f` |
+| `androidx.startup.InitializationProvider` | `3c8663262` | "resolve startup crash by suppressing unused WorkManagerInitializer" | `3c8663262` |
+| `RECEIVE_BOOT_COMPLETED` | `625f2c387` | "harden credentials, concurrency, widget receivers and expose reset undo" | `625f2c387` |
+| `android.permission.RECORD_AUDIO` | `6d9fe4f` | "implement Voice Quick Add with zero-permission speech delegation" | `6d9fe4f` |
+
+## Safe-change checklist
+
+Before you change anything:
+
+- [ ] Run `./gradlew testDebugUnitTest` to verify all 402 existing unit and contract tests pass.
+- [ ] Confirm the tree is clean: `git status --porcelain`.
+- [ ] Read `docs/RECURRING_ISSUES.md` before touching any widget provider or XML layout.
+
+While you change:
+
+- [ ] Maintain zero runtime permissions; never add `RECORD_AUDIO` or `RECEIVE_BOOT_COMPLETED` to `AndroidManifest.xml`.
+- [ ] Preserve `android:resizeMode="none"` and `reconfigurable` in `zen_pebble_widget_info.xml`; never add `configuration_optional`.
+- [ ] Omit `Modifier.minimumInteractiveComponentSize()` from 26dp subheader and 30dp card action button clusters.
+- [ ] Wrap all `CountUpStore` mutations in `synchronized(globalStoreLock)` and invoke `purgeWidgetBindingsForItem(itemId)` on deletion.
+
+Before you call it done:
+
+- [ ] Run `./gradlew testDebugUnitTest` and confirm 100% green test execution.
+- [ ] Run `./gradlew assembleRelease` to confirm R8 rules preserve all data models, enums, and widget providers.
+- [ ] Verify widget RemoteViews payload remains below 40KB via `WidgetMemoryBudgetGateTest`.
+
+## Examples from commit history
+
+### Example 1 — The configuration_optional trap on 1x1 widgets
+
+```
+1cd6e29d1  fix(widget): lock 1x1 pebble resizeMode to none and restore configuration_optional
+433f1d47b  fix(widget): restore auto-launch picker for 1x1 Zen Pebble by removing configuration_optional
+```
+
+- **What changed:** Commit `1cd6e29d1` added `configuration_optional` to fix home-screen drop behavior.
+- **What broke:** Android 12+ launchers interpreted the flag as permission to omit `ZenPebbleConfigureActivity`, dropping unconfigured fallback widgets.
+- **The fix:** Commit `433f1d47b` removed `configuration_optional` and added an invariant test asserting its absence.
+- **The rule it produced:** see L1
+- **Grade:** `[observed]`
+
+### Example 2 — Abandoning 1x1 Hero layout for 2x1 poetic cards
+
+```
+ca2d64b  feat(widget): add Focused Hero Milestone Widget (1x1 Compact Stamp & 2x1 Poetic Card)
+20cd2677f  fix(widget): make 2x1 wide card the exclusive default and only layout for Hero widget
+```
+
+- **What was tried:** Supporting both 1x1 compact stamp and 2x1 card layouts within the Hero widget provider.
+- **Why it failed:** "make 2x1 wide card the exclusive default and only layout for Hero widget" — 1x1 required title-splitting heuristics and overcrowded reset tap targets.
+- **The rule it produced:** see L8
+
+### Example 3 — R8 enum member obfuscation causing silent deserialization reset
+
+```
+0162fc3  (audit finding P0-2)
+92262bb43  feat: harden security, persist widget bindings, refine edge-to-edge, and optimize R8
+```
+
+- **What changed:** Storing `TimeDisplayMode` and `ZenWidgetDisplayUnit` enum `.name` in SharedPreferences.
+- **What broke:** R8 minification renamed enum fields to single letters, causing `valueOf()` to throw `IllegalArgumentException` and silently default to `DAYS`.
+- **The fix:** Commit `92262bb43` persisted stable serialization codes and updated ProGuard keep definitions.
+- **The rule it produced:** see L4
+
+### Example 4 — Silent partial-decode data loss and backup overwriting
+
+```
+c678dd3fd  fix: harden data recovery, lock store writes, and apply review fixes
+92262bb43  feat: harden security, persist widget bindings, refine edge-to-edge, and optimize R8
+```
+
+- **What repeated:** Malformed JSON elements were skipped during array deserialization, returning truncated lists as valid data.
+- **Why it repeated:** `CountUpStore` lacked validation comparing decoded list length with raw JSON array length, overwriting good backups with partial lists.
+- **The fix:** Commit `92262bb43` implemented corrupted payload quarantine to `items_v1_quarantine` and aborted backup overwrites.
+- **The rule it produced:** see L5
+
+### Example 5 — Transitive WorkManager startup provider crash on release build
+
+```
+227b2f372  feat(widgets): implement Zen & Efficient Widget Suite with reactive updates
+3c8663262  fix(release): resolve startup crash by suppressing unused WorkManagerInitializer
+```
+
+- **What changed:** Introducing widget dependencies transitively brought in AndroidX startup and WorkManager dependencies.
+- **What broke:** App crashed on cold start in release builds attempting to initialize unused background worker infrastructure.
+- **The fix:** Commit `3c8663262` stripped `InitializationProvider` via manifest `tools:node="remove"`.
+- **The rule it produced:** see L3
+
+### Example 6 — Zero-permission speech delegation with package visibility
+
+```
+6d9fe4f  feat(widget): implement Voice Quick Add with zero-permission speech delegation
+966928a  feat(voice): refine voice add aesthetics, match widget icon stroke, prune dead strings
+```
+
+- **What changed:** Implemented speech-to-text quick item entry without adding `android.permission.RECORD_AUDIO`.
+- **What broke:** On Android 11+ (API 30+), external speech intents failed without explicit package visibility declarations.
+- **The fix:** Added `<queries>` declarations for `RecognitionService` and `RECOGNIZE_SPEECH` in `AndroidManifest.xml`.
+- **The rule it produced:** see L10
+
+## Analysis notes
+
+- **Coverage:** 176 commits analyzed across 530 tracked files spanning 2026-08-20 to 2026-09-16.
+- **Not covered:** Excluded build artifacts (`build/`, `.gradle/`), IDE metadata (`.idea/`), and scratch logs (`.scratch/`).
+- **Weak signals:** None. All twelve prescriptive rules are corroborated by commit messages, regression tests, or architecture documentation.
+- **Unknowns:** Production upload key replacement status in Google Play Console requires manual verification outside repository history.\n

@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.unit.dp
 import java.time.LocalDate
 
@@ -140,6 +141,9 @@ private val InkSage: Color get() = if (isDarkLandscapeDraw.get() == true) Color(
 
 /**
  * Renders the chosen abstract Zen/Ink Wash background behind content.
+ * Uses a GPU-backed [androidx.compose.ui.graphics.layer.GraphicsLayer] cached via [drawWithCache]
+ * so vector landscape paths and brushes are recorded once upon layout/theme changes,
+ * executing zero heap allocations during list scroll and animations.
  */
 fun Modifier.drawAbstractBackground(
     theme: BackgroundTheme,
@@ -147,48 +151,53 @@ fun Modifier.drawAbstractBackground(
     isDark: Boolean = false,
 ): Modifier = this.drawWithCache {
     val active = resolveActiveTheme(theme, epochDay)
-    onDrawBehind {
-        isDarkLandscapeDraw.set(isDark)
-        try {
-            if (isDark) {
-                drawNightZenWash()
+    val layer = obtainGraphicsLayer().apply {
+        record {
+            isDarkLandscapeDraw.set(isDark)
+            try {
+                if (isDark) {
+                    drawNightZenWash()
+                }
+                when (active) {
+                    BackgroundTheme.MOUNTAIN -> drawInkMountainTheme()
+                    BackgroundTheme.SAND_DUNES -> drawInkSandDunesTheme()
+                    BackgroundTheme.SEA_HORIZON -> drawInkSeaHorizonTheme()
+                    BackgroundTheme.SOLITARY_ISLE -> drawInkSolitaryIsleTheme()
+                    BackgroundTheme.WILLOW_LEAVES -> drawInkWillowLeavesTheme()
+                    BackgroundTheme.ZEN_BAMBOO -> drawInkZenBambooTheme()
+                    BackgroundTheme.DREAM_BOAT -> drawDreamBoatTheme()
+                    BackgroundTheme.CLEAR_SPRING -> drawClearSpringTheme()
+                    BackgroundTheme.DESERT_SUNSET -> drawDesertSunsetTheme()
+                    BackgroundTheme.EGRETS_ASCENDING -> drawEgretsAscendingTheme()
+                    BackgroundTheme.PLUM_SHADOW -> drawPlumShadowTheme()
+                    BackgroundTheme.ANCIENT_ROAD -> drawAncientRoadTheme()
+                    BackgroundTheme.SPRING_RAIN -> drawSpringRainTheme()
+                    BackgroundTheme.LOTUS_DRAGONFLY -> drawLotusDragonflyTheme()
+                    BackgroundTheme.CRISP_SPRING_RAIN -> drawCrispSpringRainTheme()
+                    BackgroundTheme.SOLITARY_SAIL_RIVER -> drawSolitarySailRiverTheme()
+                    BackgroundTheme.OCEAN_MOON_TIDE -> drawOceanMoonTideTheme()
+                    BackgroundTheme.WILD_SKY_RIVER_MOON -> drawWildSkyRiverMoonTheme()
+                    BackgroundTheme.GREEN_HILLS_SAIL -> drawGreenHillsSailTheme()
+                    BackgroundTheme.STARS_FALL_RIVER_FLOW -> drawStarsFallRiverFlowTheme()
+                    BackgroundTheme.CLOUDS_COTTAGE -> drawCloudsCottageTheme()
+                    BackgroundTheme.WINE_SPRING_MOON -> drawWineSpringMoonTheme()
+                    BackgroundTheme.APRICOT_RAIN -> drawApricotRainTheme()
+                    BackgroundTheme.DEEP_FOREST_DEER -> drawDeepForestDeerTheme()
+                    BackgroundTheme.PEAR_BLOSSOM_WILLOW -> drawPearBlossomWillowTheme()
+                    BackgroundTheme.SPRING_WATER_SLEEP -> drawSpringWaterSleepTheme()
+                    BackgroundTheme.READING_LAMP_MOON -> drawReadingLampMoonTheme()
+                    BackgroundTheme.MOON_IN_HAND_WIND -> drawMoonInHandWindTheme()
+                    BackgroundTheme.MOSS_COURTYARD_PLANTAIN -> drawMossCourtyardPlantainTheme()
+                    BackgroundTheme.FISH_JUMPING_DUCKWEED -> drawFishJumpingDuckweedTheme()
+                    BackgroundTheme.AUTO_DAILY -> drawInkMountainTheme()
+                }
+            } finally {
+                isDarkLandscapeDraw.set(false)
             }
-            when (active) {
-            BackgroundTheme.MOUNTAIN -> drawInkMountainTheme()
-            BackgroundTheme.SAND_DUNES -> drawInkSandDunesTheme()
-            BackgroundTheme.SEA_HORIZON -> drawInkSeaHorizonTheme()
-            BackgroundTheme.SOLITARY_ISLE -> drawInkSolitaryIsleTheme()
-            BackgroundTheme.WILLOW_LEAVES -> drawInkWillowLeavesTheme()
-            BackgroundTheme.ZEN_BAMBOO -> drawInkZenBambooTheme()
-            BackgroundTheme.DREAM_BOAT -> drawDreamBoatTheme()
-            BackgroundTheme.CLEAR_SPRING -> drawClearSpringTheme()
-            BackgroundTheme.DESERT_SUNSET -> drawDesertSunsetTheme()
-            BackgroundTheme.EGRETS_ASCENDING -> drawEgretsAscendingTheme()
-            BackgroundTheme.PLUM_SHADOW -> drawPlumShadowTheme()
-            BackgroundTheme.ANCIENT_ROAD -> drawAncientRoadTheme()
-            BackgroundTheme.SPRING_RAIN -> drawSpringRainTheme()
-            BackgroundTheme.LOTUS_DRAGONFLY -> drawLotusDragonflyTheme()
-            BackgroundTheme.CRISP_SPRING_RAIN -> drawCrispSpringRainTheme()
-            BackgroundTheme.SOLITARY_SAIL_RIVER -> drawSolitarySailRiverTheme()
-            BackgroundTheme.OCEAN_MOON_TIDE -> drawOceanMoonTideTheme()
-            BackgroundTheme.WILD_SKY_RIVER_MOON -> drawWildSkyRiverMoonTheme()
-            BackgroundTheme.GREEN_HILLS_SAIL -> drawGreenHillsSailTheme()
-            BackgroundTheme.STARS_FALL_RIVER_FLOW -> drawStarsFallRiverFlowTheme()
-            BackgroundTheme.CLOUDS_COTTAGE -> drawCloudsCottageTheme()
-            BackgroundTheme.WINE_SPRING_MOON -> drawWineSpringMoonTheme()
-            BackgroundTheme.APRICOT_RAIN -> drawApricotRainTheme()
-            BackgroundTheme.DEEP_FOREST_DEER -> drawDeepForestDeerTheme()
-            BackgroundTheme.PEAR_BLOSSOM_WILLOW -> drawPearBlossomWillowTheme()
-            BackgroundTheme.SPRING_WATER_SLEEP -> drawSpringWaterSleepTheme()
-            BackgroundTheme.READING_LAMP_MOON -> drawReadingLampMoonTheme()
-            BackgroundTheme.MOON_IN_HAND_WIND -> drawMoonInHandWindTheme()
-            BackgroundTheme.MOSS_COURTYARD_PLANTAIN -> drawMossCourtyardPlantainTheme()
-            BackgroundTheme.FISH_JUMPING_DUCKWEED -> drawFishJumpingDuckweedTheme()
-            BackgroundTheme.AUTO_DAILY -> drawInkMountainTheme()
         }
-    } finally {
-        isDarkLandscapeDraw.set(false)
     }
+    onDrawBehind {
+        drawLayer(layer)
     }
 }
 

@@ -1,0 +1,353 @@
+{
+  "schema": "project-lessons/v1",
+  "repository": "CountUp-Android",
+  "scope": "repository",
+  "generated_from": {
+    "head": "966928a035a944120572c8ce82fbfb5dfbaf4f23",
+    "commits_analyzed": 176,
+    "date_range": [
+      "2026-08-20",
+      "2026-09-16"
+    ]
+  },
+  "rules": [
+    {
+      "id": "PL-001",
+      "text": "Never include configuration_optional in android:widgetFeatures for item-tracking widgets; declare reconfigurable only.",
+      "grade": "observed",
+      "evidence": [
+        "1cd6e29d1",
+        "433f1d47b"
+      ],
+      "paths": [
+        "app/src/main/res/xml/zen_pebble_widget_info.xml"
+      ],
+      "phase": "recurrence"
+    },
+    {
+      "id": "PL-002",
+      "text": "Set android:resizeMode=\"none\" on single-cell widget provider XML definitions.",
+      "grade": "observed",
+      "evidence": [
+        "b6b4ce0ba",
+        "471e4cc69"
+      ],
+      "paths": [
+        "app/src/main/res/xml/zen_pebble_widget_info.xml"
+      ],
+      "phase": "recurrence"
+    },
+    {
+      "id": "PL-003",
+      "text": "Strip androidx.startup.InitializationProvider via tools:node=\"remove\" in AndroidManifest.xml.",
+      "grade": "observed",
+      "evidence": [
+        "3c8663262",
+        "625f2c387"
+      ],
+      "paths": [
+        "app/src/main/AndroidManifest.xml"
+      ],
+      "phase": "removals"
+    },
+    {
+      "id": "PL-004",
+      "text": "Store stable serialization codes or specify -keepclassmembers,allowoptimization enum * { <fields>; } in proguard-rules.pro.",
+      "grade": "observed",
+      "evidence": [
+        "0162fc3",
+        "92262bb43"
+      ],
+      "paths": [
+        "app/proguard-rules.pro",
+        "app/src/main/java/com/countup/app/CountUpStore.kt"
+      ],
+      "phase": "conventions"
+    },
+    {
+      "id": "PL-005",
+      "text": "Quarantine corrupted raw payloads to items_v1_quarantine and abort backup overwriting whenever item decoding fails.",
+      "grade": "observed",
+      "evidence": [
+        "c678dd3fd",
+        "92262bb43"
+      ],
+      "paths": [
+        "app/src/main/java/com/countup/app/CountUpItem.kt",
+        "app/src/main/java/com/countup/app/CountUpStore.kt"
+      ],
+      "phase": "recurrence"
+    },
+    {
+      "id": "PL-006",
+      "text": "Wrap all persistence mutations in synchronized(globalStoreLock) and write disk backups via temporary file replacement.",
+      "grade": "observed",
+      "evidence": [
+        "c678dd3fd",
+        "625f2c387"
+      ],
+      "paths": [
+        "app/src/main/java/com/countup/app/CountUpStore.kt"
+      ],
+      "phase": "conventions"
+    },
+    {
+      "id": "PL-007",
+      "text": "Invoke purgeWidgetBindingsForItem(itemId) across all four configurable widget families inside CountUpStore.deleteItem().",
+      "grade": "observed",
+      "evidence": [
+        "92262bb43"
+      ],
+      "paths": [
+        "app/src/main/java/com/countup/app/CountUpStore.kt"
+      ],
+      "phase": "recurrence"
+    },
+    {
+      "id": "PL-008",
+      "text": "Verify that serialized RemoteViews parcels stay strictly under 40KB via WidgetMemoryBudgetGateTest.",
+      "grade": "observed",
+      "evidence": [
+        "227b2f372",
+        "82e9024d7"
+      ],
+      "paths": [
+        "app/src/main/java/com/countup/app/WidgetMemoryBudgetGate.kt"
+      ],
+      "phase": "conventions"
+    },
+    {
+      "id": "PL-009",
+      "text": "Use explicit size(26.dp) or size(30.dp) on action clusters and apply clip() exclusively to outer card containers.",
+      "grade": "observed",
+      "evidence": [
+        "92262bb43"
+      ],
+      "paths": [
+        "app/src/main/java/com/countup/app/CountUpContent.kt"
+      ],
+      "phase": "conventions"
+    },
+    {
+      "id": "PL-010",
+      "text": "Maintain <queries> for RecognitionService and RECOGNIZE_SPEECH and delegate audio capture out-of-process via RecognizerIntent.",
+      "grade": "observed",
+      "evidence": [
+        "6d9fe4f",
+        "966928a"
+      ],
+      "paths": [
+        "app/src/main/AndroidManifest.xml"
+      ],
+      "phase": "removals"
+    },
+    {
+      "id": "PL-011",
+      "text": "Validate appWidgetId != INVALID_APPWIDGET_ID, verify caller identity, and return results containing only EXTRA_APPWIDGET_ID.",
+      "grade": "observed",
+      "evidence": [
+        "92262bb43"
+      ],
+      "paths": [
+        "app/src/main/java/com/countup/app/HeroWidgetConfigureActivity.kt",
+        "app/src/main/java/com/countup/app/ZenPebbleConfigureActivity.kt"
+      ],
+      "phase": "conventions"
+    },
+    {
+      "id": "PL-012",
+      "text": "Invoke MidnightAlarmReceiver.scheduleMidnightAlarm(context) with RTC_WAKEUP inside widget onUpdate() and onEnabled().",
+      "grade": "observed",
+      "evidence": [
+        "625f2c387",
+        "92262bb43"
+      ],
+      "paths": [
+        "app/src/main/java/com/countup/app/MidnightAlarmReceiver.kt"
+      ],
+      "phase": "conventions"
+    }
+  ],
+  "risk_areas": [
+    {
+      "path": "app/build.gradle.kts",
+      "score": 233.0,
+      "why": "Central build and signing configuration; frequent version bumps and multi-tier credential resolution.",
+      "evidence": [
+        "7b1c9c36a",
+        "662675d61",
+        "92262bb43"
+      ]
+    },
+    {
+      "path": "app/src/main/java/com/countup/app/CountUpContent.kt",
+      "score": 223.8,
+      "why": "Primary Compose UI screen containing action clusters, dialog triggers, and responsive layout scaling.",
+      "evidence": [
+        "45dd6e198",
+        "5522dec24",
+        "a2039e72c"
+      ]
+    },
+    {
+      "path": "app/src/main/java/com/countup/app/CountUpStore.kt",
+      "score": 134.2,
+      "why": "Storage engine handling concurrent shared preferences, atomic backup files, and corrupted payload quarantine.",
+      "evidence": [
+        "c678dd3fd",
+        "625f2c387",
+        "92262bb43"
+      ]
+    },
+    {
+      "path": "app/src/main/java/com/countup/app/HeroWidgetReceiver.kt",
+      "score": 131.6,
+      "why": "Primary widget broadcast receiver handling daily midnight rollovers and interactive counter resets.",
+      "evidence": [
+        "58618f707",
+        "20cd2677f",
+        "625f2c387"
+      ]
+    },
+    {
+      "path": "app/src/main/res/xml/zen_pebble_widget_info.xml",
+      "score": 91.0,
+      "why": "1x1 widget XML descriptor subject to OEM slot-0 snapping and configuration_optional suppression traps.",
+      "evidence": [
+        "b6b4ce0ba",
+        "1cd6e29d1",
+        "433f1d47b"
+      ]
+    },
+    {
+      "path": "app/src/main/AndroidManifest.xml",
+      "score": 115.6,
+      "why": "Application manifest enforcing zero permissions via tools:node=\"remove\" and package queries.",
+      "evidence": [
+        "3c8663262",
+        "625f2c387",
+        "6d9fe4f"
+      ]
+    }
+  ],
+  "couplings": [
+    {
+      "pair": [
+        "app/src/main/java/com/countup/app/CountUpContent.kt",
+        "app/src/main/java/com/countup/app/CountUpViewModel.kt"
+      ],
+      "count": 18
+    },
+    {
+      "pair": [
+        "app/src/main/java/com/countup/app/CountUpContent.kt",
+        "app/src/main/java/com/countup/app/CountUpDialogs.kt"
+      ],
+      "count": 17
+    },
+    {
+      "pair": [
+        "app/src/main/java/com/countup/app/CountUpContract.kt",
+        "app/src/main/java/com/countup/app/CountUpViewModel.kt"
+      ],
+      "count": 15
+    },
+    {
+      "pair": [
+        "app/src/main/java/com/countup/app/CountUpContent.kt",
+        "app/src/main/java/com/countup/app/CountUpStore.kt"
+      ],
+      "count": 14
+    },
+    {
+      "pair": [
+        "app/src/main/java/com/countup/app/HeroWidgetReceiver.kt",
+        "app/src/main/java/com/countup/app/ZenHorizonWidgetReceiver.kt"
+      ],
+      "count": 12
+    },
+    {
+      "pair": [
+        "app/src/main/java/com/countup/app/CountUpItem.kt",
+        "app/src/main/java/com/countup/app/CountUpStore.kt"
+      ],
+      "count": 10
+    },
+    {
+      "pair": [
+        "app/src/main/java/com/countup/app/HeroWidgetReceiver.kt",
+        "app/src/main/java/com/countup/app/ZenPebbleWidgetReceiver.kt"
+      ],
+      "count": 10
+    }
+  ],
+  "checklist": [
+    {
+      "id": "PL-C1",
+      "text": "Run ./gradlew testDebugUnitTest to verify all 402 existing unit and contract tests pass.",
+      "evidence": [
+        "92262bb43"
+      ]
+    },
+    {
+      "id": "PL-C2",
+      "text": "Confirm the tree is clean: git status --porcelain.",
+      "evidence": [
+        "32f6f3621"
+      ]
+    },
+    {
+      "id": "PL-C3",
+      "text": "Read docs/RECURRING_ISSUES.md before touching any widget provider or XML layout.",
+      "evidence": [
+        "433f1d47b"
+      ]
+    },
+    {
+      "id": "PL-C4",
+      "text": "Maintain zero runtime permissions; never add RECORD_AUDIO or RECEIVE_BOOT_COMPLETED to AndroidManifest.xml.",
+      "evidence": [
+        "625f2c387",
+        "6d9fe4f"
+      ]
+    },
+    {
+      "id": "PL-C5",
+      "text": "Preserve android:resizeMode=\"none\" and reconfigurable in zen_pebble_widget_info.xml; never add configuration_optional.",
+      "evidence": [
+        "1cd6e29d1",
+        "433f1d47b"
+      ]
+    },
+    {
+      "id": "PL-C6",
+      "text": "Omit Modifier.minimumInteractiveComponentSize() from 26dp subheader and 30dp card action button clusters.",
+      "evidence": [
+        "92262bb43"
+      ]
+    },
+    {
+      "id": "PL-C7",
+      "text": "Wrap all CountUpStore mutations in synchronized(globalStoreLock) and invoke purgeWidgetBindingsForItem(itemId) on deletion.",
+      "evidence": [
+        "625f2c387",
+        "92262bb43"
+      ]
+    },
+    {
+      "id": "PL-C8",
+      "text": "Run ./gradlew assembleRelease to confirm R8 rules preserve all data models, enums, and widget providers.",
+      "evidence": [
+        "3c8663262",
+        "92262bb43"
+      ]
+    },
+    {
+      "id": "PL-C9",
+      "text": "Verify widget RemoteViews payload remains below 40KB via WidgetMemoryBudgetGateTest.",
+      "evidence": [
+        "82e9024d7"
+      ]
+    }
+  ]
+}

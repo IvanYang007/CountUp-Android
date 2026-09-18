@@ -49,8 +49,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.util.Locale
 
@@ -153,16 +156,21 @@ class VoiceAddActivity : ComponentActivity() {
     }
 
     private fun saveAndConfirm(text: String) {
-        val store = CountUpStore.getInstance(applicationContext)
-        val item = store.addItem(
-            name = text,
-            epochDay = anchorEpochDay,
-        )
-        if (item != null) {
-            createdItem = item
-            pushAllWidgetsUpdate(applicationContext)
-        } else {
-            finishSilently()
+        val appContext = applicationContext
+        lifecycleScope.launch(Dispatchers.IO) {
+            val store = CountUpStore.getInstance(appContext)
+            val item = store.addItem(
+                name = text,
+                epochDay = anchorEpochDay,
+            )
+            withContext(Dispatchers.Main) {
+                if (item != null) {
+                    createdItem = item
+                    pushAllWidgetsUpdate(appContext)
+                } else {
+                    finishSilently()
+                }
+            }
         }
     }
 

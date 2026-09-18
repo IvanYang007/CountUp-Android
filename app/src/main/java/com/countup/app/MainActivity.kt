@@ -207,11 +207,6 @@ class MainActivity : ComponentActivity() {
         refreshWidget(immediate = true)
     }
 
-    override fun onPause() {
-        super.onPause()
-        refreshWidget(immediate = true)
-    }
-
     private var refreshWidgetJob: kotlinx.coroutines.Job? = null
 
     private fun refreshWidget(immediate: Boolean = false) {

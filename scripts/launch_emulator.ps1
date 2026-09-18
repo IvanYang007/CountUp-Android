@@ -15,7 +15,8 @@
 param(
     [string]$Avd = "",
     [switch]$Deploy,
-    [switch]$OpenDialog
+    [switch]$OpenDialog,
+    [switch]$Fresh
 )
 
 $ErrorActionPreference = "Continue"
@@ -147,7 +148,7 @@ public class DesktopLauncher {
         Add-Type -TypeDefinition $launcherSource
     }
 
-    $pid = [DesktopLauncher]::StartOnInteractiveDesktop($emulatorExe, "-avd $Avd", $emulatorDir)
+    $pid = [DesktopLauncher]::StartOnInteractiveDesktop($emulatorExe, "-avd $Avd -dns-server 8.8.8.8,1.1.1.1", $emulatorDir)
     Write-Host "Spawned emulator process PID: $pid on WinSta0\Default"
 }
 
@@ -170,6 +171,8 @@ if (-not $bootDone) {
     Write-Warning "Emulator is connected, but boot_completed flag not 1 yet. Continuing..."
 } else {
     Write-Host "Emulator boot completed successfully!"
+    # Ensure DNS and network connectivity in emulator (clear broken private DNS)
+    & $adb shell "settings put global private_dns_mode off" 2>$null
 }
 
 # 5. Build, Install, and Launch if -Deploy requested
@@ -180,6 +183,10 @@ if ($Deploy) {
     
     $apk = "app\build\outputs\apk\debug\app-debug.apk"
     if (Test-Path $apk) {
+        if ($Fresh) {
+            Write-Host "Performing fresh install: uninstalling existing com.countup.app..."
+            & $adb uninstall com.countup.app 2>$null
+        }
         Write-Host "Installing $apk..."
         & $adb install -r $apk
         Write-Host "Launching com.countup.app/.MainActivity..."

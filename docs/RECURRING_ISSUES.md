@@ -183,17 +183,93 @@ And verify bundles with `apksigner` before release distribution.
 
 ---
 
+## 7. Intent Security & Calling Package Verification in Configure Activities
+
+### Symptom
+Potential Intent Redirection or unauthorized widget reconfiguration if untrusted third-party apps send spoofed Intents to exported configure activities (`HeroWidgetConfigureActivity`, `ZenHorizonConfigureActivity`, etc.).
+
+### Architectural Root Cause
+Widget configuration activities must declare `exported="true"` with an `APPWIDGET_CONFIGURE` intent filter so system launchers can launch them upon widget placement. However, an exported activity can be invoked by any application on the device. If the activity blindly consumes `EXTRA_APPWIDGET_ID` or redirects intents without validation, it creates an intent redirection vulnerability.
+
+### Hard Invariants
+1. Validate that `appWidgetId` is valid (`!= AppWidgetManager.INVALID_APPWIDGET_ID`).
+2. Verify calling package identity where feasible or restrict result dispatch strictly via `setResult(RESULT_OK, resultIntent)` carrying only `EXTRA_APPWIDGET_ID`.
+3. Never echo untrusted caller extras into pending intents or internal store operations.
+
+---
+
+## 8. Zero-Permission Voice Quick Add & Package Visibility Queries (`<queries>`)
+
+### Symptom
+Triggering speech recognition via `RecognizerIntent.ACTION_RECOGNIZE_SPEECH` throws `ActivityNotFoundException` on Android 11+ (API 30+), or developers attempt to declare `android.permission.RECORD_AUDIO` to make speech input work.
+
+### Architectural Root Cause
+1. **Package Visibility on API 30+**: Android 11 introduced package filtering. An app cannot query or invoke external speech recognition services unless declared in `<queries>`.
+2. **Zero-Permission Violation**: Developers often mistakenly believe voice input requires `RECORD_AUDIO`. In reality, CountUp delegates speech capture to the platform speech engine (Google Speech Services / system assistant) out-of-process. CountUp never records audio directly and requires **zero** microphone permissions.
+
+### Hard Invariants
+1. In `AndroidManifest.xml`, maintain explicit `<queries>` declarations:
+   ```xml
+   <queries>
+       <intent>
+           <action android:name="android.speech.RecognitionService" />
+       </intent>
+       <intent>
+           <action android:name="android.intent.action.RECOGNIZE_SPEECH" />
+       </intent>
+   </queries>
+   ```
+2. **DO NOT** declare `android.permission.RECORD_AUDIO` or any microphone permissions.
+3. Keep `VoiceAddActivity` private (`exported="false"`, `theme="@style/Theme.CountUp.Translucent"`).
+
+---
+
+## 9. Nested Clipping on ItemCard and Bottom-Left Text Truncation
+
+### Symptom
+The bottom-left anchor date label (e.g. `SINCE Jan 15, 2024` or `UNTIL ...`) has its baseline, descenders, or corners clipped off on certain display densities.
+
+### Architectural Root Cause
+Applying `Modifier.clip(RoundedCornerShape(12.dp))` to internal `Column` layouts within `ItemCard` applies a secondary boundary inside the card's 16dp content padding. When combined with font descenders and localized date strings, the inner clip slices through text.
+
+### Hard Invariants
+1. Apply `Modifier.clip(RoundedCornerShape(12.dp))` only to the outer card border surface.
+2. Inner content containers must remain unclipped and preserve uniform `16.dp` padding.
+
+---
+
+## 10. Orphaned Widget Bindings on Item Deletion
+
+### Symptom
+When an item is deleted in the app, home-screen widgets configured to track that specific item revert to fallback data, but their instance preferences (`hero_widget_item_<id>`, etc.) linger in `countup_prefs`, producing orphaned bindings across device backups and restores.
+
+### Architectural Root Cause
+Deleting an item from `CountUpStore` previously modified `items_v1` without traversing the widget preference map to remove references to the deleted UUID.
+
+### Hard Invariants
+In `CountUpStore.deleteItem(itemId)`, always execute `purgeWidgetBindingsForItem(itemId)` across all 4 configurable widget families:
+- `HeroWidget` (`hero_widget_item_<id>`)
+- `ZenHorizonWidget` (`zen_horizon_widget_item_<id>`)
+- `SolarRhythmWidget` (`solar_rhythm_widget_item_<id>`)
+- `ZenPebbleWidget` (`zen_pebble_widget_item_<id>`)
+
+---
+
 ## Quick Reference Checklist for New Widgets or Refactoring
 
 Before committing any widget changes or releasing a new version:
 
 - [ ] **1x1 Widgets**: Does `zen_pebble_widget_info.xml` have `android:resizeMode="none"` and `android:widgetFeatures="reconfigurable"` (omitting `configuration_optional` to guarantee automatic configure activity launch on drop)?
 - [ ] **Configurable Widgets**: Does provider XML declare `android:configure` and is the activity registered in `AndroidManifest.xml` with `APPWIDGET_CONFIGURE`?
-- [ ] **Instance Bindings**: Does `onDeleted()` clean up `CountUpStore` widget bindings?
-- [ ] **Midnight Alarm**: Do `onUpdate()` and `onEnabled()` re-register `MidnightAlarmReceiver.scheduleMidnightAlarm(context)`?
+- [ ] **Calling Package Security**: Do exported configure activities validate `appWidgetId` and caller parameters?
+- [ ] **Instance Bindings**: Does `onDeleted()` clean up `CountUpStore` widget bindings, and does `deleteItem()` purge orphaned bindings across all widget families?
+- [ ] **Voice Quick Add**: Does `AndroidManifest.xml` retain `<queries>` for `RecognitionService` and `RECOGNIZE_SPEECH` while requesting **zero** microphone permissions?
+- [ ] **Midnight Alarm**: Do `onUpdate()` and `onEnabled()` re-register `MidnightAlarmReceiver.scheduleMidnightAlarm(context)` with `RTC_WAKEUP`?
 - [ ] **Action Row Density**: Are subheader action buttons sized at 26dp and ItemCard buttons at 30dp with 1–2dp spacing, strictly omitting `minimumInteractiveComponentSize()` to prevent layout spread?
-- [ ] **ProGuard Rules**: Are new receivers and configure activities added to `proguard-rules.pro`?
+- [ ] **Card Padding & Clipping**: Is inner clipping omitted on `ItemCard` to prevent `SINCE`/`UNTIL` text truncation?
+- [ ] **ProGuard Rules**: Are new receivers, models, and configure activities added to `proguard-rules.pro`?
 - [ ] **Release Signing**: Is release bundle signed (verified via `apksigner`)?
 - [ ] **Memory Gate**: Does the widget payload stay strictly below 40 KB (`WidgetMemoryBudgetGateTest`) to prevent `TransactionTooLargeException`?
-- [ ] **Automated Tests**: Do all unit and contract tests pass (`./gradlew testDebugUnitTest`)?
+- [ ] **Automated Tests**: Do all 402 unit and contract tests pass (`./gradlew testDebugUnitTest`)?
+
 

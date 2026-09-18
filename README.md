@@ -7,13 +7,15 @@
 An intentionally small, fully offline Android app and home-screen widget suite that tracks
 the **days since a set of anchor dates** (e.g. last haircut, a habit streak, sobriety, an anniversary) or **days until upcoming events**.
 
-- **Calm, Mindful Aesthetic:** Mid-century modern tactile styling with warm paper background, rich card drop shadows, and 30 rotating classical Chinese ink wash landscape themes.
+- **Calm, Mindful Aesthetic & Dark Mode Overhaul:** Mid-century modern tactile styling with warm paper background, rich card drop shadows, calibrated dark mode palettes (Washi, Earth, Sumi) with luminous border brushes, and 30 rotating classical Chinese ink wash landscape themes.
+- **100+ Curated Tactile Icons:** Rich built-in vector icon catalog (Material + Phosphor sets) covering habits, fitness, health, sobriety, finance, milestones, and mindfulness with bilingual TalkBack accessibility descriptions and deterministic keyword auto-styling.
 - **Decoupled Subheader & Bidirectional Sorting:** Instant search, 1-tap bidirectional sorting (tap again to toggle Asc ⇄ Desc by Days, Date, or Name), direct 1-tap Theme Mode cycling (⚡ System / ☀️ Light / 🌙 Dark), and dedicated Settings access.
 - **Dedicated Data & Backup Settings:** Standalone modal dialog (`ic_settings`) for offline SAF JSON export, pre-validation preview, and Merge/Replace restore strategies.
 - **In-Card Undo Whispers:** Unobtrusive in-situ recovery alerts directly on item cards when counters are reset accidentally, replacing disruptive top-screen banners.
 - **Habit Notes & Countdowns:** 2-line custom notes and automatic "UNTIL" sub-labeling for future target dates.
-- **Full Zen Widget Suite (5 Home-Screen Widgets):**
-  - **Count-ups (Multi-Item Grid):** Full-width 3-column / 2-column grid widget displaying active milestones on dynamic ink wash backgrounds with 7-color MCM palettes.
+- **Full Zen Widget Suite (5 Home-Screen Widgets + Voice Quick Add):**
+  - **Count-ups (Multi-Item Grid):** Full-width 3-column / 2-column grid widget displaying active milestones on dynamic ink wash backgrounds with 7-color MCM palettes and widget toolbar.
+  - **Voice Quick Add:** 1-tap microphone button on the widget toolbar triggering zero-permission out-of-process speech delegation (`RecognizerIntent.ACTION_RECOGNIZE_SPEECH`) with transient undo/edit confirmation pill.
   - **Hero Milestone Widget (2x1 Poetic Card):** Dedicated single-milestone widget with counter picker, ambient milestone gold accents, and safe two-tap direct in-place reset.
   - **Zen Horizon Ribbon (4x1 & 2x1):** Minimalist horizon ribbon featuring on-widget unit cycling (days, weeks, months, years) directly on tap.
   - **Solar Rhythm (4x2 & 2x2 Seasonal Canvas):** Harmonious seasonal tracker aligning your milestone with the 24 traditional Chinese Solar Terms (24 节气).
@@ -31,7 +33,7 @@ Versions are pinned in `gradle/libs.versions.toml`.
 
 | Component | Version |
 |---|---|
-| Android Gradle Plugin | `9.3.0` / `9.4.0` (built-in Kotlin) |
+| Android Gradle Plugin | `9.4.0` (built-in Kotlin) |
 | Gradle | `9.7.1` |
 | JDK | `17` |
 | Kotlin | `2.3.21` |
@@ -50,7 +52,7 @@ Prerequisites:
 ./gradlew clean
 ./gradlew assembleDebug             # debug APK
 ./gradlew assembleRelease           # signed release APK & bundle (R8 minified)
-./gradlew test                      # 373 JVM unit tests (100% pass)
+./gradlew test                      # 402 JVM unit tests (100% pass)
 ./gradlew connectedDebugAndroidTest # instrumented tests (emulator/device online)
 ./gradlew lintDebug                 # Android Lint (0 errors)
 ```
@@ -90,7 +92,12 @@ Long-press home screen → **Widgets** → **Solar Rhythm** → drag to a slot.
 Long-press home screen → **Widgets** → **Zen Pebble** → drag to a slot.
 - **Universal OEM Grid Resilience:** Hardened specifically for OEM launchers (Samsung One UI, Xiaomi HyperOS, Vivo OriginOS, OPPO ColorOS) with `resizeMode="none"`, uniform auto-sizing text, and bounded 16dp corners to prevent slot-0 drop snapping.
 
-### 6. Reset Recovery & Accidental Tap Protection
+### 6. Voice Quick Add (1-Tap Widget Microphone)
+- **Zero-Permission Speech Delegation:** Tap the microphone icon button in the widget toolbar to immediately speak a milestone name.
+- **Out-of-Process Speech Recognition:** Speech recognition is delegated out-of-process via Android's native `RecognizerIntent.ACTION_RECOGNIZE_SPEECH` (`RecognitionService`), requiring zero audio permissions in CountUp.
+- **Instant Transient Confirmation:** The spoken text is sanitized, anchored to today, committed idempotently, and displayed in a transient edge-to-edge floating card with instant Undo and Edit affordances while refreshing all widgets in real time.
+
+### 7. Reset Recovery & Accidental Tap Protection
 - **Two-Tap Arming Protection:** Directly on the home screen, tapping a counter numeral displays `"0?"`. A second tap within 1.5 seconds confirms the reset; otherwise it disarms safely.
 - **In-Card Undo Whispers & Recovery:** If an item is reset accidentally (from a widget or inside the app), opening the CountUp app immediately presents an in-situ undo whisper directly on the reset card with a 10-second window to restore your previous anchor date and historical streak metrics with a single tap.
 
@@ -118,19 +125,19 @@ CountUp protects user streaks and history across device upgrades and factory res
 ## 6. Midnight Rollover (Zero-Battery Inexact RTC Alarm)
 
 Widgets automatically advance at midnight without requiring battery-draining background services or `WorkManager`:
-- `MidnightAlarmReceiver` registers a battery-friendly, low-power RTC alarm (`setAndAllowWhileIdle`) targeting `00:00:01` local time.
-- Preserves the zero-permission model by avoiding `SCHEDULE_EXACT_ALARM` or `WAKE_LOCK`. Alarms respect Android Doze mode and advance widget counters during Doze maintenance windows or immediately upon screen wake.
+- `MidnightAlarmReceiver` registers a battery-friendly, low-power RTC alarm (`setAndAllowWhileIdle` with `RTC_WAKEUP`) targeting `00:00:01` local time.
+- Preserves the zero-permission model by avoiding `SCHEDULE_EXACT_ALARM` or `WAKE_LOCK`. Alarms respect Android Doze mode and advance widget counters reliably during Doze maintenance windows or immediately upon screen wake.
 - Automatically re-registers idempotently across device reboots whenever home-screen widgets update or become enabled.
 - Handles time zone changes (`ACTION_TIMEZONE_CHANGED`) and manual clock adjustments (`ACTION_TIME_SET`) to recalculate and refresh immediately.
 
 ## 7. Verification performed
 
-- **393 JVM Unit Tests** (100% passing) across data models, repository fail-safes, MVI ViewModel, JSON salvage parsing, widget reducers, navigation contracts, backup merge/replace strategies, reset whisper lifecycles, and bidirectional sorting.
+- **402 JVM Unit Tests** (100% passing) across data models, repository fail-safes, MVI ViewModel, JSON salvage parsing, widget reducers, navigation contracts, backup merge/replace strategies, reset whisper lifecycles, bidirectional sorting, date picker contracts, widget IPC debouncing, and 100+ icon registry invariants.
 - Clean debug and release builds with R8 minification and resource shrinking enabled (`isMinifyEnabled = true`, `isShrinkResources = true`).
 - Automated release bundle signing with keystore password resolution (`COUNTUP_KEYSTORE_PASS` -> `local.properties`).
 - Android Lint (`lintDebug`): **0 errors**.
 - Automated GitHub Actions CI workflow running test, lint, and assemble on all pull requests.
-- Strict zero-permission architecture: the app requests zero Android permissions across both debug and release builds. The manifest explicitly strips `WAKE_LOCK`, `ACCESS_NETWORK_STATE`, `RECEIVE_BOOT_COMPLETED`, and `FOREGROUND_SERVICE`. Tactile haptic feedback operates via standard system view haptic channels without requiring `android.permission.VIBRATE`.
+- Strict zero-permission architecture: the app requests zero Android permissions across both debug and release builds. The manifest explicitly strips `WAKE_LOCK`, `ACCESS_NETWORK_STATE`, `RECEIVE_BOOT_COMPLETED`, `FOREGROUND_SERVICE`, and `DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`. Voice recognition delegates out-of-process to system speech providers via `<queries>`, requiring zero microphone or audio permissions. Tactile haptic feedback operates via standard system view haptic channels without requiring `android.permission.VIBRATE`.
 - Physical device & emulator verification on Android 8.0 (API 26) through Android 15/16 (API 36/37).
 
 ## 8. Licensing

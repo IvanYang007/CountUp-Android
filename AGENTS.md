@@ -33,3 +33,14 @@ To prevent known regressions when modifying widget providers, configurations, or
    - No `WorkManager` or persistent background services are permitted.
    - Strip `androidx.startup.InitializationProvider` via manifest `tools:node="remove"`.
    - Retain data models and reflection targets in `proguard-rules.pro`.
+4. **Zero-Permission Speech Delegation (Voice Quick Add)**:
+   - NEVER add `android.permission.RECORD_AUDIO` or any microphone permissions. CountUp is strictly zero-permission.
+   - Speech recognition is delegated out-of-process via `RecognizerIntent.ACTION_RECOGNIZE_SPEECH` to the system's speech recognition service.
+   - Maintain `<queries>` declarations in `AndroidManifest.xml` for `android.speech.RecognitionService` and `android.intent.action.RECOGNIZE_SPEECH` to preserve package visibility on Android 11+ (API 30+).
+5. **Intent Security & Calling Package Verification**:
+   - Exported widget configure activities must verify calling package ownership and validate intent extras (`appWidgetId`) before binding items or returning results to prevent Intent Redirection.
+6. **Orphaned Widget Binding Cleanup**:
+   - Deleting an item in `CountUpStore` must call `purgeWidgetBindingsForItem(itemId)` across all widget providers (`hero`, `zen_horizon`, `solar_rhythm`, `zen_pebble`) to prevent stale or orphaned bindings.
+7. **Action Row Density & Card Clipping Guardrails**:
+   - NEVER add `.minimumInteractiveComponentSize()` or `IconButton` defaults to `SubHeaderRow` (26dp) or `ItemCard` (30dp) action clusters — it causes layout spread.
+   - NEVER add nested `clip(RoundedCornerShape)` to inner column content on `ItemCard` — it truncates bottom-left "SINCE" text. Keep clipping on the outer container only.

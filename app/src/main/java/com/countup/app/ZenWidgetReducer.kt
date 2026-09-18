@@ -2,7 +2,6 @@ package com.countup.app
 
 import androidx.compose.runtime.Immutable
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max

@@ -1,0 +1,47 @@
+# Baseline Profile for CountUp
+# Optimizes cold startup and initial render via ahead-of-time ART compilation.
+
+# Application Entry & Lifecycle
+Lcom/countup/app/MainActivity;
+HSPLcom/countup/app/MainActivity;-><init>()V
+HSPLcom/countup/app/MainActivity;->onCreate(Landroid/os/Bundle;)V
+HSPLcom/countup/app/MainActivity;->onStart()V
+HSPLcom/countup/app/MainActivity;->onResume()V
+HSPLcom/countup/app/MainActivity;->handleIntent(Landroid/content/Intent;)V
+
+# Storage & Repository Initialization
+Lcom/countup/app/CountUpStore;
+HSPLcom/countup/app/CountUpStore;-><init>(Landroid/content/Context;)V
+HSPLcom/countup/app/CountUpStore$Companion;->getInstance(Landroid/content/Context;)Lcom/countup/app/CountUpStore;
+HSPLcom/countup/app/CountUpStore;->items()Ljava/util/List;
+HSPLcom/countup/app/CountUpStore;->decodeItems(Ljava/lang/String;)Ljava/util/List;
+Lcom/countup/app/CountUpRepository;
+Lcom/countup/app/DefaultCountUpRepository;
+HSPLcom/countup/app/DefaultCountUpRepository;-><init>(Lcom/countup/app/CountUpStore;)V
+HSPLcom/countup/app/DefaultCountUpRepository;->getItems()Ljava/util/List;
+HSPLcom/countup/app/DefaultCountUpRepository;->getSortOrder()Lcom/countup/app/SortOrder;
+HSPLcom/countup/app/DefaultCountUpRepository;->getBackgroundTheme()Lcom/countup/app/BackgroundTheme;
+HSPLcom/countup/app/DefaultCountUpRepository;->getThemeMode()Lcom/countup/app/ThemeMode;
+
+# ViewModel & MVI State
+Lcom/countup/app/CountUpViewModel;
+HSPLcom/countup/app/CountUpViewModel;-><init>(Lcom/countup/app/CountUpRepository;Lkotlin/jvm/functions/Function0;Lkotlinx/coroutines/CoroutineDispatcher;)V
+HSPLcom/countup/app/CountUpViewModel;->refreshState()V
+HSPLcom/countup/app/CountUpViewModel;->onEvent(Lcom/countup/app/CountUpUiEvent;)V
+Lcom/countup/app/CountUpUiState;
+Lcom/countup/app/CountUpItem;
+HSPLcom/countup/app/CountUpItem;-><init>(Ljava/lang/String;Ljava/lang/String;JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/lang/Long;Z)V
+
+# Compose Theme & Rendering Pipeline
+Lcom/countup/app/ZenThemeKt;
+HSPLcom/countup/app/ZenThemeKt;->ZenTheme(ZZLkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+Lcom/countup/app/AbstractBackgroundsKt;
+HSPLcom/countup/app/AbstractBackgroundsKt;->drawAbstractBackground(Landroidx/compose/ui/Modifier;Lcom/countup/app/BackgroundTheme;JZ)Landroidx/compose/ui/Modifier;
+HSPLcom/countup/app/AbstractBackgroundsKt;->resolveActiveTheme(Lcom/countup/app/BackgroundTheme;J)Lcom/countup/app/BackgroundTheme;
+
+# Compose Main Screen & Habit Card Rendering
+Lcom/countup/app/CountUpContentKt;
+HSPLcom/countup/app/CountUpContentKt;->CountUpContent(Lcom/countup/app/CountUpUiState;Lkotlin/jvm/functions/Function1;Landroidx/compose/ui/Modifier;Ljava/lang/String;Landroidx/compose/material3/SnackbarHostState;Landroidx/compose/runtime/Composer;II)V
+HSPLcom/countup/app/CountUpContentKt;->HeaderRow(Lcom/countup/app/BackgroundTheme;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Ljava/time/LocalDate;Landroidx/compose/runtime/Composer;I)V
+HSPLcom/countup/app/CountUpContentKt;->SubHeaderRow(ILcom/countup/app/SortOrder;Lcom/countup/app/ThemeMode;Ljava/lang/String;ZLkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
+HSPLcom/countup/app/CountUpContentKt;->ItemCard(Lcom/countup/app/CountUpItem;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Landroidx/compose/ui/Modifier;Lcom/countup/app/CardResetWhisper;Lkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function0;Ljava/time/LocalDate;ZLandroidx/compose/runtime/Composer;III)V
