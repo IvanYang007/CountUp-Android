@@ -1,13 +1,13 @@
 # Project Lessons — CountUp-Android
 
-> Derived from git history. Last analyzed commit: `966928a035a944120572c8ce82fbfb5dfbaf4f23` (2026-09-16T07:47:58-04:00).
-> Range: `32f6f36211113906d4bc4f8c03e519b711b198e1` .. `966928a035a944120572c8ce82fbfb5dfbaf4f23` (176 commits, 2026-08-20 .. 2026-09-16).
+> Derived from git history. Last analyzed commit: `6395b8f9bcea324ff160f7826bb9dcdf72f82a6b` (2026-09-18T19:16:27-04:00).
+> Range: `32f6f36211113906d4bc4f8c03e519b711b198e1` .. `6395b8f9bcea324ff160f7826bb9dcdf72f82a6b` (177 commits, 2026-08-20 .. 2026-09-18).
 > Grades: `[observed]` stated in a commit/PR, `[inferred]` deduced from diffs,
 > `[weak]` one data point or ambiguous.
 
 ## Executive summary
 
-CountUp-Android is a zero-permission, offline-first milestone count-up app built with Jetpack Compose Material 3 and six RemoteViews home-screen widget providers. Developed over four weeks across 176 commits, its history is dominated by widget configuration contracts, release minification traps, and data integrity safeguards. The highest-risk module is `app/src/main/res/xml/zen_pebble_widget_info.xml` alongside `app/src/main/java/com/countup/app/CountUpStore.kt`. The project repeatedly struggled with 1x1 widget launcher placement, oscillating between resize modes and configuration flags before locking hard invariants. The single most important constraint is the zero-permission model: no runtime permissions, no WorkManager, and no background services are permitted.
+CountUp-Android is a zero-permission, offline-first milestone count-up app built with Jetpack Compose Material 3 and six RemoteViews home-screen widget providers. Developed over four weeks across 177 commits, its history is dominated by widget configuration contracts, release minification traps, and data integrity safeguards. The highest-risk module is `app/src/main/res/xml/zen_pebble_widget_info.xml` alongside `app/src/main/java/com/countup/app/CountUpStore.kt`. The project repeatedly struggled with 1x1 widget launcher placement, oscillating between resize modes and configuration flags before locking hard invariants. The single most important constraint is the zero-permission model: no runtime permissions, no WorkManager, and no background services are permitted.
 
 **Read this first if you are about to touch:** `app/src/main/res/xml/zen_pebble_widget_info.xml` (see Known risk areas).
 
@@ -283,7 +283,7 @@ c678dd3fd  fix: harden data recovery, lock store writes, and apply review fixes
 
 ## Analysis notes
 
-- **Coverage:** 176 commits analyzed across 530 tracked files spanning 2026-08-20 to 2026-09-16.
+- **Coverage:** 177 commits analyzed across 530 tracked files spanning 2026-08-20 to 2026-09-18.
 - **Not covered:** Excluded build artifacts (`build/`, `.gradle/`), IDE metadata (`.idea/`), and scratch logs (`.scratch/`).
 - **Weak signals:** None. All twelve prescriptive rules are corroborated by commit messages, regression tests, or architecture documentation.
 - **Unknowns:** Production upload key replacement status in Google Play Console requires manual verification outside repository history.\n

@@ -60,8 +60,8 @@ Production Kotlin is organized under `app/src/main/java/com/countup/app/`:
 | `SortOrder.kt` | Bidirectional sort order enum (`SortCriteria` × `SortDirection`: Days, Date, Name; Asc ⇄ Desc) with `toggle()` support |
 | `ZenTheme.kt` | Mid-Century Modern Zen Paper token system via `CompositionLocalProvider(LocalZenColors)`, spring physics `pressScale`, a11y standards |
 | `ItemColors.kt` | MCM color palettes, dark mode luminous border brushes, calibrated contrast ratios, and theme token mappings across Washi, Earth, and Sumi suites |
-| `ItemIcons.kt` | Centralized registry of 100+ tactile vector icons, bilingual TalkBack strings, and deterministic keyword auto-styling rules |
-| `AbstractBackgrounds.kt` | Generative Chinese ink wash landscape rendering for light and dark modes (silver moonlight tones) |
+| `AbstractBackgrounds.kt` | Generative Chinese ink wash landscape rendering for light and dark modes (silver moonlight tones) with `GraphicsLayer` caching for zero-allocation 120Hz scrolling |
+| `baseline-prof.txt` | Ahead-of-time ART Baseline Profile optimizing cold startup, database initialization, and initial render paths |
 | `CountUpRepository.kt` | Clean repository abstraction with `DefaultCountUpRepository` backed by zero-data-loss `CountUpStore` |
 | `BackupRepository.kt` | Storage Access Framework (SAF) JSON backup export and interactive restore pipeline with pre-validation, preview extraction, and UUID-authoritative merge/replace strategies |
 | `CountUpStore.kt` | Zero-data-loss persistence: 5-tier fail-safe hierarchy (Primary Prefs -> JSON Salvage -> Atomic Disk Backup `countup_backup.json` -> Legacy Migration -> Timestamped Quarantine) + widget preference bindings with orphaned ID cleanup |
@@ -120,6 +120,8 @@ One value per item, stored as a JSON array string under key `items_v1` in privat
 - **Voice Quick Add (Microphone Action):** 1-tap microphone icon in the widget toolbar launches dedicated translucent `VoiceAddActivity`. Speech recognition is delegated out-of-process via `RecognizerIntent.ACTION_RECOGNIZE_SPEECH` (`RecognitionService`), requiring zero audio permissions in CountUp. Spoken transcripts are sanitized, anchored to today, stored idempotently in `CountUpStore`, and presented on an edge-to-edge floating Zen confirmation card with Undo and Edit affordances while refreshing all widgets in real time.
 - **In-Situ Reset Whispers:** Counter resets display an in-card recovery whisper (`ResetWhisperTracker`) with a 10-second window and one-tap undo, avoiding intrusive screen-wide banners.
 - **Scale-on-press & Motion:** `0.96` buttons / `0.99` cards via `pressScale()`; list add/remove uses `Modifier.animateItem()`, disabled under system reduce-motion. Mechanical reset button features a subtle tooltip tap-hint.
+- **Responsive Large Screen Constraints & Adaptive Layout:** Centered column constraints (`widthIn(max = 640.dp)`) in `CountUpContent.kt` maintain visual balance and prevent stretched UI on foldables, tablets, and wide window modes.
+- **Zero-Allocation 120Hz Scrolling & ART Pre-compilation:** GPU-backed `GraphicsLayer` caching (`drawWithCache` + `obtainGraphicsLayer()`) isolates static ink wash theme rendering from Compose recomposition, eliminating draw allocations during fast list fling. Cold startup paths are pre-compiled via an ahead-of-time ART Baseline Profile (`baseline-prof.txt`).
 - **Complete Zen Widget Suite:**
   - **Count-ups Multi-Grid:** 3x2 and 2x2 grid with double-tap direct reset and voice quick-add toolbar button.
   - **Hero Milestone (2x1):** Poetic card format with prominent count, icon badge, milestone gold dot, anchor date, and two-tap direct reset.

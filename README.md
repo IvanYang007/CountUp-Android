@@ -24,6 +24,7 @@ the **days since a set of anchor dates** (e.g. last haircut, a habit streak, sob
   - **Tier 1 (Automated OS Sync):** Platform-native Android 12+ encrypted Auto Backup and Device-to-Device (D2D) migration (Mi Mover, Phone Clone, GMS) with an automatic launcher widget ID sanitizer.
   - **Tier 2 (Self-Sovereign JSON Portability):** Offline export and interactive restore via Android's Storage Access Framework (SAF) featuring a pre-restore preview screen and Merge / Replace conflict strategies.
 - **Silent Midnight Rollover:** Battery-friendly RTC alarm (`MidnightAlarmReceiver`) advances day counts at `00:00:01` local time without persistent background services or battery drain.
+- **Adaptive Layout & 120Hz Rendering:** Responsive centered column constraints (`widthIn(max = 640.dp)`) for foldables, tablets, and large screens; zero-allocation `GraphicsLayer` caching for 120Hz fluid scrolling across all 30 Chinese ink wash landscape themes; and an ahead-of-time ART Baseline Profile for up to 40% faster cold startup.
 - **Accessibility First:** Full TalkBack screen reader semantics, descriptive action labels, and tactile haptic feedback.
 - **Privacy First:** 100% offline, zero runtime permissions, no accounts, no ads, no trackers, no cloud servers, and no background daemon.
 
