@@ -34,7 +34,7 @@ class CountUpViewModelTest {
             initialTheme = BackgroundTheme.DREAM_BOAT,
             initialSortOrder = SortOrder.DAYS_DESC,
         )
-        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday })
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
 
         viewModel.state.test {
             val state = awaitItem()
@@ -48,7 +48,7 @@ class CountUpViewModelTest {
     @Test
     fun `search query filters displayItems in real time`() = runTest {
         val repo = FakeCountUpRepository(initialItems = sampleItems)
-        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday })
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
 
         viewModel.state.test {
             val initial = awaitItem()
@@ -70,7 +70,7 @@ class CountUpViewModelTest {
     @Test
     fun `sort order selection updates state and emits RefreshWidget effect`() = runTest {
         val repo = FakeCountUpRepository(initialItems = sampleItems, initialSortOrder = SortOrder.DAYS_DESC)
-        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday })
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
 
         viewModel.effects.test {
             viewModel.onEvent(CountUpUiEvent.SortOrderSelected(SortOrder.NAME_ASC))
@@ -90,7 +90,7 @@ class CountUpViewModelTest {
     @Test
     fun `cycle background switches theme, updates repo and emits effects`() = runTest {
         val repo = FakeCountUpRepository(initialTheme = BackgroundTheme.DREAM_BOAT)
-        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday })
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
 
         viewModel.effects.test {
             viewModel.onEvent(CountUpUiEvent.CycleBackground)
@@ -114,7 +114,7 @@ class CountUpViewModelTest {
     @Test
     fun `theme mode selection updates state, repository and emits snackbar and refresh widget effects`() = runTest {
         val repo = FakeCountUpRepository(initialThemeMode = ThemeMode.SYSTEM)
-        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday })
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
 
         viewModel.effects.test {
             viewModel.onEvent(CountUpUiEvent.ThemeModeSelected(ThemeMode.DARK))
@@ -138,7 +138,7 @@ class CountUpViewModelTest {
     @Test
     fun `cycle theme mode cycles through SYSTEM, LIGHT, and DARK sequentially`() = runTest {
         val repo = FakeCountUpRepository(initialThemeMode = ThemeMode.SYSTEM)
-        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday })
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
 
         assertEquals(ThemeMode.LIGHT, ThemeMode.SYSTEM.next())
         assertEquals(ThemeMode.DARK, ThemeMode.LIGHT.next())
@@ -171,7 +171,7 @@ class CountUpViewModelTest {
     @Test
     fun `set settings dialog visibility updates state correctly`() = runTest {
         val repo = FakeCountUpRepository()
-        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday })
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
 
         assertFalse(viewModel.state.value.isSettingsDialogOpen)
 
@@ -185,7 +185,7 @@ class CountUpViewModelTest {
     @Test
     fun `save new item adds item and closes editor`() = runTest {
         val repo = FakeCountUpRepository(initialItems = emptyList())
-        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday })
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
 
         viewModel.onEvent(CountUpUiEvent.OpenEditor(null))
         assertTrue(viewModel.state.value.isEditorOpen)
@@ -220,7 +220,7 @@ class CountUpViewModelTest {
     @Test
     fun `save existing item updates target and closes editor`() = runTest {
         val repo = FakeCountUpRepository(initialItems = sampleItems)
-        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday })
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
         val target = sampleItems.first()
 
         viewModel.onEvent(CountUpUiEvent.OpenEditor(target))
@@ -254,7 +254,7 @@ class CountUpViewModelTest {
     @Test
     fun `delete item workflow removes item and emits effect`() = runTest {
         val repo = FakeCountUpRepository(initialItems = sampleItems)
-        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday })
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
         val target = sampleItems.first()
 
         viewModel.onEvent(CountUpUiEvent.RequestDelete(target))
@@ -666,7 +666,7 @@ class CountUpViewModelTest {
     @Test
     fun `toggle widget visibility updates item and emits toast effect`() = runTest {
         val repo = FakeCountUpRepository(initialItems = sampleItems)
-        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday })
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
         val target = sampleItems.first()
 
         viewModel.effects.test {
