@@ -199,10 +199,13 @@ internal fun decodeItems(raw: String?): List<CountUpItem>? {
         val arr = JSONArray(raw)
         if (arr.length() == 0) return emptyList()
         val out = ArrayList<CountUpItem>(arr.length())
+        val seenIds = HashSet<String>(arr.length())
         for (i in 0 until arr.length()) {
-            decodeElement(arr.optJSONObject(i))?.let { out.add(it) }
+            val item = decodeElement(arr.optJSONObject(i)) ?: return null
+            if (!seenIds.add(item.id)) return null
+            out.add(item)
         }
-        if (out.size < arr.length()) null else out
+        out
     } catch (_: Exception) {
         null
     }

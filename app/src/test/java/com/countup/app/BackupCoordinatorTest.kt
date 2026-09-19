@@ -151,4 +151,18 @@ class BackupCoordinatorTest {
             BackupCoordinator.resolveRestoreStrategy(RestoreStrategy.MERGE_KEEP_EXISTING, isDamaged = false)
         )
     }
+
+    @Test
+    fun exportToStream_returnsFalseWhenPayloadExceedsMaxBytes() {
+        val hugeComment = "x".repeat(BackupCoordinator.MAX_BACKUP_BYTES + 100)
+        val repo = FakeCountUpRepository(
+            initialItems = listOf(
+                CountUpItem(id = "item-huge", name = "Big Item", epochDay = 20000L, comment = hugeComment)
+            )
+        )
+        val outputStream = ByteArrayOutputStream()
+        val success = BackupCoordinator.exportToStream(outputStream, repo)
+        assertFalse(success)
+        assertEquals(0, outputStream.size())
+    }
 }

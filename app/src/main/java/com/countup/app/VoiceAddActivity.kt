@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.speech.RecognizerIntent
+import android.view.accessibility.AccessibilityManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -45,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -89,11 +91,16 @@ class VoiceAddActivity : ComponentActivity() {
         // Lock anchor date at session launch time to avoid midnight clock jitter
         anchorEpochDay = savedInstanceState?.getLong(KEY_ANCHOR_DATE) ?: LocalDate.now().toEpochDay()
 
+        val store = CountUpStore.getInstance(applicationContext)
+        val savedItemId = savedInstanceState?.getString(KEY_CREATED_ITEM_ID)
+        if (savedItemId != null) {
+            createdItem = store.items().find { it.id == savedItemId }
+        }
+
         if (savedInstanceState == null) {
             launchSpeechRecognition()
         }
 
-        val store = CountUpStore.getInstance(applicationContext)
         val themeMode = store.getThemeMode()
 
         setContent {
@@ -130,6 +137,7 @@ class VoiceAddActivity : ComponentActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         outState.putLong(KEY_ANCHOR_DATE, anchorEpochDay)
+        createdItem?.let { outState.putString(KEY_CREATED_ITEM_ID, it.id) }
     }
 
     private fun fallbackToManualAdd() {
@@ -208,6 +216,7 @@ class VoiceAddActivity : ComponentActivity() {
 
     companion object {
         private const val KEY_ANCHOR_DATE = "KEY_ANCHOR_DATE"
+        private const val KEY_CREATED_ITEM_ID = "KEY_CREATED_ITEM_ID"
     }
 }
 
@@ -220,9 +229,22 @@ private fun VoiceConfirmationPill(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // 3.5s auto-dismiss
-    LaunchedEffect(item.id) {
-        delay(3500L)
+    val context = LocalContext.current
+    val dismissTimeoutMs = remember(item.id) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val am = context.getSystemService(AccessibilityManager::class.java)
+            am?.getRecommendedTimeoutMillis(
+                3500,
+                AccessibilityManager.FLAG_CONTENT_CONTROLS or AccessibilityManager.FLAG_CONTENT_ICONS
+            )?.toLong() ?: 3500L
+        } else {
+            3500L
+        }
+    }
+
+    // Auto-dismiss with accessibility considerations
+    LaunchedEffect(item.id, dismissTimeoutMs) {
+        delay(dismissTimeoutMs)
         onDismiss()
     }
 

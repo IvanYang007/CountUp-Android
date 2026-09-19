@@ -14,7 +14,8 @@ Lcom/countup/app/CountUpStore;
 HSPLcom/countup/app/CountUpStore;-><init>(Landroid/content/Context;)V
 HSPLcom/countup/app/CountUpStore$Companion;->getInstance(Landroid/content/Context;)Lcom/countup/app/CountUpStore;
 HSPLcom/countup/app/CountUpStore;->items()Ljava/util/List;
-HSPLcom/countup/app/CountUpStore;->decodeItems(Ljava/lang/String;)Ljava/util/List;
+Lcom/countup/app/CountUpItemKt;
+HSPLcom/countup/app/CountUpItemKt;->decodeItems(Ljava/lang/String;)Ljava/util/List;
 Lcom/countup/app/CountUpRepository;
 Lcom/countup/app/DefaultCountUpRepository;
 HSPLcom/countup/app/DefaultCountUpRepository;-><init>(Lcom/countup/app/CountUpStore;)V

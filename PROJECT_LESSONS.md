@@ -1,7 +1,7 @@
 # Project Lessons — CountUp-Android
 
-> Derived from git history. Last analyzed commit: `f21a203c94c43107611bfd8fd9f4ad1e53c8c060` (2026-09-19T09:49:56-04:00).
-> Range: `32f6f36211113906d4bc4f8c03e519b711b198e1` .. `f21a203c94c43107611bfd8fd9f4ad1e53c8c060` (183 commits, 2026-08-20 .. 2026-09-19).
+> Derived from git history. Last analyzed commit: `864d70dfcd3d9028c45b0df2c3cae23530cd7b59` (2026-09-19T12:17:50-04:00).
+> Range: `32f6f36211113906d4bc4f8c03e519b711b198e1` .. `864d70dfcd3d9028c45b0df2c3cae23530cd7b59` (185 commits, 2026-08-20 .. 2026-09-19).
 > Grades: `[observed]` stated in a commit/PR, `[inferred]` deduced from diffs,
 > `[weak]` one data point or ambiguous.
 
@@ -232,7 +232,7 @@ CountUp-Android is a zero-permission, offline-first milestone count-up app built
 
 Before you change anything:
 
-- [ ] Run `./gradlew testDebugUnitTest` to verify all 408 existing unit and contract tests pass.
+- [ ] Run `./gradlew testDebugUnitTest` to verify all 430 existing unit and contract tests pass.
 - [ ] Confirm the tree is clean: `git status --porcelain`.
 - [ ] Read `docs/RECURRING_ISSUES.md` before touching any widget provider or XML layout.
 
@@ -246,7 +246,7 @@ While you change:
 
 Before you call it done:
 
-- [ ] Run `./gradlew testDebugUnitTest` and confirm 100% green test execution (408 tests).
+- [ ] Run `./gradlew testDebugUnitTest` and confirm 100% green test execution (430 tests).
 - [ ] Run `./gradlew assembleRelease` to confirm R8 rules preserve all data models, enums, and widget providers.
 - [ ] Verify widget RemoteViews payload remains below 40KB via `WidgetMemoryBudgetGateTest`.
 
@@ -326,7 +326,7 @@ c678dd3fd  fix: harden data recovery, lock store writes, and apply review fixes
 
 ## Analysis notes
 
-- **Coverage:** 177 commits analyzed across 530 tracked files spanning 2026-08-20 to 2026-09-18.
+- **Coverage:** 185 commits analyzed across 530 tracked files spanning 2026-08-20 to 2026-09-19.
 - **Not covered:** Excluded build artifacts (`build/`, `.gradle/`), IDE metadata (`.idea/`), and scratch logs (`.scratch/`).
 - **Weak signals:** None. All twelve prescriptive rules are corroborated by commit messages, regression tests, or architecture documentation.
-- **Unknowns:** Production upload key replacement status in Google Play Console requires manual verification outside repository history.\n
+- **Unknowns:** Production upload key replacement status in Google Play Console requires manual verification outside repository history.

@@ -43,6 +43,12 @@ class CountUpItemTest {
     }
 
     @Test
+    fun decodeItemsWithDuplicateIdsReturnsNull() {
+        val raw = "[{\"id\":\"same-id\",\"name\":\"A\",\"epochDay\":100},{\"id\":\"same-id\",\"name\":\"B\",\"epochDay\":200}]"
+        assertNull(decodeItems(raw))
+    }
+
+    @Test
     fun namesWithQuotesAndUnicodeSurviveJsonEscaping() {
         val tricky = CountUpItem(id = "z", name = "Say \"hi\"\u2024 \u00e9\u00e8", epochDay = 1)
         val decoded = decodeItems(encodeItems(listOf(tricky)))

@@ -32,7 +32,12 @@ object BackupCoordinator {
         return try {
             val payload = repository.exportBackupPayload()
             val json = CountUpBackupPayload.encode(payload)
-            outputStream.bufferedWriter(Charsets.UTF_8).use { it.write(json) }
+            val bytes = json.toByteArray(Charsets.UTF_8)
+            if (bytes.size > MAX_BACKUP_BYTES) return false
+            outputStream.use { stream ->
+                stream.write(bytes)
+                stream.flush()
+            }
             true
         } catch (_: Exception) {
             false

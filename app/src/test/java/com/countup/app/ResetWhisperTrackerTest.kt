@@ -121,6 +121,33 @@ class ResetWhisperTrackerTest {
     }
 
     @Test
+    fun restoreReset_returnsAlreadyRestoredOrStale_whenWidgetResetItemResetCountMismatches() = runTest {
+        val item = CountUpItem(
+            id = "item-1",
+            name = "Piano",
+            epochDay = fixedToday.toEpochDay(),
+            resetCount = 3, // Current resetCount is 3
+        )
+        val repo = FakeCountUpRepository(initialItems = listOf(item))
+        // Widget snapshot with previousResetCount = 0 (expects current resetCount to be 1)
+        val snapshot = ResetSnapshot(
+            epochDay = fixedToday.minusDays(30).toEpochDay(),
+            resetCount = 0,
+            totalResetDays = 0L,
+        )
+
+        val result = ResetWhisperTracker.restoreReset(
+            itemId = "item-1",
+            snapshot = snapshot,
+            recordId = "widget-record-1",
+            repository = repo,
+            today = fixedToday,
+        )
+
+        assertEquals(ResetRestoreResult.AlreadyRestoredOrStale, result)
+    }
+
+    @Test
     fun restoreReset_returnsFailedWithMissingTrue_whenItemNotFound() = runTest {
         val repo = FakeCountUpRepository(initialItems = emptyList())
         val snapshot = ResetSnapshot(epochDay = fixedToday.toEpochDay(), resetCount = 0, totalResetDays = 0)

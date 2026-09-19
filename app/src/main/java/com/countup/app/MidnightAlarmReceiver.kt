@@ -95,15 +95,20 @@ class MidnightAlarmReceiver : BroadcastReceiver() {
                 true
             }
         }
+
+        /**
+         * Checks whether the given intent action triggers a widget rollover update.
+         */
+        fun isSupportedAction(action: String?): Boolean =
+            action == ACTION_MIDNIGHT_ROLLOVER ||
+                action == Intent.ACTION_TIME_CHANGED ||
+                action == Intent.ACTION_TIMEZONE_CHANGED ||
+                action == Intent.ACTION_MY_PACKAGE_REPLACED
     }
 
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action ?: return
-        if (action != ACTION_MIDNIGHT_ROLLOVER &&
-            action != Intent.ACTION_TIME_CHANGED &&
-            action != Intent.ACTION_TIMEZONE_CHANGED &&
-            action != Intent.ACTION_MY_PACKAGE_REPLACED
-        ) {
+        if (!isSupportedAction(action)) {
             return
         }
 

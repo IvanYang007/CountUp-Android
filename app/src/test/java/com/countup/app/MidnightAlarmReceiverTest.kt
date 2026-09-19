@@ -117,4 +117,19 @@ class MidnightAlarmReceiverTest {
         assertEquals(0, fallZoned.minute)
         assertEquals(1, fallZoned.second)
     }
+
+    @Test
+    fun isSupportedActionIdentifiesRolloverTriggersAndRejectsUnsupported() {
+        // Supported actions must evaluate to true
+        assertTrue(MidnightAlarmReceiver.isSupportedAction(MidnightAlarmReceiver.ACTION_MIDNIGHT_ROLLOVER))
+        assertTrue(MidnightAlarmReceiver.isSupportedAction(android.content.Intent.ACTION_TIME_CHANGED))
+        assertTrue(MidnightAlarmReceiver.isSupportedAction(android.content.Intent.ACTION_TIMEZONE_CHANGED))
+        assertTrue(MidnightAlarmReceiver.isSupportedAction(android.content.Intent.ACTION_MY_PACKAGE_REPLACED))
+
+        // Unsupported actions and null action must evaluate to false
+        org.junit.Assert.assertFalse(MidnightAlarmReceiver.isSupportedAction("android.intent.action.BOOT_COMPLETED"))
+        org.junit.Assert.assertFalse(MidnightAlarmReceiver.isSupportedAction("android.intent.action.BATTERY_LOW"))
+        org.junit.Assert.assertFalse(MidnightAlarmReceiver.isSupportedAction(null))
+        org.junit.Assert.assertFalse(MidnightAlarmReceiver.isSupportedAction(""))
+    }
 }

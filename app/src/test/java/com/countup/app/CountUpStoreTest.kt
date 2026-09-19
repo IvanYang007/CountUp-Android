@@ -381,6 +381,23 @@ class CountUpStoreTest {
     }
 
     @Test
+    fun restoreResetRejectsWhenResetCountDoesNotMatch() {
+        val store = CountUpStore(testContext)
+        val item = store.addItem("Workout", 20000L)!!
+        assertTrue(store.resetTo(item.id, 20050L))
+
+        // Snapshot expects resetCount 0, so item's resetCount must be 1 (0 + 1).
+        // If snapshot claims previous resetCount was 2, restoreReset must reject.
+        val staleSnapshot = ResetSnapshot(
+            epochDay = 20000L,
+            resetCount = 2,
+            totalResetDays = 0L,
+            futureFlag = false,
+        )
+        assertFalse(store.restoreReset(item.id, staleSnapshot))
+    }
+
+    @Test
     fun widgetResetQueueCapsAtThreeNewestAndDismissesCorrectly() {
         val store = CountUpStore(testContext)
         assertTrue(store.getPendingWidgetResets().isEmpty())
@@ -624,6 +641,40 @@ class CountUpStoreTest {
         assertEquals(SortOrder.DAYS_DESC, store2.getSortOrder())
         assertEquals(ThemeMode.SYSTEM, store2.getThemeMode())
         assertEquals(BackgroundTheme.AUTO_DAILY, store2.getBackgroundTheme())
+    }
+
+    @Test
+    fun restoreBackupPayloadRejectsPayloadWithDuplicateIds() {
+        val store = CountUpStore(testContext)
+        val duplicateItems = listOf(
+            CountUpItem(id = "same-id", name = "First", epochDay = 20000L),
+            CountUpItem(id = "same-id", name = "Second", epochDay = 20050L),
+        )
+        val payload = CountUpBackupPayload(items = duplicateItems)
+        assertFalse(store.restoreBackupPayload(payload, RestoreStrategy.REPLACE_ALL))
+        assertFalse(store.restoreBackupPayload(payload, RestoreStrategy.MERGE_KEEP_EXISTING))
+    }
+
+    @Test
+    fun ensureBackupInSyncRepairsStaleBackup() {
+        val store = CountUpStore(testContext)
+        val item = store.addItem("Item 1", 20000L)!!
+        val filesDir = testContext.filesDir
+        val backupFile = java.io.File(filesDir, "countup_backup.json")
+        val backupRevFile = java.io.File(filesDir, "countup_backup.rev")
+
+        // Intentionally make backup rev stale
+        backupRevFile.writeText("1", Charsets.UTF_8)
+        backupFile.writeText("[]", Charsets.UTF_8)
+
+        // Calling items() triggers ensureBackupInSync()
+        val loaded = store.items()
+        assertEquals(1, loaded.size)
+
+        // Verify backup was updated to current store revision
+        val updatedRev = backupRevFile.readText(Charsets.UTF_8).toLong()
+        assertEquals(store.getRevision(), updatedRev)
+        assertTrue(backupFile.readText(Charsets.UTF_8).contains(item.id))
     }
 
     @Test
@@ -930,5 +981,29 @@ class CountUpStoreTest {
         assertEquals(0, store.remapWidgetBindings(intArrayOf(1), intArrayOf(1, 2)))
         // Identical IDs
         assertEquals(0, store.remapWidgetBindings(intArrayOf(10), intArrayOf(10)))
+    }
+
+    @Test
+    fun backupPersistenceUsesNioAtomicMoveOverExistingFilesWithoutOrphaningTempFiles() {
+        val store = CountUpStore(testContext)
+        val backupFile = File(tempDir, "countup_backup.json")
+        val tempBackupFile = File(tempDir, "countup_backup.json.tmp")
+
+        // Initial items() call triggers ensureBackupInSync
+        val initialItems = store.items()
+        assertTrue(initialItems.isEmpty())
+        assertTrue(backupFile.exists())
+        assertFalse(tempBackupFile.exists())
+
+        // Multiple rapid sequential writes to exercise atomic replace
+        for (i in 1..10) {
+            val item = store.addItem("Item $i", 20000L + i)
+            assertNotNull(item)
+            assertTrue(backupFile.exists())
+            assertFalse("Temp backup file must not be orphaned after atomic move", tempBackupFile.exists())
+        }
+
+        val content = backupFile.readText(Charsets.UTF_8)
+        assertTrue(content.contains("Item 10"))
     }
 }

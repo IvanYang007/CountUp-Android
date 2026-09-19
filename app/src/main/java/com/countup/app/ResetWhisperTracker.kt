@@ -63,7 +63,7 @@ object ResetWhisperTracker {
         }
 
         val todayEpochDay = today.toEpochDay()
-        if (recordId == null && currentItem.epochDay != todayEpochDay) {
+        if (currentItem.resetCount != snapshot.resetCount + 1 || (recordId == null && currentItem.epochDay != todayEpochDay)) {
             return ResetRestoreResult.AlreadyRestoredOrStale
         }
 

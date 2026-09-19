@@ -63,7 +63,6 @@
             android:theme="@style/Theme.CountUp.Translucent"
             android:launchMode="singleTop"
             android:excludeFromRecents="true"
-            android:noHistory="true"
             android:windowSoftInputMode="adjustResize" />
 
         <receiver

@@ -143,12 +143,20 @@ class CountUpViewModel(
                         }
                         if (success) {
                             val updatedItems = repository.getItems()
+                            if (target != null) {
+                                repository.getPendingWidgetResets().filter { it.itemId == target.id }.forEach {
+                                    repository.dismissWidgetReset(it.id)
+                                }
+                            }
+                            val remainingResets = repository.getPendingWidgetResets()
                             _state.update {
                                 it.copy(
                                     items = updatedItems,
                                     isEditorOpen = false,
                                     editorTarget = null,
                                     isSaving = false,
+                                    cardWhispers = if (target != null) it.cardWhispers - target.id else it.cardWhispers,
+                                    pendingWidgetResets = remainingResets,
                                 )
                             }
                             emitEffect(CountUpUiEffect.RefreshWidget)

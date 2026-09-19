@@ -171,5 +171,18 @@ class ZenWidgetReducerTest {
         val expectedDarkStyle = resolveCardStyle("celadon_bamboo", isDark = true)
         assertEquals(expectedDarkStyle.cardBg.toArgb(), darkCeladonState.palette.canvasBg)
     }
+
+    @Test
+    fun `ZenWidgetDisplayUnit fromCode safely restores exact entries and defaults to DAYS`() {
+        assertEquals(ZenWidgetDisplayUnit.DAYS, ZenWidgetDisplayUnit.fromCode("DAYS"))
+        assertEquals(ZenWidgetDisplayUnit.MONTHS, ZenWidgetDisplayUnit.fromCode("MONTHS"))
+        assertEquals(ZenWidgetDisplayUnit.WEEKS, ZenWidgetDisplayUnit.fromCode("WEEKS"))
+        assertEquals(ZenWidgetDisplayUnit.HOURS, ZenWidgetDisplayUnit.fromCode("HOURS"))
+        assertEquals(ZenWidgetDisplayUnit.YEARS, ZenWidgetDisplayUnit.fromCode("YEARS"))
+        assertEquals(ZenWidgetDisplayUnit.DAYS, ZenWidgetDisplayUnit.fromCode(null))
+        assertEquals(ZenWidgetDisplayUnit.DAYS, ZenWidgetDisplayUnit.fromCode(""))
+        assertEquals(ZenWidgetDisplayUnit.DAYS, ZenWidgetDisplayUnit.fromCode("a")) // obfuscated R8 fallback
+        assertEquals(ZenWidgetDisplayUnit.DAYS, ZenWidgetDisplayUnit.fromCode("UNKNOWN_UNIT"))
+    }
 }
 

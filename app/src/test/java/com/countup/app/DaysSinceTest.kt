@@ -220,5 +220,16 @@ class DaysSinceTest {
         val zero = decomposeTime(today, today, TimeDisplayMode.ELAPSED_BREAKDOWN, localeTw)
         assertEquals("0 天", zero.valueText)
     }
+
+    @Test
+    fun `TimeDisplayMode fromCode safely restores exact entries and defaults to DAYS`() {
+        assertEquals(TimeDisplayMode.DAYS, TimeDisplayMode.fromCode("DAYS"))
+        assertEquals(TimeDisplayMode.ELAPSED_BREAKDOWN, TimeDisplayMode.fromCode("ELAPSED_BREAKDOWN"))
+        assertEquals(TimeDisplayMode.TOTAL_WEEKS, TimeDisplayMode.fromCode("TOTAL_WEEKS"))
+        assertEquals(TimeDisplayMode.DAYS, TimeDisplayMode.fromCode(null))
+        assertEquals(TimeDisplayMode.DAYS, TimeDisplayMode.fromCode(""))
+        assertEquals(TimeDisplayMode.DAYS, TimeDisplayMode.fromCode("f")) // obfuscated R8 fallback
+        assertEquals(TimeDisplayMode.DAYS, TimeDisplayMode.fromCode("UNKNOWN_MODE"))
+    }
 }
 

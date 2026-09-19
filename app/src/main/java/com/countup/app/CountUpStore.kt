@@ -340,6 +340,7 @@ class CountUpStore(context: Context) {
             val index = list.indexOfFirst { it.id == id }
             if (index < 0) return false
             val current = list[index]
+            if (current.resetCount != snapshot.resetCount + 1) return false
             list[index] = current.restoreFrom(snapshot)
             persist(list)
         }
@@ -662,9 +663,14 @@ class CountUpStore(context: Context) {
 
     fun restoreBackupPayload(payload: CountUpBackupPayload, strategy: RestoreStrategy): Boolean {
         return synchronized(globalStoreLock) {
+            val seenIds = HashSet<String>(payload.items.size)
+            for (item in payload.items) {
+                if (!seenIds.add(item.id)) return false
+            }
+
             when (strategy) {
                 RestoreStrategy.REPLACE_ALL -> {
-                    writePreRestoreSafetySnapshot()
+                    if (!writePreRestoreSafetySnapshot()) return false
                     try {
                         val revision = nextRevision()
                         val encodedItems = encodeItems(payload.items)
@@ -969,8 +975,9 @@ class CountUpStore(context: Context) {
 
     private fun ensureBackupInSync(encodedJson: String) {
         try {
-            if (!backupFile.exists() || backupFile.length() == 0L) {
-                writeBackup(encodedJson, prefs.getLong(KEY_REVISION, 0L))
+            val storeRevision = prefs.getLong(KEY_REVISION, 0L)
+            if (!backupFile.exists() || backupFile.length() == 0L || readBackupRevision() < storeRevision) {
+                writeBackup(encodedJson, storeRevision)
             }
         } catch (_: Exception) {
             // Best effort sync
