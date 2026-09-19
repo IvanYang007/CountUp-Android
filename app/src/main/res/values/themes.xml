@@ -1,9 +1,14 @@
 <resources>
     <!-- Compose renders its own colors (light/dark via MaterialTheme); the activity theme only needs NoActionBar. -->
-    <style name="Theme.CountUp" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.CountUp" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
 
     <!-- Translucent floating activity theme for zero-flicker dialog overlays -->
     <style name="Theme.CountUp.Translucent" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowAnimationStyle">@android:style/Animation.Translucent</item>
