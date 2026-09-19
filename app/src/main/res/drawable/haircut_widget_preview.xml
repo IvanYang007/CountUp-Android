@@ -1,17 +1,158 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Static widget picker preview (older launchers / pre-generation fallback). -->
+<!-- Preview asset for the 4x2 Overview Grid widget in the launcher widget picker.
+     Harmonious 6-habit Zen canvas with authentic Chinese ink wash palette. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="180dp"
-    android:height="60dp"
-    android:viewportWidth="240"
-    android:viewportHeight="80">
+    android:width="280dp"
+    android:height="140dp"
+    android:viewportWidth="280"
+    android:viewportHeight="140">
+
+    <!-- Card Background (16dp rounded corner) -->
     <path
-        android:fillColor="#F5E6D3"
-        android:pathData="M8,4 h224 a4,4 0 0 1 4,4 v64 a4,4 0 0 1 -4,4 h-224 a4,4 0 0 1 -4,-4 v-64 a4,4 0 0 1 4,-4 z" />
+        android:fillColor="#FAF5EE"
+        android:pathData="M20,6 h240 a14,14 0 0 1 14,14 v96 a14,14 0 0 1 -14,14 h-240 a14,14 0 0 1 -14,-14 v-96 a14,14 0 0 1 14,-14 z" />
     <path
-        android:fillColor="#D97642"
-        android:pathData="M24,22 h60 v26 h-60 z" />
+        android:fillColor="#0D2C2416"
+        android:pathData="M20,6 h240 a14,14 0 0 1 14,14 v96 a14,14 0 0 1 -14,14 h-240 a14,14 0 0 1 -14,-14 v-96 a14,14 0 0 1 14,-14 z" />
+
+    <!-- Top Toolbar -->
+    <!-- App Title Bar ("CountUp") -->
     <path
-        android:fillColor="#8B7355"
-        android:pathData="M24,58 h92 v8 h-92 z" />
+        android:fillColor="#5D5043"
+        android:pathData="M24,14 h46 v6 h-46 z" />
+
+    <!-- Voice Quick Add Mic Icon -->
+    <path
+        android:fillColor="#5D5043"
+        android:pathData="M236,13 a2,2 0 0 1 2,2 v3 a2,2 0 0 1 -4,0 v-3 a2,2 0 0 1 2,-2 z M234,17 a2.5,2.5 0 0 0 4,0 h1 a3.5,3.5 0 0 1 -3,2.4 v1.6 h2 v1 h-5 v-1 h2 v-1.6 a3.5,3.5 0 0 1 -3,-2.4 z" />
+
+    <!-- Quick Add "+" Symbol -->
+    <path
+        android:fillColor="#5D5043"
+        android:pathData="M255,14 h2 v4 h4 v2 h-4 v4 h-2 v-4 h-4 v-2 h4 z" />
+
+    <!-- Subtle Hairline Rule -->
+    <path
+        android:fillColor="#33E3D3B8"
+        android:pathData="M20,28 h240 v1 h-240 z" />
+
+    <!-- ================= ROW 1 (y center ~ 58) ================= -->
+    <!-- Cell 1: Meditation (Sage Green, 170) -->
+    <!-- Label Bar -->
+    <path
+        android:fillColor="#6B5D4F"
+        android:pathData="M44,35 h36 v4.5 h-36 z" />
+    <!-- Sage Circle Plate (x=62, y=60, radius=16) -->
+    <path
+        android:fillColor="#5E8C6D"
+        android:pathData="M62,44 a16,16 0 1 0 0.01,0 z" />
+    <!-- Count "170" -->
+    <!-- "1" -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M52,55 h3 v10 h-3 z" />
+    <!-- "7" -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M59,55 h6.5 v2.5 l-3.5,7.5 h-3 l3,-7 h-3 z" />
+    <!-- "0" -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M68,55 h4 a2.5,2.5 0 0 1 2.5,2.5 v5 a2.5,2.5 0 0 1 -2.5,2.5 h-4 a2.5,2.5 0 0 1 -2.5,-2.5 v-5 a2.5,2.5 0 0 1 2.5,-2.5 z M68,57.5 v5 h4 v-5 z" />
+
+    <!-- Cell 2: Reading (Terracotta, 85) -->
+    <!-- Label Bar -->
+    <path
+        android:fillColor="#6B5D4F"
+        android:pathData="M124,35 h32 v4.5 h-32 z" />
+    <!-- Terracotta Circle Plate (x=140, y=60, radius=16) -->
+    <path
+        android:fillColor="#D87A4F"
+        android:pathData="M140,44 a16,16 0 1 0 0.01,0 z" />
+    <!-- Count "85" -->
+    <!-- "8" -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M133,55 h4 a2.2,2.2 0 0 1 2.2,2.2 v1 a2.2,2.2 0 0 1 -1.2,1.8 a2.5,2.5 0 0 1 1.5,2.2 v1 a2.5,2.5 0 0 1 -2.5,2.5 h-4 a2.5,2.5 0 0 1 -2.5,-2.5 v-1 a2.5,2.5 0 0 1 1.5,-2.2 a2.2,2.2 0 0 1 -1.2,-1.8 v-1 a2.2,2.2 0 0 1 2.2,-2.2 z M133,57 v1.5 h4 v-1.5 z M133,60.5 v2 h4 v-2 z" />
+    <!-- "5" -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M142,55 h6.5 v2.5 h-4 v1.8 h2.5 a2.5,2.5 0 0 1 2.5,2.5 v1 a2.5,2.5 0 0 1 -2.5,2.5 h-5 v-2.5 h4 v-1.2 h-4 z" />
+
+    <!-- Cell 3: Running (Warm Ochre, 50) -->
+    <!-- Label Bar -->
+    <path
+        android:fillColor="#6B5D4F"
+        android:pathData="M204,35 h32 v4.5 h-32 z" />
+    <!-- Ochre Circle Plate (x=220, y=60, radius=16) -->
+    <path
+        android:fillColor="#DEB285"
+        android:pathData="M220,44 a16,16 0 1 0 0.01,0 z" />
+    <!-- Count "50" -->
+    <!-- "5" -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M213,55 h6.5 v2.5 h-4 v1.8 h2.5 a2.5,2.5 0 0 1 2.5,2.5 v1 a2.5,2.5 0 0 1 -2.5,2.5 h-5 v-2.5 h4 v-1.2 h-4 z" />
+    <!-- "0" -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M222,55 h4 a2.5,2.5 0 0 1 2.5,2.5 v5 a2.5,2.5 0 0 1 -2.5,2.5 h-4 a2.5,2.5 0 0 1 -2.5,-2.5 v-5 a2.5,2.5 0 0 1 2.5,-2.5 z M222,57.5 v5 h4 v-5 z" />
+
+    <!-- ================= ROW 2 (y center ~ 102) ================= -->
+    <!-- Cell 4: Guitar (Sage Green, 35) -->
+    <!-- Label Bar -->
+    <path
+        android:fillColor="#6B5D4F"
+        android:pathData="M46,80 h32 v4.5 h-32 z" />
+    <!-- Sage Circle Plate (x=62, y=104, radius=16) -->
+    <path
+        android:fillColor="#5E8C6D"
+        android:pathData="M62,88 a16,16 0 1 0 0.01,0 z" />
+    <!-- Count "35" -->
+    <!-- "3" -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M55,99 h6.5 v2.2 l-3.5,2.5 a2.5,2.5 0 0 1 3.5,2.3 v0.5 a2.5,2.5 0 0 1 -2.5,2.5 h-4 v-2.5 h3 v-1 a1.5,1.5 0 0 0 -1.5,-1.5 h-1.5 v-2 h2.5 l2.5,-1.8 h-5 z" />
+    <!-- "5" -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M64,99 h6.5 v2.5 h-4 v1.8 h2.5 a2.5,2.5 0 0 1 2.5,2.5 v1 a2.5,2.5 0 0 1 -2.5,2.5 h-5 v-2.5 h4 v-1.2 h-4 z" />
+
+    <!-- Cell 5: Haircut (Terracotta, 25) -->
+    <!-- Label Bar -->
+    <path
+        android:fillColor="#6B5D4F"
+        android:pathData="M124,80 h32 v4.5 h-32 z" />
+    <!-- Terracotta Circle Plate (x=140, y=104, radius=16) -->
+    <path
+        android:fillColor="#D87A4F"
+        android:pathData="M140,88 a16,16 0 1 0 0.01,0 z" />
+    <!-- Count "25" -->
+    <!-- "2" -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M133,99 h6 a2.5,2.5 0 0 1 2.5,2.5 c0,2 -2,3.5 -4,5 h4 v2.5 h-8.5 v-2.5 l5,-4.5 a1.2,1.2 0 0 0 -1.2,-1.2 h-3.8 z" />
+    <!-- "5" -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M143,99 h6.5 v2.5 h-4 v1.8 h2.5 a2.5,2.5 0 0 1 2.5,2.5 v1 a2.5,2.5 0 0 1 -2.5,2.5 h-5 v-2.5 h4 v-1.2 h-4 z" />
+
+    <!-- Cell 6: Tea Ceremony (Warm Ochre, 12) -->
+    <!-- Label Bar -->
+    <path
+        android:fillColor="#6B5D4F"
+        android:pathData="M204,80 h32 v4.5 h-32 z" />
+    <!-- Ochre Circle Plate (x=220, y=104, radius=16) -->
+    <path
+        android:fillColor="#DEB285"
+        android:pathData="M220,88 a16,16 0 1 0 0.01,0 z" />
+    <!-- Count "12" -->
+    <!-- "1" -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M213,99 h3 v10 h-3 z" />
+    <!-- "2" -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M219,99 h6 a2.5,2.5 0 0 1 2.5,2.5 c0,2 -2,3.5 -4,5 h4 v2.5 h-8.5 v-2.5 l5,-4.5 a1.2,1.2 0 0 0 -1.2,-1.2 h-3.8 z" />
 </vector>

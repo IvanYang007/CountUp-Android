@@ -343,4 +343,10 @@
     <string name="preview_solar_event_title">戒酒记录</string>
     <string name="preview_solar_quote">“暑气渐消秋意静，蜻蜓低掠晚霞明”</string>
     <string name="preview_solar_term_day">第 5 天 / 共 15 天</string>
+    <string name="preview_grid_item_1">冥想静心</string>
+    <string name="preview_grid_item_2">深度阅读</string>
+    <string name="preview_grid_item_3">坚持慢跑</string>
+    <string name="preview_grid_item_4">练习吉他</string>
+    <string name="preview_grid_item_5">理发间隔</string>
+    <string name="preview_grid_item_6">禅茶一味</string>
 </resources>

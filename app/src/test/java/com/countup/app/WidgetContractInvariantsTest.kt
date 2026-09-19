@@ -178,7 +178,7 @@ class WidgetContractInvariantsTest {
             Triple("zen_horizon_widget_info.xml", "widget_zen_horizon_4x1", "zen_horizon_widget_preview"),
             Triple("solar_rhythm_widget_info.xml", "widget_solar_rhythm_4x2", "solar_rhythm_widget_preview"),
             Triple("hero_widget_info.xml", "countup_hero_widget_2x1", "hero_widget_preview"),
-            Triple("haircut_widget_info.xml", "countup_widget", "haircut_widget_preview"),
+            Triple("haircut_widget_info.xml", "widget_preview_overview_4x2", "haircut_widget_preview"),
         )
 
         for ((xmlName, layoutName, previewDrawableName) in widgetXmls) {

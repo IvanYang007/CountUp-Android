@@ -534,4 +534,10 @@
     <string name="preview_solar_event_title">Sobriety Streak</string>
     <string name="preview_solar_quote">“Summer heat fades as autumn quiet settles”</string>
     <string name="preview_solar_term_day">Day 5 of 15</string>
+    <string name="preview_grid_item_1">Meditation</string>
+    <string name="preview_grid_item_2">Reading</string>
+    <string name="preview_grid_item_3">Running</string>
+    <string name="preview_grid_item_4">Guitar</string>
+    <string name="preview_grid_item_5">Haircut</string>
+    <string name="preview_grid_item_6">Tea Ceremony</string>
 </resources>
