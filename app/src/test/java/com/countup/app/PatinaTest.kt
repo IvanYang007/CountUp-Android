@@ -66,30 +66,6 @@ class PatinaTest {
         assertEquals(PatinaPhase.KINTSUGI, resolvePatinaPhase(5000L))
     }
 
-    @Test
-    fun `lerpPatinaColor correctly interpolates channels and clamps bounds`() {
-        val red = Color(1f, 0f, 0f, 1f)
-        val blue = Color(0f, 0f, 1f, 1f)
-
-        val atZero = lerpPatinaColor(red, blue, 0f)
-        assertEquals(1f, atZero.red, 0.001f)
-        assertEquals(0f, atZero.blue, 0.001f)
-
-        val atOne = lerpPatinaColor(red, blue, 1f)
-        assertEquals(0f, atOne.red, 0.001f)
-        assertEquals(1f, atOne.blue, 0.001f)
-
-        val atHalf = lerpPatinaColor(red, blue, 0.5f)
-        assertEquals(0.5f, atHalf.red, 0.01f)
-        assertEquals(0.5f, atHalf.blue, 0.01f)
-
-        // Clamping negative and overflow factors
-        val atNegative = lerpPatinaColor(red, blue, -0.5f)
-        assertEquals(1f, atNegative.red, 0.001f)
-
-        val atOverflow = lerpPatinaColor(red, blue, 1.5f)
-        assertEquals(1f, atOverflow.blue, 0.001f)
-    }
 
     @Test
     fun `getPatinaColor hits exact milestone pigment coordinates`() {

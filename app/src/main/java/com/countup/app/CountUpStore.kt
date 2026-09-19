@@ -118,10 +118,7 @@ class CountUpStore(context: Context) {
                 quarantineRawPayload(raw)
             }
             if (!prefs.getBoolean(KEY_MIGRATED, false) || !backupFile.exists()) {
-                val emptyEncoded = encodeItems(emptyList())
-                val revision = nextRevision()
-                prefs.edit().putString(KEY_ITEMS, emptyEncoded).putLong(KEY_REVISION, revision).putBoolean(KEY_MIGRATED, true).commit()
-                writeBackup(emptyEncoded, revision)
+                persist(emptyList())
             }
             emptyList()
         }
@@ -217,40 +214,64 @@ class CountUpStore(context: Context) {
                 .putString(KEY_PENDING_WIDGET_RESETS, encodeWidgetResets(pending))
                 .putLong(KEY_REVISION, revision)
                 .putBoolean(KEY_MIGRATED, true)
+            val success = editor.commit()
+            if (success) {
+                purgeWidgetBindingsForItem(id)
+            }
+            success
+        }
+    }
 
+    /**
+     * Purges all widget instance bindings and mode/tag preferences bound to [itemId]
+     * across all 4 configurable widget families (Hero, Zen Horizon, Zen Pebble, Solar Rhythm).
+     * @return count of keys purged.
+     */
+    fun purgeWidgetBindingsForItem(itemId: String): Int {
+        return synchronized(globalStoreLock) {
+            val editor = prefs.edit()
+            var purgedCount = 0
             for ((key, value) in prefs.all) {
-                if (value == id) {
+                if (value == itemId) {
                     when {
                         key.startsWith(PREFIX_HERO_BINDING) -> {
                             val widgetId = key.removePrefix(PREFIX_HERO_BINDING).toIntOrNull()
                             editor.remove(key)
+                            purgedCount++
                             if (widgetId != null) {
                                 editor.remove(PREFIX_HERO_DISPLAY_MODE + widgetId)
-                                editor.remove(PREFIX_ZEN_HORIZON_UNIT + widgetId)
+                                purgedCount++
                             }
                         }
                         key.startsWith(PREFIX_ZEN_HORIZON_BINDING) -> {
                             val widgetId = key.removePrefix(PREFIX_ZEN_HORIZON_BINDING).toIntOrNull()
                             editor.remove(key)
+                            purgedCount++
                             if (widgetId != null) {
                                 editor.remove(PREFIX_ZEN_HORIZON_UNIT + widgetId)
+                                purgedCount++
                             }
                         }
                         key.startsWith(PREFIX_ZEN_PEBBLE_BINDING) -> {
                             val widgetId = key.removePrefix(PREFIX_ZEN_PEBBLE_BINDING).toIntOrNull()
                             editor.remove(key)
+                            purgedCount++
                             if (widgetId != null) {
                                 editor.remove(PREFIX_ZEN_PEBBLE_TAG + widgetId)
+                                purgedCount++
                             }
                         }
                         key.startsWith(PREFIX_SOLAR_RHYTHM_BINDING) -> {
                             editor.remove(key)
+                            purgedCount++
                         }
                     }
                 }
             }
-
-            editor.commit()
+            if (purgedCount > 0) {
+                editor.commit()
+            }
+            purgedCount
         }
     }
 
@@ -452,59 +473,25 @@ class CountUpStore(context: Context) {
 
     /** Retrieves the saved [TimeDisplayMode] for a Hero Widget instance, defaulting to [TimeDisplayMode.DAYS]. */
     fun getHeroWidgetDisplayMode(appWidgetId: Int): TimeDisplayMode {
-        val raw = prefs.getString(PREFIX_HERO_DISPLAY_MODE + appWidgetId, null) ?: return TimeDisplayMode.DAYS
-        return when (raw) {
-            "DAYS" -> TimeDisplayMode.DAYS
-            "ELAPSED_BREAKDOWN" -> TimeDisplayMode.ELAPSED_BREAKDOWN
-            "TOTAL_WEEKS" -> TimeDisplayMode.TOTAL_WEEKS
-            else -> try {
-                TimeDisplayMode.valueOf(raw)
-            } catch (_: IllegalArgumentException) {
-                TimeDisplayMode.DAYS
-            }
-        }
+        return TimeDisplayMode.fromCode(prefs.getString(PREFIX_HERO_DISPLAY_MODE + appWidgetId, null))
     }
 
     /** Persists the [TimeDisplayMode] for a Hero Widget instance. */
     fun setHeroWidgetDisplayMode(appWidgetId: Int, mode: TimeDisplayMode): Boolean {
-        val code = when (mode) {
-            TimeDisplayMode.DAYS -> "DAYS"
-            TimeDisplayMode.ELAPSED_BREAKDOWN -> "ELAPSED_BREAKDOWN"
-            TimeDisplayMode.TOTAL_WEEKS -> "TOTAL_WEEKS"
-        }
         return prefs.edit()
-            .putString(PREFIX_HERO_DISPLAY_MODE + appWidgetId, code)
+            .putString(PREFIX_HERO_DISPLAY_MODE + appWidgetId, mode.code)
             .commit()
     }
 
     /** Retrieves the saved [ZenWidgetDisplayUnit] for a Zen Horizon instance, defaulting to [ZenWidgetDisplayUnit.DAYS]. */
     fun getZenHorizonUnit(appWidgetId: Int): ZenWidgetDisplayUnit {
-        val raw = prefs.getString(PREFIX_ZEN_HORIZON_UNIT + appWidgetId, null) ?: return ZenWidgetDisplayUnit.DAYS
-        return when (raw) {
-            "DAYS" -> ZenWidgetDisplayUnit.DAYS
-            "MONTHS" -> ZenWidgetDisplayUnit.MONTHS
-            "WEEKS" -> ZenWidgetDisplayUnit.WEEKS
-            "HOURS" -> ZenWidgetDisplayUnit.HOURS
-            "YEARS" -> ZenWidgetDisplayUnit.YEARS
-            else -> try {
-                ZenWidgetDisplayUnit.valueOf(raw)
-            } catch (_: IllegalArgumentException) {
-                ZenWidgetDisplayUnit.DAYS
-            }
-        }
+        return ZenWidgetDisplayUnit.fromCode(prefs.getString(PREFIX_ZEN_HORIZON_UNIT + appWidgetId, null))
     }
 
     /** Persists the [ZenWidgetDisplayUnit] for a Zen Horizon instance. */
     fun setZenHorizonUnit(appWidgetId: Int, unit: ZenWidgetDisplayUnit): Boolean {
-        val code = when (unit) {
-            ZenWidgetDisplayUnit.DAYS -> "DAYS"
-            ZenWidgetDisplayUnit.MONTHS -> "MONTHS"
-            ZenWidgetDisplayUnit.WEEKS -> "WEEKS"
-            ZenWidgetDisplayUnit.HOURS -> "HOURS"
-            ZenWidgetDisplayUnit.YEARS -> "YEARS"
-        }
         return prefs.edit()
-            .putString(PREFIX_ZEN_HORIZON_UNIT + appWidgetId, code)
+            .putString(PREFIX_ZEN_HORIZON_UNIT + appWidgetId, unit.code)
             .commit()
     }
 
@@ -758,31 +745,6 @@ class CountUpStore(context: Context) {
         }
     }
 
-    /**
-     * Queries the system [android.appwidget.AppWidgetManager] across all 5 widget providers
-     * to sanitize orphaned widget bindings on this device.
-     * @return count of keys purged.
-     */
-    fun sanitizeOrphanedWidgetBindings(context: Context): Int {
-        return try {
-            val manager = android.appwidget.AppWidgetManager.getInstance(context) ?: return 0
-            val activeIds = mutableSetOf<Int>()
-            val providers = listOf(
-                HeroWidgetReceiver::class.java,
-                ZenHorizonWidgetReceiver::class.java,
-                SolarRhythmWidgetReceiver::class.java,
-                ZenPebbleWidgetReceiver::class.java,
-                CountUpWidgetReceiver::class.java,
-            )
-            for (p in providers) {
-                val comp = android.content.ComponentName(context, p)
-                activeIds.addAll(manager.getAppWidgetIds(comp).toList())
-            }
-            sanitizeOrphanedWidgetBindings(activeIds)
-        } catch (_: Exception) {
-            0
-        }
-    }
 
     /**
      * Remaps widget binding preferences when the launcher restores widgets with new widget IDs

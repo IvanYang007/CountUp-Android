@@ -3,9 +3,6 @@ package com.countup.app
 import androidx.annotation.ColorInt
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.toArgb
-import kotlin.math.max
-import kotlin.math.min
-import kotlin.math.pow
 
 /**
  * Curated palette tokens for CountUp home-screen widgets, harmonized with
@@ -92,34 +89,5 @@ object WidgetThemeTokens {
             secondaryInk = cardStyle.mutedInk.toArgb(),
         )
     }
-
-    /**
-     * Calculates the WCAG 2.1 relative luminance for an ARGB color integer.
-     * https://www.w3.org/WAI/GL/wiki/Relative_luminance
-     */
-    fun relativeLuminance(@ColorInt color: Int): Double {
-        val r = sRgbToLinear(((color shr 16) and 0xFF) / 255.0)
-        val g = sRgbToLinear(((color shr 8) and 0xFF) / 255.0)
-        val b = sRgbToLinear((color and 0xFF) / 255.0)
-        return 0.2126 * r + 0.7152 * g + 0.0722 * b
-    }
-
-    private fun sRgbToLinear(channel: Double): Double {
-        return if (channel <= 0.03928) {
-            channel / 12.92
-        } else {
-            ((channel + 0.055) / 1.055).pow(2.4)
-        }
-    }
-
-    /**
-     * Calculates the WCAG contrast ratio between two colors (range: 1.0 to 21.0).
-     */
-    fun contrastRatio(@ColorInt foreground: Int, @ColorInt background: Int): Double {
-        val l1 = relativeLuminance(foreground)
-        val l2 = relativeLuminance(background)
-        val brighter = max(l1, l2)
-        val darker = min(l1, l2)
-        return (brighter + 0.05) / (darker + 0.05)
-    }
 }
+

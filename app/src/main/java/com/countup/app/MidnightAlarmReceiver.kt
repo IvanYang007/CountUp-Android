@@ -109,26 +109,7 @@ class MidnightAlarmReceiver : BroadcastReceiver() {
 
         val appContext = context.applicationContext
         launchAsync {
-            try {
-                // Push update pass across all active widget varieties with failure isolation
-                val updates = listOf<(Context) -> Unit>(
-                    { pushWidgetUpdate(it) },
-                    { pushAllHeroWidgetsUpdate(it) },
-                    { pushAllZenHorizonWidgetsUpdate(it) },
-                    { pushAllSolarRhythmWidgetsUpdate(it) },
-                    { pushAllZenPebbleWidgetsUpdate(it) },
-                )
-                for (update in updates) {
-                    try {
-                        update(appContext)
-                    } catch (_: Throwable) {
-                        // Isolate individual provider failure so sibling providers still update
-                    }
-                }
-            } finally {
-                // Re-arm next midnight rollover in finally block to ensure it is never dropped
-                scheduleMidnightAlarm(appContext)
-            }
+            updateAllWidgets(appContext)
         }
     }
 }

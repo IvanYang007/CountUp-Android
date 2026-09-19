@@ -10,10 +10,10 @@ import kotlin.math.abs
 /**
  * Display modes for the tactile odometer on the item card.
  */
-enum class TimeDisplayMode {
-    DAYS,
-    ELAPSED_BREAKDOWN,
-    TOTAL_WEEKS;
+enum class TimeDisplayMode(val code: String) {
+    DAYS("DAYS"),
+    ELAPSED_BREAKDOWN("ELAPSED_BREAKDOWN"),
+    TOTAL_WEEKS("TOTAL_WEEKS");
 
     fun next(): TimeDisplayMode {
         val all = entries
@@ -27,6 +27,11 @@ enum class TimeDisplayMode {
             ELAPSED_BREAKDOWN -> if (absDays >= 7L) TOTAL_WEEKS else DAYS
             TOTAL_WEEKS -> DAYS
         }
+    }
+
+    companion object {
+        fun fromCode(code: String?): TimeDisplayMode =
+            entries.firstOrNull { it.code == code } ?: DAYS
     }
 }
 

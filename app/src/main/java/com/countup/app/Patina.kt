@@ -59,18 +59,6 @@ fun calculateWarmth(days: Long): Float {
     return fraction.toDouble().pow(0.72).toFloat()
 }
 
-/**
- * Linearly interpolates RGB channels between two colors with a normalized factor in [0f, 1f].
- */
-fun lerpPatinaColor(c1: Color, c2: Color, factor: Float): Color {
-    val t = factor.coerceIn(0f, 1f)
-    return Color(
-        red = c1.red + (c2.red - c1.red) * t,
-        green = c1.green + (c2.green - c1.green) * t,
-        blue = c1.blue + (c2.blue - c1.blue) * t,
-        alpha = c1.alpha + (c2.alpha - c1.alpha) * t,
-    )
-}
 
 /**
  * Maps warmth [0.0f, 1.0f] to the piecewise continuous Zen pigment gradient:

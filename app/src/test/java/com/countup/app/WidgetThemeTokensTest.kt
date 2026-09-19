@@ -1,10 +1,20 @@
 package com.countup.app
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class WidgetThemeTokensTest {
+
+    private fun contrastRatio(fg: Int, bg: Int): Float {
+        val lum1 = Color(fg).luminance()
+        val lum2 = Color(bg).luminance()
+        val maxLum = maxOf(lum1, lum2)
+        val minLum = minOf(lum1, lum2)
+        return (maxLum + 0.05f) / (minLum + 0.05f)
+    }
 
     @Test
     fun `light palette matches xuan paper and patina design tokens`() {
@@ -37,12 +47,12 @@ class WidgetThemeTokensTest {
     @Test
     fun `text tokens satisfy WCAG AA contrast ratio against canvas backgrounds`() {
         val light = WidgetThemeTokens.Light
-        val lightContrast = WidgetThemeTokens.contrastRatio(light.primaryInk, light.canvasBg)
+        val lightContrast = contrastRatio(light.primaryInk, light.canvasBg)
         // WCAG AA requires at least 4.5:1 for normal text
         assertTrue("Light primary ink contrast should exceed 4.5:1, was $lightContrast", lightContrast >= 4.5)
 
         val dark = WidgetThemeTokens.Dark
-        val darkContrast = WidgetThemeTokens.contrastRatio(dark.primaryInk, dark.canvasBg)
+        val darkContrast = contrastRatio(dark.primaryInk, dark.canvasBg)
         assertTrue("Dark primary ink contrast should exceed 4.5:1, was $darkContrast", darkContrast >= 4.5)
     }
 

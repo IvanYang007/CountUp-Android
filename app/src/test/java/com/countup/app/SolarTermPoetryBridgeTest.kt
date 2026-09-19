@@ -1,5 +1,7 @@
 package com.countup.app
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNotNull
@@ -44,8 +46,8 @@ class SolarTermPoetryBridgeTest {
         val springLight = SolarTermPoetryBridge.resolveSeasonalPalette(R.string.season_spring, isDarkMode = false)
 
         // Dark mode primary tint (e.g. #97C4A3) has higher relative luminance than light mode tint (#4A6B53)
-        val darkLuminance = WidgetThemeTokens.relativeLuminance(springDark.primaryTint)
-        val lightLuminance = WidgetThemeTokens.relativeLuminance(springLight.primaryTint)
+        val darkLuminance = Color(springDark.primaryTint).luminance()
+        val lightLuminance = Color(springLight.primaryTint).luminance()
 
         org.junit.Assert.assertTrue(
             "Dark mode tint should be brighter on dark background",

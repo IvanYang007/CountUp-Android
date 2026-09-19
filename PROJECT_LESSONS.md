@@ -1,7 +1,7 @@
 # Project Lessons — CountUp-Android
 
-> Derived from git history. Last analyzed commit: `6395b8f9bcea324ff160f7826bb9dcdf72f82a6b` (2026-09-18T19:16:27-04:00).
-> Range: `32f6f36211113906d4bc4f8c03e519b711b198e1` .. `6395b8f9bcea324ff160f7826bb9dcdf72f82a6b` (177 commits, 2026-08-20 .. 2026-09-18).
+> Derived from git history. Last analyzed commit: `f21a203c94c43107611bfd8fd9f4ad1e53c8c060` (2026-09-19T09:49:56-04:00).
+> Range: `32f6f36211113906d4bc4f8c03e519b711b198e1` .. `f21a203c94c43107611bfd8fd9f4ad1e53c8c060` (183 commits, 2026-08-20 .. 2026-09-19).
 > Grades: `[observed]` stated in a commit/PR, `[inferred]` deduced from diffs,
 > `[weak]` one data point or ambiguous.
 
@@ -128,9 +128,16 @@ CountUp-Android is a zero-permission, offline-first milestone count-up app built
 ### L17. Populate default sample strings and preview tracks when using previewLayout — [observed]
 
 - **What happened:** Adding `android:previewLayout="@layout/..."` pointing to live widget layouts that only specified design-time `tools:text` caused Android 12+ launchers to render blank white boxes with missing titles, counts, and milestone tracks in the widget picker. Conversely, relying solely on static `previewImage` vectors looked flat, unrepresentative of real typography, and failed to dynamically adapt to system locales (English vs. Chinese).
-- **Evidence:** `d99a22f` feat(preview): provide dedicated vector previewImage, `6395b8f` feat: living widget preview layouts with localized string resources
-- **Why it recurs:** Developers assume `previewLayout` runs widget Kotlin population logic or shows design-time `tools:text`. At runtime, launchers inflate the layout XML directly with zero code execution.
-- **The rule:** When using `android:previewLayout`, always populate layout XMLs with default `android:text="@string/..."` using dedicated preview string resources defined across all 7 locale files (`values`, `values-zh`, `values-zh-rCN`, etc.), and reference static preview tracks (`preview_zen_horizon_track`, `preview_solar_timeline_track`). Maintain `android:previewImage` as backward-compatible fallback for API 26–30 launchers.
+- **Evidence:** `d99a22f` feat(preview): provide dedicated vector previewImage, `6395b8f` feat: living widget preview layouts with localized string resources, `f21a203` fix(widget): provide authentic populated preview for 4x2 overview grid
+- **Why it recurs:** Developers assume `previewLayout` runs widget Kotlin population logic or shows design-time `tools:text`. At runtime, launchers inflate the layout XML directly with zero code execution. Moreover, adapter-backed views like `<GridView>` cannot populate via `RemoteViewsService` synchronously, requiring a dedicated static layout for previews.
+- **The rule:** When using `android:previewLayout`, always populate layout XMLs with default `android:text="@string/..."` using dedicated preview string resources defined across all 7 locale files (`values`, `values-zh`, `values-zh-rCN`, etc.), and reference static preview tracks (`preview_zen_horizon_track`, `preview_solar_timeline_track`). For collections, provide dedicated static preview layouts (e.g. `widget_preview_overview_4x2.xml`). Maintain `android:previewImage` as backward-compatible fallback for API 26–30 launchers.
+
+### L18. Eliminate deprecated Window color and cutout APIs under Android 15 edge-to-edge — [observed]
+
+- **What happened:** On Android 15 (targetSdk 35+), apps are forced edge-to-edge by default. Calling `window.setStatusBarColor()`, `window.setNavigationBarColor()`, or specifying `LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES` triggered Google Play Console compliance warnings and is deprecated.
+- **Evidence:** `fcbddc8` fix(edge-to-edge): eliminate deprecated status/nav bar and cutout APIs for Android 15 compliance
+- **Why it recurs:** Traditional tutorial code and boilerplate templates continue to manipulate Window color bars imperatively.
+- **The rule:** Never call `window.setStatusBarColor()` or `window.setNavigationBarColor()`. Set `layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS` on API 28+, `isNavigationBarContrastEnforced = false` on API 29+, and manage icon contrast via `WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars`.
 
 ## Project-specific implementation rules
 

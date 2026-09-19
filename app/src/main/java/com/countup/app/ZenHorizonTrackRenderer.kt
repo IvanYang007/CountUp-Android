@@ -63,16 +63,16 @@ object ZenHorizonTrackRenderer {
             val canvas = Canvas(bitmap)
 
             val palette = WidgetThemeTokens.resolve(isDark)
-            val centerY = heightPx / 2f
+            val centerY = safeHeight / 2f
 
             // Hairline track height: ~2px (corresponds to 1dp on ~2x-3x displays)
-            val trackThickness = maxOf(2f, heightPx * 0.09f)
-            val pebbleRadius = heightPx * 0.26f
-            val haloRadius = pebbleRadius + maxOf(2f, heightPx * 0.08f)
+            val trackThickness = maxOf(2f, safeHeight * 0.09f)
+            val pebbleRadius = safeHeight * 0.26f
+            val haloRadius = pebbleRadius + maxOf(2f, safeHeight * 0.08f)
 
             // Padding on left and right so pebble doesn't clip at 0% or 100%
             val startX = haloRadius
-            val endX = widthPx - haloRadius
+            val endX = safeWidth - haloRadius
             val trackLength = maxOf(1f, endX - startX)
 
             // 1. Draw 1dp background hairline track (#E3D3B8 in light, #3A3D35 in dark)

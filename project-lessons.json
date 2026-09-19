@@ -3,11 +3,11 @@
   "repository": "CountUp-Android",
   "scope": "repository",
   "generated_from": {
-    "head": "6395b8f9bcea324ff160f7826bb9dcdf72f82a6b",
-    "commits_analyzed": 177,
+    "head": "f21a203c94c43107611bfd8fd9f4ad1e53c8c060",
+    "commits_analyzed": 183,
     "date_range": [
       "2026-08-20",
-      "2026-09-18"
+      "2026-09-19"
     ]
   },
   "rules": [
@@ -225,7 +225,8 @@
       "grade": "observed",
       "evidence": [
         "d99a22f",
-        "6395b8f"
+        "6395b8f",
+        "f21a203"
       ],
       "paths": [
         "app/src/main/res/xml/zen_pebble_widget_info.xml",
@@ -235,6 +236,19 @@
         "app/src/main/res/xml/haircut_widget_info.xml"
       ],
       "phase": "recurrence"
+    },
+    {
+      "id": "PL-018",
+      "text": "Never call window.setStatusBarColor() or window.setNavigationBarColor(); set layoutInDisplayCutoutMode = ALWAYS on API 28+, isNavigationBarContrastEnforced = false on API 29+, and manage bar contrast dynamically via WindowCompat.getInsetsController for Android 15 edge-to-edge compliance.",
+      "grade": "observed",
+      "evidence": [
+        "fcbddc8"
+      ],
+      "paths": [
+        "app/src/main/java/com/countup/app/EdgeToEdge.kt",
+        "app/src/main/java/com/countup/app/ZenTheme.kt"
+      ],
+      "phase": "conventions"
     }
   ],
   "risk_areas": [

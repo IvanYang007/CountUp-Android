@@ -9,16 +9,21 @@ import kotlin.math.max
 /**
  * Units of time that can be cycled in-place on the Zen Horizon widget.
  */
-enum class ZenWidgetDisplayUnit {
-    DAYS,
-    MONTHS,
-    WEEKS,
-    HOURS,
-    YEARS;
+enum class ZenWidgetDisplayUnit(val code: String) {
+    DAYS("DAYS"),
+    MONTHS("MONTHS"),
+    WEEKS("WEEKS"),
+    HOURS("HOURS"),
+    YEARS("YEARS");
 
     fun next(): ZenWidgetDisplayUnit {
         val values = entries
         return values[(ordinal + 1) % values.size]
+    }
+
+    companion object {
+        fun fromCode(code: String?): ZenWidgetDisplayUnit =
+            entries.firstOrNull { it.code == code } ?: DAYS
     }
 }
 

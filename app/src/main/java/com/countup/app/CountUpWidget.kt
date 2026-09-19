@@ -105,17 +105,25 @@ fun pushWidgetUpdate(context: Context) {
 
 /**
  * Imperatively updates all 5 widget families and synchronizes the midnight alarm.
+ */
+internal suspend fun updateAllWidgets(context: Context) {
+    val appContext = context.applicationContext
+    runCatching { pushWidgetUpdate(appContext) }
+    runCatching { pushAllHeroWidgetsUpdate(appContext) }
+    runCatching { pushAllZenHorizonWidgetsUpdate(appContext) }
+    runCatching { pushAllSolarRhythmWidgetsUpdate(appContext) }
+    runCatching { pushAllZenPebbleWidgetsUpdate(appContext) }
+    runCatching { MidnightAlarmReceiver.scheduleMidnightAlarm(appContext) }
+}
+
+/**
+ * Imperatively launches an update across all 5 widget families and synchronizes the midnight alarm.
  * Safe to call from any background coroutine or thread.
  */
 fun pushAllWidgetsUpdate(context: Context) {
     val appContext = context.applicationContext
     widgetReceiverScope.launch {
-        runCatching { pushWidgetUpdate(appContext) }
-        runCatching { pushAllHeroWidgetsUpdate(appContext) }
-        runCatching { pushAllZenHorizonWidgetsUpdate(appContext) }
-        runCatching { pushAllSolarRhythmWidgetsUpdate(appContext) }
-        runCatching { pushAllZenPebbleWidgetsUpdate(appContext) }
-        runCatching { MidnightAlarmReceiver.scheduleMidnightAlarm(appContext) }
+        updateAllWidgets(appContext)
     }
 }
 

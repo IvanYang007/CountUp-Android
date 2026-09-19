@@ -1,5 +1,7 @@
 package com.countup.app
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -65,11 +67,19 @@ class ZenWidgetSuiteIntegrationSmokeTest {
         assertEquals("108", pebbleCompactNumber)
     }
 
+    private fun contrastRatio(fg: Int, bg: Int): Float {
+        val lum1 = Color(fg).luminance()
+        val lum2 = Color(bg).luminance()
+        val maxLum = maxOf(lum1, lum2)
+        val minLum = minOf(lum1, lum2)
+        return (maxLum + 0.05f) / (minLum + 0.05f)
+    }
+
     @Test
     fun visualContrastPassesWcagAaInBothLightAndDarkModes() {
         for (isDark in listOf(false, true)) {
             val palette = WidgetThemeTokens.resolve(isDark)
-            val contrast = WidgetThemeTokens.contrastRatio(palette.primaryInk, palette.canvasBg)
+            val contrast = contrastRatio(palette.primaryInk, palette.canvasBg)
             // WCAG AA for normal text requires >= 4.5:1
             assertTrue(
                 "Primary ink contrast in ${if (isDark) "dark" else "light"} mode must exceed 4.5:1, was $contrast",
