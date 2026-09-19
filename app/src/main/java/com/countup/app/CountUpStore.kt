@@ -30,12 +30,6 @@ class CountUpStore(context: Context) {
     private val backupRevFile: File = File(filesDir, BACKUP_REV_FILE_NAME)
     private val preRestoreFile: File = File(filesDir, PRE_RESTORE_SAFETY_FILE_NAME)
 
-    init {
-        if (!prefs.contains(KEY_SCHEMA_VERSION)) {
-            prefs.edit().putInt(KEY_SCHEMA_VERSION, CURRENT_STORE_SCHEMA_VERSION).apply()
-        }
-    }
-
     /** Returns the persisted schema version of local storage. */
     fun getSchemaVersion(): Int = prefs.getInt(KEY_SCHEMA_VERSION, CURRENT_STORE_SCHEMA_VERSION)
 
@@ -791,6 +785,55 @@ class CountUpStore(context: Context) {
     }
 
     /**
+     * Remaps widget binding preferences when the launcher restores widgets with new widget IDs
+     * (e.g. across device migration or cloud backup restoration).
+     * @return count of keys remapped.
+     */
+    fun remapWidgetBindings(oldWidgetIds: IntArray, newWidgetIds: IntArray): Int {
+        if (oldWidgetIds.isEmpty() || oldWidgetIds.size != newWidgetIds.size) return 0
+        return synchronized(globalStoreLock) {
+            val bindingPrefixes = listOf(
+                PREFIX_HERO_BINDING,
+                PREFIX_HERO_DISPLAY_MODE,
+                PREFIX_ZEN_HORIZON_BINDING,
+                PREFIX_ZEN_HORIZON_UNIT,
+                PREFIX_ZEN_PEBBLE_BINDING,
+                PREFIX_ZEN_PEBBLE_TAG,
+                PREFIX_SOLAR_RHYTHM_BINDING,
+            )
+            val editor = prefs.edit()
+            var remappedCount = 0
+
+            for (i in oldWidgetIds.indices) {
+                val oldId = oldWidgetIds[i]
+                val newId = newWidgetIds[i]
+                if (oldId == newId) continue
+
+                for (prefix in bindingPrefixes) {
+                    val oldKey = "$prefix$oldId"
+                    val newKey = "$prefix$newId"
+                    if (prefs.contains(oldKey)) {
+                        val value = prefs.all[oldKey]
+                        when (value) {
+                            is String -> editor.putString(newKey, value)
+                            is Int -> editor.putInt(newKey, value)
+                            is Long -> editor.putLong(newKey, value)
+                            is Boolean -> editor.putBoolean(newKey, value)
+                            is Float -> editor.putFloat(newKey, value)
+                        }
+                        editor.remove(oldKey)
+                        remappedCount++
+                    }
+                }
+            }
+            if (remappedCount > 0) {
+                editor.commit()
+            }
+            remappedCount
+        }
+    }
+
+    /**
      * Records a widget-triggered counter reset so opening the app can present an undo whisper stack.
      * Stacks up to 3 newest widget resets.
      */
@@ -929,13 +972,7 @@ class CountUpStore(context: Context) {
                 }
             }
             try {
-                java.nio.file.Files.write(
-                    backupRevFile.toPath(),
-                    revision.toString().toByteArray(Charsets.UTF_8),
-                    java.nio.file.StandardOpenOption.CREATE,
-                    java.nio.file.StandardOpenOption.TRUNCATE_EXISTING,
-                    java.nio.file.StandardOpenOption.WRITE,
-                )
+                backupRevFile.writeText(revision.toString(), Charsets.UTF_8)
             } catch (_: Exception) {}
         } catch (_: Exception) {
             // Backup write failure must not crash the primary persistence flow

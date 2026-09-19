@@ -38,6 +38,17 @@ class ZenPebbleWidgetReceiver : AppWidgetProvider() {
             }
         }
     }
+
+    override fun onRestored(context: Context, oldWidgetIds: IntArray, newWidgetIds: IntArray) {
+        val appContext = context.applicationContext
+        CountUpStore.getInstance(appContext).remapWidgetBindings(oldWidgetIds, newWidgetIds)
+        MidnightAlarmReceiver.scheduleMidnightAlarm(appContext)
+        launchAsync {
+            for (newId in newWidgetIds) {
+                pushZenPebbleWidgetUpdate(appContext, newId)
+            }
+        }
+    }
 }
 
 /** Pushes update to all placed Zen Pebble widgets on the launcher. */

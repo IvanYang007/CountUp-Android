@@ -5,6 +5,8 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Converts the Material DatePicker's selection (a UTC-milliseconds epoch value)
@@ -16,12 +18,24 @@ fun datePickerMillisToLocalDate(value: Long): LocalDate {
     return Instant.ofEpochMilli(value).atZone(ZoneOffset.UTC).toLocalDate()
 }
 
+private val mediumDateFormatters = ConcurrentHashMap<Locale, DateTimeFormatter>()
+
+/**
+ * Retrieves a thread-safe cached [DateTimeFormatter] instance for the given [locale].
+ */
+fun getLocalizedDateFormatter(locale: Locale = Locale.getDefault()): DateTimeFormatter {
+    return mediumDateFormatters.computeIfAbsent(locale) { loc ->
+        DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(loc)
+    }
+}
+
 /**
  * Formats a date using the device's localized medium format (e.g. "Aug 2, 2026").
- * Kept here as the single formatting helper for both the app and widget.
+ * Reuses thread-safe cached [DateTimeFormatter] instances keyed by locale to eliminate
+ * redundant allocations on scroll hot paths.
  */
-fun formatLocalized(date: LocalDate): String {
-    return DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).format(date)
+fun formatLocalized(date: LocalDate, locale: Locale = Locale.getDefault()): String {
+    return getLocalizedDateFormatter(locale).format(date)
 }
 
 /**
@@ -34,8 +48,9 @@ fun formatAnchorDateSubLabel(
     date: LocalDate,
     sinceTemplate: String,
     untilTemplate: String,
+    locale: Locale = Locale.getDefault(),
 ): String {
-    val formattedDate = formatLocalized(date)
+    val formattedDate = formatLocalized(date, locale)
     val template = if (count < 0) untilTemplate else sinceTemplate
-    return String.format(template, formattedDate).uppercase()
+    return String.format(locale, template, formattedDate).uppercase(locale)
 }

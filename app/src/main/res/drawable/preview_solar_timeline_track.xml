@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="300dp"
+    android:height="5dp"
+    android:viewportWidth="300"
+    android:viewportHeight="5">
+    <!-- Background seasonal hairline track -->
+    <path
+        android:pathData="M2.5,2.5 L297.5,2.5"
+        android:strokeColor="#20000000"
+        android:strokeWidth="4"
+        android:strokeLineCap="round" />
+    <!-- Elapsed solar term progress bar (~33%, Day 5 of 15) -->
+    <path
+        android:pathData="M2.5,2.5 L100,2.5"
+        android:strokeColor="#B86B35"
+        android:strokeWidth="4"
+        android:strokeLineCap="round" />
+</vector>

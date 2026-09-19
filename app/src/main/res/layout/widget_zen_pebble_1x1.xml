@@ -47,6 +47,7 @@
             android:singleLine="true"
             android:gravity="center"
             android:maxLines="1"
+            android:text="42"
             tools:text="412" />
 
         <!-- Micro-Unit Label -->
@@ -83,6 +84,7 @@
             android:textColor="#46664B"
             android:singleLine="true"
             android:ellipsize="end"
+            android:text="@string/preview_item_tag"
             tools:text="SOBRIETY" />
     </LinearLayout>
 

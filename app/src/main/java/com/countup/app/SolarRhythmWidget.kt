@@ -95,6 +95,17 @@ class SolarRhythmWidgetReceiver : AppWidgetProvider() {
             }
         }
     }
+
+    override fun onRestored(context: Context, oldWidgetIds: IntArray, newWidgetIds: IntArray) {
+        val appContext = context.applicationContext
+        CountUpStore.getInstance(appContext).remapWidgetBindings(oldWidgetIds, newWidgetIds)
+        MidnightAlarmReceiver.scheduleMidnightAlarm(appContext)
+        launchAsync {
+            for (newId in newWidgetIds) {
+                pushSolarRhythmWidgetUpdate(appContext, newId)
+            }
+        }
+    }
 }
 
 /** Pushes update to all placed Solar Rhythm widgets on the launcher. */

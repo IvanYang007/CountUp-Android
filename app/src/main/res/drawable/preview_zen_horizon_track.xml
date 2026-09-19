@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="160dp"
+    android:height="14dp"
+    android:viewportWidth="160"
+    android:viewportHeight="14">
+    <!-- Hairline base track -->
+    <path
+        android:pathData="M7,7 L153,7"
+        android:strokeColor="#DCD2C4"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round" />
+    <!-- Milestone progress bar (~45%) -->
+    <path
+        android:pathData="M7,7 L72,7"
+        android:strokeColor="#C28B5C"
+        android:strokeWidth="2"
+        android:strokeLineCap="round" />
+    <!-- Indicator pebble halo -->
+    <path
+        android:pathData="M72,7 m -4.5,0 a 4.5,4.5 0 1,0 9,0 a 4.5,4.5 0 1,0 -9,0"
+        android:fillColor="#33C28B5C" />
+    <!-- Indicator pebble center -->
+    <path
+        android:pathData="M72,7 m -2.8,0 a 2.8,2.8 0 1,0 5.6,0 a 2.8,2.8 0 1,0 -5.6,0"
+        android:fillColor="#C28B5C" />
+</vector>

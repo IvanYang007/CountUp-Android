@@ -63,6 +63,7 @@
                 android:textColor="#5D5043"
                 android:singleLine="true"
                 android:ellipsize="end"
+                android:text="@string/preview_item_title"
                 tools:text="SOBRIETY" />
 
             <TextView
@@ -103,6 +104,7 @@
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:textColor="#2C2416"
+                android:text="412"
                 tools:text="120" />
 
             <TextView
@@ -116,6 +118,7 @@
                 android:letterSpacing="0.04"
                 android:singleLine="true"
                 android:textColor="#8C7E70"
+                android:text="@string/unit_days"
                 tools:text="DAYS" />
         </LinearLayout>
 
@@ -129,6 +132,7 @@
             android:textColor="#8C7E70"
             android:singleLine="true"
             android:ellipsize="end"
+            android:text="@string/preview_item_subtitle"
             tools:text="since May 3, 2026" />
     </LinearLayout>
 

@@ -336,4 +336,12 @@
     <string name="voice_item_undone">已撤銷添加</string>
     <string name="action_edit">編輯</string>
     <string name="cd_widget_voice_add">語音添加計數</string>
+
+    <!-- 小組件預覽 -->
+    <string name="preview_item_title">戒酒</string>
+    <string name="preview_item_tag">戒酒</string>
+    <string name="preview_item_subtitle">始於 2025年1月20日</string>
+    <string name="preview_solar_event_title">戒酒記錄</string>
+    <string name="preview_solar_quote">“暑氣漸消秋意靜，蜻蜓低掠晚霞明”</string>
+    <string name="preview_solar_term_day">第 5 天 / 共 15 天</string>
 </resources>

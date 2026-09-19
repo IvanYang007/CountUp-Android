@@ -1,19 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Preview asset for the 2x1 Hero Card widget in the launcher widget picker.
+     Focus on a single sacred counter with circular icon badge and milestone accents. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="160dp"
     android:height="80dp"
     android:viewportWidth="160"
     android:viewportHeight="80">
+
+    <!-- Card Background (16dp corner radius) -->
     <path
         android:fillColor="#FAF5EE"
-        android:pathData="M8,4 h144 a8,8 0 0 1 8,8 v56 a8,8 0 0 1 -8,8 h-144 a8,8 0 0 1 -8,-8 v-56 a8,8 0 0 1 8,-8 z" />
+        android:pathData="M16,4 h128 a12,12 0 0 1 12,12 v48 a12,12 0 0 1 -12,12 h-128 a12,12 0 0 1 -12,-12 v-48 a12,12 0 0 1 12,-12 z" />
+    <path
+        android:fillColor="#102C2416"
+        android:pathData="M16,4 h128 a12,12 0 0 1 12,12 v48 a12,12 0 0 1 -12,12 h-128 a12,12 0 0 1 -12,-12 v-48 a12,12 0 0 1 12,-12 z" />
+
+    <!-- Left: Circular Icon Badge Plate (Radius 18) -->
+    <path
+        android:fillColor="#EBE3D5"
+        android:pathData="M24,40 a18,18 0 1 0 0.01,0 z" />
+    <!-- Inner Accent (Pine) -->
     <path
         android:fillColor="#33523D"
-        android:pathData="M22,18 a22,22 0 1 0 0.01,0 z" />
+        android:pathData="M24,40 a10,10 0 1 0 0.01,0 z" />
     <path
-        android:fillColor="#DEB285"
-        android:pathData="M54,20 h60 v12 h-60 z" />
+        android:fillColor="#FAF5EE"
+        android:pathData="M24,37 a3,3 0 1 0 0.01,0 z M24,42 c-3,0 -5,2 -5,4 h10 c0,-2 -2,-4 -5,-4 z" />
+
+    <!-- Right: Title Bar ("SOBRIETY") -->
+    <path
+        android:fillColor="#6B5D4F"
+        android:pathData="M52,18 h48 v6 h-48 z" />
+    <!-- Milestone Accent Dot -->
+    <path
+        android:fillColor="#C87A48"
+        android:pathData="M106,21 a2.5,2.5 0 1 0 0.01,0 z" />
+
+    <!-- Numeral "64" -->
+    <!-- "6" -->
     <path
         android:fillColor="#2C2416"
-        android:pathData="M54,38 h40 v22 h-40 z" />
+        android:pathData="M56,31 c3.5,-2 7.5,-0.5 8,2.5 l-3,0.5 c-0.5,-1 -1.5,-1.5 -2.5,-1 c-2,1 -2.5,3 -2.5,4.5 c0.5,-1 2,-1.5 3.5,-1.5 c3,0 5,2 5,5 c0,3 -2,5 -5,5 c-4,0 -6,-3 -6,-8 c0,-3.5 1,-6.5 2.5,-8 z M57.5,41 c0,1.5 1,2.5 2.5,2.5 c1.5,0 2.5,-1 2.5,-2.5 c0,-1.5 -1,-2.5 -2.5,-2.5 c-1.5,0 -2.5,1 -2.5,2.5 z" />
+    <!-- "4" -->
+    <path
+        android:fillColor="#2C2416"
+        android:pathData="M74,31 h3.5 v10 h2.5 v2.5 h-2.5 v3.5 h-3.5 v-3.5 h-6.5 v-2.5 l6.5,-10 z M71,41 h3 v-5 l-3,5 z" />
+
+    <!-- Unit Bar ("DAYS") -->
+    <path
+        android:fillColor="#8C7E70"
+        android:pathData="M84,41 h24 v3.5 h-24 z" />
+
+    <!-- Subtitle Bar ("Since Nov 12") -->
+    <path
+        android:fillColor="#B0A495"
+        android:pathData="M52,56 h56 v4.5 h-56 z" />
 </vector>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Preview asset for the 4x2 Solar Rhythm widget in the launcher widget picker.
+     Seasonal canvas harmonizing personal milestones with the 24 Solar Terms. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="280dp"
+    android:height="140dp"
+    android:viewportWidth="280"
+    android:viewportHeight="140">
+
+    <!-- Card Background (20dp corner radius) -->
+    <path
+        android:fillColor="#FAF5EE"
+        android:pathData="M20,4 h240 a16,16 0 0 1 16,16 v100 a16,16 0 0 1 -16,16 h-240 a16,16 0 0 1 -16,-16 v-100 a16,16 0 0 1 16,-16 z" />
+    <path
+        android:fillColor="#102C2416"
+        android:pathData="M20,4 h240 a16,16 0 0 1 16,16 v100 a16,16 0 0 1 -16,16 h-240 a16,16 0 0 1 -16,-16 v-100 a16,16 0 0 1 16,-16 z" />
+
+    <!-- Top: Solar Term Badge Pill (Autumn Equinox) -->
+    <path
+        android:fillColor="#EFE6D8"
+        android:pathData="M30,16 h110 a9,9 0 0 1 9,9 v0 a9,9 0 0 1 -9,9 h-110 a9,9 0 0 1 -9,-9 v0 a9,9 0 0 1 9,-9 z" />
+
+    <!-- Solar Term Accent Dot in Terracotta -->
+    <path
+        android:fillColor="#C87A48"
+        android:pathData="M31,25 a4,4 0 1 0 0.01,0 z" />
+
+    <!-- Badge Title Bar ("AUTUMN EQUINOX") -->
+    <path
+        android:fillColor="#6B5D4F"
+        android:pathData="M40,22 h65 v6 h-65 z" />
+
+    <!-- Top Right: Date Bar ("SEP 22") -->
+    <path
+        android:fillColor="#8C7E70"
+        android:pathData="M215,22 h45 v6 h-45 z" />
+
+    <!-- Middle: Subtle Solar Ecliptic Rhythm Arc -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#E2D7C7"
+        android:strokeWidth="1.5"
+        android:pathData="M20,42 Q140,56 260,42" />
+
+    <!-- Solar nodes on the arc -->
+    <path
+        android:fillColor="#33523D"
+        android:pathData="M70,47 a3,3 0 1 0 0.01,0 z" />
+    <path
+        android:fillColor="#C87A48"
+        android:pathData="M140,49 a4,4 0 1 0 0.01,0 z" />
+    <path
+        android:fillColor="#DEB285"
+        android:pathData="M210,47 a3,3 0 1 0 0.01,0 z" />
+
+    <!-- Bottom Left: Anchor Card 1 (radius 12dp) -->
+    <path
+        android:fillColor="#F3ECE0"
+        android:pathData="M30,58 h98 a10,10 0 0 1 10,10 v48 a10,10 0 0 1 -10,10 h-98 a10,10 0 0 1 -10,-10 v-48 a10,10 0 0 1 10,-10 z" />
+    <!-- Tag Dot (Pine) -->
+    <path
+        android:fillColor="#33523D"
+        android:pathData="M32,71 a3.5,3.5 0 1 0 0.01,0 z" />
+    <!-- Title Bar ("MEDITATION") -->
+    <path
+        android:fillColor="#6B5D4F"
+        android:pathData="M40,68 h48 v5.5 h-48 z" />
+    <!-- Numeral "128" -->
+    <!-- "1" -->
+    <path
+        android:fillColor="#2C2416"
+        android:pathData="M44,83 l-2.5,2 v-2.5 l3,-2 h2 v15 h-2.5 z" />
+    <!-- "2" -->
+    <path
+        android:fillColor="#2C2416"
+        android:pathData="M52,82 c2.5,-1.5 5,-0.5 6,1.5 c0.5,1.5 0,3 -1,4.5 l-3,3 h4.5 v2.5 h-9.5 v-2.5 l4.5,-4.5 c1,-1 1.5,-2 1,-2.5 c-0.5,-0.5 -1.5,-1 -2.5,-0.5 c-1,0.5 -1,1 -1,1.5 h-2.5 c0,-2 1.5,-3.5 3.5,-4.5 z" />
+    <!-- "8" -->
+    <path
+        android:fillColor="#2C2416"
+        android:pathData="M66,82 c2,0 3.5,1 3.5,2.5 c0,1 -0.5,1.5 -1.5,2 c1,0.5 2,1.5 2,2.5 c0,2 -1.5,3 -4,3 c-2.5,0 -4,-1 -4,-3 c0,-1 1,-2 2,-2.5 c-1,-0.5 -1.5,-1 -1.5,-2 c0,-1.5 1.5,-2.5 3.5,-2.5 z M66,84.5 c-1,0 -1.5,0.5 -1.5,1 c0,0.5 0.5,1 1.5,1 c1,0 1.5,-0.5 1.5,-1 c0,-0.5 -0.5,-1 -1.5,-1 z M66,88 c-1.5,0 -2,0.5 -2,1.5 c0,1 0.5,1.5 2,1.5 c1.5,0 2,-0.5 2,-1.5 c0,-1 -0.5,-1.5 -2,-1.5 z" />
+    <!-- "DAYS" -->
+    <path
+        android:fillColor="#8C7E70"
+        android:pathData="M42,106 h24 v3 h-24 z" />
+
+    <!-- Bottom Right: Anchor Card 2 (radius 12dp) -->
+    <path
+        android:fillColor="#F3ECE0"
+        android:pathData="M152,58 h98 a10,10 0 0 1 10,10 v48 a10,10 0 0 1 -10,10 h-98 a10,10 0 0 1 -10,-10 v-48 a10,10 0 0 1 10,-10 z" />
+    <!-- Tag Dot (Terracotta) -->
+    <path
+        android:fillColor="#C87A48"
+        android:pathData="M154,71 a3.5,3.5 0 1 0 0.01,0 z" />
+    <!-- Title Bar ("READING") -->
+    <path
+        android:fillColor="#6B5D4F"
+        android:pathData="M162,68 h42 v5.5 h-42 z" />
+    <!-- Numeral "45" -->
+    <!-- "4" -->
+    <path
+        android:fillColor="#2C2416"
+        android:pathData="M168,80 h3.5 v10 h2.5 v2.5 h-2.5 v3.5 h-3.5 v-3.5 h-6.5 v-2.5 l6.5,-10 z M165,90 h3 v-5 l-3,5 z" />
+    <!-- "5" -->
+    <path
+        android:fillColor="#2C2416"
+        android:pathData="M177,80 h7 v2.5 h-4.5 l-0.5,3.5 c0.5,-0.5 1.5,-0.5 2.5,-0.5 c2.5,0 4,1.5 4,4 c0,2.5 -1.5,4.5 -4.5,4.5 c-2.5,0 -4,-1.5 -4,-3.5 h3 c0,1 0.5,1.5 1.5,1.5 c1,0 1.5,-0.5 1.5,-1.5 c0,-1 -0.5,-1.5 -1.5,-1.5 c-1,0 -1.5,0.5 -1.5,1 l-2.5,-0.5 l0.5,-9.5 z" />
+    <!-- "DAYS" -->
+    <path
+        android:fillColor="#8C7E70"
+        android:pathData="M164,106 h24 v3 h-24 z" />
+</vector>

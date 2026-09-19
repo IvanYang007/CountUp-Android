@@ -166,6 +166,75 @@
         "app/src/main/java/com/countup/app/MidnightAlarmReceiver.kt"
       ],
       "phase": "conventions"
+    },
+    {
+      "id": "PL-013",
+      "text": "Never run an aggressive orphaned-binding purge on app startup. Implement onRestored(oldIds, newIds) on all AppWidgetProvider classes delegating to CountUpStore.remapWidgetBindings, and restrict deletion to onDeleted() or deleteItem().",
+      "grade": "observed",
+      "evidence": [
+        "2c48806",
+        "92262bb"
+      ],
+      "paths": [
+        "app/src/main/java/com/countup/app/CountUpWidget.kt",
+        "app/src/main/java/com/countup/app/CountUpStore.kt"
+      ],
+      "phase": "recurrence"
+    },
+    {
+      "id": "PL-014",
+      "text": "Compute next midnight using now.toLocalDate().plusDays(1).atStartOfDay(now.zone).plusSeconds(1).toInstant().toEpochMilli() to safely cross DST boundaries, and register ACTION_MY_PACKAGE_REPLACED.",
+      "grade": "observed",
+      "evidence": [
+        "5fa0136",
+        "92262bb"
+      ],
+      "paths": [
+        "app/src/main/java/com/countup/app/MidnightAlarmReceiver.kt"
+      ],
+      "phase": "recurrence"
+    },
+    {
+      "id": "PL-015",
+      "text": "Use FileOutputStream.fd.sync() paired with java.nio.file.Files.move(tempPath, targetPath, StandardCopyOption.REPLACE_EXISTING) for robust atomic file snapshots across both Android and desktop unit test environments.",
+      "grade": "observed",
+      "evidence": [
+        "625f2c387",
+        "8a69041"
+      ],
+      "paths": [
+        "app/src/main/java/com/countup/app/CountUpStore.kt"
+      ],
+      "phase": "recurrence"
+    },
+    {
+      "id": "PL-016",
+      "text": "In centered responsive layouts, apply .widthIn(max = 640.dp) before .fillMaxWidth().fillMaxHeight() to ensure constraints scale correctly on foldables and tablets.",
+      "grade": "observed",
+      "evidence": [
+        "6395b8f"
+      ],
+      "paths": [
+        "app/src/main/java/com/countup/app/CountUpContent.kt"
+      ],
+      "phase": "conventions"
+    },
+    {
+      "id": "PL-017",
+      "text": "Declare both previewLayout and previewImage, populating layout XMLs with default localized strings and preview tracks to deliver authentic living dual-locale (EN/ZH) previews in pickers.",
+      "grade": "observed",
+      "evidence": [
+        "d99a22f",
+        "6395b8f"
+      ],
+      "paths": [
+        "app/src/main/res/xml/zen_pebble_widget_info.xml",
+        "app/src/main/res/xml/zen_horizon_widget_info.xml",
+        "app/src/main/res/xml/solar_rhythm_widget_info.xml",
+        "app/src/main/res/xml/hero_widget_info.xml",
+        "app/src/main/res/xml/haircut_widget_info.xml"
+      ],
+      "phase": "recurrence"
     }
   ],
   "risk_areas": [

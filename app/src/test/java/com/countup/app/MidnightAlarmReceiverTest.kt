@@ -90,4 +90,31 @@ class MidnightAlarmReceiverTest {
         assertEquals(0, targetZoned.minute)
         assertEquals(1, targetZoned.second)
     }
+
+    @Test
+    fun calculateNextMidnightMillisHandlesDaylightSavingTransitions() {
+        val zone = ZoneId.of("America/New_York")
+
+        // Spring forward day (March 8, 2026 - 23 hour day)
+        val beforeSpringForward = ZonedDateTime.of(2026, 3, 7, 23, 30, 0, 0, zone)
+        val springTarget = MidnightAlarmReceiver.calculateNextMidnightMillis(beforeSpringForward)
+        val springZoned = ZonedDateTime.ofInstant(java.time.Instant.ofEpochMilli(springTarget), zone)
+        assertEquals(2026, springZoned.year)
+        assertEquals(3, springZoned.monthValue)
+        assertEquals(8, springZoned.dayOfMonth)
+        assertEquals(0, springZoned.hour)
+        assertEquals(0, springZoned.minute)
+        assertEquals(1, springZoned.second)
+
+        // Fall back day (November 1, 2026 - 25 hour day)
+        val beforeFallBack = ZonedDateTime.of(2026, 10, 31, 23, 30, 0, 0, zone)
+        val fallTarget = MidnightAlarmReceiver.calculateNextMidnightMillis(beforeFallBack)
+        val fallZoned = ZonedDateTime.ofInstant(java.time.Instant.ofEpochMilli(fallTarget), zone)
+        assertEquals(2026, fallZoned.year)
+        assertEquals(11, fallZoned.monthValue)
+        assertEquals(1, fallZoned.dayOfMonth)
+        assertEquals(0, fallZoned.hour)
+        assertEquals(0, fallZoned.minute)
+        assertEquals(1, fallZoned.second)
+    }
 }

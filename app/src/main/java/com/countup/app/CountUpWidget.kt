@@ -79,6 +79,15 @@ class CountUpWidgetReceiver : AppWidgetProvider() {
             pushWidgetUpdate(appContext)
         }
     }
+
+    override fun onRestored(context: Context, oldWidgetIds: IntArray, newWidgetIds: IntArray) {
+        val appContext = context.applicationContext
+        CountUpStore.getInstance(appContext).remapWidgetBindings(oldWidgetIds, newWidgetIds)
+        MidnightAlarmReceiver.scheduleMidnightAlarm(appContext)
+        launchAsync {
+            pushWidgetUpdate(appContext)
+        }
+    }
 }
 
 /** Pushes a fresh base RemoteViews to every placed widget and re-queries the grid. */
@@ -101,7 +110,6 @@ fun pushWidgetUpdate(context: Context) {
 fun pushAllWidgetsUpdate(context: Context) {
     val appContext = context.applicationContext
     widgetReceiverScope.launch {
-        runCatching { CountUpStore.getInstance(appContext).sanitizeOrphanedWidgetBindings(appContext) }
         runCatching { pushWidgetUpdate(appContext) }
         runCatching { pushAllHeroWidgetsUpdate(appContext) }
         runCatching { pushAllZenHorizonWidgetsUpdate(appContext) }
@@ -256,13 +264,9 @@ class ResetCountReceiver : BroadcastReceiver() {
                     pushAllZenPebbleWidgetsUpdate(appContext)
                 }
             } else {
-                // First tap: arm this cell and re-render widget to show "Tap again" / "0?"
+                // First tap: arm this cell and re-render grid widget to show "Tap again" / "0?"
                 arm(appContext, id)
                 pushWidgetUpdate(appContext)
-                pushAllHeroWidgetsUpdate(appContext)
-                pushAllZenHorizonWidgetsUpdate(appContext)
-                pushAllSolarRhythmWidgetsUpdate(appContext)
-                pushAllZenPebbleWidgetsUpdate(appContext)
             }
         }
     }
@@ -308,10 +312,6 @@ class ResetCountReceiver : BroadcastReceiver() {
                         disarm()
                         widgetReceiverScope.launch {
                             pushWidgetUpdate(appContext)
-                            pushAllHeroWidgetsUpdate(appContext)
-                            pushAllZenHorizonWidgetsUpdate(appContext)
-                            pushAllSolarRhythmWidgetsUpdate(appContext)
-                            pushAllZenPebbleWidgetsUpdate(appContext)
                         }
                     }
                 }

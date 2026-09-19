@@ -45,6 +45,7 @@
                     android:textStyle="bold"
                     android:includeFontPadding="false"
                     android:textColor="#FFFFFF"
+                    android:text="@string/solar_term_white_dew"
                     tools:text="白露" />
             </LinearLayout>
 
@@ -60,6 +61,7 @@
                 android:maxLines="2"
                 android:ellipsize="end"
                 android:textColor="#8C7E70"
+                android:text="@string/preview_solar_quote"
                 tools:text="“暑气渐消秋意静，蜻蜓低掠晚霞明”" />
         </LinearLayout>
 
@@ -93,6 +95,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="9sp"
                     android:textColor="#8C7E70"
+                    android:text="@string/solar_term_white_dew"
                     tools:text="白露" />
 
                 <TextView
@@ -103,6 +106,7 @@
                     android:gravity="center"
                     android:textSize="9sp"
                     android:textColor="#8C7E70"
+                    android:text="@string/preview_solar_term_day"
                     tools:text="Day 5 of 15" />
 
                 <TextView
@@ -112,6 +116,7 @@
                     android:gravity="end"
                     android:textSize="9sp"
                     android:textColor="#8C7E70"
+                    android:text="@string/solar_term_autumnal_equinox"
                     tools:text="秋分" />
             </LinearLayout>
 
@@ -121,6 +126,7 @@
                 android:layout_height="5dp"
                 android:layout_marginTop="3dp"
                 android:scaleType="fitXY"
+                android:src="@drawable/preview_solar_timeline_track"
                 android:contentDescription="@null" />
         </LinearLayout>
 
@@ -151,6 +157,7 @@
                     android:textColor="#2C2416"
                     android:singleLine="true"
                     android:ellipsize="end"
+                    android:text="@string/preview_solar_event_title"
                     tools:text="Sobriety Streak" />
 
                 <TextView
@@ -162,6 +169,7 @@
                     android:textColor="#8C7E70"
                     android:singleLine="true"
                     android:ellipsize="end"
+                    android:text="@string/preview_item_subtitle"
                     tools:text="Since Jan 20, 2025" />
             </LinearLayout>
 
@@ -183,6 +191,7 @@
                     android:textColor="#8A5A36"
                     android:includeFontPadding="false"
                     android:singleLine="true"
+                    android:text="412"
                     tools:text="412" />
 
                 <TextView

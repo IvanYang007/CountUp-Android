@@ -36,6 +36,7 @@
                 android:textStyle="bold"
                 android:includeFontPadding="false"
                 android:textColor="#FFFFFF"
+                android:text="@string/solar_term_white_dew"
                 tools:text="白露" />
         </LinearLayout>
 
@@ -55,6 +56,7 @@
                 android:textStyle="bold"
                 android:includeFontPadding="false"
                 android:textColor="#8A5A36"
+                android:text="412"
                 tools:text="412" />
 
             <TextView
@@ -68,6 +70,7 @@
                 android:textColor="#8C7E70"
                 android:singleLine="true"
                 android:ellipsize="end"
+                android:text="@string/preview_item_tag"
                 tools:text="SOBRIETY" />
         </LinearLayout>
 
@@ -78,6 +81,7 @@
             android:layout_height="4dp"
             android:layout_alignParentBottom="true"
             android:scaleType="fitXY"
+            android:src="@drawable/preview_solar_timeline_track"
             android:contentDescription="@null" />
     </RelativeLayout>
 

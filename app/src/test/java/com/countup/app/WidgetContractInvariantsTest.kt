@@ -170,4 +170,55 @@ class WidgetContractInvariantsTest {
             )
         }
     }
+
+    @Test
+    fun allWidgetsDeclareValidPreviewLayoutAndPreviewImage() {
+        val widgetXmls = listOf(
+            Triple("zen_pebble_widget_info.xml", "widget_zen_pebble_1x1", "zen_pebble_widget_preview"),
+            Triple("zen_horizon_widget_info.xml", "widget_zen_horizon_4x1", "zen_horizon_widget_preview"),
+            Triple("solar_rhythm_widget_info.xml", "widget_solar_rhythm_4x2", "solar_rhythm_widget_preview"),
+            Triple("hero_widget_info.xml", "countup_hero_widget_2x1", "hero_widget_preview"),
+            Triple("haircut_widget_info.xml", "countup_widget", "haircut_widget_preview"),
+        )
+
+        for ((xmlName, layoutName, previewDrawableName) in widgetXmls) {
+            val candidates = listOf(
+                File("app/src/main/res/xml/$xmlName"),
+                File("src/main/res/xml/$xmlName"),
+            )
+            val xmlFile = candidates.firstOrNull { it.exists() }
+            assertNotNull("$xmlName must exist", xmlFile)
+            val content = xmlFile!!.readText(Charsets.UTF_8)
+
+            assertTrue(
+                "$xmlName must declare android:previewLayout=\"@layout/$layoutName\"",
+                content.contains("android:previewLayout=\"@layout/$layoutName\"")
+            )
+            assertTrue(
+                "$xmlName must declare android:previewImage=\"@drawable/$previewDrawableName\"",
+                content.contains("android:previewImage=\"@drawable/$previewDrawableName\"")
+            )
+
+            val layoutCandidates = listOf(
+                File("app/src/main/res/layout/$layoutName.xml"),
+                File("src/main/res/layout/$layoutName.xml"),
+            )
+            val layoutFile = layoutCandidates.firstOrNull { it.exists() }
+            assertNotNull("Layout $layoutName.xml must exist", layoutFile)
+            val layoutContent = layoutFile!!.readText(Charsets.UTF_8)
+            assertTrue(
+                "Layout $layoutName.xml must specify default populated android:text to prevent blank previews in launcher pickers",
+                layoutContent.contains("android:text=")
+            )
+
+            val drawableCandidates = listOf(
+                File("app/src/main/res/drawable/$previewDrawableName.xml"),
+                File("src/main/res/drawable/$previewDrawableName.xml"),
+            )
+            assertTrue(
+                "Preview drawable $previewDrawableName.xml must exist",
+                drawableCandidates.any { it.exists() }
+            )
+        }
+    }
 }

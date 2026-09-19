@@ -35,6 +35,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -181,8 +182,9 @@ fun CountUpContent(
             ) {
                 Column(
                     modifier = Modifier
-                        .fillMaxSize()
                         .widthIn(max = 640.dp)
+                        .fillMaxWidth()
+                        .fillMaxHeight()
                         .padding(
                             top = topInset,
                             start = startInset + 20.dp,
@@ -1236,6 +1238,9 @@ private fun OdometerDisplay(
             text = annotated,
             fontSize = fontSize,
             fontFamily = FontFamily.SansSerif,
+            maxLines = 1,
+            softWrap = false,
+            overflow = TextOverflow.Ellipsis,
             modifier = Modifier.alignByBaseline(),
         )
         if (unitLabel.isNotBlank()) {
@@ -1604,6 +1609,8 @@ fun ItemCard(
                     ),
                     style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
                     color = mutedInk,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
 

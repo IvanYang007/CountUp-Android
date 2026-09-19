@@ -97,6 +97,41 @@ CountUp-Android is a zero-permission, offline-first milestone count-up app built
 - **Why it recurs:** Zero-permission architecture prohibits listening for boot broadcasts directly.
 - **The rule:** Invoke `MidnightAlarmReceiver.scheduleMidnightAlarm(context)` with `RTC_WAKEUP` inside widget `onUpdate()` and `onEnabled()`.
 
+### L13. Remap widget bindings on restore instead of purging on startup — [observed]
+
+- **What happened:** A startup widget sanitizer purged all binding keys whose IDs weren't registered with the local launcher, immediately wiping all user configurations and pinned cards during device-to-device restores (D2D migration) before the new launcher could assign or restore widget IDs.
+- **Evidence:** `2c48806` feat(backup): platform-native auto backup & launcher widget sanitizer, `92262bb` feat: harden security, persist widget bindings
+- **Why it recurs:** Developers mistakenly treat missing launcher IDs on startup as dead state, unaware that launcher D2D restoration delivers new IDs asynchronously via `AppWidgetProvider.onRestored()`.
+- **The rule:** Never run an aggressive orphaned-binding purge on app startup. Implement `onRestored(oldIds, newIds)` on all `AppWidgetProvider` classes delegating to `CountUpStore.remapWidgetBindings`, and restrict deletion to `onDeleted()` or `deleteItem()`.
+
+### L14. Compute midnight rollover from civil dates across DST transitions — [observed]
+
+- **What happened:** Adding fixed 24-hour millisecond intervals or deriving midnight from wall-clock time without civil calendar day advancement caused alarms to drift or schedule into the past during 23-hour (spring forward) or 25-hour (fall back) daylight saving transitions.
+- **Evidence:** `5fa0136` feat(reliability): remediate audit findings, harden reboot rollover, `92262bb` feat: harden security
+- **Why it recurs:** Standard testing often executes in fixed timezones without asserting across DST boundary days.
+- **The rule:** Compute next midnight using `now.toLocalDate().plusDays(1).atStartOfDay(now.zone).plusSeconds(1).toInstant().toEpochMilli()`. Also register `ACTION_MY_PACKAGE_REPLACED` in manifest and receiver to restore rollover alarms across app updates without requiring `RECEIVE_BOOT_COMPLETED`.
+
+### L15. Standardize NIO atomic rename over AtomicFile for cross-platform JVM stability — [observed]
+
+- **What happened:** Replacing custom NIO `Files.move` with `androidx.core.util.AtomicFile` broke snapshot persistence in unit tests on Windows JVMs because `java.io.File.renameTo` silently fails when the target file already exists on Windows NT.
+- **Evidence:** `625f2c387` fix(security,ui): harden credentials, `8a69041` feat(release): bump version to 2.20.0, harden storage
+- **Why it recurs:** `AtomicFile` relies on POSIX `rename(2)` semantics which atomicity-replace targets on Linux/Android but fail silently on Windows.
+- **The rule:** Use `FileOutputStream.fd.sync()` paired with `java.nio.file.Files.move(tempPath, targetPath, StandardCopyOption.REPLACE_EXISTING)` for robust atomic file snapshots across both Android and desktop unit test environments.
+
+### L16. Order widthIn before fillMaxWidth and fillMaxHeight in Compose — [observed]
+
+- **What happened:** Writing `.fillMaxSize().widthIn(max = 640.dp)` in Jetpack Compose forced the layout constraint's minimum width to the full device width, bypassing the 640dp max limit and stretching content across tablets and foldables.
+- **Evidence:** `6395b8f` feat(perf): add baseline profile, graphics layer caching, adaptive width
+- **Why it recurs:** In Compose, modifier ordering determines constraint propagation; placing `fillMaxSize()` first locks incoming constraints to `(minWidth = screenWidth, maxWidth = screenWidth)`.
+- **The rule:** In centered responsive layouts, apply `.widthIn(max = 640.dp)` *before* `.fillMaxWidth().fillMaxHeight()`.
+
+### L17. Populate default sample strings and preview tracks when using previewLayout — [observed]
+
+- **What happened:** Adding `android:previewLayout="@layout/..."` pointing to live widget layouts that only specified design-time `tools:text` caused Android 12+ launchers to render blank white boxes with missing titles, counts, and milestone tracks in the widget picker. Conversely, relying solely on static `previewImage` vectors looked flat, unrepresentative of real typography, and failed to dynamically adapt to system locales (English vs. Chinese).
+- **Evidence:** `d99a22f` feat(preview): provide dedicated vector previewImage, `6395b8f` feat: living widget preview layouts with localized string resources
+- **Why it recurs:** Developers assume `previewLayout` runs widget Kotlin population logic or shows design-time `tools:text`. At runtime, launchers inflate the layout XML directly with zero code execution.
+- **The rule:** When using `android:previewLayout`, always populate layout XMLs with default `android:text="@string/..."` using dedicated preview string resources defined across all 7 locale files (`values`, `values-zh`, `values-zh-rCN`, etc.), and reference static preview tracks (`preview_zen_horizon_track`, `preview_solar_timeline_track`). Maintain `android:previewImage` as backward-compatible fallback for API 26–30 launchers.
+
 ## Project-specific implementation rules
 
 **Layout** — Place app UI components in `app/src/main/java/com/countup/app/`. Model new screens after `CountUpContent.kt`. Build new home-screen widget providers following `ZenPebbleWidgetReceiver.kt`.
@@ -190,7 +225,7 @@ CountUp-Android is a zero-permission, offline-first milestone count-up app built
 
 Before you change anything:
 
-- [ ] Run `./gradlew testDebugUnitTest` to verify all 402 existing unit and contract tests pass.
+- [ ] Run `./gradlew testDebugUnitTest` to verify all 408 existing unit and contract tests pass.
 - [ ] Confirm the tree is clean: `git status --porcelain`.
 - [ ] Read `docs/RECURRING_ISSUES.md` before touching any widget provider or XML layout.
 
@@ -198,12 +233,13 @@ While you change:
 
 - [ ] Maintain zero runtime permissions; never add `RECORD_AUDIO` or `RECEIVE_BOOT_COMPLETED` to `AndroidManifest.xml`.
 - [ ] Preserve `android:resizeMode="none"` and `reconfigurable` in `zen_pebble_widget_info.xml`; never add `configuration_optional`.
+- [ ] Ensure all widget info XMLs declare both `previewImage` and `previewLayout` with populated localized `@string/...` default text.
 - [ ] Omit `Modifier.minimumInteractiveComponentSize()` from 26dp subheader and 30dp card action button clusters.
 - [ ] Wrap all `CountUpStore` mutations in `synchronized(globalStoreLock)` and invoke `purgeWidgetBindingsForItem(itemId)` on deletion.
 
 Before you call it done:
 
-- [ ] Run `./gradlew testDebugUnitTest` and confirm 100% green test execution.
+- [ ] Run `./gradlew testDebugUnitTest` and confirm 100% green test execution (408 tests).
 - [ ] Run `./gradlew assembleRelease` to confirm R8 rules preserve all data models, enums, and widget providers.
 - [ ] Verify widget RemoteViews payload remains below 40KB via `WidgetMemoryBudgetGateTest`.
 

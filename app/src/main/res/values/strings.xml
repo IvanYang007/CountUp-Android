@@ -526,4 +526,12 @@
     <string name="voice_item_undone">Counter removed</string>
     <string name="action_edit">Edit</string>
     <string name="cd_widget_voice_add">Add counter by voice</string>
+
+    <!-- Widget Previews -->
+    <string name="preview_item_title">Sobriety</string>
+    <string name="preview_item_tag">SOBRIETY</string>
+    <string name="preview_item_subtitle">Since Jan 20, 2025</string>
+    <string name="preview_solar_event_title">Sobriety Streak</string>
+    <string name="preview_solar_quote">“Summer heat fades as autumn quiet settles”</string>
+    <string name="preview_solar_term_day">Day 5 of 15</string>
 </resources>

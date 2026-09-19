@@ -1,5 +1,6 @@
 package com.countup.app
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -130,6 +131,10 @@ fun ItemEditorDialog(
 
     val scrollState = rememberScrollState()
     val (dialogSurface, dialogBorder) = zenDialogStyle(RoundedCornerShape(20.dp))
+
+    BackHandler(enabled = isCustomizationExpanded) {
+        isCustomizationExpanded = false
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,

@@ -85,6 +85,17 @@ class HeroWidgetReceiver : AppWidgetProvider() {
             }
         }
     }
+
+    override fun onRestored(context: Context, oldWidgetIds: IntArray, newWidgetIds: IntArray) {
+        val appContext = context.applicationContext
+        CountUpStore.getInstance(appContext).remapWidgetBindings(oldWidgetIds, newWidgetIds)
+        MidnightAlarmReceiver.scheduleMidnightAlarm(appContext)
+        launchAsync {
+            for (newId in newWidgetIds) {
+                pushHeroWidgetUpdate(appContext, newId)
+            }
+        }
+    }
 }
 
 /** Pushes an update to all placed Hero Milestone widgets on the launcher. */

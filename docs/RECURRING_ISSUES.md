@@ -32,7 +32,6 @@ In `app/src/main/res/xml/zen_pebble_widget_info.xml`:
     android:updatePeriodMillis="1800000"
     android:initialLayout="@layout/widget_zen_pebble_1x1"
     android:previewImage="@drawable/zen_pebble_widget_preview"
-    android:previewLayout="@layout/widget_zen_pebble_1x1"
     android:description="@string/zen_pebble_widget_description"
     android:widgetCategory="home_screen"
     android:resizeMode="none"
@@ -255,14 +254,38 @@ In `CountUpStore.deleteItem(itemId)`, always execute `purgeWidgetBindingsForItem
 
 ---
 
+## 11. Widget Picker Previews (`previewLayout` Populated String & Sample Track Contract)
+
+### Symptom
+Widgets in the system launcher widget picker appear completely blank or show empty cards with missing text, no numbers, and absent milestone progress bars (e.g., only a solitary cycle icon or empty unit label) when raw runtime layouts are referenced without default populated content.
+
+### Architectural Root Cause
+In Android 12+ (API 31+), launcher hosts (Pixel Launcher, Samsung One UI, Launcher3) inflate `android:previewLayout` directly in the widget picker.
+If layouts only specify `tools:text` (which are stripped at build time) and omit default `android:text` and preview track drawables, static layout inflation yields empty views. Conversely, relying only on static `previewImage` vector drawables looks flat and cannot dynamically adapt to user system languages (English vs. Chinese).
+
+### Hard Invariants
+1. **Declare both `android:previewLayout` and `android:previewImage`**:
+   - `android:previewLayout` enables Android 12+ (API 31+) living widget previews that render exact fonts, margins, and card backgrounds.
+   - `android:previewImage` serves as backward-compatible fallback for API 26–30 launchers.
+2. **Always populate layout XMLs with localized `@string/...` resources**:
+   - Never leave `android:text` empty or rely solely on `tools:text`.
+   - Use dedicated preview string keys (`@string/preview_item_title`, `@string/preview_item_tag`, `@string/preview_item_subtitle`, `@string/preview_solar_quote`, etc.) defined across all 7 locale files (`values`, `values-zh`, `values-zh-rCN`, etc.) so picker previews dynamically render in authentic English or authentic Chinese.
+3. **Include static preview tracks in layout XMLs**:
+   - Reference `preview_zen_horizon_track` and `preview_solar_timeline_track` in layout XMLs so progress bars and milestone indicators display authentic visual structure in pickers before runtime Kotlin rendering takes over.
+4. **Enforced by `WidgetContractInvariantsTest.allWidgetsDeclareValidPreviewLayoutAndPreviewImage`**.
+
+---
+
 ## Quick Reference Checklist for New Widgets or Refactoring
 
 Before committing any widget changes or releasing a new version:
 
 - [ ] **1x1 Widgets**: Does `zen_pebble_widget_info.xml` have `android:resizeMode="none"` and `android:widgetFeatures="reconfigurable"` (omitting `configuration_optional` to guarantee automatic configure activity launch on drop)?
+- [ ] **Widget Previews**: Does every widget info XML declare both `android:previewImage` and `android:previewLayout`, with layout XMLs containing default populated `android:text="@string/..."` and sample tracks for dual-locale (EN/ZH) previews?
 - [ ] **Configurable Widgets**: Does provider XML declare `android:configure` and is the activity registered in `AndroidManifest.xml` with `APPWIDGET_CONFIGURE`?
 - [ ] **Calling Package Security**: Do exported configure activities validate `appWidgetId` and caller parameters?
 - [ ] **Instance Bindings**: Does `onDeleted()` clean up `CountUpStore` widget bindings, and does `deleteItem()` purge orphaned bindings across all widget families?
+- [ ] **Device Restoration**: Does every widget provider implement `onRestored(oldIds, newIds)` delegating to `CountUpStore.remapWidgetBindings`?
 - [ ] **Voice Quick Add**: Does `AndroidManifest.xml` retain `<queries>` for `RecognitionService` and `RECOGNIZE_SPEECH` while requesting **zero** microphone permissions?
 - [ ] **Midnight Alarm**: Do `onUpdate()` and `onEnabled()` re-register `MidnightAlarmReceiver.scheduleMidnightAlarm(context)` with `RTC_WAKEUP`?
 - [ ] **Action Row Density**: Are subheader action buttons sized at 26dp and ItemCard buttons at 30dp with 1–2dp spacing, strictly omitting `minimumInteractiveComponentSize()` to prevent layout spread?
@@ -270,6 +293,6 @@ Before committing any widget changes or releasing a new version:
 - [ ] **ProGuard Rules**: Are new receivers, models, and configure activities added to `proguard-rules.pro`?
 - [ ] **Release Signing**: Is release bundle signed (verified via `apksigner`)?
 - [ ] **Memory Gate**: Does the widget payload stay strictly below 40 KB (`WidgetMemoryBudgetGateTest`) to prevent `TransactionTooLargeException`?
-- [ ] **Automated Tests**: Do all 402 unit and contract tests pass (`./gradlew testDebugUnitTest`)?
+- [ ] **Automated Tests**: Do all 408 unit and contract tests pass (`./gradlew testDebugUnitTest`)?
 
 

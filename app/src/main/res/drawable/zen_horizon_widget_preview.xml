@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Preview asset for the 4x1 Zen Horizon widget in the launcher widget picker.
+     Single-row ribbon with title, milestone hairline track, count numeral, and cycling unit. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="280dp"
+    android:height="70dp"
+    android:viewportWidth="280"
+    android:viewportHeight="70">
+
+    <!-- Card Background (18dp corner radius) -->
+    <path
+        android:fillColor="#FAF5EE"
+        android:pathData="M18,3 h244 a15,15 0 0 1 15,15 v34 a15,15 0 0 1 -15,15 h-244 a15,15 0 0 1 -15,-15 v-34 a15,15 0 0 1 15,-15 z" />
+    <path
+        android:fillColor="#122C2416"
+        android:pathData="M18,3 h244 a15,15 0 0 1 15,15 v34 a15,15 0 0 1 -15,15 h-244 a15,15 0 0 1 -15,-15 v-34 a15,15 0 0 1 15,-15 z" />
+
+    <!-- Left: Title Bar ("SOBRIETY") -->
+    <!-- Stylized title bars representing clean typography -->
+    <path
+        android:fillColor="#6B5D4F"
+        android:pathData="M22,17 h58 v8 h-58 z" />
+
+    <!-- Subtitle Bar ("Since Jan 20, 2025") -->
+    <path
+        android:fillColor="#8C7E70"
+        android:pathData="M22,29 h85 v5 h-85 z" />
+
+    <!-- Hairline Milestone Track (Total track) -->
+    <path
+        android:fillColor="#DED5C7"
+        android:pathData="M22,46 h120 v2.5 h-120 z" />
+
+    <!-- Progress filled track -->
+    <path
+        android:fillColor="#DEB285"
+        android:pathData="M22,46 h75 v2.5 h-75 z" />
+
+    <!-- Milestone Accent Dot with glowing halo -->
+    <path
+        android:fillColor="#FAF5EE"
+        android:pathData="M97,47.25 a5.5,5.5 0 1 0 0.01,0 z" />
+    <path
+        android:fillColor="#C87A48"
+        android:pathData="M97,47.25 a3.5,3.5 0 1 0 0.01,0 z" />
+
+    <!-- Right: Bold Numeral ("412") -->
+    <!-- "4" -->
+    <path
+        android:fillColor="#2C2416"
+        android:pathData="M210,18 h4.5 v14 h3.5 v3.5 h-3.5 v5 h-4.5 v-5 h-9 v-3.5 l8.5,-14 z M206,32 h4 v-7 l-4,7 z" />
+    <!-- "1" -->
+    <path
+        android:fillColor="#2C2416"
+        android:pathData="M222,22 l-3.5,2.5 v-3.5 l4.5,-3 h3 v22.5 h-4 z" />
+    <!-- "2" -->
+    <path
+        android:fillColor="#2C2416"
+        android:pathData="M233,20 c3.5,-2 7.5,-1 9,2 c1,2 0.5,4 -1,6 l-4.5,4.5 h6.5 v3.5 h-13.5 v-3.5 l6.5,-6.5 c1.5,-1.5 2,-2.5 1.5,-3.5 c-0.5,-1 -2,-1.5 -3.5,-0.5 c-1,0.5 -1.5,1.5 -1.5,2.5 h-3.5 c0,-3 2,-5.5 5,-6.5 z" />
+
+    <!-- Unit Label ("DAYS") -->
+    <path
+        android:fillColor="#8C7E70"
+        android:pathData="M208,46 h30 v3.5 h-30 z" />
+
+    <!-- Unit Cycle Icon ("⇄") in warm patina -->
+    <path
+        android:fillColor="#DEB285"
+        android:pathData="M243,45 h10 v1.5 h-10 z M251,43.5 l3,2.25 l-3,2.25 z M241,49.5 l-3,-2.25 l3,-2.25 z M239,48.75 h10 v1.5 h-10 z" />
+</vector>

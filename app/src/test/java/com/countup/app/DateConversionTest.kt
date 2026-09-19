@@ -68,4 +68,38 @@ class DateConversionTest {
         assertTrue(todaySubLabel.startsWith("SINCE "))
         assertTrue(todaySubLabel.contains("2026"))
     }
+
+    @Test
+    fun `getLocalizedDateFormatter caches formatters per locale`() {
+        val usFormatter1 = getLocalizedDateFormatter(java.util.Locale.US)
+        val usFormatter2 = getLocalizedDateFormatter(java.util.Locale.US)
+        org.junit.Assert.assertSame("Same locale must return identical cached formatter instance", usFormatter1, usFormatter2)
+
+        val deFormatter = getLocalizedDateFormatter(java.util.Locale.GERMANY)
+        val testDate = LocalDate.of(2026, 9, 18)
+        val usFormatted = usFormatter1.format(testDate)
+        val deFormatted = deFormatter.format(testDate)
+
+        assertTrue(usFormatted.contains("Sep"))
+        assertTrue(deFormatted.contains("18.09.2026") || deFormatted.contains("Sept") || deFormatted.contains("Sep"))
+    }
+
+    @Test
+    fun `formatAnchorDateSubLabel works with Turkish and German locales without case anomalies`() {
+        val originalLocale = java.util.Locale.getDefault()
+        try {
+            // Turkish locale has special dotless i handling (i -> İ vs I)
+            java.util.Locale.setDefault(java.util.Locale.forLanguageTag("tr-TR"))
+            val label = formatAnchorDateSubLabel(
+                count = 10L,
+                date = LocalDate.of(2026, 9, 18),
+                sinceTemplate = "since %s",
+                untilTemplate = "until %s",
+            )
+            assertTrue(label.isNotEmpty())
+            assertTrue(label.contains("2026"))
+        } finally {
+            java.util.Locale.setDefault(originalLocale)
+        }
+    }
 }

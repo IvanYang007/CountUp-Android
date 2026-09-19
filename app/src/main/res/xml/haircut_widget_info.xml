@@ -9,6 +9,7 @@
     android:updatePeriodMillis="1800000"
     android:initialLayout="@layout/countup_widget"
     android:previewImage="@drawable/haircut_widget_preview"
+    android:previewLayout="@layout/countup_widget"
     android:description="@string/widget_description"
     android:widgetCategory="home_screen"
     android:resizeMode="horizontal|vertical"

@@ -23,11 +23,11 @@ class MidnightAlarmReceiver : BroadcastReceiver() {
          * Calculates the epoch millisecond timestamp for the nearest upcoming 00:00:01 local time.
          */
         fun calculateNextMidnightMillis(now: ZonedDateTime): Long {
-            val todayTarget = now.toLocalDate().atTime(0, 0, 1).atZone(now.zone)
+            val todayTarget = now.toLocalDate().atStartOfDay(now.zone).plusSeconds(1)
             return if (now.isBefore(todayTarget)) {
                 todayTarget.toInstant().toEpochMilli()
             } else {
-                now.toLocalDate().plusDays(1).atTime(0, 0, 1).atZone(now.zone).toInstant().toEpochMilli()
+                now.toLocalDate().plusDays(1).atStartOfDay(now.zone).plusSeconds(1).toInstant().toEpochMilli()
             }
         }
 
@@ -101,7 +101,8 @@ class MidnightAlarmReceiver : BroadcastReceiver() {
         val action = intent.action ?: return
         if (action != ACTION_MIDNIGHT_ROLLOVER &&
             action != Intent.ACTION_TIME_CHANGED &&
-            action != Intent.ACTION_TIMEZONE_CHANGED
+            action != Intent.ACTION_TIMEZONE_CHANGED &&
+            action != Intent.ACTION_MY_PACKAGE_REPLACED
         ) {
             return
         }

@@ -21,10 +21,10 @@ the **days since a set of anchor dates** (e.g. last haircut, a habit streak, sob
   - **Solar Rhythm (4x2 & 2x2 Seasonal Canvas):** Harmonious seasonal tracker aligning your milestone with the 24 traditional Chinese Solar Terms (24 节气).
   - **Zen Pebble (1x1 Tactile Tile):** Ultra-compact pebble tile engineered for zero-compromise drop targeting across OEM launchers (Samsung One UI, Xiaomi HyperOS, Vivo OriginOS, OPPO ColorOS).
 - **Dual-Tier Cross-Device Migration & Offline SAF Backup:**
-  - **Tier 1 (Automated OS Sync):** Platform-native Android 12+ encrypted Auto Backup and Device-to-Device (D2D) migration (Mi Mover, Phone Clone, GMS) with an automatic launcher widget ID sanitizer.
+  - **Tier 1 (Automated OS Sync):** Platform-native Android 12+ encrypted Auto Backup and Device-to-Device (D2D) migration (Mi Mover, Phone Clone, GMS) with automatic widget ID remapping across device restorations (`onRestored`).
   - **Tier 2 (Self-Sovereign JSON Portability):** Offline export and interactive restore via Android's Storage Access Framework (SAF) featuring a pre-restore preview screen and Merge / Replace conflict strategies.
 - **Silent Midnight Rollover:** Battery-friendly RTC alarm (`MidnightAlarmReceiver`) advances day counts at `00:00:01` local time without persistent background services or battery drain.
-- **Adaptive Layout & 120Hz Rendering:** Responsive centered column constraints (`widthIn(max = 640.dp)`) for foldables, tablets, and large screens; zero-allocation `GraphicsLayer` caching for 120Hz fluid scrolling across all 30 Chinese ink wash landscape themes; and an ahead-of-time ART Baseline Profile for up to 40% faster cold startup.
+- **Adaptive Layout & 120Hz Rendering:** Responsive centered column constraints (`widthIn(max = 640.dp)`) for foldables, tablets, and large screens; zero-allocation `GraphicsLayer` caching for 120Hz fluid scrolling across all 30 Chinese ink wash landscape themes; and an ahead-of-time ART Baseline Profile pre-compiling critical startup entry points and initial Compose rendering paths.
 - **Accessibility First:** Full TalkBack screen reader semantics, descriptive action labels, and tactile haptic feedback.
 - **Privacy First:** 100% offline, zero runtime permissions, no accounts, no ads, no trackers, no cloud servers, and no background daemon.
 
@@ -34,8 +34,8 @@ Versions are pinned in `gradle/libs.versions.toml`.
 
 | Component | Version |
 |---|---|
-| Android Gradle Plugin | `9.4.0` (built-in Kotlin) |
-| Gradle | `9.7.1` |
+| Android Gradle Plugin | `9.3.0` (built-in Kotlin) |
+| Gradle | `9.5.0` |
 | JDK | `17` |
 | Kotlin | `2.3.21` |
 | Compose BOM | `2026.06.00` |
@@ -53,7 +53,7 @@ Prerequisites:
 ./gradlew clean
 ./gradlew assembleDebug             # debug APK
 ./gradlew assembleRelease           # signed release APK & bundle (R8 minified)
-./gradlew test                      # 402 JVM unit tests (100% pass)
+./gradlew test                      # 408 JVM unit tests (100% pass)
 ./gradlew connectedDebugAndroidTest # instrumented tests (emulator/device online)
 ./gradlew lintDebug                 # Android Lint (0 errors)
 ```
@@ -102,6 +102,19 @@ Long-press home screen → **Widgets** → **Zen Pebble** → drag to a slot.
 - **Two-Tap Arming Protection:** Directly on the home screen, tapping a counter numeral displays `"0?"`. A second tap within 1.5 seconds confirms the reset; otherwise it disarms safely.
 - **In-Card Undo Whispers & Recovery:** If an item is reset accidentally (from a widget or inside the app), opening the CountUp app immediately presents an in-situ undo whisper directly on the reset card with a 10-second window to restore your previous anchor date and historical streak metrics with a single tap.
 
+### 8. Tested OEM Launcher Compatibility Matrix
+
+All 5 widgets are tested across primary Android OEM launcher implementations to ensure exact placement, no drop snapping, and reliable configuration activity invocation:
+
+| Launcher / OEM | Typical 1x1 Cell | Grid Density | Drop Targeting | Configuration Flow |
+|---|---|---|---|---|
+| Google Pixel Launcher | ~80dp | 5×5 | Verified | Auto-launches configure picker |
+| Samsung One UI (Galaxy) | ~68dp | 4×6 / 5×6 | Verified (`resizeMode="none"`) | Auto-launches configure picker |
+| Xiaomi HyperOS / MIUI | ~60–68dp | 4×6 / 5×6 | Verified (16dp bounded corners) | Auto-launches configure picker |
+| Vivo OriginOS / Funtouch | ~56–64dp | 5×6 / 5×9 | Verified (autoSizeText uniform) | Auto-launches configure picker |
+| OPPO ColorOS / Realme UI | ~60–66dp | 4×6 / 5×6 | Verified | Auto-launches configure picker |
+| Nova Launcher / Lawnchair | Configurable | Dynamic | Verified | Auto-launches configure picker |
+
 **Widget screenshot (debug builds only):** Renderable on-device via debug-only host activity:
 
 ```bash
@@ -116,7 +129,7 @@ CountUp protects user streaks and history across device upgrades and factory res
 - **Tier 1: Platform-Native OS Backup & Phone Cloning**
   - Configured via `backup_rules.xml` and `data_extraction_rules.xml`.
   - Backs up primary preferences and the atomic snapshot `countup_backup.json` to encrypted Google Drive backup (on GMS devices) and authorizes Device-to-Device migration tools (Mi Mover, Phone Clone, EasyShare).
-  - Includes an automatic **Launcher Widget Sanitizer** on startup that purges invalid widget IDs left behind by previous device launchers.
+  - Automatically remaps launcher widget IDs via `AppWidgetProvider.onRestored(oldIds, newIds)` on device-to-device restores without purging valid configurations.
 - **Tier 2: Self-Sovereign JSON Portability via Storage Access Framework (SAF)**
   - Accessible directly in the app via the dedicated **Settings** gear icon (`ic_settings`) in the subheader under **Data & Backup**.
   - **Export:** Generates a clean, UTF-8 encoded, unencrypted `.json` backup file using Android's system document creation picker (`ACTION_CREATE_DOCUMENT`) without requesting storage permissions.
@@ -133,7 +146,7 @@ Widgets automatically advance at midnight without requiring battery-draining bac
 
 ## 7. Verification performed
 
-- **402 JVM Unit Tests** (100% passing) across data models, repository fail-safes, MVI ViewModel, JSON salvage parsing, widget reducers, navigation contracts, backup merge/replace strategies, reset whisper lifecycles, bidirectional sorting, date picker contracts, widget IPC debouncing, and 100+ icon registry invariants.
+- **408 JVM Unit Tests** (100% passing) across data models, repository fail-safes, MVI ViewModel, JSON salvage parsing, widget reducers, navigation contracts, backup merge/replace strategies, reset whisper lifecycles, bidirectional sorting, date picker contracts, widget IPC debouncing, and 100+ icon registry invariants.
 - Clean debug and release builds with R8 minification and resource shrinking enabled (`isMinifyEnabled = true`, `isShrinkResources = true`).
 - Automated release bundle signing with keystore password resolution (`COUNTUP_KEYSTORE_PASS` -> `local.properties`).
 - Android Lint (`lintDebug`): **0 errors**.

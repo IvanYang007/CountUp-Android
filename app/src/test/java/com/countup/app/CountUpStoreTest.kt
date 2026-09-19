@@ -873,4 +873,62 @@ class CountUpStoreTest {
         assertEquals(1, store.items().size)
         assertEquals(firstAdd, secondAdd)
     }
+
+    @Test
+    fun remapWidgetBindingsTransfersAllWidgetPreferences() {
+        val store = CountUpStore(testContext)
+        val item = store.addItem("Reading", 20000L)!!
+
+        val oldHeroId = 101
+        val oldHorizonId = 102
+        val oldPebbleId = 103
+        val oldSolarId = 104
+
+        store.setHeroWidgetBinding(oldHeroId, item.id)
+        store.setHeroWidgetDisplayMode(oldHeroId, TimeDisplayMode.DAYS)
+        store.setZenHorizonBinding(oldHorizonId, item.id)
+        store.setZenHorizonUnit(oldHorizonId, ZenWidgetDisplayUnit.MONTHS)
+        store.setZenPebbleBinding(oldPebbleId, item.id)
+        store.setZenPebbleTag(oldPebbleId, "Book")
+        store.setSolarRhythmBinding(oldSolarId, item.id)
+
+        val newHeroId = 201
+        val newHorizonId = 202
+        val newPebbleId = 203
+        val newSolarId = 204
+
+        val oldIds = intArrayOf(oldHeroId, oldHorizonId, oldPebbleId, oldSolarId)
+        val newIds = intArrayOf(newHeroId, newHorizonId, newPebbleId, newSolarId)
+
+        val remappedCount = store.remapWidgetBindings(oldIds, newIds)
+        // 2 hero keys + 2 horizon keys + 2 pebble keys + 1 solar key = 7
+        assertEquals(7, remappedCount)
+
+        // Old keys must be purged
+        assertNull(store.getHeroWidgetBinding(oldHeroId))
+        assertNull(store.getZenHorizonBinding(oldHorizonId))
+        assertNull(store.getZenPebbleBinding(oldPebbleId))
+        assertNull(store.getZenPebbleTag(oldPebbleId))
+        assertNull(store.getSolarRhythmBinding(oldSolarId))
+
+        // New keys must retain values
+        assertEquals(item.id, store.getHeroWidgetBinding(newHeroId))
+        assertEquals(TimeDisplayMode.DAYS, store.getHeroWidgetDisplayMode(newHeroId))
+        assertEquals(item.id, store.getZenHorizonBinding(newHorizonId))
+        assertEquals(ZenWidgetDisplayUnit.MONTHS, store.getZenHorizonUnit(newHorizonId))
+        assertEquals(item.id, store.getZenPebbleBinding(newPebbleId))
+        assertEquals("Book", store.getZenPebbleTag(newPebbleId))
+        assertEquals(item.id, store.getSolarRhythmBinding(newSolarId))
+    }
+
+    @Test
+    fun remapWidgetBindingsHandlesEdgeCases() {
+        val store = CountUpStore(testContext)
+        // Empty arrays
+        assertEquals(0, store.remapWidgetBindings(intArrayOf(), intArrayOf()))
+        // Mismatched sizes
+        assertEquals(0, store.remapWidgetBindings(intArrayOf(1), intArrayOf(1, 2)))
+        // Identical IDs
+        assertEquals(0, store.remapWidgetBindings(intArrayOf(10), intArrayOf(10)))
+    }
 }

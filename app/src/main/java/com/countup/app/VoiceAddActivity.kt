@@ -133,6 +133,15 @@ class VoiceAddActivity : ComponentActivity() {
         outState.putLong(KEY_ANCHOR_DATE, anchorEpochDay)
     }
 
+    private fun fallbackToManualAdd() {
+        val fallback = Intent(this, MainActivity::class.java).apply {
+            action = ACTION_ADD_ITEM
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        startActivity(fallback)
+        finishSilently()
+    }
+
     private fun launchSpeechRecognition() {
         val localeTag = Locale.getDefault().toLanguageTag()
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
@@ -142,16 +151,15 @@ class VoiceAddActivity : ComponentActivity() {
             putExtra(RecognizerIntent.EXTRA_PROMPT, getString(R.string.voice_listening_hint))
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
         }
+        if (intent.resolveActivity(packageManager) == null) {
+            fallbackToManualAdd()
+            return
+        }
         try {
             speechLauncher.launch(intent)
         } catch (_: ActivityNotFoundException) {
             // Speech engine missing: seamlessly fallback to existing Add Dialog in MainActivity
-            val fallback = Intent(this, MainActivity::class.java).apply {
-                action = ACTION_ADD_ITEM
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            }
-            startActivity(fallback)
-            finishSilently()
+            fallbackToManualAdd()
         }
     }
 

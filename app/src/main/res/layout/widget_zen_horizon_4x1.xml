@@ -33,6 +33,7 @@
             android:textColor="#6B5D4F"
             android:singleLine="true"
             android:ellipsize="end"
+            android:text="@string/preview_item_tag"
             tools:text="SOBRIETY" />
 
         <TextView
@@ -44,6 +45,7 @@
             android:textColor="#8C7E70"
             android:singleLine="true"
             android:ellipsize="end"
+            android:text="@string/preview_item_subtitle"
             tools:text="Since Jan 20, 2025" />
 
         <ImageView
@@ -52,6 +54,7 @@
             android:layout_height="14dp"
             android:layout_marginTop="6dp"
             android:scaleType="fitStart"
+            android:src="@drawable/preview_zen_horizon_track"
             android:contentDescription="@null" />
     </LinearLayout>
 
@@ -75,6 +78,7 @@
             android:textColor="#2C2416"
             android:includeFontPadding="false"
             android:singleLine="true"
+            android:text="412"
             tools:text="412" />
 
         <LinearLayout
@@ -92,6 +96,7 @@
                 android:letterSpacing="0.12"
                 android:textColor="#8C7E70"
                 android:singleLine="true"
+                android:text="@string/unit_days"
                 tools:text="DAYS" />
 
             <TextView

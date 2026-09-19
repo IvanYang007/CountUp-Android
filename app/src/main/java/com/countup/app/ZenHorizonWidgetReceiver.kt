@@ -79,6 +79,17 @@ class ZenHorizonWidgetReceiver : AppWidgetProvider() {
             }
         }
     }
+
+    override fun onRestored(context: Context, oldWidgetIds: IntArray, newWidgetIds: IntArray) {
+        val appContext = context.applicationContext
+        CountUpStore.getInstance(appContext).remapWidgetBindings(oldWidgetIds, newWidgetIds)
+        MidnightAlarmReceiver.scheduleMidnightAlarm(appContext)
+        launchAsync {
+            for (newId in newWidgetIds) {
+                pushZenHorizonWidgetUpdate(appContext, newId)
+            }
+        }
+    }
 }
 
 /** Pushes an update to all placed Zen Horizon widgets on the launcher. */
