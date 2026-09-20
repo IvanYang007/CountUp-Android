@@ -577,6 +577,35 @@ class CountUpStore(context: Context) {
             .commit()
     }
 
+    private fun sanitizeFilter(raw: String?): String =
+        if (raw == OVERVIEW_FILTER_ALL || CARD_COLOR_CATEGORIES.any { it.id == raw }) raw ?: OVERVIEW_FILTER_ALL else OVERVIEW_FILTER_ALL
+
+    /** Retrieves the style filter for an Overview Grid Widget instance, defaulting to [OVERVIEW_FILTER_ALL]. */
+    fun getOverviewWidgetFilter(appWidgetId: Int): String {
+        return synchronized(globalStoreLock) {
+            sanitizeFilter(prefs.getString(PREFIX_OVERVIEW_STYLE_FILTER + appWidgetId, OVERVIEW_FILTER_ALL))
+        }
+    }
+
+    /** Persists the style filter for an Overview Grid Widget instance. */
+    fun setOverviewWidgetFilter(appWidgetId: Int, filter: String): Boolean {
+        val sanitized = sanitizeFilter(filter)
+        return synchronized(globalStoreLock) {
+            prefs.edit()
+                .putString(PREFIX_OVERVIEW_STYLE_FILTER + appWidgetId, sanitized)
+                .commit()
+        }
+    }
+
+    /** Removes the style filter for a deleted Overview Grid Widget instance. */
+    fun removeOverviewWidgetFilter(appWidgetId: Int): Boolean {
+        return synchronized(globalStoreLock) {
+            prefs.edit()
+                .remove(PREFIX_OVERVIEW_STYLE_FILTER + appWidgetId)
+                .commit()
+        }
+    }
+
     /** Retrieves all active hero widget bindings. */
     fun getAllHeroWidgetBindings(): Map<Int, String> {
         val result = mutableMapOf<Int, String>()
@@ -729,6 +758,7 @@ class CountUpStore(context: Context) {
                 PREFIX_ZEN_PEBBLE_BINDING,
                 PREFIX_ZEN_PEBBLE_TAG,
                 PREFIX_SOLAR_RHYTHM_BINDING,
+                PREFIX_OVERVIEW_STYLE_FILTER,
             )
             val editor = prefs.edit()
             var purgedCount = 0
@@ -768,6 +798,7 @@ class CountUpStore(context: Context) {
                 PREFIX_ZEN_PEBBLE_BINDING,
                 PREFIX_ZEN_PEBBLE_TAG,
                 PREFIX_SOLAR_RHYTHM_BINDING,
+                PREFIX_OVERVIEW_STYLE_FILTER,
             )
             val editor = prefs.edit()
             var remappedCount = 0
@@ -1033,6 +1064,8 @@ class CountUpStore(context: Context) {
         private const val PREFIX_ZEN_PEBBLE_BINDING = "zen_pebble_binding_"
         private const val PREFIX_ZEN_PEBBLE_TAG = "zen_pebble_tag_"
         private const val PREFIX_SOLAR_RHYTHM_BINDING = "solar_rhythm_binding_"
+        private const val PREFIX_OVERVIEW_STYLE_FILTER = "overview_style_filter_"
+        const val OVERVIEW_FILTER_ALL = "all"
         private const val MAX_QUARANTINE_ENTRIES = 3
         private const val KEY_PENDING_WIDGET_RESETS = "pending_widget_resets_v1"
         private const val MAX_PENDING_WIDGET_RESETS = 3

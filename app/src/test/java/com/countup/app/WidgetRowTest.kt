@@ -193,7 +193,120 @@ class WidgetRowTest {
     }
 
     @Test
-    fun widgetActionAddItemMatchesConstant() {
+    fun widgetActionAndExtraConstantsMatch() {
         assertEquals("com.countup.app.ACTION_ADD_ITEM", ACTION_ADD_ITEM)
+        assertEquals("com.countup.app.EXTRA_INITIAL_CARD_STYLE_CATEGORY", EXTRA_INITIAL_CARD_STYLE_CATEGORY)
+    }
+
+    @Test
+    fun widgetRowsFilteringBySuiteOnlyIncludesMatchingItems() {
+        val washiItem = CountUpItem(id = "1", name = "Washi", epochDay = today.toEpochDay() - 1, cardColor = "paper_sage", showInWidget = true)
+        val earthItem = CountUpItem(id = "2", name = "Earth", epochDay = today.toEpochDay() - 2, cardColor = "celadon_bamboo", showInWidget = true)
+        val sumiItem = CountUpItem(id = "3", name = "Sumi", epochDay = today.toEpochDay() - 3, cardColor = "ink_gold", showInWidget = true)
+        val allItems = listOf(washiItem, earthItem, sumiItem)
+
+        val washiRows = widgetRows(allItems.filter { it.matchesStyleFilter("washi") }, today)
+        assertEquals(1, washiRows.size)
+        assertEquals("Washi", washiRows[0].name)
+
+        val earthRows = widgetRows(allItems.filter { it.matchesStyleFilter("earth") }, today)
+        assertEquals(1, earthRows.size)
+        assertEquals("Earth", earthRows[0].name)
+
+        val sumiRows = widgetRows(allItems.filter { it.matchesStyleFilter("sumi") }, today)
+        assertEquals(1, sumiRows.size)
+        assertEquals("Sumi", sumiRows[0].name)
+
+        val allRows = widgetRows(allItems.filter { it.matchesStyleFilter(CountUpStore.OVERVIEW_FILTER_ALL) }, today)
+        assertEquals(3, allRows.size)
+    }
+
+    @Test
+    fun nextOverviewStyleFilterCyclesThroughAllSuites() {
+        assertEquals("washi", nextOverviewStyleFilter(CountUpStore.OVERVIEW_FILTER_ALL))
+        assertEquals("earth", nextOverviewStyleFilter("washi"))
+        assertEquals("sumi", nextOverviewStyleFilter("earth"))
+        assertEquals(CountUpStore.OVERVIEW_FILTER_ALL, nextOverviewStyleFilter("sumi"))
+        assertEquals("washi", nextOverviewStyleFilter("unknown_value"))
+    }
+
+    @Test
+    fun resolveOverviewDotColorReturnsSuiteColors() {
+        // Day mode
+        assertEquals(0xFFDEB285.toInt(), resolveOverviewDotColor("washi", night = false))
+        assertEquals(0xFF6DB88A.toInt(), resolveOverviewDotColor("earth", night = false))
+        assertEquals(0xFF3C3F41.toInt(), resolveOverviewDotColor("sumi", night = false))
+        assertEquals(0xFF8C8275.toInt(), resolveOverviewDotColor("all", night = false))
+
+        // Night mode
+        assertEquals(0xFFE8C5A0.toInt(), resolveOverviewDotColor("washi", night = true))
+        assertEquals(0xFF8BC4A2.toInt(), resolveOverviewDotColor("earth", night = true))
+        assertEquals(0xFFD4A574.toInt(), resolveOverviewDotColor("sumi", night = true))
+        assertEquals(0xFFA8A095.toInt(), resolveOverviewDotColor("all", night = true))
+    }
+
+    @Test
+    fun cycleOverviewFilterActionConstantMatches() {
+        assertEquals("com.countup.app.ACTION_CYCLE_OVERVIEW_FILTER", ACTION_CYCLE_OVERVIEW_FILTER)
+    }
+
+    @Test
+    fun resolveOverviewTitleResReturnsCorrectResourcePairs() {
+        // "all" must resolve to category_all (e.g. "All" / "全部")
+        assertEquals(Pair(R.string.app_name, R.string.category_all), resolveOverviewTitleRes(CountUpStore.OVERVIEW_FILTER_ALL))
+        // Specific suites resolve to their respective category labels
+        assertEquals(Pair(R.string.app_name, R.string.color_category_washi), resolveOverviewTitleRes("washi"))
+        assertEquals(Pair(R.string.app_name, R.string.color_category_earth), resolveOverviewTitleRes("earth"))
+        assertEquals(Pair(R.string.app_name, R.string.color_category_sumi), resolveOverviewTitleRes("sumi"))
+        // Unknown filter falls back to category_all
+        assertEquals(Pair(R.string.app_name, R.string.category_all), resolveOverviewTitleRes("unknown"))
+    }
+
+    @Test
+    fun resolveOverviewPaperColorReturnsCorrectPalette() {
+        // Day mode: "all" must remain strictly identical to current production (#F5E6D3)
+        assertEquals(0xFFF5E6D3.toInt(), resolveOverviewPaperColor(CountUpStore.OVERVIEW_FILTER_ALL, night = false))
+        assertEquals(0xFFF7E3C8.toInt(), resolveOverviewPaperColor("washi", night = false))
+        assertEquals(0xFFEBECE3.toInt(), resolveOverviewPaperColor("earth", night = false))
+        assertEquals(0xFFECEBE8.toInt(), resolveOverviewPaperColor("sumi", night = false))
+        assertEquals(0xFFF5E6D3.toInt(), resolveOverviewPaperColor("fallback", night = false))
+
+        // Night mode: "all" must remain strictly identical to current production (#191B17)
+        assertEquals(0xFF191B17.toInt(), resolveOverviewPaperColor(CountUpStore.OVERVIEW_FILTER_ALL, night = true))
+        assertEquals(0xFF201B15.toInt(), resolveOverviewPaperColor("washi", night = true))
+        assertEquals(0xFF161B17.toInt(), resolveOverviewPaperColor("earth", night = true))
+        assertEquals(0xFF141415.toInt(), resolveOverviewPaperColor("sumi", night = true))
+        assertEquals(0xFF191B17.toInt(), resolveOverviewPaperColor("fallback", night = true))
+    }
+
+    @Test
+    fun resolveOverviewDividerColorReturnsCorrectPalette() {
+        // Day mode
+        assertEquals(0x66E3D3B8, resolveOverviewDividerColor(CountUpStore.OVERVIEW_FILTER_ALL, night = false))
+        assertEquals(0x66DFBE93, resolveOverviewDividerColor("washi", night = false))
+        assertEquals(0x66CEDBD1, resolveOverviewDividerColor("earth", night = false))
+        assertEquals(0x66CBC7C0, resolveOverviewDividerColor("sumi", night = false))
+
+        // Night mode
+        assertEquals(0x403A3D35, resolveOverviewDividerColor(CountUpStore.OVERVIEW_FILTER_ALL, night = true))
+        assertEquals(0x4045382D, resolveOverviewDividerColor("washi", night = true))
+        assertEquals(0x40333C36, resolveOverviewDividerColor("earth", night = true))
+        assertEquals(0x402E3033, resolveOverviewDividerColor("sumi", night = true))
+    }
+
+    @Test
+    fun resolveOverviewMutedInkReturnsCorrectPalette() {
+        // Day mode
+        assertEquals(0xFF6B5D4F.toInt(), resolveOverviewMutedInk(CountUpStore.OVERVIEW_FILTER_ALL, night = false))
+        assertEquals(0xFF68513B.toInt(), resolveOverviewMutedInk("washi", night = false))
+        assertEquals(0xFF546358.toInt(), resolveOverviewMutedInk("earth", night = false))
+        assertEquals(0xFF505359.toInt(), resolveOverviewMutedInk("sumi", night = false))
+
+        // Night mode
+        assertEquals(0xFFC4BEAE.toInt(), resolveOverviewMutedInk(CountUpStore.OVERVIEW_FILTER_ALL, night = true))
+        assertEquals(0xFFD2C3AA.toInt(), resolveOverviewMutedInk("washi", night = true))
+        assertEquals(0xFFBDC7BE.toInt(), resolveOverviewMutedInk("earth", night = true))
+        assertEquals(0xFFC4C5C8.toInt(), resolveOverviewMutedInk("sumi", night = true))
     }
 }
+

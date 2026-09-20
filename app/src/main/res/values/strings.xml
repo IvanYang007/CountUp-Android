@@ -540,4 +540,8 @@
     <string name="preview_grid_item_4">Guitar</string>
     <string name="preview_grid_item_5">Haircut</string>
     <string name="preview_grid_item_6">Tea Ceremony</string>
+    <!-- Overview Grid Widget Styles -->
+    <string name="widget_empty_washi">Washi paper awaits ink\nTap to create in Washi</string>
+    <string name="widget_empty_earth">Rich earth awaits the seed\nTap to plant in Earth</string>
+    <string name="widget_empty_sumi">Deep ink rests in the stone\nTap to mark in Sumi</string>
 </resources>

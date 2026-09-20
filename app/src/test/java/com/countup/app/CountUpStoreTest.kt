@@ -934,6 +934,7 @@ class CountUpStoreTest {
         val oldHorizonId = 102
         val oldPebbleId = 103
         val oldSolarId = 104
+        val oldOverviewId = 105
 
         store.setHeroWidgetBinding(oldHeroId, item.id)
         store.setHeroWidgetDisplayMode(oldHeroId, TimeDisplayMode.DAYS)
@@ -942,18 +943,20 @@ class CountUpStoreTest {
         store.setZenPebbleBinding(oldPebbleId, item.id)
         store.setZenPebbleTag(oldPebbleId, "Book")
         store.setSolarRhythmBinding(oldSolarId, item.id)
+        store.setOverviewWidgetFilter(oldOverviewId, "washi")
 
         val newHeroId = 201
         val newHorizonId = 202
         val newPebbleId = 203
         val newSolarId = 204
+        val newOverviewId = 205
 
-        val oldIds = intArrayOf(oldHeroId, oldHorizonId, oldPebbleId, oldSolarId)
-        val newIds = intArrayOf(newHeroId, newHorizonId, newPebbleId, newSolarId)
+        val oldIds = intArrayOf(oldHeroId, oldHorizonId, oldPebbleId, oldSolarId, oldOverviewId)
+        val newIds = intArrayOf(newHeroId, newHorizonId, newPebbleId, newSolarId, newOverviewId)
 
         val remappedCount = store.remapWidgetBindings(oldIds, newIds)
-        // 2 hero keys + 2 horizon keys + 2 pebble keys + 1 solar key = 7
-        assertEquals(7, remappedCount)
+        // 2 hero keys + 2 horizon keys + 2 pebble keys + 1 solar key + 1 overview key = 8
+        assertEquals(8, remappedCount)
 
         // Old keys must be purged
         assertNull(store.getHeroWidgetBinding(oldHeroId))
@@ -961,6 +964,7 @@ class CountUpStoreTest {
         assertNull(store.getZenPebbleBinding(oldPebbleId))
         assertNull(store.getZenPebbleTag(oldPebbleId))
         assertNull(store.getSolarRhythmBinding(oldSolarId))
+        assertEquals(CountUpStore.OVERVIEW_FILTER_ALL, store.getOverviewWidgetFilter(oldOverviewId))
 
         // New keys must retain values
         assertEquals(item.id, store.getHeroWidgetBinding(newHeroId))
@@ -970,6 +974,43 @@ class CountUpStoreTest {
         assertEquals(item.id, store.getZenPebbleBinding(newPebbleId))
         assertEquals("Book", store.getZenPebbleTag(newPebbleId))
         assertEquals(item.id, store.getSolarRhythmBinding(newSolarId))
+        assertEquals("washi", store.getOverviewWidgetFilter(newOverviewId))
+    }
+
+    @Test
+    fun overviewWidgetFilterCrudAndSanitization() {
+        val store = CountUpStore(testContext)
+        val widgetId = 42
+
+        // Default should be OVERVIEW_FILTER_ALL
+        assertEquals(CountUpStore.OVERVIEW_FILTER_ALL, store.getOverviewWidgetFilter(widgetId))
+
+        // Set to washi
+        store.setOverviewWidgetFilter(widgetId, "washi")
+        assertEquals("washi", store.getOverviewWidgetFilter(widgetId))
+
+        // Setting to invalid value falls back to OVERVIEW_FILTER_ALL
+        store.setOverviewWidgetFilter(widgetId, "invalid_suite")
+        assertEquals(CountUpStore.OVERVIEW_FILTER_ALL, store.getOverviewWidgetFilter(widgetId))
+
+        // Set to sumi
+        store.setOverviewWidgetFilter(widgetId, "sumi")
+        assertEquals("sumi", store.getOverviewWidgetFilter(widgetId))
+
+        // Remove filter
+        store.removeOverviewWidgetFilter(widgetId)
+        assertEquals(CountUpStore.OVERVIEW_FILTER_ALL, store.getOverviewWidgetFilter(widgetId))
+
+        // Sanitization test: orphan filter keys purged when not in activeWidgetIds
+        store.setOverviewWidgetFilter(100, "earth")
+        store.setOverviewWidgetFilter(200, "washi")
+        assertEquals("earth", store.getOverviewWidgetFilter(100))
+        assertEquals("washi", store.getOverviewWidgetFilter(200))
+
+        val purged = store.sanitizeOrphanedWidgetBindings(setOf(200))
+        assertEquals(1, purged)
+        assertEquals(CountUpStore.OVERVIEW_FILTER_ALL, store.getOverviewWidgetFilter(100))
+        assertEquals("washi", store.getOverviewWidgetFilter(200))
     }
 
     @Test

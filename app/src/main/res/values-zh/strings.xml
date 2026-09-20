@@ -539,4 +539,8 @@
     <string name="preview_grid_item_4">练习吉他</string>
     <string name="preview_grid_item_5">理发间隔</string>
     <string name="preview_grid_item_6">禅茶一味</string>
+    <!-- Overview Grid Widget Styles -->
+    <string name="widget_empty_washi">素笺待墨\n轻触起笔</string>
+    <string name="widget_empty_earth">沃土待春\n轻触播种</string>
+    <string name="widget_empty_sumi">静墨凝神\n轻触落印</string>
 </resources>

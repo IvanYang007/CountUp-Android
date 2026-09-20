@@ -3,8 +3,8 @@
   "repository": "CountUp-Android",
   "scope": "repository",
   "generated_from": {
-    "head": "864d70dfcd3d9028c45b0df2c3cae23530cd7b59",
-    "commits_analyzed": 185,
+    "head": "627e7fb066e2c39169dc521b2ff688e4e94b29bb",
+    "commits_analyzed": 187,
     "date_range": [
       "2026-08-20",
       "2026-09-19"
@@ -249,6 +249,30 @@
         "app/src/main/java/com/countup/app/ZenTheme.kt"
       ],
       "phase": "conventions"
+    },
+    {
+      "id": "PL-019",
+      "text": "Always set a unique data URI (intent.data = Uri.parse(\"countup://widget/overview/$appWidgetId\")) on any service intent passed to views.setRemoteAdapter() when multiple widget instances display instance-specific collections.",
+      "grade": "observed",
+      "evidence": [
+        "e60f514"
+      ],
+      "paths": [
+        "app/src/main/java/com/countup/app/CountUpWidget.kt"
+      ],
+      "phase": "recurrence"
+    },
+    {
+      "id": "PL-020",
+      "text": "Write automated contract invariant tests (WidgetContractInvariantsTest.kt) that parse and validate XML files directly, turning written guidelines into executable red/green assertions in CI.",
+      "grade": "observed",
+      "evidence": [
+        "e60f514"
+      ],
+      "paths": [
+        "app/src/test/java/com/countup/app/WidgetContractInvariantsTest.kt"
+      ],
+      "phase": "conventions"
     }
   ],
   "risk_areas": [
@@ -367,7 +391,7 @@
   "checklist": [
     {
       "id": "PL-C1",
-      "text": "Run ./gradlew testDebugUnitTest to verify all 402 existing unit and contract tests pass.",
+      "text": "Run ./gradlew testDebugUnitTest to verify all 444 existing unit and contract tests pass.",
       "evidence": [
         "92262bb43"
       ]

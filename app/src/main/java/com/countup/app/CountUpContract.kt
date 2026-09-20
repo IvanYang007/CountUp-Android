@@ -40,6 +40,7 @@ data class CountUpUiState(
     val pendingRestorePayload: CountUpBackupPayload? = null,
     val isRestorePayloadDamaged: Boolean = false,
     val isSaving: Boolean = false,
+    val editorInitialCategory: String? = null,
 ) {
     /**
      * Instant derived filtered & sorted list of items matching [searchQuery] in [sortOrder].
@@ -59,7 +60,7 @@ sealed interface CountUpUiEvent {
     data class ThemeModeSelected(val mode: ThemeMode) : CountUpUiEvent
     data object CycleThemeMode : CountUpUiEvent
     data object CycleBackground : CountUpUiEvent
-    data class OpenEditor(val target: CountUpItem? = null) : CountUpUiEvent
+    data class OpenEditor(val target: CountUpItem? = null, val initialCategory: String? = null) : CountUpUiEvent
     data class OpenTargetItem(val itemId: String) : CountUpUiEvent
     data object CloseEditor : CountUpUiEvent
     data class SaveItem(

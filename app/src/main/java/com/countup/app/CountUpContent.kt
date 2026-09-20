@@ -322,6 +322,7 @@ fun CountUpContent(
                 item = state.editorTarget,
                 today = state.today,
                 isSaving = state.isSaving,
+                initialCategory = state.editorInitialCategory,
                 onDismiss = { onEvent(CountUpUiEvent.CloseEditor) },
                 onSave = { draft ->
                     onEvent(CountUpUiEvent.SaveItem(draft))

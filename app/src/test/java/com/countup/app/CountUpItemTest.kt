@@ -482,4 +482,44 @@ class CountUpItemTest {
         assertTrue(futureItem.isResettableOn(20050L))
         assertTrue(futureItem.isResettableOn(today))
     }
+
+    @Test
+    fun matchesStyleFilterReturnsTrueForFilterAll() {
+        val washiItem = CountUpItem(id = "1", name = "Sakura", epochDay = 20000L, cardColor = "sakura")
+        val earthItem = CountUpItem(id = "2", name = "Clay", epochDay = 20000L, cardColor = "terracotta")
+        val sumiItem = CountUpItem(id = "3", name = "Ink", epochDay = 20000L, cardColor = "charcoal")
+        val defaultItem = CountUpItem(id = "4", name = "Default", epochDay = 20000L, cardColor = "")
+
+        assertTrue(washiItem.matchesStyleFilter(CountUpStore.OVERVIEW_FILTER_ALL))
+        assertTrue(earthItem.matchesStyleFilter(CountUpStore.OVERVIEW_FILTER_ALL))
+        assertTrue(sumiItem.matchesStyleFilter(CountUpStore.OVERVIEW_FILTER_ALL))
+        assertTrue(defaultItem.matchesStyleFilter(CountUpStore.OVERVIEW_FILTER_ALL))
+    }
+
+    @Test
+    fun matchesStyleFilterAccuratelyPartitionsSuites() {
+        val washiItem = CountUpItem(id = "1", name = "Washi", epochDay = 20000L, cardColor = "paper_sage")
+        val earthItem = CountUpItem(id = "2", name = "Earth", epochDay = 20000L, cardColor = "celadon_bamboo")
+        val sumiItem = CountUpItem(id = "3", name = "Sumi", epochDay = 20000L, cardColor = "ink_gold")
+
+        assertTrue(washiItem.matchesStyleFilter("washi"))
+        assertFalse(washiItem.matchesStyleFilter("earth"))
+        assertFalse(washiItem.matchesStyleFilter("sumi"))
+
+        assertTrue(earthItem.matchesStyleFilter("earth"))
+        assertFalse(earthItem.matchesStyleFilter("washi"))
+        assertFalse(earthItem.matchesStyleFilter("sumi"))
+
+        assertTrue(sumiItem.matchesStyleFilter("sumi"))
+        assertFalse(sumiItem.matchesStyleFilter("washi"))
+        assertFalse(sumiItem.matchesStyleFilter("earth"))
+    }
+
+    @Test
+    fun matchesStyleFilterDefaultsBlankColorToWashiPreset() {
+        val defaultItem = CountUpItem(id = "4", name = "Default", epochDay = 20000L, cardColor = "")
+        assertTrue(defaultItem.matchesStyleFilter("washi"))
+        assertFalse(defaultItem.matchesStyleFilter("earth"))
+        assertFalse(defaultItem.matchesStyleFilter("sumi"))
+    }
 }

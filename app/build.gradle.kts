@@ -14,8 +14,8 @@ android {
         applicationId = "com.countup.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 60
-        versionName = "3.0.8"
+        versionCode = 61
+        versionName = "3.0.9"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

@@ -179,9 +179,11 @@ class MainActivity : ComponentActivity() {
             viewModel.onEvent(CountUpUiEvent.OpenTargetItem(targetItemId))
             intent.removeExtra(WidgetNavigationContract.EXTRA_TARGET_ITEM_ID)
         } else if (isAdd) {
-            viewModel.onEvent(CountUpUiEvent.OpenEditor(target = null))
+            val initialCategory = intent.getStringExtra(EXTRA_INITIAL_CARD_STYLE_CATEGORY)
+            viewModel.onEvent(CountUpUiEvent.OpenEditor(target = null, initialCategory = initialCategory))
             intent.action = null
             intent.data = null
+            intent.removeExtra(EXTRA_INITIAL_CARD_STYLE_CATEGORY)
         } else {
             val pinProviderClass = when (intent.data?.toString()) {
                 "countup://pin_hero" -> HeroWidgetReceiver::class.java

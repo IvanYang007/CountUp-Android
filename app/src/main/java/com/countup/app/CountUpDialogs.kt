@@ -100,6 +100,7 @@ fun ItemEditorDialog(
     onSave: (ItemDraft) -> Unit,
     modifier: Modifier = Modifier,
     isSaving: Boolean = false,
+    initialCategory: String? = null,
 ) {
     var name by rememberSaveable { mutableStateOf(item?.name ?: "") }
     var comment by rememberSaveable { mutableStateOf(item?.comment ?: "") }
@@ -111,20 +112,33 @@ fun ItemEditorDialog(
         )
     }
     var selectedCardColor by rememberSaveable {
-        mutableStateOf(
-            item?.cardColor ?: DEFAULT_CARD_COLOR
-        )
+        val initialColor = if (item != null) {
+            item.cardColor.ifBlank { DEFAULT_CARD_COLOR }
+        } else if (!initialCategory.isNullOrBlank() && initialCategory != CountUpStore.OVERVIEW_FILTER_ALL) {
+            val cat = CARD_COLOR_CATEGORIES.firstOrNull { it.id == initialCategory }
+            cat?.presetIds?.firstOrNull() ?: DEFAULT_CARD_COLOR
+        } else {
+            DEFAULT_CARD_COLOR
+        }
+        mutableStateOf(initialColor)
     }
     var isPinned by rememberSaveable { mutableStateOf(item?.isPinned ?: false) }
     var isCustomizationExpanded by rememberSaveable {
-        mutableStateOf(item != null && (item.cardColor.isNotBlank() || item.icon.isNotBlank()))
+        mutableStateOf(
+            (item != null && (item.cardColor.isNotBlank() || item.icon.isNotBlank())) ||
+                (item == null && !initialCategory.isNullOrBlank() && initialCategory != CountUpStore.OVERVIEW_FILTER_ALL)
+        )
     }
     var hasCustomizedManually by rememberSaveable { mutableStateOf(false) }
     val isDarkTheme = LocalZenColors.current.isDark
     var selectedColorCategoryIndex by rememberSaveable {
-        val initialPresetId = resolveCardStyle(selectedCardColor, isDark = isDarkTheme).id
-        val idx = CARD_COLOR_CATEGORIES.indexOfFirst { cat -> cat.presetIds.contains(initialPresetId) }
-        mutableIntStateOf(if (idx >= 0) idx else 0)
+        val targetCatId = if (item == null && !initialCategory.isNullOrBlank() && initialCategory != CountUpStore.OVERVIEW_FILTER_ALL) {
+            initialCategory
+        } else {
+            val initialPresetId = resolveCardStyle(selectedCardColor, isDark = isDarkTheme).id
+            CARD_COLOR_CATEGORIES.firstOrNull { it.presetIds.contains(initialPresetId) }?.id
+        }
+        mutableIntStateOf(CARD_COLOR_CATEGORIES.indexOfFirst { it.id == targetCatId }.coerceAtLeast(0))
     }
     var selectedCategoryIndex by rememberSaveable { mutableIntStateOf(0) }
     var showPicker by rememberSaveable { mutableStateOf(false) }

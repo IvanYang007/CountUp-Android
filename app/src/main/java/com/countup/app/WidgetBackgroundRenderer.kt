@@ -49,6 +49,7 @@ object WidgetBackgroundRenderer {
         width: Int = DEFAULT_WIDTH,
         height: Int = DEFAULT_HEIGHT,
         isNight: Boolean = false,
+        paperColor: Int = if (isNight) COLOR_NIGHT_PAPER else COLOR_PAPER,
     ): Bitmap? {
         return try {
             val active = resolveActiveTheme(theme, epochDay)
@@ -56,7 +57,7 @@ object WidgetBackgroundRenderer {
             val canvas = Canvas(bitmap)
 
             // 1. Draw base warm paper background
-            canvas.drawColor(if (isNight) COLOR_NIGHT_PAPER else COLOR_PAPER)
+            canvas.drawColor(paperColor)
 
             val w = width.toFloat()
             val h = height.toFloat()

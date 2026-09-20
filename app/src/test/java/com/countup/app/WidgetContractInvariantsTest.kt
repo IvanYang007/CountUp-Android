@@ -66,6 +66,42 @@ class WidgetContractInvariantsTest {
     }
 
     @Test
+    fun overviewWidgetUsesAmbientDropWithNoConfigureActivity() {
+        val candidates = listOf(
+            File("app/src/main/res/xml/haircut_widget_info.xml"),
+            File("src/main/res/xml/haircut_widget_info.xml"),
+        )
+        val xmlFile = candidates.firstOrNull { it.exists() }
+        assertNotNull("haircut_widget_info.xml must exist", xmlFile)
+        val content = xmlFile!!.readText(Charsets.UTF_8)
+
+        assertTrue(
+            "haircut_widget_info.xml must omit android:configure to enable instant ambient drop with zero setup friction",
+            !content.contains("android:configure")
+        )
+    }
+
+    @Test
+    fun overviewWidgetDeclaresTitleContainerAndFilterDot() {
+        val candidates = listOf(
+            File("app/src/main/res/layout/countup_widget.xml"),
+            File("src/main/res/layout/countup_widget.xml"),
+        )
+        val layoutFile = candidates.firstOrNull { it.exists() }
+        assertNotNull("countup_widget.xml must exist", layoutFile)
+        val content = layoutFile!!.readText(Charsets.UTF_8)
+
+        assertTrue(
+            "countup_widget.xml must declare widget_title_container for in-situ suite switching",
+            content.contains("android:id=\"@+id/widget_title_container\"")
+        )
+        assertTrue(
+            "countup_widget.xml must declare widget_filter_dot affordance indicator",
+            content.contains("android:id=\"@+id/widget_filter_dot\"")
+        )
+    }
+
+    @Test
     fun zenPebbleBackgroundCornerRadiusMustNotExceed16dp() {
         val candidates = listOf(
             File("app/src/main/res/drawable/widget_zen_bg.xml"),

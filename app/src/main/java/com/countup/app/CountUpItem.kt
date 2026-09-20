@@ -330,3 +330,15 @@ private fun decodeElement(o: JSONObject?): CountUpItem? {
         null
     }
 }
+
+/**
+ * Evaluates whether this item matches the specified overview widget style filter.
+ * [filter] can be "all", "", or a category ID ("washi", "earth", "sumi").
+ */
+fun CountUpItem.matchesStyleFilter(filter: String): Boolean {
+    if (filter.isEmpty() || filter == CountUpStore.OVERVIEW_FILTER_ALL) return true
+    val activePreset = resolveCardStyle(cardColor)
+    val category = CARD_COLOR_CATEGORIES.firstOrNull { it.id == filter }
+    return category?.presetIds?.contains(activePreset.id) == true
+}
+

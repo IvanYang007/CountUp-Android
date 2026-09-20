@@ -56,6 +56,24 @@ internal inline fun BroadcastReceiver.launchAsync(
  */
 class CountUpWidgetReceiver : AppWidgetProvider() {
 
+    override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action == ACTION_CYCLE_OVERVIEW_FILTER) {
+            val appWidgetId = intent.getOverviewWidgetId()
+            if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+                val appContext = context.applicationContext
+                launchAsync {
+                    val store = CountUpStore.getInstance(appContext)
+                    val currentFilter = store.getOverviewWidgetFilter(appWidgetId)
+                    val nextFilter = nextOverviewStyleFilter(currentFilter)
+                    store.setOverviewWidgetFilter(appWidgetId, nextFilter)
+                    pushWidgetUpdate(appContext, appWidgetId)
+                }
+            }
+            return
+        }
+        super.onReceive(context, intent)
+    }
+
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
         val appContext = context.applicationContext
         MidnightAlarmReceiver.scheduleMidnightAlarm(appContext)
@@ -80,6 +98,16 @@ class CountUpWidgetReceiver : AppWidgetProvider() {
         }
     }
 
+    override fun onDeleted(context: Context, appWidgetIds: IntArray) {
+        val appContext = context.applicationContext
+        launchAsync {
+            val store = CountUpStore.getInstance(appContext)
+            for (id in appWidgetIds) {
+                store.removeOverviewWidgetFilter(id)
+            }
+        }
+    }
+
     override fun onRestored(context: Context, oldWidgetIds: IntArray, newWidgetIds: IntArray) {
         val appContext = context.applicationContext
         CountUpStore.getInstance(appContext).remapWidgetBindings(oldWidgetIds, newWidgetIds)
@@ -90,6 +118,15 @@ class CountUpWidgetReceiver : AppWidgetProvider() {
     }
 }
 
+/** Pushes an update to a specific 4x2 Overview widget instance. */
+@Suppress("DEPRECATION")
+fun pushWidgetUpdate(context: Context, appWidgetId: Int) {
+    val manager = AppWidgetManager.getInstance(context)
+    val options = manager.getAppWidgetOptions(appWidgetId)
+    manager.updateAppWidget(appWidgetId, buildBaseViews(context, appWidgetId, options))
+    manager.notifyAppWidgetViewDataChanged(appWidgetId, R.id.widget_grid)
+}
+
 /** Pushes a fresh base RemoteViews to every placed widget and re-queries the grid. */
 @Suppress("DEPRECATION")
 fun pushWidgetUpdate(context: Context) {
@@ -98,7 +135,7 @@ fun pushWidgetUpdate(context: Context) {
     if (ids.isEmpty()) return
     for (id in ids) {
         val options = manager.getAppWidgetOptions(id)
-        manager.updateAppWidget(id, buildBaseViews(context, options))
+        manager.updateAppWidget(id, buildBaseViews(context, id, options))
     }
     manager.notifyAppWidgetViewDataChanged(ids, R.id.widget_grid)
 }
@@ -145,18 +182,29 @@ internal fun computeWidgetCanvasDimensions(optionsHeightDp: Int, rowCount: Int):
 
 /** Builds the widget frame: dynamic ink background, title, launch/reset intents, empty view. */
 @Suppress("DEPRECATION")
-internal fun buildBaseViews(context: Context, appWidgetOptions: android.os.Bundle? = null): RemoteViews {
+internal fun buildBaseViews(
+    context: Context,
+    appWidgetId: Int = AppWidgetManager.INVALID_APPWIDGET_ID,
+    appWidgetOptions: android.os.Bundle? = null,
+): RemoteViews {
     val night = isNightMode(context)
     val views = RemoteViews(context.packageName, R.layout.countup_widget)
 
+    // Resolve per-instance style filter
+    val store = CountUpStore.getInstance(context)
+    val filter = if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+        store.getOverviewWidgetFilter(appWidgetId)
+    } else {
+        CountUpStore.OVERVIEW_FILTER_ALL
+    }
+
     // Base paper backdrop on root ensures seamless blending on any aspect ratio
-    val paperColor = if (night) NIGHT_PAPER else PAPER
+    val paperColor = resolveOverviewPaperColor(filter, night)
     views.setInt(R.id.widget_root, "setBackgroundColor", paperColor)
 
-    // Calculate row count and dynamic height so background graphics scale with widget rows
-    val store = CountUpStore.getInstance(context)
+    // Calculate row count and dynamic height so background graphics scale with filtered widget rows
     val theme = store.getBackgroundTheme()
-    val widgetItems = store.items().filter { it.showInWidget }
+    val widgetItems = store.items().filter { it.showInWidget && it.matchesStyleFilter(filter) }
     val itemCount = widgetItems.size
     val rowCount = ((itemCount + 2) / 3).coerceIn(1, 5)
 
@@ -169,18 +217,31 @@ internal fun buildBaseViews(context: Context, appWidgetOptions: android.os.Bundl
         width = targetWidth,
         height = targetHeight,
         isNight = night,
+        paperColor = paperColor,
     )
     if (bgBitmap != null) {
         views.setImageViewBitmap(R.id.widget_bg_image, bgBitmap)
     }
 
-    // Minimal title, voice add, & '+' quick add button in muted ink typography
-    views.setTextColor(R.id.widget_title, if (night) NIGHT_MUTED else MUTED)
-    views.setInt(R.id.widget_voice_button, "setColorFilter", if (night) NIGHT_MUTED else MUTED)
-    views.setTextColor(R.id.widget_add_button, if (night) NIGHT_MUTED else MUTED)
-    views.setInt(R.id.widget_divider, "setBackgroundColor", if (night) NIGHT_DIVIDER else DIVIDER)
+    // Header styling & title: typographic compound "CountUp · All", "CountUp · Washi", etc.
+    val baseTitle = context.getString(R.string.app_name)
+    val compoundTitle = resolveOverviewCompoundTitle(context, filter)
+    val span = SpannableString(compoundTitle)
+    span.setSpan(StyleSpan(Typeface.BOLD), 0, baseTitle.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+    span.setSpan(StyleSpan(Typeface.NORMAL), baseTitle.length, compoundTitle.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+    views.setTextViewText(R.id.widget_title, span)
 
-    // Tap title or background -> open the app.
+    val mutedInk = resolveOverviewMutedInk(filter, night)
+    val dividerColor = resolveOverviewDividerColor(filter, night)
+    views.setTextColor(R.id.widget_title, mutedInk)
+    views.setInt(R.id.widget_filter_dot, "setColorFilter", resolveOverviewDotColor(filter, night))
+    views.setContentDescription(R.id.widget_title_container, "$compoundTitle. Tap to cycle style.")
+
+    views.setInt(R.id.widget_voice_button, "setColorFilter", mutedInk)
+    views.setTextColor(R.id.widget_add_button, mutedInk)
+    views.setInt(R.id.widget_divider, "setBackgroundColor", dividerColor)
+
+    // Tap background -> open the app.
     val launch = PendingIntent.getActivity(
         context,
         REQUEST_LAUNCH,
@@ -188,7 +249,26 @@ internal fun buildBaseViews(context: Context, appWidgetOptions: android.os.Bundl
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
     views.setOnClickPendingIntent(R.id.widget_root, launch)
-    views.setOnClickPendingIntent(R.id.widget_title, launch)
+
+    // Tap title container -> cycle suite filter in place
+    if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+        val cycleIntent = Intent(context, CountUpWidgetReceiver::class.java).apply {
+            action = ACTION_CYCLE_OVERVIEW_FILTER
+            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+            data = android.net.Uri.parse("countup://widget/cycle/$appWidgetId")
+        }
+        val cyclePendingIntent = PendingIntent.getBroadcast(
+            context,
+            REQUEST_CYCLE_FILTER + appWidgetId,
+            cycleIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        views.setOnClickPendingIntent(R.id.widget_title_container, cyclePendingIntent)
+        views.setOnClickPendingIntent(R.id.widget_title, cyclePendingIntent)
+        views.setOnClickPendingIntent(R.id.widget_filter_dot, cyclePendingIntent)
+    } else {
+        views.setOnClickPendingIntent(R.id.widget_title_container, launch)
+    }
 
     // Tap voice button -> open VoiceAddActivity
     val voiceIntent = Intent(context, VoiceAddActivity::class.java).apply {
@@ -202,19 +282,31 @@ internal fun buildBaseViews(context: Context, appWidgetOptions: android.os.Bundl
     )
     views.setOnClickPendingIntent(R.id.widget_voice_button, voicePendingIntent)
 
-    // Tap '+' quick add action or empty state -> open the app straight into Add Item dialog.
+    // Tap '+' quick add action or empty state -> open the app straight into Add Item dialog with Intent Continuity.
     val addIntent = Intent(context, MainActivity::class.java).apply {
         action = ACTION_ADD_ITEM
+        if (filter != CountUpStore.OVERVIEW_FILTER_ALL) {
+            putExtra(EXTRA_INITIAL_CARD_STYLE_CATEGORY, filter)
+        }
         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
     }
+    val addRequestCode = REQUEST_ADD + (if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) appWidgetId * 10 else 0)
     val addPendingIntent = PendingIntent.getActivity(
         context,
-        REQUEST_ADD,
+        addRequestCode,
         addIntent,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
     views.setOnClickPendingIntent(R.id.widget_add_button, addPendingIntent)
     views.setOnClickPendingIntent(R.id.widget_empty, addPendingIntent)
+
+    val emptyText = when (filter) {
+        "washi" -> context.getString(R.string.widget_empty_washi)
+        "earth" -> context.getString(R.string.widget_empty_earth)
+        "sumi" -> context.getString(R.string.widget_empty_sumi)
+        else -> context.getString(R.string.widget_empty)
+    }
+    views.setTextViewText(R.id.widget_empty, emptyText)
     views.setTextColor(R.id.widget_empty, if (night) NIGHT_MUTED else MUTED)
 
     // Cell taps: template broadcast to the reset receiver; each cell fills in
@@ -227,9 +319,14 @@ internal fun buildBaseViews(context: Context, appWidgetOptions: android.os.Bundl
     )
     views.setPendingIntentTemplate(R.id.widget_grid, reset)
 
-    // Bind the collection and designate the empty view the launcher shows when
-    // there is nothing to list.
-    views.setRemoteAdapter(R.id.widget_grid, Intent(context, CountUpWidgetService::class.java))
+    // Bind the collection with unique URI per appWidgetId to prevent RemoteViewsAdapter factory cache collision
+    val serviceIntent = Intent(context, CountUpWidgetService::class.java).apply {
+        putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+        if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+            data = android.net.Uri.parse("countup://widget/overview/$appWidgetId")
+        }
+    }
+    views.setRemoteAdapter(R.id.widget_grid, serviceIntent)
     views.setEmptyView(R.id.widget_grid, R.id.widget_empty)
 
     return views
@@ -339,7 +436,9 @@ class ResetCountReceiver : BroadcastReceiver() {
 
 /** Serves the grid's cell views from [CountUpStore] inside the launcher's process. */
 class CountUpWidgetService : RemoteViewsService() {
-    override fun onGetViewFactory(intent: Intent): RemoteViewsFactory = WidgetViewsFactory(applicationContext)
+    override fun onGetViewFactory(intent: Intent): RemoteViewsFactory {
+        return WidgetViewsFactory(applicationContext, intent.getOverviewWidgetId())
+    }
 }
 
 /** A single rendered cell of widget data, derived from a store item. */
@@ -385,10 +484,14 @@ private fun widgetCountText(count: Long, arrived: Boolean): CharSequence =
         count.toString()
     }
 
-internal class WidgetViewsFactory(private val context: Context) : RemoteViewsService.RemoteViewsFactory {
+internal class WidgetViewsFactory(
+    private val context: Context,
+    private val appWidgetId: Int = AppWidgetManager.INVALID_APPWIDGET_ID,
+) : RemoteViewsService.RemoteViewsFactory {
 
     private var rows: List<WidgetRowData> = emptyList()
     private var night = false
+    private var filter: String = CountUpStore.OVERVIEW_FILTER_ALL
 
     override fun onCreate() {
         night = isNightMode(context)
@@ -400,7 +503,13 @@ internal class WidgetViewsFactory(private val context: Context) : RemoteViewsSer
         night = isNightMode(context)
         val store = CountUpStore.getInstance(context)
         val today = LocalDate.now()
-        val sorted = sortItems(store.items(), store.getSortOrder(), today)
+        filter = if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+            store.getOverviewWidgetFilter(appWidgetId)
+        } else {
+            CountUpStore.OVERVIEW_FILTER_ALL
+        }
+        val filtered = store.items().filter { it.matchesStyleFilter(filter) }
+        val sorted = sortItems(filtered, store.getSortOrder(), today)
         rows = widgetRows(sorted, today)
     }
 
@@ -414,7 +523,7 @@ internal class WidgetViewsFactory(private val context: Context) : RemoteViewsSer
         val row = rows[position]
         val views = RemoteViews(context.packageName, R.layout.countup_widget_cell)
 
-        val textInk = if (night) NIGHT_MUTED else MUTED
+        val textInk = resolveOverviewMutedInk(filter, night)
         val armed = ResetCountReceiver.isArmed(row.id)
 
         // Set Phosphor icon and tint to text ink
@@ -535,8 +644,95 @@ internal val WIDGET_RESET_BADGE_NIGHT: Int = 0xFFD4A574.toInt()
 private val ARRIVED_NUMBER: Int = 0xFFB71C1C.toInt()
 
 const val ACTION_ADD_ITEM: String = "com.countup.app.ACTION_ADD_ITEM"
+const val EXTRA_INITIAL_CARD_STYLE_CATEGORY: String = "com.countup.app.EXTRA_INITIAL_CARD_STYLE_CATEGORY"
+const val ACTION_CYCLE_OVERVIEW_FILTER: String = "com.countup.app.ACTION_CYCLE_OVERVIEW_FILTER"
 
 private const val REQUEST_LAUNCH = 1
 private const val REQUEST_RESET = 2
 private const val REQUEST_ADD = 3
 private const val REQUEST_VOICE_ADD = 4
+private const val REQUEST_CYCLE_FILTER = 5
+
+/** Safely resolves the target AppWidget ID from extras or URI data segment. */
+internal fun Intent.getOverviewWidgetId(): Int = getIntExtra(
+    AppWidgetManager.EXTRA_APPWIDGET_ID,
+    data?.lastPathSegment?.toIntOrNull() ?: AppWidgetManager.INVALID_APPWIDGET_ID
+)
+
+/**
+ * Cycles the overview widget card style filter:
+ * All -> washi -> earth -> sumi -> All.
+ */
+internal fun nextOverviewStyleFilter(currentFilter: String): String = when (currentFilter) {
+    CountUpStore.OVERVIEW_FILTER_ALL -> "washi"
+    "washi" -> "earth"
+    "earth" -> "sumi"
+    "sumi" -> CountUpStore.OVERVIEW_FILTER_ALL
+    else -> "washi"
+}
+
+/**
+ * Resolves the signature color of the suite affordance dot for the overview widget header.
+ * Washi: Warm Ochre Gold
+ * Earth: Willow Bamboo / Sage
+ * Sumi: Deep Charcoal / Amber Gold
+ * All: Neutral Sand / Pale Linen
+ */
+internal fun resolveOverviewDotColor(filter: String, night: Boolean): Int = when (filter) {
+    "washi" -> if (night) 0xFFE8C5A0.toInt() else 0xFFDEB285.toInt()
+    "earth" -> if (night) 0xFF8BC4A2.toInt() else 0xFF6DB88A.toInt()
+    "sumi" -> if (night) 0xFFD4A574.toInt() else 0xFF3C3F41.toInt()
+    else -> if (night) 0xFFA8A095.toInt() else 0xFF8C8275.toInt()
+}
+
+/** Resolves the string resource IDs for the base title and category label. */
+internal fun resolveOverviewTitleRes(filter: String): Pair<Int, Int> {
+    val activeCategory = CARD_COLOR_CATEGORIES.firstOrNull { it.id == filter }
+    val categoryRes = activeCategory?.labelRes ?: R.string.category_all
+    return Pair(R.string.app_name, categoryRes)
+}
+
+/** Resolves the full compound title (e.g. "CountUp · All", "CountUp · Washi"). */
+internal fun resolveOverviewCompoundTitle(context: Context, filter: String): String {
+    val (baseRes, categoryRes) = resolveOverviewTitleRes(filter)
+    val baseTitle = context.getString(baseRes)
+    val categoryName = context.getString(categoryRes)
+    return "$baseTitle · $categoryName"
+}
+
+/**
+ * Resolves the subtle base paper background color for each overview widget card style filter.
+ * - All: Classic Xuan paper (#F5E6D3 / #191B17)
+ * - Washi: Warm golden mulberry fiber (#F7E3C8 / #201B15)
+ * - Earth: Celadon mist stone (#EBECE3 / #161B17)
+ * - Sumi: Cool inkstone wash (#ECEBE8 / #141415)
+ */
+internal fun resolveOverviewPaperColor(filter: String, night: Boolean): Int = when (filter) {
+    "washi" -> if (night) 0xFF201B15.toInt() else 0xFFF7E3C8.toInt()
+    "earth" -> if (night) 0xFF161B17.toInt() else 0xFFEBECE3.toInt()
+    "sumi" -> if (night) 0xFF141415.toInt() else 0xFFECEBE8.toInt()
+    else -> if (night) NIGHT_PAPER else PAPER
+}
+
+/**
+ * Resolves the hairline divider color matching the active paper substrate.
+ */
+internal fun resolveOverviewDividerColor(filter: String, night: Boolean): Int = when (filter) {
+    "washi" -> if (night) 0x4045382D else 0x66DFBE93
+    "earth" -> if (night) 0x40333C36 else 0x66CEDBD1
+    "sumi" -> if (night) 0x402E3033 else 0x66CBC7C0
+    else -> if (night) NIGHT_DIVIDER else DIVIDER
+}
+
+/**
+ * Resolves the muted text and icon ink color matching the active paper substrate.
+ */
+internal fun resolveOverviewMutedInk(filter: String, night: Boolean): Int = when (filter) {
+    "washi" -> if (night) 0xFFD2C3AA.toInt() else 0xFF68513B.toInt()
+    "earth" -> if (night) 0xFFBDC7BE.toInt() else 0xFF546358.toInt()
+    "sumi" -> if (night) 0xFFC4C5C8.toInt() else 0xFF505359.toInt()
+    else -> if (night) NIGHT_MUTED else MUTED
+}
+
+
+

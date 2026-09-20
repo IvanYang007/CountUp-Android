@@ -101,19 +101,25 @@ class CountUpViewModel(
                 }
             }
             is CountUpUiEvent.OpenEditor -> {
-                _state.update { it.copy(editorTarget = event.target, isEditorOpen = true) }
+                _state.update {
+                    it.copy(
+                        editorTarget = event.target,
+                        editorInitialCategory = event.initialCategory,
+                        isEditorOpen = true,
+                    )
+                }
             }
             is CountUpUiEvent.OpenTargetItem -> {
                 val currentItems = _state.value.items
                 val target = currentItems.find { it.id == event.itemId }
                 if (target != null) {
-                    _state.update { it.copy(editorTarget = target, isEditorOpen = true, pendingTargetItemId = null) }
+                    _state.update { it.copy(editorTarget = target, editorInitialCategory = null, isEditorOpen = true, pendingTargetItemId = null) }
                 } else {
                     _state.update { it.copy(pendingTargetItemId = event.itemId) }
                 }
             }
             CountUpUiEvent.CloseEditor -> {
-                _state.update { it.copy(isEditorOpen = false, editorTarget = null) }
+                _state.update { it.copy(isEditorOpen = false, editorTarget = null, editorInitialCategory = null) }
             }
             is CountUpUiEvent.SaveItem -> {
                 if (!isSaving.compareAndSet(false, true)) return
@@ -154,6 +160,7 @@ class CountUpViewModel(
                                     items = updatedItems,
                                     isEditorOpen = false,
                                     editorTarget = null,
+                                    editorInitialCategory = null,
                                     isSaving = false,
                                     cardWhispers = if (target != null) it.cardWhispers - target.id else it.cardWhispers,
                                     pendingWidgetResets = remainingResets,

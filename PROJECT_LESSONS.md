@@ -1,7 +1,7 @@
 # Project Lessons — CountUp-Android
 
-> Derived from git history. Last analyzed commit: `864d70dfcd3d9028c45b0df2c3cae23530cd7b59` (2026-09-19T12:17:50-04:00).
-> Range: `32f6f36211113906d4bc4f8c03e519b711b198e1` .. `864d70dfcd3d9028c45b0df2c3cae23530cd7b59` (185 commits, 2026-08-20 .. 2026-09-19).
+> Derived from git history. Last analyzed commit: `627e7fb066e2c39169dc521b2ff688e4e94b29bb` (2026-09-19T20:20:00-04:00).
+> Range: `32f6f36211113906d4bc4f8c03e519b711b198e1` .. `627e7fb066e2c39169dc521b2ff688e4e94b29bb` (187 commits, 2026-08-20 .. 2026-09-19).
 > Grades: `[observed]` stated in a commit/PR, `[inferred]` deduced from diffs,
 > `[weak]` one data point or ambiguous.
 
@@ -139,6 +139,20 @@ CountUp-Android is a zero-permission, offline-first milestone count-up app built
 - **Why it recurs:** Traditional tutorial code and boilerplate templates continue to manipulate Window color bars imperatively.
 - **The rule:** Never call `window.setStatusBarColor()` or `window.setNavigationBarColor()`. Set `layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS` on API 28+, `isNavigationBarContrastEnforced = false` on API 29+, and manage icon contrast via `WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars`.
 
+### L19. Isolate RemoteViews adapter service intents with unique data URIs to avoid binder cache collisions — [observed]
+
+- **What happened:** Binding multiple overview widget grid instances to `Intent(context, CountUpWidgetService::class.java)` caused Android's `RemoteViews` to cache a single `RemoteViewsFactory` instance across all widgets because `Intent.filterEquals()` ignores extras (`EXTRA_APPWIDGET_ID`). Toggling card styles on one widget caused other overview widgets on the home screen to display the same items or fail to update.
+- **Evidence:** `e60f514` feat(core): harden backup durability, lock contract invariants, and refresh project lessons
+- **Why it recurs:** Developers mistakenly assume `putExtra(EXTRA_APPWIDGET_ID, appWidgetId)` distinguishes service intents in RemoteViews adapter bindings.
+- **The rule:** Always set a unique data URI (`intent.data = Uri.parse("countup://widget/overview/$appWidgetId")`) on any service intent passed to `views.setRemoteAdapter()` when multiple widget instances display instance-specific collections.
+
+### L20. Enforce widget XML contracts and invariant configurations through JVM invariant tests — [observed]
+
+- **What happened:** Refactorings and cleanup passes frequently reintroduced known launcher traps (such as adding `configuration_optional` or setting `resizeMode="horizontal|vertical"` on single-cell widgets), which bypassed standard unit tests and only surfaced when manually tested on physical OEM launchers.
+- **Evidence:** `e60f514` feat(core): harden backup durability, lock contract invariants, and refresh project lessons
+- **Why it recurs:** Pixel emulator launchers tolerate invalid widget attributes that physical OEM skins (Samsung One UI, Xiaomi HyperOS) reject or distort.
+- **The rule:** Write automated contract invariant tests (`WidgetContractInvariantsTest.kt`) that parse and validate XML files directly, turning written guidelines into executable red/green assertions in CI.
+
 ## Project-specific implementation rules
 
 **Layout** — Place app UI components in `app/src/main/java/com/countup/app/`. Model new screens after `CountUpContent.kt`. Build new home-screen widget providers following `ZenPebbleWidgetReceiver.kt`.
@@ -232,7 +246,7 @@ CountUp-Android is a zero-permission, offline-first milestone count-up app built
 
 Before you change anything:
 
-- [ ] Run `./gradlew testDebugUnitTest` to verify all 430 existing unit and contract tests pass.
+- [ ] Run `./gradlew testDebugUnitTest` to verify all 444 existing unit and contract tests pass.
 - [ ] Confirm the tree is clean: `git status --porcelain`.
 - [ ] Read `docs/RECURRING_ISSUES.md` before touching any widget provider or XML layout.
 
@@ -241,12 +255,13 @@ While you change:
 - [ ] Maintain zero runtime permissions; never add `RECORD_AUDIO` or `RECEIVE_BOOT_COMPLETED` to `AndroidManifest.xml`.
 - [ ] Preserve `android:resizeMode="none"` and `reconfigurable` in `zen_pebble_widget_info.xml`; never add `configuration_optional`.
 - [ ] Ensure all widget info XMLs declare both `previewImage` and `previewLayout` with populated localized `@string/...` default text.
+- [ ] Set unique data URIs (`intent.data = Uri.parse(...)`) on collection service intents to avoid RemoteViews adapter factory cache collisions.
 - [ ] Omit `Modifier.minimumInteractiveComponentSize()` from 26dp subheader and 30dp card action button clusters.
 - [ ] Wrap all `CountUpStore` mutations in `synchronized(globalStoreLock)` and invoke `purgeWidgetBindingsForItem(itemId)` on deletion.
 
 Before you call it done:
 
-- [ ] Run `./gradlew testDebugUnitTest` and confirm 100% green test execution (430 tests).
+- [ ] Run `./gradlew testDebugUnitTest` and confirm 100% green test execution (444 tests).
 - [ ] Run `./gradlew assembleRelease` to confirm R8 rules preserve all data models, enums, and widget providers.
 - [ ] Verify widget RemoteViews payload remains below 40KB via `WidgetMemoryBudgetGateTest`.
 
