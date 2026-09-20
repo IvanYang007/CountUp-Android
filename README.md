@@ -14,7 +14,7 @@ the **days since a set of anchor dates** (e.g. last haircut, a habit streak, sob
 - **In-Card Undo Whispers:** Unobtrusive in-situ recovery alerts directly on item cards when counters are reset accidentally, replacing disruptive top-screen banners.
 - **Habit Notes & Countdowns:** 2-line custom notes and automatic "UNTIL" sub-labeling for future target dates.
 - **Full Zen Widget Suite (5 Home-Screen Widgets + Voice Quick Add):**
-  - **Count-ups (Multi-Item Grid):** Full-width 3-column / 2-column grid widget displaying active milestones on dynamic ink wash backgrounds with 7-color MCM palettes and widget toolbar.
+  - **Count-ups (Multi-Item Grid):** Full-width 3-column / 2-column grid widget displaying active milestones on dynamic ink wash and paper substrate backgrounds, featuring in-situ style suite cycling (All ➔ Washi ➔ Earth ➔ Sumi ➔ All) directly on the home screen, suite signature dots, 7-color MCM palettes, and widget toolbar.
   - **Voice Quick Add:** 1-tap microphone button on the widget toolbar triggering zero-permission out-of-process speech delegation (`RecognizerIntent.ACTION_RECOGNIZE_SPEECH`) with transient undo/edit confirmation pill.
   - **Hero Milestone Widget (2x1 Poetic Card):** Dedicated single-milestone widget with counter picker, ambient milestone gold accents, and safe two-tap direct in-place reset.
   - **Zen Horizon Ribbon (4x1 & 2x1):** Minimalist horizon ribbon featuring on-widget unit cycling (days, weeks, months, years) directly on tap.
@@ -53,7 +53,7 @@ Prerequisites:
 ./gradlew clean
 ./gradlew assembleDebug             # debug APK
 ./gradlew assembleRelease           # signed release APK & bundle (R8 minified)
-./gradlew test                      # 408 JVM unit tests (100% pass)
+./gradlew test                      # 444 JVM unit tests (100% pass)
 ./gradlew connectedDebugAndroidTest # instrumented tests (emulator/device online)
 ./gradlew lintDebug                 # Android Lint (0 errors)
 ```
@@ -73,6 +73,9 @@ Existing single-item installs are migrated automatically: the legacy
 ### 1. Count-ups (Multi-Item Grid Widget)
 Long-press home screen → **Widgets** → **Count-ups** → drag to a slot.
 Lists enabled items in a clean multi-column grid with dynamic ink wash backgrounds.
+- **In-Situ Style Suite Cycling:** Tap the widget header title or suite signature dot directly on the home screen to cycle through color suites: **All** ➔ **Washi** ➔ **Earth** ➔ **Sumi** ➔ **All**. The grid and its subtle paper substrate background tint instantly filter in place without opening configuration screens.
+- **Independent Multi-Widget Isolation:** Each overview grid instance maintains its own filter state independently using unique data URIs (`countup://widget/overview/$appWidgetId`), allowing multiple widgets across home screen pages to display distinct category views simultaneously.
+- **Quick-Add Intent Continuity:** Tapping the `+` button on a filtered widget opens the Add Item dialog with that style suite pre-selected.
 - **In-place reset:** Tapping the number arms the direct reset confirmation ("0?"), and a second tap within 1.5 seconds zeroes that counter to today without opening the app.
 
 ### 2. Hero Milestone Widget (2x1 Poetic Card)
@@ -146,7 +149,7 @@ Widgets automatically advance at midnight without requiring battery-draining bac
 
 ## 7. Verification performed
 
-- **408 JVM Unit Tests** (100% passing) across data models, repository fail-safes, MVI ViewModel, JSON salvage parsing, widget reducers, navigation contracts, backup merge/replace strategies, reset whisper lifecycles, bidirectional sorting, date picker contracts, widget IPC debouncing, and 100+ icon registry invariants.
+- **444 JVM Unit Tests** (100% passing) across data models, repository fail-safes, MVI ViewModel, JSON salvage parsing, widget reducers, navigation contracts, backup merge/replace strategies, reset whisper lifecycles, bidirectional sorting, date picker contracts, widget IPC debouncing, and 100+ icon registry invariants.
 - Clean debug and release builds with R8 minification and resource shrinking enabled (`isMinifyEnabled = true`, `isShrinkResources = true`).
 - Automated release bundle signing with keystore password resolution (`COUNTUP_KEYSTORE_PASS` -> `local.properties`).
 - Android Lint (`lintDebug`): **0 errors**.

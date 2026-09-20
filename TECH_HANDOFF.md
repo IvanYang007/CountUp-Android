@@ -11,7 +11,7 @@ Purpose of this doc: let another engineer (or agent) pick up the project and und
 - Any number of items; each has a **name**, a custom or randomly-assigned **icon** (100+ curated vector icons from Material + Phosphor sets), an **anchor date**, optional **2-line notes**, and **custom surface styling**.
 - App: zen-paper styled list (warm off-white, serif/sans/mono typography, 1px borders), add/edit/delete/reset, instant search & 1-tap bidirectional sorting (tap to toggle Asc ⇄ Desc), 1-tap theme cycling (⚡ System / ☀️ Light / 🌙 Dark), calibrated dark mode palettes (Washi, Earth, Sumi) with luminous border brushes, dedicated Data & Backup settings dialog, in-card undo whispers, 30 rotatable Chinese ink wash landscape themes.
 - Widgets:
-  - **Count-ups Grid Widget:** A 3-column / 2-column grid of item cells on dynamic ink wash backgrounds; double-tap resets an item to today; widget toolbar includes 1-tap Voice Quick Add.
+  - **Count-ups Grid Widget:** A 3-column / 2-column grid of item cells with dynamic paper substrate backgrounds, suite signature dots, and in-situ style suite cycling (All ➔ Washi ➔ Earth ➔ Sumi ➔ All) directly on the home screen; double-tap resets an item to today; widget toolbar includes 1-tap Voice Quick Add and Add Item continuity.
   - **Voice Quick Add:** Microphone trigger button on widget toolbar delegating speech recognition out-of-process (`RecognizerIntent.ACTION_RECOGNIZE_SPEECH`) with zero permissions, instant auto-anchor to today, and transient floating Undo/Edit card.
   - **Hero Milestone Widget:** Dedicated single-milestone widget in **2x1 Poetic Card** layout, configuration picker on placement, milestone gold accent indicator, and safe two-tap in-place reset.
   - **Zen Horizon Ribbon:** 4x1 & 2x1 minimalist horizon ribbon with direct on-widget unit cycling (days, weeks, months, years) on tap.
@@ -28,8 +28,8 @@ Versions live in `gradle/libs.versions.toml`.
 
 | Component | Version | Note |
 |---|---|---|
-| Android Gradle Plugin | `9.4.0` | Uses **built-in Kotlin** (no `org.jetbrains.kotlin.android` plugin) |
-| Gradle | `9.7.1` | Wrapper checked in |
+| Android Gradle Plugin | `9.3.0` | Uses **built-in Kotlin** (no `org.jetbrains.kotlin.android` plugin) |
+| Gradle | `9.5.0` | Wrapper checked in |
 | JDK | `17` | Temurin; `JAVA_HOME` set |
 | Kotlin | `2.3.21` | Provided via `buildscript` classpath in root `build.gradle.kts` (above AGP's bundled KGP) |
 | Compose BOM | `2026.06.00` | |
@@ -70,7 +70,7 @@ Production Kotlin is organized under `app/src/main/java/com/countup/app/`:
 | `WidgetNavigationContract.kt` | Partitioned pending intent request codes and navigation routing for widget cell taps, resets, voice add, and unit cycling |
 | `ZenWidgetReducer.kt` | Centralized state reduction and palette resolution for all widget families |
 | `WidgetThemeTokens.kt` | Visual styling tokens, contrast definitions, and dimensions for widget canvases |
-| `CountUpWidget.kt` | Zen RemoteViews multi-item grid widget (Count-ups): dynamic ink background, full-width grid, voice add trigger, `ResetCountReceiver` (in-place double-tap reset confirmation) |
+| `CountUpWidget.kt` | Zen RemoteViews multi-item grid widget (Count-ups): dynamic ink wash & paper substrate backgrounds (All / Washi / Earth / Sumi), full-width grid, suite signature dots, in-situ style cycling (`FilterSuiteReceiver`), per-instance unique URI isolation, voice add trigger, and `ResetCountReceiver` (in-place double-tap reset confirmation) |
 | `HeroWidgetReceiver.kt` | Dedicated single-item Hero Milestone widget receiver (2x1 Poetic Card), safe two-tap direct in-place reset (`ResetHeroCountReceiver`) |
 | `HeroWidgetConfigureActivity.kt` | Interactive launcher widget configuration activity with package verification to select and pin a counter to a Hero widget instance |
 | `ZenHorizonWidgetReceiver.kt` | Minimalist Zen Horizon ribbon receiver (4x1 & 2x1) with in-place unit cycling |
@@ -82,8 +82,7 @@ Production Kotlin is organized under `app/src/main/java/com/countup/app/`:
 | (debug) `WidgetHostActivity.kt` | Debug-only activity to render widgets on-device for automated screenshot capture (excluded in release) |
 
 Tests:
-- `app/src/test/...` (JVM): **402 JVM unit tests** (100% green) covering `CountUpViewModelTest` (Turbine), `BackupCoordinatorTest`, `ResetWhisperTrackerTest`, `SortOrderTest`, `CountUpRepositoryTest`, `BackupRepositoryTest`, `HeroWidgetTest`, `ZenPebbleTest`, `SolarRhythmConfigurationTest`, `WidgetContractInvariantsTest`, `WidgetMemoryBudgetGateTest`, `CountUpStressAndBoundaryTest`, `DateConversionTest`, `DaysSinceTest`, `MidnightAlarmReceiverTest`, `CountUpContractAndFlowTest`, `ItemIconsTest`, `DatePickerContractTest`, `WidgetRefreshDebounceTest`, `ItemColorsTest`, and `EdgeCaseMatrixTest`.
-- `app/src/androidTest/...` (device): `ComposeUiSmokeTest` (stateless UI & a11y semantics), `CountUpStoreInstrumentedTest` (CRUD, migration, recovery).
+- `app/src/test/...` (JVM): **444 JVM unit tests** (100% green) covering `CountUpViewModelTest` (Turbine), `BackupCoordinatorTest`, `ResetWhisperTrackerTest`, `SortOrderTest`, `CountUpRepositoryTest`, `BackupRepositoryTest`, `CountUpStoreTest`, `CountUpItemTest`, `WidgetRowTest`, `HeroWidgetTest`, `ZenPebbleTest`, `SolarRhythmConfigurationTest`, `WidgetContractInvariantsTest`, `WidgetMemoryBudgetGateTest`, `CountUpStressAndBoundaryTest`, `DateConversionTest`, `DaysSinceTest`, `MidnightAlarmReceiverTest`, `CountUpContractAndFlowTest`, `ItemIconsTest`, `DatePickerContractTest`, `WidgetRefreshDebounceTest`, `ItemColorsTest`, and `EdgeCaseMatrixTest`.
 - `app/src/androidTest/...` (device): `ComposeUiSmokeTest` (stateless UI & a11y semantics), `CountUpStoreInstrumentedTest` (CRUD, migration, recovery).
 
 ---
@@ -98,7 +97,7 @@ One value per item, stored as a JSON array string under key `items_v1` in privat
 
 - `epochDay` = `LocalDate.toEpochDay()`.
 - **Zero Data Loss Guarantee:** If SharedPreferences is wiped or corrupted, `CountUpStore` automatically self-heals from `countup_backup.json`. If a payload is truncated mid-write by OS power cutoff, `salvageItems` extracts all intact items and preserves the raw broken payload in a timestamped quarantine key.
-- **Widget Instance Bindings:** Per-instance bindings (`hero_widget_item_<id>`, `zen_horizon_widget_item_<id>`, `solar_rhythm_widget_item_<id>`, `zen_pebble_widget_item_<id>`) store bound item UUIDs. Deleting an item automatically cleans up all associated bindings across all widget families via `CountUpStore.purgeWidgetBindingsForItem(itemId)`. Stale IDs are cleaned up in `onDeleted` and sanitized on new-device restore.
+- **Widget Instance Bindings:** Per-instance bindings (`hero_widget_item_<id>`, `zen_horizon_widget_item_<id>`, `solar_rhythm_widget_item_<id>`, `zen_pebble_widget_item_<id>`, and `overview_widget_filter_<id>`) store bound item UUIDs and active suite filters. Deleting an item automatically cleans up all associated bindings across all widget families via `CountUpStore.purgeWidgetBindingsForItem(itemId)`. Stale IDs are cleaned up in `onDeleted` and sanitized on new-device restore.
 - **Writes use `commit()` and `fd.sync()`** synchronously before updating widgets (write-before-update ordering).
 - **Two-Tier Backup Architecture:**
   1. **Tier 1 (Automated OS Sync):** `android:allowBackup="true"` with `backup_rules.xml` and `data_extraction_rules.xml` synchronizing `countup_prefs.xml` and `countup_backup.json` to encrypted cloud storage (GMS) or D2D transfer tools (Mi Mover, Phone Clone).
@@ -123,7 +122,7 @@ One value per item, stored as a JSON array string under key `items_v1` in privat
 - **Responsive Large Screen Constraints & Adaptive Layout:** Centered column constraints (`widthIn(max = 640.dp)`) in `CountUpContent.kt` maintain visual balance and prevent stretched UI on foldables, tablets, and wide window modes.
 - **Zero-Allocation 120Hz Scrolling & ART Pre-compilation:** GPU-backed `GraphicsLayer` caching (`drawWithCache` + `obtainGraphicsLayer()`) isolates static ink wash theme rendering from Compose recomposition, eliminating draw allocations during fast list fling. Cold startup paths are pre-compiled via an ahead-of-time ART Baseline Profile (`baseline-prof.txt`).
 - **Complete Zen Widget Suite:**
-  - **Count-ups Multi-Grid:** 3x2 and 2x2 grid with double-tap direct reset and voice quick-add toolbar button.
+  - **Count-ups Multi-Grid:** 3-column / 2-column grid with dynamic ink wash and paper substrate backgrounds, suite signature dots, in-situ header style suite cycling (All ➔ Washi ➔ Earth ➔ Sumi ➔ All), isolated per-instance RemoteViews URIs (`countup://widget/overview/$appWidgetId`), Add Item intent continuity, double-tap direct reset, and voice quick-add toolbar button.
   - **Hero Milestone (2x1):** Poetic card format with prominent count, icon badge, milestone gold dot, anchor date, and two-tap direct reset.
   - **Zen Horizon Ribbon (4x1 & 2x1):** Horizontal ribbon with on-widget unit cycling (days -> weeks -> months -> years).
   - **Solar Rhythm (4x2 & 2x2):** Seasonal art matching the current Chinese solar term with milestone countdown/countup, calmed with 3 breathing cycles settling to equilibrium.
@@ -138,7 +137,7 @@ export JAVA_HOME="/path/to/jdk-17"   # or set via Android Studio / system PATH
 ./gradlew clean
 ./gradlew assembleDebug             # debug APK
 ./gradlew assembleRelease           # signed release APK + AAB bundle (R8 minified)
-./gradlew test                      # 402 JVM unit tests (100% green)
+./gradlew test                      # 444 JVM unit tests (100% green)
 ./gradlew connectedDebugAndroidTest # device tests (emulator/device online)
 ./gradlew lintDebug                 # 0 errors
 ```
