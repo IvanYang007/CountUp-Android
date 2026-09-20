@@ -44,6 +44,8 @@ interface CountUpRepository {
     fun setThemeMode(mode: ThemeMode): Boolean
     fun getSortOrder(): SortOrder
     fun setSortOrder(order: SortOrder): Boolean
+    fun getCardStyleFilter(): String
+    fun setCardStyleFilter(filter: String): Boolean
     fun exportBackupPayload(): CountUpBackupPayload
     fun restoreBackupPayload(payload: CountUpBackupPayload, strategy: RestoreStrategy): Boolean
 }
@@ -120,6 +122,12 @@ class DefaultCountUpRepository(
 
     override fun setSortOrder(order: SortOrder): Boolean =
         store.setSortOrder(order)
+
+    override fun getCardStyleFilter(): String =
+        store.getCardStyleFilter()
+
+    override fun setCardStyleFilter(filter: String): Boolean =
+        store.setCardStyleFilter(filter)
 
     override fun exportBackupPayload(): CountUpBackupPayload =
         store.exportBackupPayload()

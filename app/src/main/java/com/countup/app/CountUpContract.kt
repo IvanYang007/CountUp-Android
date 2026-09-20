@@ -41,12 +41,19 @@ data class CountUpUiState(
     val isRestorePayloadDamaged: Boolean = false,
     val isSaving: Boolean = false,
     val editorInitialCategory: String? = null,
+    val cardStyleFilter: String = CountUpStore.OVERVIEW_FILTER_ALL,
+    val isCardStyleMenuOpen: Boolean = false,
 ) {
     /**
-     * Instant derived filtered & sorted list of items matching [searchQuery] in [sortOrder].
+     * Instant derived filtered & sorted list of items matching [cardStyleFilter] and [searchQuery] in [sortOrder].
      */
     val displayItems: List<CountUpItem> by lazy {
-        queryAndSortItems(items, searchQuery, sortOrder, today)
+        val filteredByStyle = if (cardStyleFilter.isEmpty() || cardStyleFilter == CountUpStore.OVERVIEW_FILTER_ALL) {
+            items
+        } else {
+            items.filter { it.matchesStyleFilter(cardStyleFilter) }
+        }
+        queryAndSortItems(filteredByStyle, searchQuery, sortOrder, today)
     }
 }
 
@@ -99,6 +106,9 @@ sealed interface CountUpUiEvent {
     data class DismissCardWhisper(val itemId: String) : CountUpUiEvent
     data class ToggleWidgetVisibility(val id: String) : CountUpUiEvent
     data class SetSearchSortMenuOpen(val open: Boolean) : CountUpUiEvent
+    data class CardStyleFilterSelected(val filter: String) : CountUpUiEvent
+    data object CycleCardStyleFilter : CountUpUiEvent
+    data class SetCardStyleMenuOpen(val open: Boolean) : CountUpUiEvent
     data class SetSettingsDialogOpen(val open: Boolean) : CountUpUiEvent
     data object RequestExportBackup : CountUpUiEvent
     data class ExportBackupToStream(val outputStream: java.io.OutputStream) : CountUpUiEvent

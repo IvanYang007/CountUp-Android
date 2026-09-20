@@ -3,6 +3,7 @@ package com.countup.app
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
@@ -19,11 +20,13 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -202,7 +205,10 @@ fun CountUpContent(
                 HeaderRow(
                     backgroundTheme = state.backgroundTheme,
                     onCycleBackground = { onEvent(CountUpUiEvent.CycleBackground) },
-                    onNewItem = { onEvent(CountUpUiEvent.OpenEditor(null)) },
+                    onNewItem = {
+                        val initialCat = if (state.cardStyleFilter == CountUpStore.OVERVIEW_FILTER_ALL) null else state.cardStyleFilter
+                        onEvent(CountUpUiEvent.OpenEditor(null, initialCategory = initialCat))
+                    },
                     today = state.today,
                 )
                 Spacer(Modifier.padding(top = 16.dp))
@@ -242,12 +248,29 @@ fun CountUpContent(
                         onSelectSortOrder = { onEvent(CountUpUiEvent.SortOrderSelected(it)) },
                         onCycleThemeMode = { onEvent(CountUpUiEvent.CycleThemeMode) },
                         onOpenSettings = { onEvent(CountUpUiEvent.SetSettingsDialogOpen(true)) },
+                        cardStyleFilter = state.cardStyleFilter,
+                        isCardStyleMenuOpen = state.isCardStyleMenuOpen,
+                        onCycleCardStyle = { onEvent(CountUpUiEvent.CycleCardStyleFilter) },
+                        onSelectCardStyle = { onEvent(CountUpUiEvent.CardStyleFilterSelected(it)) },
+                        onToggleCardStyleMenu = { onEvent(CountUpUiEvent.SetCardStyleMenuOpen(it)) },
+                        allItems = state.items,
                     )
                     Spacer(Modifier.padding(top = 8.dp))
 
                     if (displayItems.isEmpty() && state.searchQuery.isNotEmpty()) {
                         EmptySearchState(
                             onClearSearch = { onEvent(CountUpUiEvent.ClearSearch) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 48.dp, bottom = bottomInset),
+                        )
+                    } else if (displayItems.isEmpty() && state.cardStyleFilter != CountUpStore.OVERVIEW_FILTER_ALL) {
+                        EmptyStyleFilterState(
+                            filter = state.cardStyleFilter,
+                            onShowAll = { onEvent(CountUpUiEvent.CardStyleFilterSelected(CountUpStore.OVERVIEW_FILTER_ALL)) },
+                            onNewItemInStyle = {
+                                onEvent(CountUpUiEvent.OpenEditor(null, initialCategory = state.cardStyleFilter))
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 48.dp, bottom = bottomInset),
@@ -695,8 +718,23 @@ private fun SubHeaderRow(
     onSelectSortOrder: (SortOrder) -> Unit,
     onCycleThemeMode: () -> Unit,
     onOpenSettings: () -> Unit,
+    cardStyleFilter: String,
+    isCardStyleMenuOpen: Boolean,
+    onCycleCardStyle: () -> Unit,
+    onSelectCardStyle: (String) -> Unit,
+    onToggleCardStyleMenu: (Boolean) -> Unit,
+    allItems: List<CountUpItem>,
     modifier: Modifier = Modifier,
 ) {
+    val categoryCounts = remember(allItems) {
+        mapOf(
+            CountUpStore.OVERVIEW_FILTER_ALL to allItems.size,
+            "washi" to allItems.count { it.matchesStyleFilter("washi") },
+            "earth" to allItems.count { it.matchesStyleFilter("earth") },
+            "sumi" to allItems.count { it.matchesStyleFilter("sumi") },
+        )
+    }
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -704,20 +742,34 @@ private fun SubHeaderRow(
             .fillMaxWidth()
             .padding(horizontal = 4.dp, vertical = 2.dp),
     ) {
-        Text(
-            text = if (itemCount == 1) {
-                stringResource(R.string.items_count_one)
-            } else {
-                stringResource(R.string.items_count, itemCount)
-            },
-            style = MaterialTheme.typography.bodySmall.copy(
-                fontSize = 12.5.sp,
-                letterSpacing = 0.2.sp,
-                fontWeight = FontWeight.Medium,
-            ),
-            fontFamily = FontFamily.SansSerif,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            CardStyleTogglePill(
+                filter = cardStyleFilter,
+                isMenuOpen = isCardStyleMenuOpen,
+                onCycle = onCycleCardStyle,
+                onSelect = onSelectCardStyle,
+                onToggleMenu = onToggleCardStyleMenu,
+                categoryCounts = categoryCounts,
+            )
+
+            Text(
+                text = if (itemCount == 1) {
+                    stringResource(R.string.items_count_one)
+                } else {
+                    stringResource(R.string.items_count, itemCount)
+                },
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 12.5.sp,
+                    letterSpacing = 0.2.sp,
+                    fontWeight = FontWeight.Medium,
+                ),
+                fontFamily = FontFamily.SansSerif,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
 
         val zenColors = LocalZenColors.current
         val sortInteraction = rememberPressSource()
@@ -967,6 +1019,187 @@ private fun SubHeaderRow(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(15.dp),
                 )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun CardStyleTogglePill(
+    filter: String,
+    isMenuOpen: Boolean,
+    onCycle: () -> Unit,
+    onSelect: (String) -> Unit,
+    onToggleMenu: (Boolean) -> Unit,
+    categoryCounts: Map<String, Int>,
+    modifier: Modifier = Modifier,
+) {
+    val zenColors = LocalZenColors.current
+    val interactionSource = rememberPressSource()
+
+    val dotColor = Color(resolveOverviewDotColor(filter, zenColors.isDark))
+    val paperColor = Color(resolveOverviewPaperColor(filter, zenColors.isDark))
+    val borderColor = Color(resolveOverviewDividerColor(filter, zenColors.isDark))
+
+    val animatedDotColor by animateColorAsState(
+        targetValue = dotColor,
+        animationSpec = tween(durationMillis = 200),
+        label = "styleDotColor",
+    )
+    val animatedPaperColor by animateColorAsState(
+        targetValue = paperColor,
+        animationSpec = tween(durationMillis = 200),
+        label = "stylePaperColor",
+    )
+    val animatedBorderColor by animateColorAsState(
+        targetValue = borderColor,
+        animationSpec = tween(durationMillis = 200),
+        label = "styleBorderColor",
+    )
+
+    val currentLabelRes = resolveStyleFilterLabelRes(filter)
+    val currentLabel = stringResource(currentLabelRes)
+    val contentDesc = stringResource(R.string.cd_card_style_toggle, currentLabel)
+
+    Box(modifier = modifier) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .height(24.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(animatedPaperColor)
+                .border(BorderStroke(0.8.dp, animatedBorderColor), RoundedCornerShape(8.dp))
+                .combinedClickable(
+                    interactionSource = interactionSource,
+                    indication = LocalIndication.current,
+                    onClick = onCycle,
+                    onLongClick = { onToggleMenu(true) },
+                )
+                .pressScale(interactionSource)
+                .padding(horizontal = 7.dp)
+                .semantics {
+                    contentDescription = contentDesc
+                },
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                // Living mineral bead dot
+                Box(
+                    modifier = Modifier
+                        .size(6.dp)
+                        .clip(CircleShape)
+                        .background(animatedDotColor),
+                )
+
+                // Style label with smooth crossfade
+                AnimatedContent(
+                    targetState = currentLabel,
+                    transitionSpec = {
+                        fadeIn(tween(150)) togetherWith fadeOut(tween(100))
+                    },
+                    label = "styleLabelTransition",
+                ) { label ->
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontSize = 11.5.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 0.2.sp,
+                        ),
+                        fontFamily = FontFamily.SansSerif,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+
+                // Dropdown caret indicator
+                Text(
+                    text = "▾",
+                    fontSize = 10.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(bottom = 1.dp),
+                )
+            }
+        }
+
+        // Floating Zen Style Suite Dropdown Menu
+        DropdownMenu(
+            expanded = isMenuOpen,
+            onDismissRequest = { onToggleMenu(false) },
+            shape = RoundedCornerShape(12.dp),
+            containerColor = if (zenColors.isDark) zenColors.paperSurface else zenColors.paperBackground,
+            tonalElevation = 0.dp,
+            border = BorderStroke(1.dp, zenColors.hairlineRule),
+            shadowElevation = if (zenColors.isDark) 0.dp else 6.dp,
+            modifier = Modifier
+                .width(180.dp)
+                .padding(horizontal = 6.dp, vertical = 4.dp),
+        ) {
+            val styleOptions = remember {
+                listOf(
+                    CountUpStore.OVERVIEW_FILTER_ALL,
+                    "washi",
+                    "earth",
+                    "sumi",
+                )
+            }
+
+            styleOptions.forEach { option ->
+                val isSelected = option == filter
+                val optionDotColor = Color(resolveOverviewDotColor(option, zenColors.isDark))
+                val optionLabelRes = resolveStyleFilterLabelRes(option)
+                val count = categoryCounts[option] ?: 0
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(
+                            if (isSelected) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
+                            else Color.Transparent,
+                        )
+                        .clickable {
+                            onSelect(option)
+                        }
+                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(7.dp)
+                            .clip(CircleShape)
+                            .background(optionDotColor),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(optionLabelRes),
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontSize = 12.5.sp,
+                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                        ),
+                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Text(
+                        text = "($count)",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Normal,
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    if (isSelected) {
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            text = "✓",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                }
             }
         }
     }
@@ -1765,6 +1998,73 @@ private fun EmptySearchState(onClearSearch: () -> Unit, modifier: Modifier = Mod
             modifier = Modifier.pressScale(clearInteraction),
         ) {
             Text(stringResource(R.string.search_clear))
+        }
+    }
+}
+
+@Composable
+private fun EmptyStyleFilterState(
+    filter: String,
+    onShowAll: () -> Unit,
+    onNewItemInStyle: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val emptyRes = when (filter) {
+        "washi" -> R.string.widget_empty_washi
+        "earth" -> R.string.widget_empty_earth
+        "sumi" -> R.string.widget_empty_sumi
+        else -> R.string.empty_body
+    }
+    val text = stringResource(emptyRes)
+    val lines = text.split("\n")
+    val headline = lines.firstOrNull() ?: text
+    val subtitle = if (lines.size > 1) lines[1] else ""
+    val styleLabel = stringResource(resolveStyleFilterLabelRes(filter))
+
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        Spacer(Modifier.padding(top = 16.dp))
+        Text(
+            text = headline,
+            style = MaterialTheme.typography.titleMedium,
+            fontFamily = FontFamily.SansSerif,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = TextAlign.Center,
+        )
+        if (subtitle.isNotEmpty()) {
+            Spacer(Modifier.padding(top = 4.dp))
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        }
+        Spacer(Modifier.padding(top = 20.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            val createInteraction = rememberPressSource()
+            Button(
+                onClick = onNewItemInStyle,
+                interactionSource = createInteraction,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.onTertiary,
+                ),
+                shape = RoundedCornerShape(percent = 50),
+                modifier = Modifier.pressScale(createInteraction),
+            ) {
+                Text(stringResource(R.string.create_in_style, styleLabel))
+            }
+
+            val showAllInteraction = rememberPressSource()
+            OutlinedButton(
+                onClick = onShowAll,
+                interactionSource = showAllInteraction,
+                shape = RoundedCornerShape(percent = 50),
+                modifier = Modifier.pressScale(showAllInteraction),
+            ) {
+                Text(stringResource(R.string.show_all_cards))
+            }
         }
     }
 }

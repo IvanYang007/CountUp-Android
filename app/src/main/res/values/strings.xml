@@ -200,6 +200,7 @@
     <string name="search_clear">Clear search</string>
     <string name="sort_section_title">SORT ORDER</string>
     <string name="cd_sort_search_pill">Sort and search options. Currently sorted by %1$s. Tap to search or change sort.</string>
+    <string name="cd_card_style_toggle">Card style: %1$s. Tap to cycle, long press to choose.</string>
 
     <!-- Theme Mode -->
     <string name="theme_mode_system">System Default</string>
@@ -544,4 +545,6 @@
     <string name="widget_empty_washi">Washi paper awaits ink\nTap to create in Washi</string>
     <string name="widget_empty_earth">Rich earth awaits the seed\nTap to plant in Earth</string>
     <string name="widget_empty_sumi">Deep ink rests in the stone\nTap to mark in Sumi</string>
+    <string name="show_all_cards">Show all cards</string>
+    <string name="create_in_style">+ Create in %1$s</string>
 </resources>

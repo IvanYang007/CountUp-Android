@@ -1463,4 +1463,122 @@ class CountUpViewModelTest {
             assertEquals(1, finishedState.items.size)
         }
     }
+
+    @Test
+    fun `cycleCardStyleFilter cycles through all suites and updates repository`() = runTest {
+        val repo = FakeCountUpRepository(
+            initialItems = emptyList(),
+            initialCardStyleFilter = CountUpStore.OVERVIEW_FILTER_ALL,
+        )
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+
+        viewModel.state.test {
+            val initial = awaitItem()
+            assertEquals(CountUpStore.OVERVIEW_FILTER_ALL, initial.cardStyleFilter)
+
+            // Cycle: all -> washi
+            viewModel.onEvent(CountUpUiEvent.CycleCardStyleFilter)
+            val washiState = awaitItem()
+            assertEquals("washi", washiState.cardStyleFilter)
+            assertEquals("washi", repo.getCardStyleFilter())
+
+            // Cycle: washi -> earth
+            viewModel.onEvent(CountUpUiEvent.CycleCardStyleFilter)
+            val earthState = awaitItem()
+            assertEquals("earth", earthState.cardStyleFilter)
+            assertEquals("earth", repo.getCardStyleFilter())
+
+            // Cycle: earth -> sumi
+            viewModel.onEvent(CountUpUiEvent.CycleCardStyleFilter)
+            val sumiState = awaitItem()
+            assertEquals("sumi", sumiState.cardStyleFilter)
+            assertEquals("sumi", repo.getCardStyleFilter())
+
+            // Cycle: sumi -> all
+            viewModel.onEvent(CountUpUiEvent.CycleCardStyleFilter)
+            val allState = awaitItem()
+            assertEquals(CountUpStore.OVERVIEW_FILTER_ALL, allState.cardStyleFilter)
+            assertEquals(CountUpStore.OVERVIEW_FILTER_ALL, repo.getCardStyleFilter())
+        }
+    }
+
+    @Test
+    fun `cardStyleFilterSelected filters displayItems to matching category`() = runTest {
+        val washiItem = CountUpItem(id = "1", name = "Washi Item", epochDay = fixedToday.toEpochDay(), cardColor = "paper_gold")
+        val earthItem = CountUpItem(id = "2", name = "Earth Item", epochDay = fixedToday.toEpochDay(), cardColor = "celadon_bamboo")
+        val sumiItem = CountUpItem(id = "3", name = "Sumi Item", epochDay = fixedToday.toEpochDay(), cardColor = "ink_gold")
+
+        val repo = FakeCountUpRepository(
+            initialItems = listOf(washiItem, earthItem, sumiItem),
+            initialCardStyleFilter = CountUpStore.OVERVIEW_FILTER_ALL,
+        )
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+
+        viewModel.state.test {
+            val initial = awaitItem()
+            assertEquals(3, initial.displayItems.size)
+
+            viewModel.onEvent(CountUpUiEvent.CardStyleFilterSelected("washi"))
+            val washiState = awaitItem()
+            assertEquals(1, washiState.displayItems.size)
+            assertEquals("Washi Item", washiState.displayItems.first().name)
+            assertFalse(washiState.isCardStyleMenuOpen)
+
+            viewModel.onEvent(CountUpUiEvent.CardStyleFilterSelected("earth"))
+            val earthState = awaitItem()
+            assertEquals(1, earthState.displayItems.size)
+            assertEquals("Earth Item", earthState.displayItems.first().name)
+
+            viewModel.onEvent(CountUpUiEvent.CardStyleFilterSelected("sumi"))
+            val sumiState = awaitItem()
+            assertEquals(1, sumiState.displayItems.size)
+            assertEquals("Sumi Item", sumiState.displayItems.first().name)
+
+            viewModel.onEvent(CountUpUiEvent.CardStyleFilterSelected(CountUpStore.OVERVIEW_FILTER_ALL))
+            val allState = awaitItem()
+            assertEquals(3, allState.displayItems.size)
+        }
+    }
+
+    @Test
+    fun `openEditor preserves initialCategory in state`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = emptyList())
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+
+        viewModel.onEvent(CountUpUiEvent.OpenEditor(null, initialCategory = "earth"))
+        assertEquals("earth", viewModel.state.value.editorInitialCategory)
+        assertTrue(viewModel.state.value.isEditorOpen)
+
+        viewModel.onEvent(CountUpUiEvent.CloseEditor)
+        assertNull(viewModel.state.value.editorInitialCategory)
+        assertFalse(viewModel.state.value.isEditorOpen)
+    }
+
+    @Test
+    fun `setCardStyleMenuOpen toggles isCardStyleMenuOpen in state`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = emptyList())
+        val viewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+
+        assertFalse(viewModel.state.value.isCardStyleMenuOpen)
+        viewModel.onEvent(CountUpUiEvent.SetCardStyleMenuOpen(true))
+        assertTrue(viewModel.state.value.isCardStyleMenuOpen)
+        viewModel.onEvent(CountUpUiEvent.SetCardStyleMenuOpen(false))
+        assertFalse(viewModel.state.value.isCardStyleMenuOpen)
+    }
 }

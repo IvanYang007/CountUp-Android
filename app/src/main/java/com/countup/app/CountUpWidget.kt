@@ -692,6 +692,10 @@ internal fun resolveOverviewTitleRes(filter: String): Pair<Int, Int> {
     return Pair(R.string.app_name, categoryRes)
 }
 
+/** Resolves the string resource ID for the category label of the style filter. */
+internal fun resolveStyleFilterLabelRes(filter: String): Int =
+    CARD_COLOR_CATEGORIES.firstOrNull { it.id == filter }?.labelRes ?: R.string.category_all
+
 /** Resolves the full compound title (e.g. "CountUp · All", "CountUp · Washi"). */
 internal fun resolveOverviewCompoundTitle(context: Context, filter: String): String {
     val (baseRes, categoryRes) = resolveOverviewTitleRes(filter)

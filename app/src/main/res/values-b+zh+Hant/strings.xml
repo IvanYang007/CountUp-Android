@@ -350,5 +350,7 @@
     <string name="widget_empty_washi">素箋待墨\n輕觸起筆</string>
     <string name="widget_empty_earth">沃土待春\n輕觸播種</string>
     <string name="widget_empty_sumi">靜墨凝神\n輕觸落印</string>
+    <string name="show_all_cards">顯示全部卡片</string>
+    <string name="create_in_style">+ 新建%1$s卡片</string>
 </resources>
 
