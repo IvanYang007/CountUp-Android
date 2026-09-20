@@ -726,15 +726,6 @@ private fun SubHeaderRow(
     allItems: List<CountUpItem>,
     modifier: Modifier = Modifier,
 ) {
-    val categoryCounts = remember(allItems) {
-        mapOf(
-            CountUpStore.OVERVIEW_FILTER_ALL to allItems.size,
-            "washi" to allItems.count { it.matchesStyleFilter("washi") },
-            "earth" to allItems.count { it.matchesStyleFilter("earth") },
-            "sumi" to allItems.count { it.matchesStyleFilter("sumi") },
-        )
-    }
-
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -752,7 +743,7 @@ private fun SubHeaderRow(
                 onCycle = onCycleCardStyle,
                 onSelect = onSelectCardStyle,
                 onToggleMenu = onToggleCardStyleMenu,
-                categoryCounts = categoryCounts,
+                allItems = allItems,
             )
 
             Text(
@@ -1024,6 +1015,13 @@ private fun SubHeaderRow(
     }
 }
 
+private val STYLE_FILTER_OPTIONS = listOf(
+    CountUpStore.OVERVIEW_FILTER_ALL,
+    "washi",
+    "earth",
+    "sumi",
+)
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun CardStyleTogglePill(
@@ -1032,7 +1030,7 @@ private fun CardStyleTogglePill(
     onCycle: () -> Unit,
     onSelect: (String) -> Unit,
     onToggleMenu: (Boolean) -> Unit,
-    categoryCounts: Map<String, Int>,
+    allItems: List<CountUpItem>,
     modifier: Modifier = Modifier,
 ) {
     val zenColors = LocalZenColors.current
@@ -1137,16 +1135,16 @@ private fun CardStyleTogglePill(
                 .width(180.dp)
                 .padding(horizontal = 6.dp, vertical = 4.dp),
         ) {
-            val styleOptions = remember {
-                listOf(
-                    CountUpStore.OVERVIEW_FILTER_ALL,
-                    "washi",
-                    "earth",
-                    "sumi",
+            val categoryCounts = remember(allItems) {
+                mapOf(
+                    CountUpStore.OVERVIEW_FILTER_ALL to allItems.size,
+                    "washi" to allItems.count { it.matchesStyleFilter("washi") },
+                    "earth" to allItems.count { it.matchesStyleFilter("earth") },
+                    "sumi" to allItems.count { it.matchesStyleFilter("sumi") },
                 )
             }
 
-            styleOptions.forEach { option ->
+            STYLE_FILTER_OPTIONS.forEach { option ->
                 val isSelected = option == filter
                 val optionDotColor = Color(resolveOverviewDotColor(option, zenColors.isDark))
                 val optionLabelRes = resolveStyleFilterLabelRes(option)
@@ -2018,7 +2016,7 @@ private fun EmptyStyleFilterState(
     val text = stringResource(emptyRes)
     val lines = text.split("\n")
     val headline = lines.firstOrNull() ?: text
-    val subtitle = if (lines.size > 1) lines[1] else ""
+    val subtitle = lines.getOrNull(1).orEmpty()
     val styleLabel = stringResource(resolveStyleFilterLabelRes(filter))
 
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {

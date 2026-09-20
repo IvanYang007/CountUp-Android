@@ -606,7 +606,6 @@ class CountUpStore(context: Context) {
         }
     }
 
-
     /** Retrieves all active hero widget bindings. */
     fun getAllHeroWidgetBindings(): Map<Int, String> {
         val result = mutableMapOf<Int, String>()
