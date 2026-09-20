@@ -1047,25 +1047,4 @@ class CountUpStoreTest {
         val content = backupFile.readText(Charsets.UTF_8)
         assertTrue(content.contains("Item 10"))
     }
-
-    @Test
-    fun getAndSetCardStyleFilterPersistsAndSanitizesFallback() {
-        val store = CountUpStore(testContext)
-        assertEquals(CountUpStore.OVERVIEW_FILTER_ALL, store.getCardStyleFilter())
-
-        assertTrue(store.setCardStyleFilter("washi"))
-        assertEquals("washi", store.getCardStyleFilter())
-
-        assertTrue(store.setCardStyleFilter("earth"))
-        assertEquals("earth", store.getCardStyleFilter())
-
-        assertTrue(store.setCardStyleFilter("sumi"))
-        assertEquals("sumi", store.getCardStyleFilter())
-
-        assertTrue(store.setCardStyleFilter("invalid_junk"))
-        assertEquals(CountUpStore.OVERVIEW_FILTER_ALL, store.getCardStyleFilter())
-
-        assertTrue(store.setCardStyleFilter(CountUpStore.OVERVIEW_FILTER_ALL))
-        assertEquals(CountUpStore.OVERVIEW_FILTER_ALL, store.getCardStyleFilter())
-    }
 }

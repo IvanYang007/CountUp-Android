@@ -606,22 +606,6 @@ class CountUpStore(context: Context) {
         }
     }
 
-    /** Retrieves the global app card style filter, defaulting to [OVERVIEW_FILTER_ALL]. */
-    fun getCardStyleFilter(): String {
-        return synchronized(globalStoreLock) {
-            sanitizeFilter(prefs.getString(KEY_CARD_STYLE_FILTER, OVERVIEW_FILTER_ALL))
-        }
-    }
-
-    /** Persists the global app card style filter. */
-    fun setCardStyleFilter(filter: String): Boolean {
-        val sanitized = sanitizeFilter(filter)
-        return synchronized(globalStoreLock) {
-            prefs.edit()
-                .putString(KEY_CARD_STYLE_FILTER, sanitized)
-                .commit()
-        }
-    }
 
     /** Retrieves all active hero widget bindings. */
     fun getAllHeroWidgetBindings(): Map<Int, String> {
@@ -1082,7 +1066,6 @@ class CountUpStore(context: Context) {
         private const val PREFIX_ZEN_PEBBLE_TAG = "zen_pebble_tag_"
         private const val PREFIX_SOLAR_RHYTHM_BINDING = "solar_rhythm_binding_"
         private const val PREFIX_OVERVIEW_STYLE_FILTER = "overview_style_filter_"
-        private const val KEY_CARD_STYLE_FILTER = "card_style_filter_v1"
         const val OVERVIEW_FILTER_ALL = "all"
         private const val MAX_QUARANTINE_ENTRIES = 3
         private const val KEY_PENDING_WIDGET_RESETS = "pending_widget_resets_v1"

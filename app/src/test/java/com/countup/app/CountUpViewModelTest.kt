@@ -1465,11 +1465,8 @@ class CountUpViewModelTest {
     }
 
     @Test
-    fun `cycleCardStyleFilter cycles through all suites and updates repository`() = runTest {
-        val repo = FakeCountUpRepository(
-            initialItems = emptyList(),
-            initialCardStyleFilter = CountUpStore.OVERVIEW_FILTER_ALL,
-        )
+    fun `cycleCardStyleFilter cycles through all suites in memory without persisting to repository`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = emptyList())
         val viewModel = CountUpViewModel(
             repository = repo,
             todayProvider = { fixedToday },
@@ -1484,26 +1481,30 @@ class CountUpViewModelTest {
             viewModel.onEvent(CountUpUiEvent.CycleCardStyleFilter)
             val washiState = awaitItem()
             assertEquals("washi", washiState.cardStyleFilter)
-            assertEquals("washi", repo.getCardStyleFilter())
 
             // Cycle: washi -> earth
             viewModel.onEvent(CountUpUiEvent.CycleCardStyleFilter)
             val earthState = awaitItem()
             assertEquals("earth", earthState.cardStyleFilter)
-            assertEquals("earth", repo.getCardStyleFilter())
 
             // Cycle: earth -> sumi
             viewModel.onEvent(CountUpUiEvent.CycleCardStyleFilter)
             val sumiState = awaitItem()
             assertEquals("sumi", sumiState.cardStyleFilter)
-            assertEquals("sumi", repo.getCardStyleFilter())
 
             // Cycle: sumi -> all
             viewModel.onEvent(CountUpUiEvent.CycleCardStyleFilter)
             val allState = awaitItem()
             assertEquals(CountUpStore.OVERVIEW_FILTER_ALL, allState.cardStyleFilter)
-            assertEquals(CountUpStore.OVERVIEW_FILTER_ALL, repo.getCardStyleFilter())
         }
+
+        // Relaunching the app (new ViewModel) must always default to All
+        val relaunchedViewModel = CountUpViewModel(
+            repository = repo,
+            todayProvider = { fixedToday },
+            ioDispatcher = mainDispatcherRule.testDispatcher,
+        )
+        assertEquals(CountUpStore.OVERVIEW_FILTER_ALL, relaunchedViewModel.state.value.cardStyleFilter)
     }
 
     @Test
@@ -1514,7 +1515,6 @@ class CountUpViewModelTest {
 
         val repo = FakeCountUpRepository(
             initialItems = listOf(washiItem, earthItem, sumiItem),
-            initialCardStyleFilter = CountUpStore.OVERVIEW_FILTER_ALL,
         )
         val viewModel = CountUpViewModel(
             repository = repo,

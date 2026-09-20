@@ -87,17 +87,11 @@ class CountUpViewModel(
                 }
             }
             is CountUpUiEvent.CardStyleFilterSelected -> {
-                viewModelScope.launch(ioDispatcher) {
-                    repository.setCardStyleFilter(event.filter)
-                    _state.update { it.copy(cardStyleFilter = event.filter, isCardStyleMenuOpen = false) }
-                }
+                _state.update { it.copy(cardStyleFilter = event.filter, isCardStyleMenuOpen = false) }
             }
             CountUpUiEvent.CycleCardStyleFilter -> {
                 val next = nextOverviewStyleFilter(_state.value.cardStyleFilter)
-                viewModelScope.launch(ioDispatcher) {
-                    repository.setCardStyleFilter(next)
-                    _state.update { it.copy(cardStyleFilter = next) }
-                }
+                _state.update { it.copy(cardStyleFilter = next) }
             }
             is CountUpUiEvent.SetCardStyleMenuOpen -> {
                 _state.update { it.copy(isCardStyleMenuOpen = event.open) }
@@ -439,7 +433,6 @@ class CountUpViewModel(
         val sortOrder = repository.getSortOrder()
         val backgroundTheme = repository.getBackgroundTheme()
         val themeMode = repository.getThemeMode()
-        val cardStyleFilter = repository.getCardStyleFilter()
         val pendingWidgetResets = repository.getPendingWidgetResets()
         val widgetWhispers = ResetWhisperTracker.buildWidgetWhispers(pendingWidgetResets)
         // Mark as acknowledged in persistent storage so next launch is clean (Active Session pattern)
@@ -457,7 +450,6 @@ class CountUpViewModel(
                 sortOrder = sortOrder,
                 backgroundTheme = backgroundTheme,
                 themeMode = themeMode,
-                cardStyleFilter = cardStyleFilter,
                 today = today,
                 cardWhispers = widgetWhispers + current.cardWhispers,
                 pendingWidgetResets = if (pendingWidgetResets.isNotEmpty()) pendingWidgetResets else current.pendingWidgetResets,

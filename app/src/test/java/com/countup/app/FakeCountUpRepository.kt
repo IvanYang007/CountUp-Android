@@ -11,24 +11,14 @@ class FakeCountUpRepository(
     initialTheme: BackgroundTheme = BackgroundTheme.AUTO_DAILY,
     initialSortOrder: SortOrder = SortOrder.DAYS_DESC,
     initialThemeMode: ThemeMode = ThemeMode.SYSTEM,
-    initialCardStyleFilter: String = CountUpStore.OVERVIEW_FILTER_ALL,
 ) : CountUpRepository {
 
     private val itemsList = initialItems.toMutableList()
     private var theme: BackgroundTheme = initialTheme
     private var sortOrder: SortOrder = initialSortOrder
     private var themeMode: ThemeMode = initialThemeMode
-    private var cardStyleFilter: String = initialCardStyleFilter
 
     var shouldFailWrite: Boolean = false
-
-    override fun getCardStyleFilter(): String = cardStyleFilter
-
-    override fun setCardStyleFilter(filter: String): Boolean {
-        if (shouldFailWrite) return false
-        cardStyleFilter = filter
-        return true
-    }
 
     override fun getItems(): List<CountUpItem> = itemsList.toList()
 
