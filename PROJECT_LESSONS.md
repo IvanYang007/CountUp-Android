@@ -1,157 +1,157 @@
 # Project Lessons — CountUp-Android
 
-> Derived from git history. Last analyzed commit: `627e7fb066e2c39169dc521b2ff688e4e94b29bb` (2026-09-19T20:20:00-04:00).
-> Range: `32f6f36211113906d4bc4f8c03e519b711b198e1` .. `627e7fb066e2c39169dc521b2ff688e4e94b29bb` (187 commits, 2026-08-20 .. 2026-09-19).
+> Derived from git history. Last analyzed commit: `ddee9c5a0bdfc3add66e00f3f708a24d6591a8f7` (2026-09-20T16:48:00-04:00).
+> Range: `32f6f36211113906d4bc4f8c03e519b711b198e1` .. `ddee9c5a0bdfc3add66e00f3f708a24d6591a8f7` (190 commits, 2026-08-20 .. 2026-09-20).
 > Grades: `[observed]` stated in a commit/PR, `[inferred]` deduced from diffs,
 > `[weak]` one data point or ambiguous.
 
 ## Executive summary
 
-CountUp-Android is a zero-permission, offline-first milestone count-up app built with Jetpack Compose Material 3 and six RemoteViews home-screen widget providers. Developed over four weeks across 177 commits, its history is dominated by widget configuration contracts, release minification traps, and data integrity safeguards. The highest-risk module is `app/src/main/res/xml/zen_pebble_widget_info.xml` alongside `app/src/main/java/com/countup/app/CountUpStore.kt`. The project repeatedly struggled with 1x1 widget launcher placement, oscillating between resize modes and configuration flags before locking hard invariants. The single most important constraint is the zero-permission model: no runtime permissions, no WorkManager, and no background services are permitted.
+CountUp-Android is a zero-permission, offline-first milestone count-up app built with Jetpack Compose Material 3 and six RemoteViews home-screen widget providers. Developed over four weeks across 190 commits, its history is dominated by widget configuration contracts, release minification traps, and data integrity safeguards. The highest-risk module is `app/src/main/res/xml/zen_pebble_widget_info.xml` alongside `app/src/main/java/com/countup/app/CountUpStore.kt`. The project repeatedly struggled with 1x1 widget launcher placement, oscillating between resize modes and configuration flags before locking hard invariants. The single most important constraint is the zero-permission model: no runtime permissions, no WorkManager, and no background services are permitted.
 
 **Read this first if you are about to touch:** `app/src/main/res/xml/zen_pebble_widget_info.xml` (see Known risk areas).
 
 ## Lessons learned from past commits
 
-### L1. Omit configuration_optional from widgets requiring card selection — [observed]
+### L1. Lock 1x1 pebble widget XML invariants (resizeMode=none, omit configuration_optional) — [observed]
 
-- **What happened:** Adding `configuration_optional` to `zen_pebble_widget_info.xml` caused Android 12+ launchers to skip `ZenPebbleConfigureActivity` on drag-and-drop, placing an unconfigured widget with fallback data and an easily-missed pencil affordance.
-- **Evidence:** `1cd6e29d1` fix(widget): lock 1x1 pebble resizeMode to none and restore configuration_optional, `433f1d47b` fix(widget): restore auto-launch picker for 1x1 Zen Pebble by removing configuration_optional
-- **Why it recurs:** Developers mistakenly treat `configuration_optional` as a placement fix, unaware that it instructs launcher hosts to omit initial configuration.
-- **The rule:** Never include `configuration_optional` in `android:widgetFeatures` for item-tracking widgets; declare `reconfigurable` only.
+- **What happened:** Setting `android:resizeMode="horizontal|vertical"` on single-cell widgets caused Samsung One UI and Xiaomi HyperOS drop handlers to abort targeted drop coordinates and snap tiles to slot 0 (`b6b4ce0ba`, `471e4cc69`). Conversely, adding `configuration_optional` to fix drop placement caused Android 12+ launchers to omit `ZenPebbleConfigureActivity`, dropping unconfigured fallback widgets with an easily-missed pencil affordance (`1cd6e29d1`, `433f1d47b`).
+- **Evidence:** `1cd6e29d1` fix(widget): lock 1x1 pebble resizeMode to none, `433f1d47b` fix(widget): restore auto-launch picker, `b6b4ce0ba` fix(widget): fix 1x1 pebble grid slotting, `471e4cc69` fix(widget): universal 1x1 pebble layout
+- **Why it recurs:** Standard Pixel emulator launchers tolerate resize flags and configuration omissions on single-cell widgets, masking OEM launcher-specific drag-and-drop failures during standard testing.
+- **The rule:** In `zen_pebble_widget_info.xml`, declare `android:resizeMode="none"` and `android:widgetFeatures="reconfigurable"`; never set resize modes or add `configuration_optional`.
 
-### L2. Set resizeMode to none on 1x1 widgets to prevent OEM slot-0 snapping — [observed]
-
-- **What happened:** Setting `android:resizeMode="horizontal|vertical"` on single-cell widgets caused Samsung One UI and Xiaomi HyperOS drop handlers to abort targeted drop coordinates and snap tiles to slot 0.
-- **Evidence:** `b6b4ce0ba` fix(widget): fix 1x1 pebble grid slotting, `471e4cc69` fix(widget): universal 1x1 pebble layout for all OEM launchers
-- **Why it recurs:** Standard Pixel emulator launchers tolerate resize flags on 1x1 cells, masking the failure during emulator testing.
-- **The rule:** Set `android:resizeMode="none"` on single-cell widget provider XML definitions.
-
-### L3. Strip transitive InitializationProvider to prevent background service leaks — [observed]
+### L2. Strip transitive InitializationProvider to prevent background service leaks — [observed]
 
 - **What happened:** Transitive AndroidX dependencies injected `androidx.startup.InitializationProvider`, booting unauthorized WorkManager initializers and crashing release cold start.
 - **Evidence:** `3c8663262` fix(release): resolve startup crash by suppressing unused WorkManagerInitializer, `625f2c387` fix(security,ui): harden credentials
 - **Why it recurs:** Modern AndroidX libraries automatically bundle startup providers into merged manifests unless explicitly stripped.
 - **The rule:** Strip `androidx.startup.InitializationProvider` via `tools:node="remove"` in `AndroidManifest.xml`.
 
-### L4. Persist stable string codes or full field keeps for enums under R8 — [observed]
+### L3. Persist stable string codes or full field keeps for enums under R8 — [observed]
 
 - **What happened:** Persisting `TimeDisplayMode` and `ZenWidgetDisplayUnit` via `.name` failed under R8 because default enum rules only keep `values()` and `valueOf()`, renaming constants to `f` and silently resetting values to `DAYS`.
 - **Evidence:** `0162fc3` (audit finding P0-2), `92262bb43` feat: harden security, persist widget bindings, refine edge-to-edge, and optimize R8
 - **Why it recurs:** Debug builds do not obfuscate enums, and read-path exception handlers swallow `IllegalArgumentException`.
 - **The rule:** Store stable serialization codes or specify `-keepclassmembers,allowoptimization enum * { <fields>; }` in `proguard-rules.pro`.
 
-### L5. Quarantine malformed JSON payloads instead of dropping items — [observed]
+### L4. Quarantine malformed JSON payloads instead of dropping items — [observed]
 
 - **What happened:** `decodeItems` skipped invalid JSON elements and returned partial lists; `CountUpStore` accepted the reduced list and wrote it over `countup_backup.json`, permanently deleting counters.
 - **Evidence:** `c678dd3fd` fix: harden data recovery, `92262bb43` feat: harden security, persist widget bindings
 - **Why it recurs:** Error-handling logic treating partial decodes as valid reads without validating element counts against array length.
 - **The rule:** Quarantine corrupted raw payloads to `items_v1_quarantine` and abort backup overwriting whenever item decoding fails.
 
-### L6. Synchronize store mutations with companion locks and atomic file replacement — [observed]
+### L5. Synchronize store mutations with companion locks and atomic file replacement — [observed]
 
 - **What happened:** Concurrent updates between home-screen widget receivers and main-app viewmodels caused race conditions and partial file corruption in SharedPreferences and JSON backups.
 - **Evidence:** `c678dd3fd` fix: harden data recovery, lock store writes, `625f2c387` fix(security,ui): harden credentials, concurrency
 - **Why it recurs:** Widget receivers run in independent broadcast threads concurrently with UI viewmodel coroutine dispatchers.
 - **The rule:** Wrap all persistence mutations in `synchronized(globalStoreLock)` and write disk backups via temporary file replacement.
 
-### L7. Purge orphaned widget bindings across all families on item deletion — [observed]
+### L6. Purge orphaned widget bindings across all families on item deletion — [observed]
 
 - **What happened:** Deleting an item removed it from `items_v1` but left dangling preference references across `hero_widget_item_<id>`, `zen_horizon_widget_item_<id>`, and `solar_rhythm_widget_item_<id>`.
 - **Evidence:** `92262bb43` feat: harden security, persist widget bindings, refine edge-to-edge
 - **Why it recurs:** Widget instance bindings reside in separate preference keys from core item storage and are bypassed by simple item deletions.
 - **The rule:** Invoke `purgeWidgetBindingsForItem(itemId)` across all four configurable widget families inside `CountUpStore.deleteItem()`.
 
-### L8. Restrict RemoteViews parcel payload below 40KB to prevent IPC Binder crashes — [observed]
+### L7. Restrict RemoteViews parcel payload below 40KB to prevent IPC Binder crashes — [observed]
 
 - **What happened:** Pushing high-resolution vector assets or uncompressed tracks via `RemoteViews` risked exceeding Android's 1MB Binder transaction limit during concurrent widget updates.
 - **Evidence:** `227b2f372` feat(widgets): implement Zen & Efficient Widget Suite, `82e9024d7` fix(review): resolve all code standards review findings
 - **Why it recurs:** The 1MB Binder transaction limit is shared across all inter-process communication in the system.
 - **The rule:** Verify that serialized RemoteViews parcels stay strictly under 40KB via `WidgetMemoryBudgetGateTest`.
 
-### L9. Omit minimumInteractiveComponentSize and inner clipping on compact rows — [observed]
+### L8. Omit minimumInteractiveComponentSize and inner clipping on compact rows — [observed]
 
 - **What happened:** Compose `minimumInteractiveComponentSize()` expanded 26dp subheader and 30dp card buttons to 48dp, blowing out row spacing; inner column clipping truncated bottom-left `SINCE` dates.
 - **Evidence:** `92262bb43` feat: harden security, persist widget bindings, refine edge-to-edge
 - **Why it recurs:** Jetpack Compose Material 3 components enforce 48dp touch target bounds by default unless explicitly overridden.
 - **The rule:** Use explicit `size(26.dp)` or `size(30.dp)` on action clusters and apply `clip()` exclusively to outer card containers.
 
-### L10. Delegate speech recognition out-of-process to maintain zero permissions — [observed]
+### L9. Delegate speech recognition out-of-process to maintain zero permissions — [observed]
 
 - **What happened:** Adding voice quick-add risked introducing `android.permission.RECORD_AUDIO` or crashing with `ActivityNotFoundException` on Android 11+ due to package filtering.
 - **Evidence:** `6d9fe4f` feat(widget): implement Voice Quick Add with zero-permission speech delegation, `966928a` feat(voice): refine voice add aesthetics
 - **Why it recurs:** Developers default to in-app audio recording instead of delegating speech capture to platform intents.
 - **The rule:** Maintain `<queries>` for `RecognitionService` and `RECOGNIZE_SPEECH` and delegate audio capture out-of-process via `RecognizerIntent`.
 
-### L11. Verify calling package ownership and validate appWidgetId in configure activities — [observed]
+### L10. Verify calling package ownership and validate appWidgetId in configure activities — [observed]
 
 - **What happened:** Exported configuration activities required by `APPWIDGET_CONFIGURE` could be invoked by third-party applications to spoof widget bindings or redirect intents.
 - **Evidence:** `92262bb43` feat: harden security, persist widget bindings, refine edge-to-edge
 - **Why it recurs:** Widget configuration activities must declare `android:exported="true"` to allow launcher invocation, exposing an external attack surface.
 - **The rule:** Validate `appWidgetId != INVALID_APPWIDGET_ID`, verify caller identity, and return results containing only `EXTRA_APPWIDGET_ID`.
 
-### L12. Re-register midnight alarm rollover inside widget receivers on boot — [observed]
+### L11. Re-register midnight alarm rollover inside widget receivers on boot — [observed]
 
 - **What happened:** Without `RECEIVE_BOOT_COMPLETED`, device reboots dropped the scheduled midnight alarm required for rolling over daily milestone counters.
 - **Evidence:** `625f2c387` fix(security,ui): harden credentials, `92262bb43` feat: harden security
 - **Why it recurs:** Zero-permission architecture prohibits listening for boot broadcasts directly.
 - **The rule:** Invoke `MidnightAlarmReceiver.scheduleMidnightAlarm(context)` with `RTC_WAKEUP` inside widget `onUpdate()` and `onEnabled()`.
 
-### L13. Remap widget bindings on restore instead of purging on startup — [observed]
+### L12. Remap widget bindings on restore instead of purging on startup — [observed]
 
 - **What happened:** A startup widget sanitizer purged all binding keys whose IDs weren't registered with the local launcher, immediately wiping all user configurations and pinned cards during device-to-device restores (D2D migration) before the new launcher could assign or restore widget IDs.
 - **Evidence:** `2c48806` feat(backup): platform-native auto backup & launcher widget sanitizer, `92262bb` feat: harden security, persist widget bindings
 - **Why it recurs:** Developers mistakenly treat missing launcher IDs on startup as dead state, unaware that launcher D2D restoration delivers new IDs asynchronously via `AppWidgetProvider.onRestored()`.
 - **The rule:** Never run an aggressive orphaned-binding purge on app startup. Implement `onRestored(oldIds, newIds)` on all `AppWidgetProvider` classes delegating to `CountUpStore.remapWidgetBindings`, and restrict deletion to `onDeleted()` or `deleteItem()`.
 
-### L14. Compute midnight rollover from civil dates across DST transitions — [observed]
+### L13. Compute midnight rollover from civil dates across DST transitions — [observed]
 
 - **What happened:** Adding fixed 24-hour millisecond intervals or deriving midnight from wall-clock time without civil calendar day advancement caused alarms to drift or schedule into the past during 23-hour (spring forward) or 25-hour (fall back) daylight saving transitions.
 - **Evidence:** `5fa0136` feat(reliability): remediate audit findings, harden reboot rollover, `92262bb` feat: harden security
 - **Why it recurs:** Standard testing often executes in fixed timezones without asserting across DST boundary days.
 - **The rule:** Compute next midnight using `now.toLocalDate().plusDays(1).atStartOfDay(now.zone).plusSeconds(1).toInstant().toEpochMilli()`. Also register `ACTION_MY_PACKAGE_REPLACED` in manifest and receiver to restore rollover alarms across app updates without requiring `RECEIVE_BOOT_COMPLETED`.
 
-### L15. Standardize NIO atomic rename over AtomicFile for cross-platform JVM stability — [observed]
+### L14. Standardize NIO atomic rename over AtomicFile for cross-platform JVM stability — [observed]
 
 - **What happened:** Replacing custom NIO `Files.move` with `androidx.core.util.AtomicFile` broke snapshot persistence in unit tests on Windows JVMs because `java.io.File.renameTo` silently fails when the target file already exists on Windows NT.
 - **Evidence:** `625f2c387` fix(security,ui): harden credentials, `8a69041` feat(release): bump version to 2.20.0, harden storage
 - **Why it recurs:** `AtomicFile` relies on POSIX `rename(2)` semantics which atomicity-replace targets on Linux/Android but fail silently on Windows.
 - **The rule:** Use `FileOutputStream.fd.sync()` paired with `java.nio.file.Files.move(tempPath, targetPath, StandardCopyOption.REPLACE_EXISTING)` for robust atomic file snapshots across both Android and desktop unit test environments.
 
-### L16. Order widthIn before fillMaxWidth and fillMaxHeight in Compose — [observed]
+### L15. Order widthIn before fillMaxWidth and fillMaxHeight in Compose — [observed]
 
 - **What happened:** Writing `.fillMaxSize().widthIn(max = 640.dp)` in Jetpack Compose forced the layout constraint's minimum width to the full device width, bypassing the 640dp max limit and stretching content across tablets and foldables.
 - **Evidence:** `6395b8f` feat(perf): add baseline profile, graphics layer caching, adaptive width
 - **Why it recurs:** In Compose, modifier ordering determines constraint propagation; placing `fillMaxSize()` first locks incoming constraints to `(minWidth = screenWidth, maxWidth = screenWidth)`.
 - **The rule:** In centered responsive layouts, apply `.widthIn(max = 640.dp)` *before* `.fillMaxWidth().fillMaxHeight()`.
 
-### L17. Populate default sample strings and preview tracks when using previewLayout — [observed]
+### L16. Populate default sample strings and preview tracks when using previewLayout — [observed]
 
 - **What happened:** Adding `android:previewLayout="@layout/..."` pointing to live widget layouts that only specified design-time `tools:text` caused Android 12+ launchers to render blank white boxes with missing titles, counts, and milestone tracks in the widget picker. Conversely, relying solely on static `previewImage` vectors looked flat, unrepresentative of real typography, and failed to dynamically adapt to system locales (English vs. Chinese).
 - **Evidence:** `d99a22f` feat(preview): provide dedicated vector previewImage, `6395b8f` feat: living widget preview layouts with localized string resources, `f21a203` fix(widget): provide authentic populated preview for 4x2 overview grid
 - **Why it recurs:** Developers assume `previewLayout` runs widget Kotlin population logic or shows design-time `tools:text`. At runtime, launchers inflate the layout XML directly with zero code execution. Moreover, adapter-backed views like `<GridView>` cannot populate via `RemoteViewsService` synchronously, requiring a dedicated static layout for previews.
 - **The rule:** When using `android:previewLayout`, always populate layout XMLs with default `android:text="@string/..."` using dedicated preview string resources defined across all 7 locale files (`values`, `values-zh`, `values-zh-rCN`, etc.), and reference static preview tracks (`preview_zen_horizon_track`, `preview_solar_timeline_track`). For collections, provide dedicated static preview layouts (e.g. `widget_preview_overview_4x2.xml`). Maintain `android:previewImage` as backward-compatible fallback for API 26–30 launchers.
 
-### L18. Eliminate deprecated Window color and cutout APIs under Android 15 edge-to-edge — [observed]
+### L17. Eliminate deprecated Window color and cutout APIs under Android 15 edge-to-edge — [observed]
 
 - **What happened:** On Android 15 (targetSdk 35+), apps are forced edge-to-edge by default. Calling `window.setStatusBarColor()`, `window.setNavigationBarColor()`, or specifying `LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES` triggered Google Play Console compliance warnings and is deprecated.
 - **Evidence:** `fcbddc8` fix(edge-to-edge): eliminate deprecated status/nav bar and cutout APIs for Android 15 compliance
 - **Why it recurs:** Traditional tutorial code and boilerplate templates continue to manipulate Window color bars imperatively.
 - **The rule:** Never call `window.setStatusBarColor()` or `window.setNavigationBarColor()`. Set `layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS` on API 28+, `isNavigationBarContrastEnforced = false` on API 29+, and manage icon contrast via `WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars`.
 
-### L19. Isolate RemoteViews adapter service intents with unique data URIs to avoid binder cache collisions — [observed]
+### L18. Isolate RemoteViews adapter service intents with unique data URIs to avoid binder cache collisions — [observed]
 
 - **What happened:** Binding multiple overview widget grid instances to `Intent(context, CountUpWidgetService::class.java)` caused Android's `RemoteViews` to cache a single `RemoteViewsFactory` instance across all widgets because `Intent.filterEquals()` ignores extras (`EXTRA_APPWIDGET_ID`). Toggling card styles on one widget caused other overview widgets on the home screen to display the same items or fail to update.
 - **Evidence:** `e60f514` feat(core): harden backup durability, lock contract invariants, and refresh project lessons
 - **Why it recurs:** Developers mistakenly assume `putExtra(EXTRA_APPWIDGET_ID, appWidgetId)` distinguishes service intents in RemoteViews adapter bindings.
 - **The rule:** Always set a unique data URI (`intent.data = Uri.parse("countup://widget/overview/$appWidgetId")`) on any service intent passed to `views.setRemoteAdapter()` when multiple widget instances display instance-specific collections.
 
-### L20. Enforce widget XML contracts and invariant configurations through JVM invariant tests — [observed]
+### L19. Enforce widget XML contracts and invariant configurations through JVM invariant tests — [observed]
 
 - **What happened:** Refactorings and cleanup passes frequently reintroduced known launcher traps (such as adding `configuration_optional` or setting `resizeMode="horizontal|vertical"` on single-cell widgets), which bypassed standard unit tests and only surfaced when manually tested on physical OEM launchers.
 - **Evidence:** `e60f514` feat(core): harden backup durability, lock contract invariants, and refresh project lessons
 - **Why it recurs:** Pixel emulator launchers tolerate invalid widget attributes that physical OEM skins (Samsung One UI, Xiaomi HyperOS) reject or distort.
 - **The rule:** Write automated contract invariant tests (`WidgetContractInvariantsTest.kt`) that parse and validate XML files directly, turning written guidelines into executable red/green assertions in CI.
+
+### L20. Guard RemoteViewsFactory collection indexing against asynchronous launcher IPC races — [observed]
+
+- **What happened:** In `RemoteViewsService.RemoteViewsFactory`, relying on direct indexing (`rows[position]`) in `getViewAt(position)` or `getItemId(position)` caused `IndexOutOfBoundsException` during concurrent list flings when counters were reset or items deleted in the background, crashing the launcher's remote view adapter.
+- **Evidence:** `ddee9c5` fix(widget): guard WidgetViewsFactory out-of-bounds access and resolve RTL symmetry
+- **Why it recurs:** Developers assume `position` is always strictly bounded by the value previously returned by `getCount()`. In reality, launcher AdapterView scrolling and app SharedPreferences updates operate across asynchronous IPC boundaries; `rows` can shrink before `notifyAppWidgetViewDataChanged` finishes processing on the launcher.
+- **The rule:** In all `RemoteViewsFactory` implementations, always use defensive bounds checking (`rows.getOrNull(position) ?: return RemoteViews(...)` and `rows.getOrNull(position)?.id?.hashCode()?.toLong() ?: position.toLong()`) instead of raw array indexing.
 
 ## Project-specific implementation rules
 
@@ -203,19 +203,16 @@ CountUp-Android is a zero-permission, offline-first milestone count-up app built
 | 6 | `app/src/main/AndroidManifest.xml` | 115.6 | 21 | 4 | 13 | `3c8663262`, `625f2c387`, `6d9fe4f` |
 
 ### `keystore/keystore-pass.txt` — Committed plain-text release signing secret in git packfile (BLOCKING)
-
 - **Failure mode:** Historical packfile object `8370ad4c87436d41ea4c8c3701b4f2c6756d4986` contains the production keystore password, exposed on upstream remote.
 - **Guard:** Rotate the upload key in Google Play Console and execute `git filter-repo` to scrub history before any public repository release.
 - **Evidence:** `32f6f36211113906d4bc4f8c03e519b711b198e1` (added), `625f2c387078c9ed3ff583d715bafa1eecb19d28` (untracked)
 
 ### `app/src/main/res/xml/zen_pebble_widget_info.xml` — Launcher placement and configuration contracts
-
 - **Failure mode:** Modifying resize flags snaps widgets to slot 0; adding `configuration_optional` bypasses configuration activities.
 - **Guard:** `WidgetContractInvariantsTest.zenPebbleWidgetEnforcesResizeModeNoneAndReconfigurable()`
 - **Evidence:** `1cd6e29d1` fix(widget): lock 1x1 pebble resizeMode to none, `433f1d47b` fix(widget): restore auto-launch picker
 
 ### `app/src/main/java/com/countup/app/CountUpStore.kt` — Data loss during corrupted payload decoding
-
 - **Failure mode:** Partial JSON decoding truncated item lists, overwriting disk backups with partial data.
 - **Guard:** `CountUpStoreTest` testing corrupted array recovery and quarantine fallbacks.
 - **Evidence:** `c678dd3fd` fix: harden data recovery, `92262bb43` feat: harden security
@@ -245,13 +242,11 @@ CountUp-Android is a zero-permission, offline-first milestone count-up app built
 ## Safe-change checklist
 
 Before you change anything:
-
-- [ ] Run `./gradlew testDebugUnitTest` to verify all 444 existing unit and contract tests pass.
+- [ ] Run `./gradlew testDebugUnitTest` to verify all 445 existing unit and contract tests pass.
 - [ ] Confirm the tree is clean: `git status --porcelain`.
 - [ ] Read `docs/RECURRING_ISSUES.md` before touching any widget provider or XML layout.
 
 While you change:
-
 - [ ] Maintain zero runtime permissions; never add `RECORD_AUDIO` or `RECEIVE_BOOT_COMPLETED` to `AndroidManifest.xml`.
 - [ ] Preserve `android:resizeMode="none"` and `reconfigurable` in `zen_pebble_widget_info.xml`; never add `configuration_optional`.
 - [ ] Ensure all widget info XMLs declare both `previewImage` and `previewLayout` with populated localized `@string/...` default text.
@@ -260,8 +255,7 @@ While you change:
 - [ ] Wrap all `CountUpStore` mutations in `synchronized(globalStoreLock)` and invoke `purgeWidgetBindingsForItem(itemId)` on deletion.
 
 Before you call it done:
-
-- [ ] Run `./gradlew testDebugUnitTest` and confirm 100% green test execution (444 tests).
+- [ ] Run `./gradlew testDebugUnitTest` and confirm 100% green test execution (445 tests).
 - [ ] Run `./gradlew assembleRelease` to confirm R8 rules preserve all data models, enums, and widget providers.
 - [ ] Verify widget RemoteViews payload remains below 40KB via `WidgetMemoryBudgetGateTest`.
 
@@ -273,7 +267,6 @@ Before you call it done:
 1cd6e29d1  fix(widget): lock 1x1 pebble resizeMode to none and restore configuration_optional
 433f1d47b  fix(widget): restore auto-launch picker for 1x1 Zen Pebble by removing configuration_optional
 ```
-
 - **What changed:** Commit `1cd6e29d1` added `configuration_optional` to fix home-screen drop behavior.
 - **What broke:** Android 12+ launchers interpreted the flag as permission to omit `ZenPebbleConfigureActivity`, dropping unconfigured fallback widgets.
 - **The fix:** Commit `433f1d47b` removed `configuration_optional` and added an invariant test asserting its absence.
@@ -286,10 +279,10 @@ Before you call it done:
 ca2d64b  feat(widget): add Focused Hero Milestone Widget (1x1 Compact Stamp & 2x1 Poetic Card)
 20cd2677f  fix(widget): make 2x1 wide card the exclusive default and only layout for Hero widget
 ```
-
 - **What was tried:** Supporting both 1x1 compact stamp and 2x1 card layouts within the Hero widget provider.
 - **Why it failed:** "make 2x1 wide card the exclusive default and only layout for Hero widget" — 1x1 required title-splitting heuristics and overcrowded reset tap targets.
-- **The rule it produced:** see L8
+- **The rule it produced:** see L7
+- **Grade:** `[observed]`
 
 ### Example 3 — R8 enum member obfuscation causing silent deserialization reset
 
@@ -297,11 +290,11 @@ ca2d64b  feat(widget): add Focused Hero Milestone Widget (1x1 Compact Stamp & 2x
 0162fc3  (audit finding P0-2)
 92262bb43  feat: harden security, persist widget bindings, refine edge-to-edge, and optimize R8
 ```
-
 - **What changed:** Storing `TimeDisplayMode` and `ZenWidgetDisplayUnit` enum `.name` in SharedPreferences.
 - **What broke:** R8 minification renamed enum fields to single letters, causing `valueOf()` to throw `IllegalArgumentException` and silently default to `DAYS`.
 - **The fix:** Commit `92262bb43` persisted stable serialization codes and updated ProGuard keep definitions.
-- **The rule it produced:** see L4
+- **The rule it produced:** see L3
+- **Grade:** `[observed]`
 
 ### Example 4 — Silent partial-decode data loss and backup overwriting
 
@@ -309,11 +302,11 @@ ca2d64b  feat(widget): add Focused Hero Milestone Widget (1x1 Compact Stamp & 2x
 c678dd3fd  fix: harden data recovery, lock store writes, and apply review fixes
 92262bb43  feat: harden security, persist widget bindings, refine edge-to-edge, and optimize R8
 ```
-
 - **What repeated:** Malformed JSON elements were skipped during array deserialization, returning truncated lists as valid data.
 - **Why it repeated:** `CountUpStore` lacked validation comparing decoded list length with raw JSON array length, overwriting good backups with partial lists.
 - **The fix:** Commit `92262bb43` implemented corrupted payload quarantine to `items_v1_quarantine` and aborted backup overwrites.
-- **The rule it produced:** see L5
+- **The rule it produced:** see L4
+- **Grade:** `[observed]`
 
 ### Example 5 — Transitive WorkManager startup provider crash on release build
 
@@ -321,11 +314,11 @@ c678dd3fd  fix: harden data recovery, lock store writes, and apply review fixes
 227b2f372  feat(widgets): implement Zen & Efficient Widget Suite with reactive updates
 3c8663262  fix(release): resolve startup crash by suppressing unused WorkManagerInitializer
 ```
-
 - **What changed:** Introducing widget dependencies transitively brought in AndroidX startup and WorkManager dependencies.
 - **What broke:** App crashed on cold start in release builds attempting to initialize unused background worker infrastructure.
 - **The fix:** Commit `3c8663262` stripped `InitializationProvider` via manifest `tools:node="remove"`.
-- **The rule it produced:** see L3
+- **The rule it produced:** see L2
+- **Grade:** `[observed]`
 
 ### Example 6 — Zero-permission speech delegation with package visibility
 
@@ -333,15 +326,15 @@ c678dd3fd  fix: harden data recovery, lock store writes, and apply review fixes
 6d9fe4f  feat(widget): implement Voice Quick Add with zero-permission speech delegation
 966928a  feat(voice): refine voice add aesthetics, match widget icon stroke, prune dead strings
 ```
-
 - **What changed:** Implemented speech-to-text quick item entry without adding `android.permission.RECORD_AUDIO`.
 - **What broke:** On Android 11+ (API 30+), external speech intents failed without explicit package visibility declarations.
 - **The fix:** Added `<queries>` declarations for `RecognitionService` and `RECOGNIZE_SPEECH` in `AndroidManifest.xml`.
-- **The rule it produced:** see L10
+- **The rule it produced:** see L9
+- **Grade:** `[observed]`
 
 ## Analysis notes
 
-- **Coverage:** 185 commits analyzed across 530 tracked files spanning 2026-08-20 to 2026-09-19.
+- **Coverage:** 190 commits analyzed across 530 tracked files spanning 2026-08-20 to 2026-09-20.
 - **Not covered:** Excluded build artifacts (`build/`, `.gradle/`), IDE metadata (`.idea/`), and scratch logs (`.scratch/`).
-- **Weak signals:** None. All twelve prescriptive rules are corroborated by commit messages, regression tests, or architecture documentation.
+- **Weak signals:** None. All twenty prescriptive rules are corroborated by commit messages, regression tests, or architecture documentation.
 - **Unknowns:** Production upload key replacement status in Google Play Console requires manual verification outside repository history.

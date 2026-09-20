@@ -3,32 +3,21 @@
   "repository": "CountUp-Android",
   "scope": "repository",
   "generated_from": {
-    "head": "627e7fb066e2c39169dc521b2ff688e4e94b29bb",
-    "commits_analyzed": 187,
+    "head": "ddee9c5a0bdfc3add66e00f3f708a24d6591a8f7",
+    "commits_analyzed": 190,
     "date_range": [
       "2026-08-20",
-      "2026-09-19"
+      "2026-09-20"
     ]
   },
   "rules": [
     {
       "id": "PL-001",
-      "text": "Never include configuration_optional in android:widgetFeatures for item-tracking widgets; declare reconfigurable only.",
+      "text": "In zen_pebble_widget_info.xml, declare android:resizeMode=\"none\" and android:widgetFeatures=\"reconfigurable\"; never set resize modes or add configuration_optional.",
       "grade": "observed",
       "evidence": [
         "1cd6e29d1",
-        "433f1d47b"
-      ],
-      "paths": [
-        "app/src/main/res/xml/zen_pebble_widget_info.xml"
-      ],
-      "phase": "recurrence"
-    },
-    {
-      "id": "PL-002",
-      "text": "Set android:resizeMode=\"none\" on single-cell widget provider XML definitions.",
-      "grade": "observed",
-      "evidence": [
+        "433f1d47b",
         "b6b4ce0ba",
         "471e4cc69"
       ],
@@ -38,7 +27,7 @@
       "phase": "recurrence"
     },
     {
-      "id": "PL-003",
+      "id": "PL-002",
       "text": "Strip androidx.startup.InitializationProvider via tools:node=\"remove\" in AndroidManifest.xml.",
       "grade": "observed",
       "evidence": [
@@ -51,7 +40,7 @@
       "phase": "removals"
     },
     {
-      "id": "PL-004",
+      "id": "PL-003",
       "text": "Store stable serialization codes or specify -keepclassmembers,allowoptimization enum * { <fields>; } in proguard-rules.pro.",
       "grade": "observed",
       "evidence": [
@@ -65,7 +54,7 @@
       "phase": "conventions"
     },
     {
-      "id": "PL-005",
+      "id": "PL-004",
       "text": "Quarantine corrupted raw payloads to items_v1_quarantine and abort backup overwriting whenever item decoding fails.",
       "grade": "observed",
       "evidence": [
@@ -79,7 +68,7 @@
       "phase": "recurrence"
     },
     {
-      "id": "PL-006",
+      "id": "PL-005",
       "text": "Wrap all persistence mutations in synchronized(globalStoreLock) and write disk backups via temporary file replacement.",
       "grade": "observed",
       "evidence": [
@@ -92,7 +81,7 @@
       "phase": "conventions"
     },
     {
-      "id": "PL-007",
+      "id": "PL-006",
       "text": "Invoke purgeWidgetBindingsForItem(itemId) across all four configurable widget families inside CountUpStore.deleteItem().",
       "grade": "observed",
       "evidence": [
@@ -104,7 +93,7 @@
       "phase": "recurrence"
     },
     {
-      "id": "PL-008",
+      "id": "PL-007",
       "text": "Verify that serialized RemoteViews parcels stay strictly under 40KB via WidgetMemoryBudgetGateTest.",
       "grade": "observed",
       "evidence": [
@@ -117,7 +106,7 @@
       "phase": "conventions"
     },
     {
-      "id": "PL-009",
+      "id": "PL-008",
       "text": "Use explicit size(26.dp) or size(30.dp) on action clusters and apply clip() exclusively to outer card containers.",
       "grade": "observed",
       "evidence": [
@@ -129,7 +118,7 @@
       "phase": "conventions"
     },
     {
-      "id": "PL-010",
+      "id": "PL-009",
       "text": "Maintain <queries> for RecognitionService and RECOGNIZE_SPEECH and delegate audio capture out-of-process via RecognizerIntent.",
       "grade": "observed",
       "evidence": [
@@ -142,7 +131,7 @@
       "phase": "removals"
     },
     {
-      "id": "PL-011",
+      "id": "PL-010",
       "text": "Validate appWidgetId != INVALID_APPWIDGET_ID, verify caller identity, and return results containing only EXTRA_APPWIDGET_ID.",
       "grade": "observed",
       "evidence": [
@@ -155,7 +144,7 @@
       "phase": "conventions"
     },
     {
-      "id": "PL-012",
+      "id": "PL-011",
       "text": "Invoke MidnightAlarmReceiver.scheduleMidnightAlarm(context) with RTC_WAKEUP inside widget onUpdate() and onEnabled().",
       "grade": "observed",
       "evidence": [
@@ -168,7 +157,7 @@
       "phase": "conventions"
     },
     {
-      "id": "PL-013",
+      "id": "PL-012",
       "text": "Never run an aggressive orphaned-binding purge on app startup. Implement onRestored(oldIds, newIds) on all AppWidgetProvider classes delegating to CountUpStore.remapWidgetBindings, and restrict deletion to onDeleted() or deleteItem().",
       "grade": "observed",
       "evidence": [
@@ -182,7 +171,7 @@
       "phase": "recurrence"
     },
     {
-      "id": "PL-014",
+      "id": "PL-013",
       "text": "Compute next midnight using now.toLocalDate().plusDays(1).atStartOfDay(now.zone).plusSeconds(1).toInstant().toEpochMilli() to safely cross DST boundaries, and register ACTION_MY_PACKAGE_REPLACED.",
       "grade": "observed",
       "evidence": [
@@ -195,7 +184,7 @@
       "phase": "recurrence"
     },
     {
-      "id": "PL-015",
+      "id": "PL-014",
       "text": "Use FileOutputStream.fd.sync() paired with java.nio.file.Files.move(tempPath, targetPath, StandardCopyOption.REPLACE_EXISTING) for robust atomic file snapshots across both Android and desktop unit test environments.",
       "grade": "observed",
       "evidence": [
@@ -208,7 +197,7 @@
       "phase": "recurrence"
     },
     {
-      "id": "PL-016",
+      "id": "PL-015",
       "text": "In centered responsive layouts, apply .widthIn(max = 640.dp) before .fillMaxWidth().fillMaxHeight() to ensure constraints scale correctly on foldables and tablets.",
       "grade": "observed",
       "evidence": [
@@ -220,7 +209,7 @@
       "phase": "conventions"
     },
     {
-      "id": "PL-017",
+      "id": "PL-016",
       "text": "Declare both previewLayout and previewImage, populating layout XMLs with default localized strings and preview tracks to deliver authentic living dual-locale (EN/ZH) previews in pickers.",
       "grade": "observed",
       "evidence": [
@@ -238,7 +227,7 @@
       "phase": "recurrence"
     },
     {
-      "id": "PL-018",
+      "id": "PL-017",
       "text": "Never call window.setStatusBarColor() or window.setNavigationBarColor(); set layoutInDisplayCutoutMode = ALWAYS on API 28+, isNavigationBarContrastEnforced = false on API 29+, and manage bar contrast dynamically via WindowCompat.getInsetsController for Android 15 edge-to-edge compliance.",
       "grade": "observed",
       "evidence": [
@@ -251,7 +240,7 @@
       "phase": "conventions"
     },
     {
-      "id": "PL-019",
+      "id": "PL-018",
       "text": "Always set a unique data URI (intent.data = Uri.parse(\"countup://widget/overview/$appWidgetId\")) on any service intent passed to views.setRemoteAdapter() when multiple widget instances display instance-specific collections.",
       "grade": "observed",
       "evidence": [
@@ -263,7 +252,7 @@
       "phase": "recurrence"
     },
     {
-      "id": "PL-020",
+      "id": "PL-019",
       "text": "Write automated contract invariant tests (WidgetContractInvariantsTest.kt) that parse and validate XML files directly, turning written guidelines into executable red/green assertions in CI.",
       "grade": "observed",
       "evidence": [
@@ -273,6 +262,18 @@
         "app/src/test/java/com/countup/app/WidgetContractInvariantsTest.kt"
       ],
       "phase": "conventions"
+    },
+    {
+      "id": "PL-020",
+      "text": "Use defensive bounds checking (rows.getOrNull(position)) in RemoteViewsFactory to avoid IndexOutOfBoundsException during asynchronous launcher scroll races.",
+      "grade": "observed",
+      "evidence": [
+        "ddee9c5"
+      ],
+      "paths": [
+        "app/src/main/java/com/countup/app/CountUpWidget.kt"
+      ],
+      "phase": "recurrence"
     }
   ],
   "risk_areas": [
@@ -391,7 +392,7 @@
   "checklist": [
     {
       "id": "PL-C1",
-      "text": "Run ./gradlew testDebugUnitTest to verify all 444 existing unit and contract tests pass.",
+      "text": "Run ./gradlew testDebugUnitTest to verify all 445 existing unit and contract tests pass.",
       "evidence": [
         "92262bb43"
       ]
