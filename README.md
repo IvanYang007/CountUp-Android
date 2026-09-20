@@ -53,7 +53,7 @@ Prerequisites:
 ./gradlew clean
 ./gradlew assembleDebug             # debug APK
 ./gradlew assembleRelease           # signed release APK & bundle (R8 minified)
-./gradlew test                      # 444 JVM unit tests (100% pass)
+./gradlew test                      # 445 JVM unit tests (100% pass)
 ./gradlew connectedDebugAndroidTest # instrumented tests (emulator/device online)
 ./gradlew lintDebug                 # Android Lint (0 errors)
 ```
@@ -149,7 +149,7 @@ Widgets automatically advance at midnight without requiring battery-draining bac
 
 ## 7. Verification performed
 
-- **444 JVM Unit Tests** (100% passing) across data models, repository fail-safes, MVI ViewModel, JSON salvage parsing, widget reducers, navigation contracts, backup merge/replace strategies, reset whisper lifecycles, bidirectional sorting, date picker contracts, widget IPC debouncing, and 100+ icon registry invariants.
+- **445 JVM Unit Tests** (100% passing) across data models, repository fail-safes, MVI ViewModel, JSON salvage parsing, widget reducers, navigation contracts, backup merge/replace strategies, reset whisper lifecycles, bidirectional sorting, date picker contracts, widget IPC debouncing, and 100+ icon registry invariants.
 - Clean debug and release builds with R8 minification and resource shrinking enabled (`isMinifyEnabled = true`, `isShrinkResources = true`).
 - Automated release bundle signing with keystore password resolution (`COUNTUP_KEYSTORE_PASS` -> `local.properties`).
 - Android Lint (`lintDebug`): **0 errors**.

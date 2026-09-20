@@ -520,7 +520,7 @@ internal class WidgetViewsFactory(
     override fun getCount(): Int = rows.size
 
     override fun getViewAt(position: Int): RemoteViews {
-        val row = rows[position]
+        val row = rows.getOrNull(position) ?: return RemoteViews(context.packageName, R.layout.countup_widget_cell)
         val views = RemoteViews(context.packageName, R.layout.countup_widget_cell)
 
         val textInk = resolveOverviewMutedInk(filter, night)
@@ -595,7 +595,7 @@ internal class WidgetViewsFactory(
 
     override fun getViewTypeCount(): Int = 1
 
-    override fun getItemId(position: Int): Long = rows[position].id.hashCode().toLong()
+    override fun getItemId(position: Int): Long = rows.getOrNull(position)?.id?.hashCode()?.toLong() ?: position.toLong()
 
     override fun hasStableIds(): Boolean = true
 }

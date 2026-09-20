@@ -308,5 +308,19 @@ class WidgetRowTest {
         assertEquals(0xFFBDC7BE.toInt(), resolveOverviewMutedInk("earth", night = true))
         assertEquals(0xFFC4C5C8.toInt(), resolveOverviewMutedInk("sumi", night = true))
     }
+
+    @Test
+    fun widgetViewsFactoryHandlesOutOfBoundsSafelyWithoutCrashing() {
+        val tempDir = java.nio.file.Files.createTempDirectory("widget_factory_test").toFile()
+        val context = TestContext(tempDir)
+        val factory = WidgetViewsFactory(context, appWidgetId = 99)
+
+        // Out of bounds on empty factory
+        assertEquals(0, factory.count)
+        assertEquals(0L, factory.getItemId(0))
+        assertEquals(42L, factory.getItemId(42))
+        val viewsOutOfBounds = factory.getViewAt(999)
+        org.junit.Assert.assertNotNull(viewsOutOfBounds)
+    }
 }
 

@@ -82,7 +82,7 @@ Production Kotlin is organized under `app/src/main/java/com/countup/app/`:
 | (debug) `WidgetHostActivity.kt` | Debug-only activity to render widgets on-device for automated screenshot capture (excluded in release) |
 
 Tests:
-- `app/src/test/...` (JVM): **444 JVM unit tests** (100% green) covering `CountUpViewModelTest` (Turbine), `BackupCoordinatorTest`, `ResetWhisperTrackerTest`, `SortOrderTest`, `CountUpRepositoryTest`, `BackupRepositoryTest`, `CountUpStoreTest`, `CountUpItemTest`, `WidgetRowTest`, `HeroWidgetTest`, `ZenPebbleTest`, `SolarRhythmConfigurationTest`, `WidgetContractInvariantsTest`, `WidgetMemoryBudgetGateTest`, `CountUpStressAndBoundaryTest`, `DateConversionTest`, `DaysSinceTest`, `MidnightAlarmReceiverTest`, `CountUpContractAndFlowTest`, `ItemIconsTest`, `DatePickerContractTest`, `WidgetRefreshDebounceTest`, `ItemColorsTest`, and `EdgeCaseMatrixTest`.
+- `app/src/test/...` (JVM): **445 JVM unit tests** (100% green) covering `CountUpViewModelTest` (Turbine), `BackupCoordinatorTest`, `ResetWhisperTrackerTest`, `SortOrderTest`, `CountUpRepositoryTest`, `BackupRepositoryTest`, `CountUpStoreTest`, `CountUpItemTest`, `WidgetRowTest`, `HeroWidgetTest`, `ZenPebbleTest`, `SolarRhythmConfigurationTest`, `WidgetContractInvariantsTest`, `WidgetMemoryBudgetGateTest`, `CountUpStressAndBoundaryTest`, `DateConversionTest`, `DaysSinceTest`, `MidnightAlarmReceiverTest`, `CountUpContractAndFlowTest`, `ItemIconsTest`, `DatePickerContractTest`, `WidgetRefreshDebounceTest`, `ItemColorsTest`, and `EdgeCaseMatrixTest`.
 - `app/src/androidTest/...` (device): `ComposeUiSmokeTest` (stateless UI & a11y semantics), `CountUpStoreInstrumentedTest` (CRUD, migration, recovery).
 
 ---
@@ -137,7 +137,7 @@ export JAVA_HOME="/path/to/jdk-17"   # or set via Android Studio / system PATH
 ./gradlew clean
 ./gradlew assembleDebug             # debug APK
 ./gradlew assembleRelease           # signed release APK + AAB bundle (R8 minified)
-./gradlew test                      # 444 JVM unit tests (100% green)
+./gradlew test                      # 445 JVM unit tests (100% green)
 ./gradlew connectedDebugAndroidTest # device tests (emulator/device online)
 ./gradlew lintDebug                 # 0 errors
 ```
