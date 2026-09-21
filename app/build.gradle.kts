@@ -14,8 +14,8 @@ android {
         applicationId = "com.countup.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 63
-        versionName = "3.1.1"
+        versionCode = 64
+        versionName = "3.1.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -37,6 +37,10 @@ android {
                 storePassword = keystorePass
                 keyAlias = "countup"
                 keyPassword = keystorePass
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = true
+                enableV4Signing = true
             }
         }
     }
