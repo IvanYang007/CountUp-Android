@@ -1061,4 +1061,65 @@ class CountUpStoreTest {
         val content = backupFile.readText(Charsets.UTF_8)
         assertTrue(content.contains("Item 10"))
     }
+
+    @Test
+    fun exportAndRestoreRoundTripPreservesWidgetExclusionAndBackwardsCompatibility() {
+        val store = CountUpStore(testContext)
+        val normalItem = store.addItem("Normal Item", 20000L)!!
+        val hiddenItem = store.addItem("Hidden Item", 20050L)!!
+        store.setWidgetVisibility(hiddenItem.id, false)
+
+        // 1. Export backup payload
+        val exportPayload = store.exportBackupPayload()
+        val json = CountUpBackupPayload.encode(exportPayload)
+
+        // Verify JSON string contains items
+        assertTrue(json.contains(normalItem.name))
+        assertTrue(json.contains(hiddenItem.name))
+
+        // 2. Decode and verify fields are preserved
+        val decoded = CountUpBackupPayload.decode(json)
+        assertNotNull(decoded)
+        val decodedNormal = decoded!!.items.first { it.id == normalItem.id }
+        val decodedHidden = decoded.items.first { it.id == hiddenItem.id }
+        assertTrue(decodedNormal.showInWidget)
+        assertFalse(decodedHidden.showInWidget)
+
+        // 3. Restore into a fresh store via REPLACE_ALL
+        val store2 = CountUpStore(testContext)
+        assertTrue(store2.restoreBackupPayload(decoded, RestoreStrategy.REPLACE_ALL))
+
+        val items = store2.items()
+        assertEquals(2, items.size)
+        val restoredNormal = items.first { it.id == normalItem.id }
+        val restoredHidden = items.first { it.id == hiddenItem.id }
+        assertTrue(restoredNormal.showInWidget)
+        assertFalse(restoredHidden.showInWidget)
+
+        // 3. Backwards compatibility: simulate legacy backup without showInWidget key
+        val legacyJson = """
+            {
+              "schemaVersion": 1,
+              "exportTimestamp": 1700000000000,
+              "appVersion": "3.0.0",
+              "sortOrder": "days_desc",
+              "themeMode": "system",
+              "backgroundTheme": "auto_daily",
+              "itemsJson": "[{\"id\":\"legacy-1\",\"name\":\"Legacy Item\",\"epochDay\":19000,\"comment\":\"old\",\"futureFlag\":false}]"
+            }
+        """.trimIndent()
+
+        val legacyDecoded = CountUpBackupPayload.decode(legacyJson)
+        assertNotNull(legacyDecoded)
+        assertEquals(1, legacyDecoded!!.items.size)
+        // Must safely default to showInWidget = true
+        assertTrue("Legacy items without showInWidget must default to true", legacyDecoded.items[0].showInWidget)
+
+        val store3 = CountUpStore(testContext)
+        assertTrue(store3.restoreBackupPayload(legacyDecoded, RestoreStrategy.REPLACE_ALL))
+        val restoredLegacy = store3.items()
+        assertEquals(1, restoredLegacy.size)
+        assertEquals("legacy-1", restoredLegacy[0].id)
+        assertTrue(restoredLegacy[0].showInWidget)
+    }
 }
