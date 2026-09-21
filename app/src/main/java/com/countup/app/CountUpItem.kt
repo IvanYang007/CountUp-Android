@@ -131,6 +131,7 @@ data class ItemDraft(
     val icon: String = "",
     val cardColor: String = "",
     val isPinned: Boolean = false,
+    val showInWidget: Boolean = true,
 )
 
 /**

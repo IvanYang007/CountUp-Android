@@ -29,6 +29,7 @@ class FakeCountUpRepository(
         icon: String,
         cardColor: String,
         isPinned: Boolean,
+        showInWidget: Boolean,
         id: String,
     ): CountUpItem? {
         if (shouldFailWrite) return null
@@ -42,7 +43,7 @@ class FakeCountUpRepository(
             icon = icon.ifBlank { "star" },
             cardColor = cardColor,
             futureFlag = epochDay > LocalDate.now().toEpochDay(),
-            showInWidget = true,
+            showInWidget = showInWidget,
             pinnedTimestamp = if (isPinned) System.currentTimeMillis() else null,
         )
         itemsList.add(item)
@@ -57,6 +58,7 @@ class FakeCountUpRepository(
         icon: String,
         cardColor: String,
         isPinned: Boolean,
+        showInWidget: Boolean,
     ): Boolean {
         if (shouldFailWrite) return false
         val idx = itemsList.indexOfFirst { it.id == id }
@@ -74,6 +76,7 @@ class FakeCountUpRepository(
             icon = icon.ifBlank { existing.icon },
             cardColor = cardColor,
             futureFlag = epochDay > LocalDate.now().toEpochDay(),
+            showInWidget = showInWidget,
             pinnedTimestamp = newPinnedTimestamp,
         )
         return true

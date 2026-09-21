@@ -284,7 +284,6 @@ fun CountUpContent(
                                 onClick = { onEvent(CountUpUiEvent.OpenEditor(item)) },
                                 onDelete = { onEvent(CountUpUiEvent.RequestDelete(item)) },
                                 onReset = { onEvent(CountUpUiEvent.ConfirmReset(item.id)) },
-                                onToggleWidget = { onEvent(CountUpUiEvent.ToggleWidgetVisibility(item.id)) },
                                 whisper = state.cardWhispers[item.id],
                                 onUndoReset = { onEvent(CountUpUiEvent.UndoReset(item.id)) },
                                 onDismissWhisper = { onEvent(CountUpUiEvent.DismissCardWhisper(item.id)) },
@@ -405,6 +404,9 @@ private fun SolarTermCapsule(
     val seasonColor = remember(solarTerm.seasonRes, zenColors) {
         getSeasonColor(solarTerm.seasonRes, zenColors)
     }
+    val seasonInkColor = remember(solarTerm.seasonRes, zenColors) {
+        getSeasonInkColor(solarTerm.seasonRes, zenColors)
+    }
 
     val pulseProgress = remember { Animatable(0.5f) }
     LaunchedEffect(morphStep, reduceMotion) {
@@ -441,6 +443,7 @@ private fun SolarTermCapsule(
         val locale = if (!configuration.locales.isEmpty) configuration.locales[0] else java.util.Locale.getDefault()
         locale.language.equals("zh", ignoreCase = true)
     }
+    val brandSerifFontFamily = if (isChinese) FontFamily.Serif else MarcellusFontFamily
     val subtitleFontFamily = if (isChinese) FontFamily.Serif else NotoSerifItalicFontFamily
     val subtitleFontStyle = if (isChinese) FontStyle.Normal else FontStyle.Italic
 
@@ -481,16 +484,16 @@ private fun SolarTermCapsule(
         ) { step ->
             when (step) {
                 0 -> {
-                    // State 0 (Resting Seal): Marcellus 12.5sp, season in seasonal vermilion/ochre/sage/indigo, hairline pipe, term name, breathing pulse dot
+                    // State 0 (Resting Seal): Marcellus / CJK Serif 12sp, season in accessible seasonal vermilion/ochre/sage/indigo, hairline pipe, term name, breathing pulse dot
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
                             text = seasonName,
                             style = TextStyle(
-                                fontFamily = MarcellusFontFamily,
+                                fontFamily = brandSerifFontFamily,
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 12.5.sp,
+                                fontSize = 12.sp,
                                 letterSpacing = 1.1.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                                 lineHeightStyle = LineHeightStyle(
@@ -498,7 +501,7 @@ private fun SolarTermCapsule(
                                     trim = LineHeightStyle.Trim.Both,
                                 ),
                             ),
-                            color = seasonColor,
+                            color = seasonInkColor,
                         )
 
                         Text(
@@ -506,7 +509,7 @@ private fun SolarTermCapsule(
                             style = TextStyle(
                                 fontFamily = FontFamily.SansSerif,
                                 fontWeight = FontWeight.Light,
-                                fontSize = 12.5.sp,
+                                fontSize = 12.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                             ),
                             color = zenColors.hairlineRuleVariant,
@@ -516,9 +519,9 @@ private fun SolarTermCapsule(
                         Text(
                             text = termName,
                             style = TextStyle(
-                                fontFamily = MarcellusFontFamily,
+                                fontFamily = brandSerifFontFamily,
                                 fontWeight = FontWeight.Normal,
-                                fontSize = 12.5.sp,
+                                fontSize = 12.sp,
                                 letterSpacing = 0.9.sp,
                                 platformStyle = PlatformTextStyle(includeFontPadding = false),
                                 lineHeightStyle = LineHeightStyle(
@@ -551,7 +554,7 @@ private fun SolarTermCapsule(
                         Text(
                             text = degreeText,
                             style = TextStyle(
-                                fontFamily = MarcellusFontFamily,
+                                fontFamily = brandSerifFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 12.sp,
                                 letterSpacing = 0.9.sp,
@@ -659,19 +662,17 @@ private fun HeaderRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = stringResource(R.string.app_name),
-                style = MaterialTheme.typography.headlineLarge.copy(letterSpacing = (-0.5).sp),
-                fontFamily = FontFamily.SansSerif,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineLarge,
                 color = MaterialTheme.colorScheme.onBackground,
             )
             Spacer(Modifier.height(3.dp))
             SolarTermCapsule(solarTerm = activeSolarTerm, today = today)
         }
         val zenColors = LocalZenColors.current
-        val plusContainerColor = if (zenColors.isDark) Color(0xFF2A3A2C) else MaterialTheme.colorScheme.tertiary
-        val plusContentColor = if (zenColors.isDark) ZenDarkSage else MaterialTheme.colorScheme.onTertiary
+        val plusContainerColor = if (zenColors.isDark) Color(0xFF382318) else MaterialTheme.colorScheme.primary
+        val plusContentColor = if (zenColors.isDark) ZenDarkVermilion else MaterialTheme.colorScheme.onPrimary
         val plusBorderModifier = if (zenColors.isDark) {
-            Modifier.border(width = 1.dp, color = ZenDarkSage, shape = CircleShape)
+            Modifier.border(width = 1.dp, color = ZenDarkVermilion, shape = CircleShape)
         } else {
             Modifier
         }
@@ -753,7 +754,7 @@ private fun SubHeaderRow(
                     stringResource(R.string.items_count, itemCount)
                 },
                 style = MaterialTheme.typography.bodySmall.copy(
-                    fontSize = 12.5.sp,
+                    fontSize = 12.sp,
                     letterSpacing = 0.2.sp,
                     fontWeight = FontWeight.Medium,
                 ),
@@ -856,7 +857,7 @@ private fun SubHeaderRow(
                                 singleLine = true,
                                 textStyle = MaterialTheme.typography.bodySmall.copy(
                                     color = MaterialTheme.colorScheme.onBackground,
-                                    fontSize = 12.5.sp,
+                                    fontSize = 12.sp,
                                 ),
                                 modifier = Modifier.weight(1f),
                                 decorationBox = { innerTextField ->
@@ -865,7 +866,7 @@ private fun SubHeaderRow(
                                             text = stringResource(R.string.search_placeholder),
                                             style = MaterialTheme.typography.bodySmall.copy(
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                                                fontSize = 12.5.sp,
+                                                fontSize = 12.sp,
                                             ),
                                         )
                                     }
@@ -896,7 +897,7 @@ private fun SubHeaderRow(
                     Text(
                         text = stringResource(R.string.sort_section_title),
                         style = MaterialTheme.typography.labelSmall.copy(
-                            fontSize = 11.5.sp,
+                            fontSize = 11.sp,
                             letterSpacing = 0.8.sp,
                             fontWeight = FontWeight.SemiBold,
                         ),
@@ -919,9 +920,9 @@ private fun SubHeaderRow(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(6.dp))
+                                .clip(ZenShapes.small)
                                 .background(
-                                    if (isSelected) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
+                                    if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
                                     else Color.Transparent
                                 )
                                 .clickable {
@@ -934,15 +935,15 @@ private fun SubHeaderRow(
                                 Text(
                                     text = stringResource(option.labelRes),
                                     style = MaterialTheme.typography.bodySmall.copy(
-                                        fontSize = 12.5.sp,
+                                        fontSize = 12.sp,
                                         fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
                                     ),
-                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                    color = if (isSelected) zenColors.cinnabarVermilionInk else MaterialTheme.colorScheme.onSurface,
                                 )
                                 Text(
                                     text = stringResource(option.descriptionRes),
                                     style = MaterialTheme.typography.bodySmall.copy(
-                                        fontSize = 10.5.sp,
+                                        fontSize = 11.sp,
                                     ),
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
@@ -950,9 +951,9 @@ private fun SubHeaderRow(
                             if (isSelected) {
                                 Text(
                                     text = "✓",
-                                    fontSize = 13.sp,
+                                    fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary,
+                                    color = zenColors.cinnabarVermilionInk,
                                 )
                             }
                         }
@@ -1103,7 +1104,7 @@ private fun CardStyleTogglePill(
                     Text(
                         text = label,
                         style = MaterialTheme.typography.bodySmall.copy(
-                            fontSize = 11.5.sp,
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold,
                             letterSpacing = 0.2.sp,
                         ),
@@ -1115,7 +1116,7 @@ private fun CardStyleTogglePill(
                 // Dropdown caret indicator
                 Text(
                     text = "▾",
-                    fontSize = 10.sp,
+                    fontSize = 11.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 1.dp),
                 )
@@ -1154,9 +1155,9 @@ private fun CardStyleTogglePill(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(6.dp))
+                        .clip(ZenShapes.small)
                         .background(
-                            if (isSelected) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
+                            if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
                             else Color.Transparent,
                         )
                         .clickable {
@@ -1174,10 +1175,10 @@ private fun CardStyleTogglePill(
                     Text(
                         text = stringResource(optionLabelRes),
                         style = MaterialTheme.typography.bodySmall.copy(
-                            fontSize = 12.5.sp,
+                            fontSize = 12.sp,
                             fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
                         ),
-                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                        color = if (isSelected) zenColors.cinnabarVermilionInk else MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.weight(1f),
                     )
                     Text(
@@ -1194,7 +1195,7 @@ private fun CardStyleTogglePill(
                             text = "✓",
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
+                            color = zenColors.cinnabarVermilionInk,
                         )
                     }
                 }
@@ -1468,8 +1469,11 @@ private fun OdometerDisplay(
     ) {
         Text(
             text = annotated,
-            fontSize = fontSize,
-            fontFamily = FontFamily.SansSerif,
+            style = TextStyle(
+                fontFamily = FontFamily.SansSerif,
+                fontSize = fontSize,
+                fontFeatureSettings = "tnum",
+            ),
             maxLines = 1,
             softWrap = false,
             overflow = TextOverflow.Ellipsis,
@@ -1496,7 +1500,6 @@ fun ItemCard(
     onClick: () -> Unit,
     onDelete: () -> Unit,
     onReset: () -> Unit,
-    onToggleWidget: () -> Unit,
     modifier: Modifier = Modifier,
     whisper: CardResetWhisper? = null,
     onUndoReset: () -> Unit = {},
@@ -1508,7 +1511,6 @@ fun ItemCard(
     val count = remember(anchorDate, today) { daysSince(anchorDate, today) }
     val cardInteraction = rememberPressSource()
     val deleteInteraction = rememberPressSource()
-    val widgetInteraction = rememberPressSource()
     val countRowInteraction = rememberPressSource()
 
     val canShowWeeks = abs(count) >= 7L
@@ -1524,8 +1526,6 @@ fun ItemCard(
 
     val resetDesc = stringResource(R.string.reset)
     val deleteDesc = stringResource(R.string.delete)
-    val widgetVisible = item.showInWidget
-    val widgetDesc = stringResource(if (widgetVisible) R.string.widget_hide else R.string.widget_show)
 
     val zenColors = LocalZenColors.current
     val isSystemDark = zenColors.isDark
@@ -1685,6 +1685,16 @@ fun ItemCard(
                         modifier = Modifier.size(11.dp),
                     )
                 }
+                if (!item.showInWidget) {
+                    Spacer(Modifier.width(if (item.isPinned) 4.dp else 5.dp))
+                    val widgetExcludedDesc = stringResource(R.string.cd_widget_excluded)
+                    Icon(
+                        painter = painterResource(R.drawable.ic_widget_off),
+                        contentDescription = widgetExcludedDesc,
+                        tint = if (isDarkCard) Color(0xFFFAF7F2).copy(alpha = 0.50f) else mutedInk.copy(alpha = 0.55f),
+                        modifier = Modifier.size(11.dp),
+                    )
+                }
                 if (count >= 0 && item.resetCount > 0) {
                     Spacer(Modifier.width(6.dp))
                     ResetRhythmBadge(
@@ -1695,31 +1705,6 @@ fun ItemCard(
                 }
             }
             Spacer(Modifier.width(8.dp))
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(30.dp)
-                    .clip(CircleShape)
-                    .clickable(
-                        interactionSource = widgetInteraction,
-                        indication = null,
-                        onClick = onToggleWidget,
-                    )
-                    .pressScale(widgetInteraction)
-                    .semantics { contentDescription = widgetDesc },
-            ) {
-                Icon(
-                    painter = painterResource(if (widgetVisible) R.drawable.ic_widget_grid_filled else R.drawable.ic_widget_grid_outline),
-                    contentDescription = null,
-                    tint = if (widgetVisible) {
-                        if (isDarkCard) ZenOchre else MaterialTheme.colorScheme.primary
-                    } else {
-                        mutedInk.copy(alpha = 0.5f)
-                    },
-                    modifier = Modifier.size(15.dp),
-                )
-            }
-            Spacer(Modifier.width(2.dp))
             val canReset = item.isResettableOn(today)
             MechanicalResetButton(
                 onResetConfirmed = onReset,
@@ -1728,7 +1713,7 @@ fun ItemCard(
                 isDarkCard = isDarkCard,
                 enabled = canReset,
             )
-            Spacer(Modifier.width(2.dp))
+            Spacer(Modifier.width(6.dp))
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
@@ -1896,15 +1881,15 @@ fun ItemCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(10.dp))
+                        .clip(ZenShapes.medium)
                         .background(whisperBg)
-                        .border(BorderStroke(0.6.dp, whisperBorder), RoundedCornerShape(10.dp))
+                        .border(BorderStroke(0.6.dp, whisperBorder), ZenShapes.medium)
                         .padding(horizontal = 12.dp, vertical = 6.dp),
                 ) {
                     Text(
                         text = whisperText,
                         style = MaterialTheme.typography.labelSmall.copy(
-                            fontSize = 11.5.sp,
+                            fontSize = 11.sp,
                             letterSpacing = 0.3.sp,
                             fontWeight = FontWeight.Medium,
                         ),
@@ -1918,7 +1903,7 @@ fun ItemCard(
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
+                                .clip(ZenShapes.small)
                                 .background(
                                     if (isDarkCard) ZenOchre.copy(alpha = 0.25f)
                                     else MaterialTheme.colorScheme.tertiary.copy(alpha = 0.20f)
@@ -1934,7 +1919,7 @@ fun ItemCard(
                             Text(
                                 text = undoLabel,
                                 style = MaterialTheme.typography.labelSmall.copy(
-                                    fontSize = 11.5.sp,
+                                    fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
                                     letterSpacing = 0.5.sp,
                                 ),
@@ -2045,10 +2030,10 @@ private fun EmptyStyleFilterState(
                 onClick = onNewItemInStyle,
                 interactionSource = createInteraction,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary,
-                    contentColor = MaterialTheme.colorScheme.onTertiary,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
                 ),
-                shape = RoundedCornerShape(percent = 50),
+                shape = ZenShapes.medium,
                 modifier = Modifier.pressScale(createInteraction),
             ) {
                 Text(stringResource(R.string.create_in_style, styleLabel))
@@ -2058,7 +2043,7 @@ private fun EmptyStyleFilterState(
             OutlinedButton(
                 onClick = onShowAll,
                 interactionSource = showAllInteraction,
-                shape = RoundedCornerShape(percent = 50),
+                shape = ZenShapes.medium,
                 modifier = Modifier.pressScale(showAllInteraction),
             ) {
                 Text(stringResource(R.string.show_all_cards))
@@ -2093,10 +2078,10 @@ private fun EmptyState(
             onClick = onNewItem,
             interactionSource = emptyInteraction,
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.tertiary,
-                contentColor = MaterialTheme.colorScheme.onTertiary,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
             ),
-            shape = RoundedCornerShape(percent = 50),
+            shape = ZenShapes.medium,
             modifier = Modifier.pressScale(emptyInteraction),
         ) {
             Text(stringResource(R.string.new_item))
@@ -2106,7 +2091,7 @@ private fun EmptyState(
         OutlinedButton(
             onClick = onImportBackup,
             interactionSource = restoreInteraction,
-            shape = RoundedCornerShape(percent = 50),
+            shape = ZenShapes.medium,
             modifier = Modifier.pressScale(restoreInteraction),
         ) {
             Text(stringResource(R.string.backup_action_import))

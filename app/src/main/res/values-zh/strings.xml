@@ -115,11 +115,21 @@
     <string name="comment_placeholder">选填备注（最多2行）</string>
     <string name="anchor_date">起始日期</string>
     <string name="pin_to_top">置顶记录</string>
+    <string name="pin_to_top_subtitle">固定在列表最上方</string>
+    <string name="show_in_widget_subtitle">在桌面小组件中展示</string>
+    <string name="hide_from_widget_subtitle">不在桌面小组件中展示</string>
     <string name="cd_pin_to_top">将此记录置顶显示在列表最前</string>
+    <string name="cd_show_in_widget">在桌面小组件中展示此计数器</string>
+    <string name="cd_hide_from_widget">在桌面小组件中隐藏此计数器</string>
     <string name="cd_pinned">已置顶</string>
+    <string name="cd_widget_excluded">已在微件中隐藏</string>
     <string name="pinned_timeline_divider">时间线</string>
     <string name="cd_expand_customization">展开样式与图标自定义选项</string>
     <string name="cd_collapse_customization">收起样式与图标自定义选项</string>
+    <string name="customization_tab_color">卡片配色</string>
+    <string name="customization_tab_icon">事项图标</string>
+    <string name="cd_select_color_tab">切换至配色选择</string>
+    <string name="cd_select_icon_tab">切换至图标选择</string>
     <string name="save">保存</string>
 
     <!-- Delete confirm -->

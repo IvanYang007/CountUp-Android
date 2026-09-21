@@ -166,7 +166,6 @@ private fun ZenHorizonConfigureScreen(
                         },
                         onDelete = {},
                         onReset = {},
-                        onToggleWidget = {},
                         today = today,
                         reduceMotion = true,
                     )

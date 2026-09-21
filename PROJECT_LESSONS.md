@@ -153,6 +153,13 @@ CountUp-Android is a zero-permission, offline-first milestone count-up app built
 - **Why it recurs:** Developers assume `position` is always strictly bounded by the value previously returned by `getCount()`. In reality, launcher AdapterView scrolling and app SharedPreferences updates operate across asynchronous IPC boundaries; `rows` can shrink before `notifyAppWidgetViewDataChanged` finishes processing on the launcher.
 - **The rule:** In all `RemoteViewsFactory` implementations, always use defensive bounds checking (`rows.getOrNull(position) ?: return RemoteViews(...)` and `rows.getOrNull(position)?.id?.hashCode()?.toLong() ?: position.toLong()`) instead of raw array indexing.
 
+### L21. Default exclusion switches to calm OFF polarity with quiet micro-indicators — [observed]
+
+- **What happened:** Configuring widgets via an active "Show in widget (default ON)" switch created unnecessary visual friction: every newly created card dialog showed a glaring vermilion toggle switch, conflicting with the calm Zen aesthetic and user mental models where toggles activate special behaviors rather than baseline states. Furthermore, home-screen cards lacked visual feedback for excluded items.
+- **Evidence:** Working tree refactor; `CountUpDialogs.kt`, `CountUpContent.kt`, `ic_widget_off.xml`
+- **Why it recurs:** Developers invert logic in UI to match boolean model defaults (`showInWidget = true`) rather than designing the interface around user intentionality.
+- **The rule:** Default modal option toggles to calm OFF (`在微件中隐藏 = false`) for exclusion or suppression overrides. Mirror the active override state with subtle, subdued micro-symbols (`ic_widget_off`, 11dp, 50–55% alpha) on compact card surfaces beside status pins.
+
 ## Project-specific implementation rules
 
 **Layout** — Place app UI components in `app/src/main/java/com/countup/app/`. Model new screens after `CountUpContent.kt`. Build new home-screen widget providers following `ZenPebbleWidgetReceiver.kt`.

@@ -145,6 +145,7 @@ class CountUpViewModel(
                                 icon = event.icon,
                                 cardColor = event.cardColor,
                                 isPinned = event.isPinned,
+                                showInWidget = event.showInWidget,
                             ) != null
                         } else {
                             repository.updateItem(
@@ -155,6 +156,7 @@ class CountUpViewModel(
                                 icon = event.icon,
                                 cardColor = event.cardColor,
                                 isPinned = event.isPinned,
+                                showInWidget = event.showInWidget,
                             )
                         }
                         if (success) {

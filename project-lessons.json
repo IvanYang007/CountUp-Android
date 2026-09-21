@@ -274,6 +274,20 @@
         "app/src/main/java/com/countup/app/CountUpWidget.kt"
       ],
       "phase": "recurrence"
+    },
+    {
+      "id": "PL-021",
+      "text": "Default modal option toggles to calm OFF (showInWidget = true / isHiddenFromWidget = false) for exclusion overrides, mirroring the active override with quiet micro-indicators (ic_widget_off, 11dp, 50-55% alpha) on compact card surfaces.",
+      "grade": "observed",
+      "evidence": [
+        "working-tree"
+      ],
+      "paths": [
+        "app/src/main/java/com/countup/app/CountUpDialogs.kt",
+        "app/src/main/java/com/countup/app/CountUpContent.kt",
+        "app/src/main/res/drawable/ic_widget_off.xml"
+      ],
+      "phase": "conventions"
     }
   ],
   "risk_areas": [

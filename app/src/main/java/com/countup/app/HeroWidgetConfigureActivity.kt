@@ -166,7 +166,6 @@ private fun HeroWidgetConfigureScreen(
                         },
                         onDelete = {},
                         onReset = {},
-                        onToggleWidget = {},
                         today = today,
                         reduceMotion = true,
                     )

@@ -166,7 +166,6 @@ private fun SolarRhythmConfigureScreen(
                         },
                         onDelete = {},
                         onReset = {},
-                        onToggleWidget = {},
                         today = today,
                         reduceMotion = true,
                     )

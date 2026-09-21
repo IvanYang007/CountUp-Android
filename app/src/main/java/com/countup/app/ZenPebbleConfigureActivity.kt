@@ -166,7 +166,6 @@ private fun ZenPebbleConfigureScreen(
                         },
                         onDelete = {},
                         onReset = {},
-                        onToggleWidget = {},
                         today = today,
                         reduceMotion = true,
                     )

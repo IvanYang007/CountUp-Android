@@ -2,6 +2,7 @@ package com.countup.app
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -58,6 +59,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -65,7 +67,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.disabled
-import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
@@ -82,11 +83,16 @@ import java.time.ZoneOffset
  * Resolves the surface color and border modifier for Zen modal dialogs.
  */
 @Composable
-private fun zenDialogStyle(shape: RoundedCornerShape): Pair<Color, Modifier> {
+private fun zenDialogStyle(shape: Shape): Pair<Color, Modifier> {
     val zenColors = LocalZenColors.current
     val surface = if (zenColors.isDark) zenColors.paperSurface else Color(0xFFFCF8F2)
     val border = if (zenColors.isDark) Modifier.border(1.dp, zenColors.hairlineRule, shape) else Modifier
     return Pair(surface, border)
+}
+
+private enum class CustomizationTab {
+    COLOR,
+    ICON,
 }
 
 /**
@@ -123,12 +129,14 @@ fun ItemEditorDialog(
         mutableStateOf(initialColor)
     }
     var isPinned by rememberSaveable { mutableStateOf(item?.isPinned ?: false) }
+    var isHiddenFromWidget by rememberSaveable { mutableStateOf(!(item?.showInWidget ?: true)) }
     var isCustomizationExpanded by rememberSaveable {
         mutableStateOf(
             (item != null && (item.cardColor.isNotBlank() || item.icon.isNotBlank())) ||
                 (item == null && !initialCategory.isNullOrBlank() && initialCategory != CountUpStore.OVERVIEW_FILTER_ALL)
         )
     }
+    var activeCustomizationTab by rememberSaveable { mutableStateOf(CustomizationTab.COLOR) }
     var hasCustomizedManually by rememberSaveable { mutableStateOf(false) }
     val isDarkTheme = LocalZenColors.current.isDark
     var selectedColorCategoryIndex by rememberSaveable {
@@ -144,7 +152,7 @@ fun ItemEditorDialog(
     var showPicker by rememberSaveable { mutableStateOf(false) }
 
     val scrollState = rememberScrollState()
-    val (dialogSurface, dialogBorder) = zenDialogStyle(RoundedCornerShape(20.dp))
+    val (dialogSurface, dialogBorder) = zenDialogStyle(ZenShapes.large)
 
     BackHandler(enabled = isCustomizationExpanded) {
         isCustomizationExpanded = false
@@ -155,7 +163,7 @@ fun ItemEditorDialog(
         modifier = modifier.then(dialogBorder),
         containerColor = dialogSurface,
         tonalElevation = 0.dp,
-        shape = RoundedCornerShape(20.dp),
+        shape = ZenShapes.large,
         title = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -184,7 +192,16 @@ fun ItemEditorDialog(
                         .clickable(
                             interactionSource = avatarInteraction,
                             indication = LocalIndication.current,
-                            onClick = { isCustomizationExpanded = !isCustomizationExpanded },
+                            onClick = {
+                                if (!isCustomizationExpanded) {
+                                    isCustomizationExpanded = true
+                                    activeCustomizationTab = CustomizationTab.ICON
+                                } else if (activeCustomizationTab == CustomizationTab.COLOR) {
+                                    activeCustomizationTab = CustomizationTab.ICON
+                                } else {
+                                    isCustomizationExpanded = false
+                                }
+                            },
                         )
                         .pressScale(avatarInteraction)
                         .semantics { contentDescription = avatarDesc },
@@ -222,7 +239,7 @@ fun ItemEditorDialog(
                     ) {
                         Icon(
                             painter = painterResource(
-                                if (isCustomizationExpanded) R.drawable.ic_chevron_up_mini else R.drawable.ic_pencil_edit
+                                if (isCustomizationExpanded && activeCustomizationTab == CustomizationTab.ICON) R.drawable.ic_chevron_up_mini else R.drawable.ic_pencil_edit
                             ),
                             contentDescription = null,
                             tint = ZenWhite,
@@ -234,6 +251,7 @@ fun ItemEditorDialog(
         },
         text = {
             val pinContentDesc = stringResource(R.string.cd_pin_to_top)
+            val widgetContentDesc = stringResource(R.string.cd_hide_from_widget)
             val textFieldColors = TextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
                 unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
@@ -251,7 +269,7 @@ fun ItemEditorDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .imePadding()
-                    .heightIn(max = 440.dp)
+                    .heightIn(max = 520.dp)
                     .verticalScroll(scrollState),
             ) {
                 TextField(
@@ -328,38 +346,140 @@ fun ItemEditorDialog(
                     }
                 }
 
-                // Pin to top toggle row (Zen minimalist switch)
-                Spacer(Modifier.padding(top = 10.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
+                // Zen Preference Capsule (Pin to top & Show in widget)
+                Spacer(Modifier.padding(top = 12.dp))
+                val zenColors = LocalZenColors.current
+                val capsuleShape = ZenShapes.medium
+                val pinInteraction = rememberPressSource()
+                val widgetInteraction = rememberPressSource()
+
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(10.dp))
-                        .clickable { isPinned = !isPinned }
-                        .padding(horizontal = 2.dp, vertical = 4.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                        .clip(capsuleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.40f))
+                        .border(1.dp, zenColors.hairlineRule.copy(alpha = 0.60f), capsuleShape),
                 ) {
-                    Text(
-                        text = stringResource(R.string.pin_to_top).uppercase(),
-                        style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.sp),
-                        fontFamily = FontFamily.SansSerif,
-                        fontWeight = FontWeight.Medium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    // Row 1: Pin to Top
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable(
+                                interactionSource = pinInteraction,
+                                indication = LocalIndication.current,
+                                onClick = { isPinned = !isPinned },
+                            )
+                            .pressScale(pinInteraction, ZenTactileHierarchy.Level2PrimaryAction)
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_seal_pin),
+                                contentDescription = null,
+                                tint = if (isPinned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                modifier = Modifier.size(16.dp),
+                            )
+                            Spacer(Modifier.width(10.dp))
+                            Column {
+                                Text(
+                                    text = stringResource(R.string.pin_to_top).uppercase(),
+                                    style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.sp),
+                                    fontFamily = FontFamily.SansSerif,
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                )
+                                Text(
+                                    text = stringResource(R.string.pin_to_top_subtitle),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                                )
+                            }
+                        }
+                        Switch(
+                            checked = isPinned,
+                            onCheckedChange = { isPinned = it },
+                            modifier = Modifier.semantics {
+                                contentDescription = pinContentDesc
+                            },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = ZenWhite,
+                                checkedTrackColor = MaterialTheme.colorScheme.primary,
+                                uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+                                uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                uncheckedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                            ),
+                        )
+                    }
+
+                    // Hairline Divider
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp)
+                            .height(0.5.dp)
+                            .background(zenColors.hairlineRule.copy(alpha = 0.60f)),
                     )
-                    Switch(
-                        checked = isPinned,
-                        onCheckedChange = { isPinned = it },
-                        modifier = Modifier.semantics {
-                            contentDescription = pinContentDesc
-                        },
-                        colors = SwitchDefaults.colors(
-                            checkedThumbColor = ZenWhite,
-                            checkedTrackColor = MaterialTheme.colorScheme.primary,
-                            uncheckedThumbColor = MaterialTheme.colorScheme.outline,
-                            uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            uncheckedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                        ),
-                    )
+
+                    // Row 2: Hide from Widget
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable(
+                                interactionSource = widgetInteraction,
+                                indication = LocalIndication.current,
+                                onClick = { isHiddenFromWidget = !isHiddenFromWidget },
+                            )
+                            .pressScale(widgetInteraction, ZenTactileHierarchy.Level2PrimaryAction)
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            Icon(
+                                painter = painterResource(if (isHiddenFromWidget) R.drawable.ic_widget_off else R.drawable.ic_widget_grid_outline),
+                                contentDescription = null,
+                                tint = if (isHiddenFromWidget) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                modifier = Modifier.size(16.dp),
+                            )
+                            Spacer(Modifier.width(10.dp))
+                            Column {
+                                Text(
+                                    text = stringResource(R.string.widget_hide).uppercase(),
+                                    style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.sp),
+                                    fontFamily = FontFamily.SansSerif,
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                )
+                                Text(
+                                    text = stringResource(R.string.hide_from_widget_subtitle),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                                )
+                            }
+                        }
+                        Switch(
+                            checked = isHiddenFromWidget,
+                            onCheckedChange = { isHiddenFromWidget = it },
+                            modifier = Modifier.semantics {
+                                contentDescription = widgetContentDesc
+                            },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = ZenWhite,
+                                checkedTrackColor = MaterialTheme.colorScheme.primary,
+                                uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+                                uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                                uncheckedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                            ),
+                        )
+                    }
                 }
 
                 AnimatedVisibility(
@@ -368,271 +488,420 @@ fun ItemEditorDialog(
                     exit = fadeOut() + shrinkVertically(),
                 ) {
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        // Section 1: Card Style Selection with Zen Categorized Tabs (Washi, Earth, Sumi)
-                        Spacer(Modifier.padding(top = 14.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                text = stringResource(R.string.card_color_label).uppercase(),
-                                style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.sp),
-                                fontFamily = FontFamily.SansSerif,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                            val activePreset = resolveCardStyle(selectedCardColor, isDark = isDarkTheme)
-                            Text(
-                                text = stringResource(activePreset.nameRes),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.SemiBold,
-                            )
-                        }
-                        Spacer(Modifier.padding(top = 6.dp))
+                        Spacer(Modifier.padding(top = 12.dp))
 
-                        // Category Tabs (Washi, Earth, Sumi)
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        ) {
-                            CARD_COLOR_CATEGORIES.forEachIndexed { index, category ->
-                                key(category.id) {
-                                    val isCatSelected = selectedColorCategoryIndex == index
-                                    val catInteraction = rememberPressSource()
-                                    Box(
-                                        contentAlignment = Alignment.Center,
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .background(
-                                                if (isCatSelected) MaterialTheme.colorScheme.tertiary
-                                                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f),
-                                            )
-                                            .clickable(
-                                                interactionSource = catInteraction,
-                                                indication = LocalIndication.current,
-                                                role = Role.Tab,
-                                                onClick = { selectedColorCategoryIndex = index },
-                                            )
-                                            .pressScale(catInteraction)
-                                            .padding(horizontal = 10.dp, vertical = 6.dp)
-                                            .semantics {
-                                                selected = isCatSelected
-                                            },
-                                    ) {
-                                        Text(
-                                            text = stringResource(category.labelRes),
-                                            style = MaterialTheme.typography.labelSmall.copy(
-                                                fontSize = 11.sp,
-                                                fontWeight = if (isCatSelected) FontWeight.Bold else FontWeight.Normal,
-                                            ),
-                                            color = if (isCatSelected) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onSurface,
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        Spacer(Modifier.padding(top = 8.dp))
-
-                        // Single clean row of 4 chips for active category
-                        val activeColorCategory = CARD_COLOR_CATEGORIES.getOrElse(selectedColorCategoryIndex) { CARD_COLOR_CATEGORIES[0] }
-                        val currentCategoryPresets = remember(selectedColorCategoryIndex, isDarkTheme) {
-                            activeColorCategory.presetIds.map { resolveCardStyle(it, isDark = isDarkTheme) }
-                        }
-
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            currentCategoryPresets.forEach { preset ->
-                                key(preset.id) {
-                                    val isSelected = resolveCardStyle(selectedCardColor, isDark = isDarkTheme).id == preset.id
-                                    val colorInteraction = rememberPressSource()
-                                    val colorName = stringResource(preset.nameRes)
-                                    val colorDescription = if (preset.id == DEFAULT_CARD_COLOR) {
-                                        stringResource(R.string.cd_color_default)
-                                    } else {
-                                        stringResource(R.string.cd_color_option, colorName)
-                                    }
-
-                                    Box(
-                                        contentAlignment = Alignment.Center,
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .minimumInteractiveComponentSize()
-                                            .height(38.dp)
-                                            .clip(RoundedCornerShape(10.dp))
-                                            .background(preset.cardBg)
-                                            .border(
-                                                width = if (isSelected) 2.5.dp else 1.dp,
-                                                color = if (isSelected) {
-                                                    if (preset.isDark) Color(0xFFDEB285) else MaterialTheme.colorScheme.primary
-                                                } else {
-                                                    if (preset.isDark) Color(0x24FFFFFF) else Color(0x332C2416)
-                                                },
-                                                shape = RoundedCornerShape(10.dp),
-                                            )
-                                            .clickable(
-                                                interactionSource = colorInteraction,
-                                                indication = LocalIndication.current,
-                                                role = Role.RadioButton,
-                                                onClick = {
-                                                    selectedCardColor = preset.id
-                                                    hasCustomizedManually = true
-                                                },
-                                            )
-                                            .pressScale(colorInteraction)
-                                            .semantics {
-                                                contentDescription = colorDescription
-                                                selected = isSelected
-                                            },
-                                    ) {
-                                        // Mini badge circle representing the coupled icon badge
-                                        Box(
-                                            contentAlignment = Alignment.Center,
-                                            modifier = Modifier
-                                                .size(16.dp)
-                                                .background(preset.badgeBg, CircleShape)
-                                                .border(
-                                                    width = 0.5.dp,
-                                                    color = if (preset.isDark) Color(0x26FFFFFF) else Color(0x22000000),
-                                                    shape = CircleShape,
-                                                ),
-                                        ) {
-                                            if (isSelected) {
-                                                Box(
-                                                    modifier = Modifier
-                                                        .size(5.dp)
-                                                        .background(preset.badgeTint, CircleShape),
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        // Section 2: Icon Picker with Categories
-                        Spacer(Modifier.padding(top = 16.dp))
-                        Text(
-                            text = stringResource(R.string.icon_label).uppercase(),
-                            style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 1.sp),
-                            fontFamily = FontFamily.SansSerif,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        Spacer(Modifier.padding(top = 6.dp))
-
-                        // Category Tabs
-                        val categoryScroll = rememberScrollState()
-                        val categories = remember {
-                            listOf("all" to R.string.category_all) + ICON_CATEGORIES.map { it.id to it.labelRes }
-                        }
+                        // Dual Segmented Customization Bar (Color vs Icon)
+                        val activePreset = resolveCardStyle(selectedCardColor, isDark = isDarkTheme)
+                        val colorTabDesc = stringResource(R.string.cd_select_color_tab)
+                        val iconTabDesc = stringResource(R.string.cd_select_icon_tab)
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .horizontalScroll(categoryScroll),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                .clip(ZenShapes.medium)
+                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.50f))
+                                .border(
+                                    width = 1.dp,
+                                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.25f),
+                                    shape = ZenShapes.medium,
+                                )
+                                .padding(3.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
-                            categories.forEachIndexed { index, (catId, labelRes) ->
-                                val isCatSelected = selectedCategoryIndex == index
-                                val catInteraction = rememberPressSource()
-                                Box(
-                                    contentAlignment = Alignment.Center,
-                                    modifier = Modifier
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .background(
-                                            if (isCatSelected) MaterialTheme.colorScheme.tertiary
-                                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f),
-                                        )
-                                        .clickable(
-                                            interactionSource = catInteraction,
-                                            indication = LocalIndication.current,
-                                            onClick = { selectedCategoryIndex = index },
-                                        )
-                                        .pressScale(catInteraction)
-                                        .padding(horizontal = 10.dp, vertical = 5.dp),
+                            // Segment 1: Color Tab
+                            val isColorTab = activeCustomizationTab == CustomizationTab.COLOR
+                            val colorTabInteraction = rememberPressSource()
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(34.dp)
+                                    .clip(RoundedCornerShape(7.dp))
+                                    .background(
+                                        if (isColorTab) MaterialTheme.colorScheme.surface
+                                        else Color.Transparent
+                                    )
+                                    .then(
+                                        if (isColorTab) Modifier.border(
+                                            width = 1.dp,
+                                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f),
+                                            shape = RoundedCornerShape(7.dp),
+                                        ) else Modifier
+                                    )
+                                    .clickable(
+                                        interactionSource = colorTabInteraction,
+                                        indication = LocalIndication.current,
+                                        role = Role.Tab,
+                                        onClick = { activeCustomizationTab = CustomizationTab.COLOR },
+                                    )
+                                    .pressScale(colorTabInteraction)
+                                    .semantics {
+                                        selected = isColorTab
+                                        contentDescription = colorTabDesc
+                                    },
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center,
                                 ) {
+                                    // Mini Color Swatch Pebble
+                                    Box(
+                                        modifier = Modifier
+                                            .size(12.dp)
+                                            .background(activePreset.badgeTint, CircleShape)
+                                            .border(0.8.dp, activePreset.badgeBg, CircleShape),
+                                    )
+                                    Spacer(Modifier.width(6.dp))
                                     Text(
-                                        text = stringResource(labelRes),
-                                        style = MaterialTheme.typography.labelSmall.copy(
-                                            fontSize = 11.sp,
-                                            fontWeight = if (isCatSelected) FontWeight.Bold else FontWeight.Normal,
-                                        ),
-                                        color = if (isCatSelected) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onSurface,
+                                        text = stringResource(R.string.customization_tab_color),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = if (isColorTab) FontWeight.SemiBold else FontWeight.Normal,
+                                        color = if (isColorTab) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                            }
+
+                            // Segment 2: Icon Tab (Direct Indication Symbol)
+                            val isIconTab = activeCustomizationTab == CustomizationTab.ICON
+                            val iconTabInteraction = rememberPressSource()
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(34.dp)
+                                    .clip(RoundedCornerShape(7.dp))
+                                    .background(
+                                        if (isIconTab) MaterialTheme.colorScheme.surface
+                                        else Color.Transparent
+                                    )
+                                    .then(
+                                        if (isIconTab) Modifier.border(
+                                            width = 1.dp,
+                                            color = MaterialTheme.colorScheme.outline.copy(alpha = 0.35f),
+                                            shape = RoundedCornerShape(7.dp),
+                                        ) else Modifier
+                                    )
+                                    .clickable(
+                                        interactionSource = iconTabInteraction,
+                                        indication = LocalIndication.current,
+                                        role = Role.Tab,
+                                        onClick = { activeCustomizationTab = CustomizationTab.ICON },
+                                    )
+                                    .pressScale(iconTabInteraction)
+                                    .semantics {
+                                        selected = isIconTab
+                                        contentDescription = iconTabDesc
+                                    },
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center,
+                                ) {
+                                    Icon(
+                                        painter = painterResource(iconRes(selectedIcon)),
+                                        contentDescription = null,
+                                        tint = if (isIconTab) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(15.dp),
+                                    )
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(
+                                        text = stringResource(R.string.customization_tab_icon),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = if (isIconTab) FontWeight.SemiBold else FontWeight.Normal,
+                                        color = if (isIconTab) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
                                 }
                             }
                         }
 
-                        Spacer(Modifier.padding(top = 8.dp))
-
-                        // Grid layout (6 columns per row)
-                        val chunkedIcons = remember(selectedCategoryIndex) {
-                            val currentIcons = if (selectedCategoryIndex == 0) {
-                                ALL_ICON_NAMES
-                            } else {
-                                ICON_CATEGORIES[selectedCategoryIndex - 1].iconNames
-                            }
-                            currentIcons.chunked(6)
-                        }
-                        Column(
-                            verticalArrangement = Arrangement.spacedBy(6.dp),
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            chunkedIcons.forEach { rowIcons ->
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth(),
-                                ) {
-                                    rowIcons.forEach { iconName ->
-                                        val isIconSelected = selectedIcon == iconName
-                                        val iconInteraction = rememberPressSource()
-                                        val iconDesc = stringResource(iconDescriptionRes(iconName))
-
-                                        Box(
-                                            contentAlignment = Alignment.Center,
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .size(40.dp)
-                                                .clip(RoundedCornerShape(8.dp))
-                                                .background(
-                                                    if (isIconSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                                                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.40f),
-                                                )
-                                                .border(
-                                                    width = if (isIconSelected) 1.8.dp else 0.dp,
-                                                    color = if (isIconSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
-                                                    shape = RoundedCornerShape(8.dp),
-                                                )
-                                                .clickable(
-                                                    interactionSource = iconInteraction,
-                                                    indication = LocalIndication.current,
-                                                    onClick = {
-                                                        selectedIcon = iconName
-                                                        hasCustomizedManually = true
-                                                    },
-                                                )
-                                                .pressScale(iconInteraction)
-                                                .semantics { contentDescription = iconDesc },
+                        // Content swapping based on active tab
+                        Crossfade(
+                            targetState = activeCustomizationTab,
+                            label = "CustomizationTabContent",
+                        ) { currentTab ->
+                            when (currentTab) {
+                                CustomizationTab.COLOR -> {
+                                    Column(modifier = Modifier.fillMaxWidth()) {
+                                        Spacer(Modifier.padding(top = 10.dp))
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically,
                                         ) {
-                                            Icon(
-                                                painter = painterResource(iconRes(iconName)),
-                                                contentDescription = null,
-                                                tint = if (isIconSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                                                modifier = Modifier.size(18.dp),
+                                            Text(
+                                                text = stringResource(R.string.card_color_label).uppercase(),
+                                                style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
+                                                fontFamily = FontFamily.SansSerif,
+                                                fontWeight = FontWeight.Medium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            )
+                                            Text(
+                                                text = stringResource(activePreset.nameRes),
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                fontWeight = FontWeight.SemiBold,
                                             )
                                         }
+                                        Spacer(Modifier.padding(top = 6.dp))
+
+                                        // Category Tabs (Washi, Earth, Sumi)
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                        ) {
+                                            CARD_COLOR_CATEGORIES.forEachIndexed { index, category ->
+                                                key(category.id) {
+                                                    val isCatSelected = selectedColorCategoryIndex == index
+                                                    val catInteraction = rememberPressSource()
+                                                    Box(
+                                                        contentAlignment = Alignment.Center,
+                                                        modifier = Modifier
+                                                            .weight(1f)
+                                                            .clip(RoundedCornerShape(8.dp))
+                                                            .background(
+                                                                if (isCatSelected) MaterialTheme.colorScheme.tertiary
+                                                                else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f),
+                                                            )
+                                                            .clickable(
+                                                                interactionSource = catInteraction,
+                                                                indication = LocalIndication.current,
+                                                                role = Role.Tab,
+                                                                onClick = { selectedColorCategoryIndex = index },
+                                                            )
+                                                            .pressScale(catInteraction)
+                                                            .padding(horizontal = 10.dp, vertical = 6.dp)
+                                                            .semantics {
+                                                                selected = isCatSelected
+                                                            },
+                                                    ) {
+                                                        Text(
+                                                            text = stringResource(category.labelRes),
+                                                            style = MaterialTheme.typography.labelSmall.copy(
+                                                                fontSize = 11.sp,
+                                                                fontWeight = if (isCatSelected) FontWeight.Bold else FontWeight.Normal,
+                                                            ),
+                                                            color = if (isCatSelected) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onSurface,
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        Spacer(Modifier.padding(top = 8.dp))
+
+                                        // Single clean row of 4 chips for active category
+                                        val activeColorCategory = CARD_COLOR_CATEGORIES.getOrElse(selectedColorCategoryIndex) { CARD_COLOR_CATEGORIES[0] }
+                                        val currentCategoryPresets = remember(selectedColorCategoryIndex, isDarkTheme) {
+                                            activeColorCategory.presetIds.map { resolveCardStyle(it, isDark = isDarkTheme) }
+                                        }
+
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.fillMaxWidth(),
+                                        ) {
+                                            currentCategoryPresets.forEach { preset ->
+                                                key(preset.id) {
+                                                    val isSelected = resolveCardStyle(selectedCardColor, isDark = isDarkTheme).id == preset.id
+                                                    val colorInteraction = rememberPressSource()
+                                                    val colorName = stringResource(preset.nameRes)
+                                                    val colorDescription = if (preset.id == DEFAULT_CARD_COLOR) {
+                                                        stringResource(R.string.cd_color_default)
+                                                    } else {
+                                                        stringResource(R.string.cd_color_option, colorName)
+                                                    }
+
+                                                    Box(
+                                                        contentAlignment = Alignment.Center,
+                                                        modifier = Modifier
+                                                            .weight(1f)
+                                                            .minimumInteractiveComponentSize()
+                                                            .height(38.dp)
+                                                            .clip(RoundedCornerShape(10.dp))
+                                                            .background(preset.cardBg)
+                                                            .border(
+                                                                width = if (isSelected) 2.5.dp else 1.dp,
+                                                                color = if (isSelected) {
+                                                                    if (preset.isDark) Color(0xFFDEB285) else MaterialTheme.colorScheme.primary
+                                                                } else {
+                                                                    if (preset.isDark) Color(0x24FFFFFF) else Color(0x332C2416)
+                                                                },
+                                                                shape = RoundedCornerShape(10.dp),
+                                                            )
+                                                            .clickable(
+                                                                interactionSource = colorInteraction,
+                                                                indication = LocalIndication.current,
+                                                                role = Role.RadioButton,
+                                                                onClick = {
+                                                                    selectedCardColor = preset.id
+                                                                    hasCustomizedManually = true
+                                                                },
+                                                            )
+                                                            .pressScale(colorInteraction)
+                                                            .semantics {
+                                                                contentDescription = colorDescription
+                                                                selected = isSelected
+                                                            },
+                                                    ) {
+                                                        // Mini badge circle representing the coupled icon badge
+                                                        Box(
+                                                            contentAlignment = Alignment.Center,
+                                                            modifier = Modifier
+                                                                .size(16.dp)
+                                                                .background(preset.badgeBg, CircleShape)
+                                                                .border(
+                                                                    width = 0.5.dp,
+                                                                    color = if (preset.isDark) Color(0x26FFFFFF) else Color(0x22000000),
+                                                                    shape = CircleShape,
+                                                                ),
+                                                        ) {
+                                                            if (isSelected) {
+                                                                Box(
+                                                                    modifier = Modifier
+                                                                        .size(5.dp)
+                                                                        .background(preset.badgeTint, CircleShape),
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
-                                    // Fill remaining slots in incomplete row
-                                    if (rowIcons.size < 6) {
-                                        repeat(6 - rowIcons.size) {
-                                            Spacer(Modifier.weight(1f))
+                                }
+                                CustomizationTab.ICON -> {
+                                    Column(modifier = Modifier.fillMaxWidth()) {
+                                        Spacer(Modifier.padding(top = 10.dp))
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            Text(
+                                                text = stringResource(R.string.icon_label).uppercase(),
+                                                style = MaterialTheme.typography.labelSmall.copy(letterSpacing = 1.sp),
+                                                fontFamily = FontFamily.SansSerif,
+                                                fontWeight = FontWeight.Medium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            )
+                                            Text(
+                                                text = stringResource(iconDescriptionRes(selectedIcon)),
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                fontWeight = FontWeight.SemiBold,
+                                            )
+                                        }
+                                        Spacer(Modifier.padding(top = 6.dp))
+
+                                        // Category Tabs
+                                        val categoryScroll = rememberScrollState()
+                                        val categories = remember {
+                                            listOf("all" to R.string.category_all) + ICON_CATEGORIES.map { it.id to it.labelRes }
+                                        }
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .horizontalScroll(categoryScroll),
+                                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                        ) {
+                                            categories.forEachIndexed { index, (catId, labelRes) ->
+                                                val isCatSelected = selectedCategoryIndex == index
+                                                val catInteraction = rememberPressSource()
+                                                Box(
+                                                    contentAlignment = Alignment.Center,
+                                                    modifier = Modifier
+                                                        .clip(RoundedCornerShape(8.dp))
+                                                        .background(
+                                                            if (isCatSelected) MaterialTheme.colorScheme.tertiary
+                                                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f),
+                                                        )
+                                                        .clickable(
+                                                            interactionSource = catInteraction,
+                                                            indication = LocalIndication.current,
+                                                            onClick = { selectedCategoryIndex = index },
+                                                        )
+                                                        .pressScale(catInteraction)
+                                                        .padding(horizontal = 10.dp, vertical = 5.dp),
+                                                ) {
+                                                    Text(
+                                                        text = stringResource(labelRes),
+                                                        style = MaterialTheme.typography.labelSmall.copy(
+                                                            fontSize = 11.sp,
+                                                            fontWeight = if (isCatSelected) FontWeight.Bold else FontWeight.Normal,
+                                                        ),
+                                                        color = if (isCatSelected) MaterialTheme.colorScheme.onTertiary else MaterialTheme.colorScheme.onSurface,
+                                                    )
+                                                }
+                                            }
+                                        }
+
+                                        Spacer(Modifier.padding(top = 8.dp))
+
+                                        // Grid layout (6 columns per row)
+                                        val chunkedIcons = remember(selectedCategoryIndex) {
+                                            val currentIcons = if (selectedCategoryIndex == 0) {
+                                                ALL_ICON_NAMES
+                                            } else {
+                                                ICON_CATEGORIES[selectedCategoryIndex - 1].iconNames
+                                            }
+                                            currentIcons.chunked(6)
+                                        }
+                                        Column(
+                                            verticalArrangement = Arrangement.spacedBy(6.dp),
+                                            modifier = Modifier.fillMaxWidth(),
+                                        ) {
+                                            chunkedIcons.forEach { rowIcons ->
+                                                Row(
+                                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    modifier = Modifier.fillMaxWidth(),
+                                                ) {
+                                                    rowIcons.forEach { iconName ->
+                                                        val isIconSelected = selectedIcon == iconName
+                                                        val iconInteraction = rememberPressSource()
+                                                        val iconDesc = stringResource(iconDescriptionRes(iconName))
+
+                                                        Box(
+                                                            contentAlignment = Alignment.Center,
+                                                            modifier = Modifier
+                                                                .weight(1f)
+                                                                .size(40.dp)
+                                                                .clip(RoundedCornerShape(8.dp))
+                                                                .background(
+                                                                    if (isIconSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                                                                    else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.40f),
+                                                                )
+                                                                .border(
+                                                                    width = if (isIconSelected) 1.8.dp else 0.dp,
+                                                                    color = if (isIconSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                                                    shape = RoundedCornerShape(8.dp),
+                                                                )
+                                                                .clickable(
+                                                                    interactionSource = iconInteraction,
+                                                                    indication = LocalIndication.current,
+                                                                    onClick = {
+                                                                        selectedIcon = iconName
+                                                                        hasCustomizedManually = true
+                                                                    },
+                                                                )
+                                                                .pressScale(iconInteraction)
+                                                                .semantics { contentDescription = iconDesc },
+                                                        ) {
+                                                            Icon(
+                                                                painter = painterResource(iconRes(iconName)),
+                                                                contentDescription = null,
+                                                                tint = if (isIconSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                                                modifier = Modifier.size(18.dp),
+                                                            )
+                                                        }
+                                                    }
+                                                    // Fill remaining slots in incomplete row
+                                                    if (rowIcons.size < 6) {
+                                                        repeat(6 - rowIcons.size) {
+                                                            Spacer(Modifier.weight(1f))
+                                                        }
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -654,16 +923,17 @@ fun ItemEditorDialog(
                             icon = selectedIcon,
                             cardColor = selectedCardColor,
                             isPinned = isPinned,
+                            showInWidget = !isHiddenFromWidget,
                         )
                     )
                 },
                 enabled = !isSaving,
                 modifier = Modifier.pressScale(saveInteraction, ZenTactileHierarchy.Level2PrimaryAction),
                 interactionSource = saveInteraction,
-                shape = RoundedCornerShape(10.dp),
+                shape = ZenShapes.medium,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary,
-                    contentColor = MaterialTheme.colorScheme.onTertiary,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
                 ),
             ) {
                 Text(
@@ -780,7 +1050,7 @@ private fun DatePickerDialog(
     val state = rememberDatePickerState(
         initialSelectedDateMillis = initialDate.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),
     )
-    val (dialogSurface, dialogBorder) = zenDialogStyle(RoundedCornerShape(24.dp))
+    val (dialogSurface, dialogBorder) = zenDialogStyle(ZenShapes.large)
 
     val datePickerColors = DatePickerDefaults.colors(
         containerColor = dialogSurface,
@@ -818,7 +1088,7 @@ private fun DatePickerDialog(
                     enabled = state.selectedDateMillis != null,
                 ),
                 interactionSource = dateConfirmInteraction,
-                shape = RoundedCornerShape(10.dp),
+                shape = ZenShapes.medium,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -843,7 +1113,7 @@ private fun DatePickerDialog(
             }
         },
         modifier = modifier.then(dialogBorder),
-        shape = RoundedCornerShape(24.dp),
+        shape = ZenShapes.large,
         tonalElevation = 0.dp,
         colors = datePickerColors,
         properties = DialogProperties(usePlatformDefaultWidth = false),
@@ -947,7 +1217,6 @@ fun BackupRestorePreviewDialog(
                             },
                             style = MaterialTheme.typography.titleSmall.copy(
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 15.sp,
                             ),
                             color = MaterialTheme.colorScheme.onSurface,
                         )
@@ -1073,7 +1342,6 @@ private fun RestoreStrategyOptionCard(
                 text = title,
                 style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = if (isSelected && enabled) FontWeight.SemiBold else FontWeight.Normal,
-                    fontSize = 13.5.sp,
                 ),
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -1106,7 +1374,7 @@ fun DataBackupSettingsDialog(
     onRestoreBackup: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val (dialogSurface, dialogBorder) = zenDialogStyle(RoundedCornerShape(22.dp))
+    val (dialogSurface, dialogBorder) = zenDialogStyle(ZenShapes.large)
     val zenColors = LocalZenColors.current
     val cancelDesc = stringResource(R.string.cancel)
 
@@ -1115,7 +1383,7 @@ fun DataBackupSettingsDialog(
         modifier = modifier.then(dialogBorder),
         containerColor = dialogSurface,
         tonalElevation = 0.dp,
-        shape = RoundedCornerShape(22.dp),
+        shape = ZenShapes.large,
         title = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -1193,7 +1461,6 @@ fun DataBackupSettingsDialog(
                             text = stringResource(R.string.backup_action_export),
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 fontWeight = FontWeight.SemiBold,
-                                fontSize = 13.5.sp,
                             ),
                             color = MaterialTheme.colorScheme.onSurface,
                         )
@@ -1207,7 +1474,7 @@ fun DataBackupSettingsDialog(
                     Spacer(Modifier.width(8.dp))
                     Text(
                         text = "↗",
-                        fontSize = 15.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -1241,7 +1508,6 @@ fun DataBackupSettingsDialog(
                             text = stringResource(R.string.backup_action_import),
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 fontWeight = FontWeight.SemiBold,
-                                fontSize = 13.5.sp,
                             ),
                             color = MaterialTheme.colorScheme.onSurface,
                         )
@@ -1255,7 +1521,7 @@ fun DataBackupSettingsDialog(
                     Spacer(Modifier.width(8.dp))
                     Text(
                         text = "↙",
-                        fontSize = 15.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -1267,7 +1533,7 @@ fun DataBackupSettingsDialog(
                 Text(
                     text = stringResource(R.string.settings_footer_offline, appVersion),
                     style = MaterialTheme.typography.bodySmall.copy(
-                        fontSize = 10.5.sp,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Normal,
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),

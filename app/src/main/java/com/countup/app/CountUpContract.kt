@@ -80,6 +80,7 @@ sealed interface CountUpUiEvent {
             icon: String = "",
             cardColor: String = "",
             isPinned: Boolean = false,
+            showInWidget: Boolean = true,
         ) : this(
             ItemDraft(
                 name = name,
@@ -88,6 +89,7 @@ sealed interface CountUpUiEvent {
                 icon = icon,
                 cardColor = cardColor,
                 isPinned = isPinned,
+                showInWidget = showInWidget,
             )
         )
 
@@ -97,6 +99,7 @@ sealed interface CountUpUiEvent {
         val icon: String get() = draft.icon
         val cardColor: String get() = draft.cardColor
         val isPinned: Boolean get() = draft.isPinned
+        val showInWidget: Boolean get() = draft.showInWidget
     }
     data class RequestDelete(val target: CountUpItem) : CountUpUiEvent
     data object DismissDelete : CountUpUiEvent

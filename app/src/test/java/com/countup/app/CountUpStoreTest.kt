@@ -141,6 +141,20 @@ class CountUpStoreTest {
     }
 
     @Test
+    fun addItemAndUpdateItemPersistShowInWidget() {
+        val store = CountUpStore(testContext)
+        val hiddenItem = store.addItem("Hidden Habit", 100L, showInWidget = false)!!
+        assertFalse(hiddenItem.showInWidget)
+        assertFalse(store.items()[0].showInWidget)
+
+        assertTrue(store.updateItem(hiddenItem.id, "Unhidden Habit", 100L, showInWidget = true))
+        assertTrue(store.items()[0].showInWidget)
+
+        assertTrue(store.updateItem(hiddenItem.id, "Re-hidden Habit", 100L, showInWidget = false))
+        assertFalse(store.items()[0].showInWidget)
+    }
+
+    @Test
     fun quarantinePruningKeepsAtMostThreeHistoricalSnapshots() {
         val prefs = testContext.getSharedPreferences("countup_prefs", Context.MODE_PRIVATE)
 

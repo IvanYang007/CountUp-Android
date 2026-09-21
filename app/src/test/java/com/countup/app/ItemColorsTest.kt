@@ -96,7 +96,7 @@ class ItemColorsTest {
         // Specifically verify sage_forest night calibration
         val sageLight = resolveCardStyle("sage_forest", isDark = false)
         val sageDark = resolveCardStyle("sage_forest", isDark = true)
-        assertEquals(Color(0xFF5E8C6D), sageLight.cardBg) // Original light sage untouched
+        assertEquals(Color(0xFF2E4D3A), sageLight.cardBg) // Calibrated to deep willow sage for WCAG AAA contrast
         assertEquals(Color(0xFF2E4D3A), sageDark.cardBg) // Deep night willow sage green
         assertEquals(Color(0xFF6DB88A), sageDark.badgeBg) // Forest leaf jade badge
         assertEquals(Color(0xFFFAF7F2), sageDark.primaryInk) // Crisp warm white text
@@ -104,7 +104,7 @@ class ItemColorsTest {
         // Specifically verify sage_ochre night calibration
         val sageOchreLight = resolveCardStyle("sage_ochre", isDark = false)
         val sageOchreDark = resolveCardStyle("sage_ochre", isDark = true)
-        assertEquals(Color(0xFF5E8C6D), sageOchreLight.cardBg)
+        assertEquals(Color(0xFF3E482A), sageOchreLight.cardBg) // Calibrated to deep olive tea green
         assertEquals(Color(0xFF3E482A), sageOchreDark.cardBg) // Deep olive tea green
         assertEquals(Color(0xFFDEB285), sageOchreDark.badgeBg)
 
@@ -147,7 +147,7 @@ class ItemColorsTest {
     fun `cardBackgroundColor respects isDark for default card and calibrates surfaces in dark mode`() {
         assertEquals(Color(0xFFFFFFFF), cardBackgroundColor("", isDark = false))
         assertEquals(ZenDarkCard, cardBackgroundColor("", isDark = true))
-        assertEquals(Color(0xFF5E8C6D), cardBackgroundColor("sage_forest", isDark = false))
+        assertEquals(Color(0xFF2E4D3A), cardBackgroundColor("sage_forest", isDark = false))
         assertEquals(Color(0xFF2E4D3A), cardBackgroundColor("sage_forest", isDark = true))
         assertEquals(Color(0xFF191613), cardBackgroundColor("ink_gold", isDark = true))
     }
@@ -263,6 +263,14 @@ class ItemColorsTest {
         assertTrue(isDarkCardBackground(nightMist.cardBg))
     }
 
+    private fun contrastRatio(fg: Color, bg: Color): Float {
+        val l1 = fg.luminance()
+        val l2 = bg.luminance()
+        val lighter = kotlin.math.max(l1, l2)
+        val darker = kotlin.math.min(l1, l2)
+        return (lighter + 0.05f) / (darker + 0.05f)
+    }
+
     @Test
     fun `all presets have badgeTint consistent with cardBadgeTint helper`() {
         CARD_COLOR_PRESETS.forEach { preset ->
@@ -271,6 +279,44 @@ class ItemColorsTest {
                 "Preset ${preset.id} badgeTint should match cardBadgeTint",
                 expectedTint,
                 preset.badgeTint,
+            )
+        }
+        DARK_CARD_COLOR_PRESETS.forEach { preset ->
+            val expectedTint = cardBadgeTint(preset.badgeBg)
+            assertEquals(
+                "Dark preset ${preset.id} badgeTint should match cardBadgeTint",
+                expectedTint,
+                preset.badgeTint,
+            )
+        }
+    }
+
+    @Test
+    fun `all 24 card presets meet WCAG AA text and non-text contrast requirements`() {
+        val allPresets = CARD_COLOR_PRESETS + DARK_CARD_COLOR_PRESETS
+        assertEquals(24, allPresets.size)
+
+        allPresets.forEach { preset ->
+            val modeLabel = if (preset.isDark) "Dark" else "Light"
+            // Primary ink must pass WCAG AA (>= 4.5:1)
+            val primaryContrast = contrastRatio(preset.primaryInk, preset.cardBg)
+            assertTrue(
+                "[$modeLabel] Preset '${preset.id}' primaryInk contrast ($primaryContrast) must be >= 4.5:1",
+                primaryContrast >= 4.5f,
+            )
+
+            // Muted ink must pass at least 4.0:1
+            val mutedContrast = contrastRatio(preset.mutedInk, preset.cardBg)
+            assertTrue(
+                "[$modeLabel] Preset '${preset.id}' mutedInk contrast ($mutedContrast) must be >= 4.0:1",
+                mutedContrast >= 4.0f,
+            )
+
+            // Badge glyph must meet WCAG 1.4.11 non-text contrast floor (>= 3.0:1)
+            val badgeContrast = contrastRatio(preset.badgeTint, preset.badgeBg)
+            assertTrue(
+                "[$modeLabel] Preset '${preset.id}' badge glyph contrast ($badgeContrast) must be >= 3.0:1",
+                badgeContrast >= 3.0f,
             )
         }
     }

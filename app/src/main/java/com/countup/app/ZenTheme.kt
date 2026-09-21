@@ -73,6 +73,7 @@ data class ZenColorScheme(
     val hairlineRule: Color,
     val hairlineRuleVariant: Color,
     val cinnabarVermilion: Color,
+    val cinnabarVermilionInk: Color,
     val willowSage: Color,
     val ochreGold: Color,
     val dustyIndigo: Color,
@@ -89,6 +90,7 @@ val ZenInkMuted = Color(0xFF6B5D4F)
 val ZenHairlineRule = Color(0xFFE3D3B8)
 val ZenHairlineRuleVariant = Color(0xFFD9C6A6)
 val ZenVermilion = Color(0xFFD97642)
+val ZenVermilionInk = Color(0xFFA63F18) // Accessible aged cinnabar for text/links on paper (5.21:1 AA)
 val ZenSage = Color(0xFF4A7C59)
 val ZenOchre = Color(0xFFD4A574)
 val ZenIndigo = Color(0xFF7D9BA8)
@@ -122,6 +124,14 @@ fun getSeasonColor(seasonRes: Int, zenColors: ZenColorScheme): Color = when (sea
     else -> zenColors.cinnabarVermilion
 }
 
+fun getSeasonInkColor(seasonRes: Int, zenColors: ZenColorScheme): Color = when (seasonRes) {
+    R.string.season_spring -> if (zenColors.isDark) zenColors.willowSage else Color(0xFF2E5E3D)
+    R.string.season_summer -> if (zenColors.isDark) zenColors.ochreGold else Color(0xFF7A4E1D)
+    R.string.season_autumn -> zenColors.cinnabarVermilionInk
+    R.string.season_winter -> if (zenColors.isDark) zenColors.dustyIndigo else Color(0xFF385E6E)
+    else -> zenColors.cinnabarVermilionInk
+}
+
 fun lightZenColors() = ZenColorScheme(
     paperBackground = ZenPaperBackground,
     paperSurface = ZenPaperSurface,
@@ -131,6 +141,7 @@ fun lightZenColors() = ZenColorScheme(
     hairlineRule = ZenHairlineRule,
     hairlineRuleVariant = ZenHairlineRuleVariant,
     cinnabarVermilion = ZenVermilion,
+    cinnabarVermilionInk = ZenVermilionInk,
     willowSage = ZenSage,
     ochreGold = ZenOchre,
     dustyIndigo = ZenIndigo,
@@ -147,6 +158,7 @@ fun darkZenColors() = ZenColorScheme(
     hairlineRule = ZenDarkHairline,
     hairlineRuleVariant = ZenDarkHairlineVariant,
     cinnabarVermilion = ZenDarkVermilion,
+    cinnabarVermilionInk = ZenDarkVermilion,
     willowSage = ZenDarkSage,
     ochreGold = ZenDarkOchre,
     dustyIndigo = ZenDarkIndigo,
@@ -156,8 +168,8 @@ fun darkZenColors() = ZenColorScheme(
 
 val LocalZenColors = staticCompositionLocalOf { lightZenColors() }
 
-private fun lightMcmMaterialColors() = lightColorScheme(
-    primary = ZenVermilion,
+internal fun lightMcmMaterialColors() = lightColorScheme(
+    primary = Color(0xFFB84E1D), // Accessible Vermilion container ensuring onPrimary White > 5.0:1 contrast
     onPrimary = ZenWhite,
     tertiary = ZenSage,
     onTertiary = ZenWhite,
@@ -172,7 +184,7 @@ private fun lightMcmMaterialColors() = lightColorScheme(
     error = ZenError,
 )
 
-private fun darkMcmMaterialColors() = darkColorScheme(
+internal fun darkMcmMaterialColors() = darkColorScheme(
     primary = ZenDarkVermilion,
     onPrimary = ZenDarkOnPrimary,
     tertiary = ZenDarkSage,
@@ -219,6 +231,8 @@ fun ZenTheme(
     CompositionLocalProvider(LocalZenColors provides colors) {
         MaterialTheme(
             colorScheme = materialColors,
+            typography = ZenTypography,
+            shapes = ZenShapes,
             content = content,
         )
     }

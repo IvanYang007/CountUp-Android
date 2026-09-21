@@ -136,6 +136,7 @@ class CountUpStore(context: Context) {
         icon: String = "",
         cardColor: String = "",
         isPinned: Boolean = false,
+        showInWidget: Boolean = true,
         id: String = newId(),
     ): CountUpItem? {
         val trimmed = name.trim()
@@ -148,6 +149,7 @@ class CountUpStore(context: Context) {
             icon = resolvedIcon,
             cardColor = cardColor.trim(),
             futureFlag = epochDay > LocalDate.now().toEpochDay(),
+            showInWidget = showInWidget,
             pinnedTimestamp = if (isPinned) System.currentTimeMillis() else null,
         )
         return synchronized(globalStoreLock) {
@@ -173,6 +175,7 @@ class CountUpStore(context: Context) {
         icon: String = "",
         cardColor: String = "",
         isPinned: Boolean = false,
+        showInWidget: Boolean = true,
     ): Boolean {
         val trimmed = name.trim()
         return synchronized(globalStoreLock) {
@@ -193,6 +196,7 @@ class CountUpStore(context: Context) {
                 icon = resolvedIcon,
                 cardColor = cardColor.trim(),
                 futureFlag = epochDay > LocalDate.now().toEpochDay(),
+                showInWidget = showInWidget,
                 pinnedTimestamp = newPinnedTimestamp,
             )
             persist(list)

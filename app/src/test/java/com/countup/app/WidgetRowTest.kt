@@ -174,7 +174,7 @@ class WidgetRowTest {
         assertEquals(0xFF33523D.toInt(), sageForestLight.circleColor) // Deep Forest badge
         assertEquals(0xFFFFFFFF.toInt(), sageForestLight.textInk)
         assertEquals(0xFF6DB88A.toInt(), sageForestDark.circleColor)
-        assertEquals(0xFFFFFFFF.toInt(), sageForestDark.textInk)
+        assertEquals(0xFF2C2416.toInt(), sageForestDark.textInk) // ZenInkBlack ensures > 6.0:1 contrast on bright dark badge
 
         val paperSageRow = WidgetRowData(id = "item3", name = "Reading", count = 15, futureFlag = false, cardColor = "paper_sage")
         val paperSageStyle = resolveWidgetCircleStyle(paperSageRow, isDark = false)

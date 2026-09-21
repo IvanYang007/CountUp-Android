@@ -252,6 +252,65 @@ class CountUpViewModelTest {
     }
 
     @Test
+    fun `save new item with showInWidget false creates item excluded from widget`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = emptyList())
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
+
+        viewModel.onEvent(CountUpUiEvent.OpenEditor(null))
+        viewModel.onEvent(
+            CountUpUiEvent.SaveItem(
+                ItemDraft(
+                    name = "Private Habit",
+                    epochDay = fixedToday.toEpochDay(),
+                    showInWidget = false,
+                )
+            )
+        )
+
+        viewModel.state.test {
+            val state = awaitItem()
+            assertFalse(state.isEditorOpen)
+            val item = state.items.first()
+            assertEquals("Private Habit", item.name)
+            assertFalse("Expected item to have showInWidget = false", item.showInWidget)
+        }
+    }
+
+    @Test
+    fun `save existing item updating showInWidget toggles widget visibility and refreshes widget`() = runTest {
+        val repo = FakeCountUpRepository(initialItems = sampleItems)
+        val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)
+        val target = sampleItems.first()
+        assertTrue(target.showInWidget)
+
+        viewModel.onEvent(CountUpUiEvent.OpenEditor(target))
+
+        viewModel.effects.test {
+            viewModel.onEvent(
+                CountUpUiEvent.SaveItem(
+                    ItemDraft(
+                        name = target.name,
+                        epochDay = target.epochDay,
+                        comment = target.comment,
+                        icon = target.icon,
+                        cardColor = target.cardColor,
+                        isPinned = target.isPinned,
+                        showInWidget = false,
+                    )
+                )
+            )
+            val effect = awaitItem()
+            assertTrue(effect is CountUpUiEffect.RefreshWidget)
+        }
+
+        viewModel.state.test {
+            val state = awaitItem()
+            val updated = state.items.first { it.id == target.id }
+            assertFalse("Item showInWidget should be updated to false", updated.showInWidget)
+        }
+    }
+
+    @Test
     fun `delete item workflow removes item and emits effect`() = runTest {
         val repo = FakeCountUpRepository(initialItems = sampleItems)
         val viewModel = CountUpViewModel(repo, todayProvider = { fixedToday }, ioDispatcher = mainDispatcherRule.testDispatcher)

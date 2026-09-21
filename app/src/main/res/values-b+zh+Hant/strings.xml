@@ -61,8 +61,17 @@
     <string name="item_comment">備註</string>
     <string name="comment_placeholder">選填備註（最多2行）</string>
     <string name="anchor_date">起始日期</string>
+    <string name="pin_to_top">置頂記錄</string>
+    <string name="pin_to_top_subtitle">固定在列表最上方</string>
+    <string name="show_in_widget_subtitle">在桌面小組件中展示</string>
+    <string name="cd_pin_to_top">將此記錄置頂顯示在列表最前</string>
+    <string name="cd_show_in_widget">在桌面小組件中展示此計數器</string>
     <string name="cd_expand_customization">展開樣式與圖示自訂選項</string>
     <string name="cd_collapse_customization">收起樣式與圖示自訂選項</string>
+    <string name="customization_tab_color">卡片配色</string>
+    <string name="customization_tab_icon">事項圖示</string>
+    <string name="cd_select_color_tab">切換至配色選擇</string>
+    <string name="cd_select_icon_tab">切換至圖示選擇</string>
     <string name="save">儲存</string>
 
     <!-- Delete confirm -->
@@ -352,5 +361,8 @@
     <string name="widget_empty_sumi">靜墨凝神\n輕觸落印</string>
     <string name="show_all_cards">顯示全部卡片</string>
     <string name="create_in_style">+ 新建%1$s卡片</string>
+    <string name="cd_widget_excluded">已在微件中隱藏</string>
+    <string name="hide_from_widget_subtitle">不在桌面小組件中展示</string>
+    <string name="cd_hide_from_widget">在桌面小組件中隱藏此計數器</string>
 </resources>
 

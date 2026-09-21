@@ -52,6 +52,9 @@ class ZenThemeTest {
         assertEquals(ZenVermilion, light.cinnabarVermilion)
         assertEquals(Color(0xFFD97642), light.cinnabarVermilion)
 
+        assertEquals(ZenVermilionInk, light.cinnabarVermilionInk)
+        assertEquals(Color(0xFFA63F18), light.cinnabarVermilionInk)
+
         assertEquals(ZenSage, light.willowSage)
         assertEquals(Color(0xFF4A7C59), light.willowSage)
 
@@ -128,6 +131,39 @@ class ZenThemeTest {
         val dark = darkZenColors()
         val actionRatio = contrastRatio(ZenDarkOnPrimary, dark.willowSage)
         assertTrue("Dark onPrimary ratio ($actionRatio) on action button must be >= 4.5", actionRatio >= 4.5f)
+    }
+
+    @Test
+    fun `primary action maintains high contrast against onPrimary in light mode`() {
+        val lightColors = lightMcmMaterialColors()
+        val actionRatio = contrastRatio(lightColors.onPrimary, lightColors.primary)
+        assertTrue("Light onPrimary ratio ($actionRatio) on action button must be >= 4.5 (AA)", actionRatio >= 4.5f)
+    }
+
+    @Test
+    fun `vermilion text ink achieves WCAG AA contrast on paper background and surface in light mode`() {
+        val light = lightZenColors()
+        val bgRatio = contrastRatio(light.cinnabarVermilionInk, light.paperBackground)
+        assertTrue("Vermilion ink on paper background ratio ($bgRatio) must be >= 4.5 (AA)", bgRatio >= 4.5f)
+
+        val surfaceRatio = contrastRatio(light.cinnabarVermilionInk, light.paperSurface)
+        assertTrue("Vermilion ink on paper surface ratio ($surfaceRatio) must be >= 4.5 (AA)", surfaceRatio >= 4.5f)
+    }
+
+    @Test
+    fun `seasonal ink colors achieve WCAG AA contrast on paper background in light mode`() {
+        val light = lightZenColors()
+        val seasons = listOf(
+            R.string.season_spring,
+            R.string.season_summer,
+            R.string.season_autumn,
+            R.string.season_winter,
+        )
+        for (season in seasons) {
+            val ink = getSeasonInkColor(season, light)
+            val ratio = contrastRatio(ink, light.paperBackground)
+            assertTrue("Season ink ($season) contrast ($ratio) on paper background must be >= 4.5 (AA)", ratio >= 4.5f)
+        }
     }
 
     @Test
