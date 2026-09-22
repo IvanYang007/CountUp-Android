@@ -350,6 +350,17 @@
     <string name="widget_empty_washi">素箋待墨\n輕觸起筆</string>
     <string name="widget_empty_earth">沃土待春\n輕觸播種</string>
     <string name="widget_empty_sumi">靜墨凝神\n輕觸落印</string>
-    <string name="show_all_cards">顯示全部卡片</string>
     <string name="create_in_style">+ 新建%1$s卡片</string>
+
+    <!-- Zen Orbit (双环律动) -->
+    <string name="zen_orbit_widget_label">雙環律動</string>
+    <string name="zen_orbit_widget_description">雙同心環靜美錶盤，直觀呈現當前計數與歷史週期平均節奏的流轉與交匯。</string>
+    <string name="zen_orbit_configure_title">雙環律動</string>
+    <string name="zen_orbit_configure_subtitle">選擇一個卡片在此雙環錶盤中記錄節律。</string>
+    <string name="zen_orbit_empty">輕觸以選擇卡片</string>
+    <string name="zen_orbit_avg_badge">均值 %1$d天</string>
+    <string name="zen_orbit_first_cycle">首個週期</string>
+    <string name="zen_orbit_harmonic_badge">交匯共振</string>
+    <string name="zen_orbit_beyond_badge">+%1$d天 均值</string>
+    <string name="preview_zen_orbit_pill">均值 28天</string>
 </resources>

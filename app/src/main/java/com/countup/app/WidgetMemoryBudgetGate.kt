@@ -18,6 +18,7 @@ object WidgetMemoryBudgetGate {
     const val ZEN_HORIZON_MAX_BYTES = 40 * 1024 // 40 KB
     const val SOLAR_RHYTHM_MAX_BYTES = 40 * 1024 // 40 KB
     const val ZEN_PEBBLE_MAX_BYTES = 15 * 1024   // 15 KB
+    const val ZEN_ORBIT_MAX_BYTES = 40 * 1024    // 40 KB
 
     enum class WidgetType(val maxAllowedBytes: Int) {
         ZEN_HORIZON_4X1(ZEN_HORIZON_MAX_BYTES),
@@ -25,6 +26,7 @@ object WidgetMemoryBudgetGate {
         SOLAR_RHYTHM_4X2(SOLAR_RHYTHM_MAX_BYTES),
         SOLAR_RHYTHM_2X2(SOLAR_RHYTHM_MAX_BYTES),
         ZEN_PEBBLE_1X1(ZEN_PEBBLE_MAX_BYTES),
+        ZEN_ORBIT_2X2(ZEN_ORBIT_MAX_BYTES),
     }
 
     data class PayloadEstimate(
@@ -44,8 +46,8 @@ object WidgetMemoryBudgetGate {
         heightPx: Int = ZenHorizonTrackRenderer.DEFAULT_HEIGHT_PX,
     ): PayloadEstimate {
         val type = if (is2x1) WidgetType.ZEN_HORIZON_2X1 else WidgetType.ZEN_HORIZON_4X1
-        val rawBitmapBytes = widthPx * heightPx * 4
-        val clampedBitmapBytes = minOf(rawBitmapBytes, ZenHorizonTrackRenderer.MAX_BITMAP_BYTES)
+        val rawBitmapBytes = widthPx.toLong() * heightPx.toLong() * 4L
+        val clampedBitmapBytes = minOf(rawBitmapBytes, ZenHorizonTrackRenderer.MAX_BITMAP_BYTES.toLong()).toInt()
         // IPC Action overhead (view IDs, string reflections, pending intents)
         val actionOverheadBytes = if (is2x1) 1024 else 1280
         val totalBytes = clampedBitmapBytes + actionOverheadBytes
@@ -90,6 +92,27 @@ object WidgetMemoryBudgetGate {
     }
 
     /**
+     * Estimates payload size for Zen Orbit (2x2).
+     * Includes procedural dial bitmap payload (clamped to at most 32 KB) + RemoteViews IPC action metadata (~1.2 KB).
+     */
+    fun estimateZenOrbitPayload(
+        sizePx: Int = ZenOrbitTrackRenderer.DEFAULT_SIZE_PX,
+    ): PayloadEstimate {
+        val type = WidgetType.ZEN_ORBIT_2X2
+        val rawBitmapBytes = sizePx.toLong() * sizePx.toLong() * 4L
+        val clampedBitmapBytes = minOf(rawBitmapBytes, ZenOrbitTrackRenderer.MAX_BITMAP_BYTES.toLong()).toInt()
+        val actionOverheadBytes = 1280
+        val totalBytes = clampedBitmapBytes + actionOverheadBytes
+
+        return PayloadEstimate(
+            widgetType = type,
+            estimatedBytes = totalBytes,
+            maxAllowedBytes = type.maxAllowedBytes,
+            isWithinBudget = totalBytes <= type.maxAllowedBytes,
+        )
+    }
+
+    /**
      * Measures actual serialized parcel byte size of an Android [Parcelable] when runtime Parcel is available.
      * Returns null if running in an unmocked JVM environment where Parcel is stubbed.
      */
@@ -118,6 +141,7 @@ object WidgetMemoryBudgetGate {
             estimateSolarRhythmPayload(is4x2 = true),
             estimateSolarRhythmPayload(is4x2 = false),
             estimateZenPebblePayload(),
+            estimateZenOrbitPayload(),
         )
         for (estimate in estimates) {
             check(estimate.isWithinBudget) {

@@ -269,6 +269,10 @@ class CountUpStore(context: Context) {
                             editor.remove(key)
                             purgedCount++
                         }
+                        key.startsWith(PREFIX_ZEN_ORBIT_BINDING) -> {
+                            editor.remove(key)
+                            purgedCount++
+                        }
                     }
                 }
             }
@@ -572,6 +576,25 @@ class CountUpStore(context: Context) {
             .commit()
     }
 
+    /** Retrieves the bound item ID for a Zen Orbit Widget instance, falling back to null. */
+    fun getZenOrbitBinding(appWidgetId: Int): String? {
+        return prefs.getString(PREFIX_ZEN_ORBIT_BINDING + appWidgetId, null)
+    }
+
+    /** Binds a specific [itemId] to a Zen Orbit Widget instance. */
+    fun setZenOrbitBinding(appWidgetId: Int, itemId: String): Boolean {
+        return prefs.edit()
+            .putString(PREFIX_ZEN_ORBIT_BINDING + appWidgetId, itemId)
+            .commit()
+    }
+
+    /** Removes the binding for a deleted Zen Orbit Widget instance. */
+    fun removeZenOrbitBinding(appWidgetId: Int): Boolean {
+        return prefs.edit()
+            .remove(PREFIX_ZEN_ORBIT_BINDING + appWidgetId)
+            .commit()
+    }
+
     /** Removes the binding for a deleted Hero Widget instance. */
     fun removeHeroWidgetBinding(appWidgetId: Int): Boolean {
         return prefs.edit()
@@ -802,6 +825,7 @@ class CountUpStore(context: Context) {
                 PREFIX_ZEN_PEBBLE_BINDING,
                 PREFIX_ZEN_PEBBLE_TAG,
                 PREFIX_SOLAR_RHYTHM_BINDING,
+                PREFIX_ZEN_ORBIT_BINDING,
                 PREFIX_OVERVIEW_STYLE_FILTER,
             )
             val editor = prefs.edit()
@@ -1068,6 +1092,7 @@ class CountUpStore(context: Context) {
         private const val PREFIX_ZEN_PEBBLE_BINDING = "zen_pebble_binding_"
         private const val PREFIX_ZEN_PEBBLE_TAG = "zen_pebble_tag_"
         private const val PREFIX_SOLAR_RHYTHM_BINDING = "solar_rhythm_binding_"
+        private const val PREFIX_ZEN_ORBIT_BINDING = "zen_orbit_binding_"
         private const val PREFIX_OVERVIEW_STYLE_FILTER = "overview_style_filter_"
         const val OVERVIEW_FILTER_ALL = "all"
         private const val MAX_QUARANTINE_ENTRIES = 3

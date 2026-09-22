@@ -171,6 +171,29 @@
             </intent-filter>
         </activity>
 
+        <!-- Zen Orbit (双环律动) Widget -->
+        <receiver
+            android:name=".ZenOrbitWidgetReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.appwidget.action.APPWIDGET_DELETED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/zen_orbit_widget_info" />
+        </receiver>
+
+        <!-- Configuration Activity for Zen Orbit Widget -->
+        <activity
+            android:name=".ZenOrbitConfigureActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
         <!-- Serves the widget grid's cell views to the launcher. Exported=false
              is safe: only the system can hold BIND_REMOTEVIEWS. -->
         <service

@@ -150,6 +150,7 @@ internal suspend fun updateAllWidgets(context: Context) {
     runCatching { pushAllZenHorizonWidgetsUpdate(appContext) }
     runCatching { pushAllSolarRhythmWidgetsUpdate(appContext) }
     runCatching { pushAllZenPebbleWidgetsUpdate(appContext) }
+    runCatching { pushAllZenOrbitWidgetsUpdate(appContext) }
     runCatching { MidnightAlarmReceiver.scheduleMidnightAlarm(appContext) }
 }
 
@@ -367,6 +368,7 @@ class ResetCountReceiver : BroadcastReceiver() {
                     pushAllZenHorizonWidgetsUpdate(appContext)
                     pushAllSolarRhythmWidgetsUpdate(appContext)
                     pushAllZenPebbleWidgetsUpdate(appContext)
+                    pushAllZenOrbitWidgetsUpdate(appContext)
                 }
             } else {
                 // First tap: arm this cell and re-render grid widget to show "Tap again" / "0?"

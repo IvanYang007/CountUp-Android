@@ -505,6 +505,18 @@
     <string name="zen_horizon_unit_hint"> ⇄</string>
     <string name="cd_zen_horizon_cycle_unit">Cycle time unit</string>
 
+    <!-- Zen Orbit (双环律动) -->
+    <string name="zen_orbit_widget_label">Zen Orbit</string>
+    <string name="zen_orbit_widget_description">Concentric rhythm rings tracking current count against your historical average cadence.</string>
+    <string name="zen_orbit_configure_title">Zen Orbit</string>
+    <string name="zen_orbit_configure_subtitle">Select a counter to honor on this concentric orbit.</string>
+    <string name="zen_orbit_empty">Tap to select a counter</string>
+    <string name="zen_orbit_avg_badge">AVG %1$dd</string>
+    <string name="zen_orbit_first_cycle">FIRST CYCLE</string>
+    <string name="zen_orbit_harmonic_badge">HARMONIC</string>
+    <string name="zen_orbit_beyond_badge">+%1$dd AVG</string>
+    <string name="preview_zen_orbit_pill">AVG 28d</string>
+
     <!-- Data Backup & Migration -->
     <string name="backup_action_export">Export Backup</string>
     <string name="backup_action_export_desc">Save a JSON backup of items and appearance settings</string>

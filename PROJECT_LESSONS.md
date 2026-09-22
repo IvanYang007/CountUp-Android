@@ -1,7 +1,7 @@
 # Project Lessons — CountUp-Android
 
-> Derived from git history. Last analyzed commit: `ddee9c5a0bdfc3add66e00f3f708a24d6591a8f7` (2026-09-20T16:48:00-04:00).
-> Range: `32f6f36211113906d4bc4f8c03e519b711b198e1` .. `ddee9c5a0bdfc3add66e00f3f708a24d6591a8f7` (190 commits, 2026-08-20 .. 2026-09-20).
+> Derived from git history. Last analyzed commit: `952afc3c6f6004b77f9859f518e38d1656bdf16a` (2026-09-21T18:30:00-04:00).
+> Range: `32f6f36211113906d4bc4f8c03e519b711b198e1` .. `952afc3c6f6004b77f9859f518e38d1656bdf16a` (199 commits, 2026-08-20 .. 2026-09-21).
 > Grades: `[observed]` stated in a commit/PR, `[inferred]` deduced from diffs,
 > `[weak]` one data point or ambiguous.
 
@@ -159,6 +159,13 @@ CountUp-Android is a zero-permission, offline-first milestone count-up app built
 - **Evidence:** Working tree refactor; `CountUpDialogs.kt`, `CountUpContent.kt`, `ic_widget_off.xml`
 - **Why it recurs:** Developers invert logic in UI to match boolean model defaults (`showInWidget = true`) rather than designing the interface around user intentionality.
 - **The rule:** Default modal option toggles to calm OFF (`在微件中隐藏 = false`) for exclusion or suppression overrides. Mirror the active override state with subtle, subdued micro-symbols (`ic_widget_off`, 11dp, 50–55% alpha) on compact card surfaces beside status pins.
+
+### L22. Unify circular widget dials into a single warm orbit with unboxed milestone typography — [observed]
+
+- **What happened:** Attempting to render two concentric rings (current elapsed days outer arc + historical cadence inner arc) alongside a boxed milestone pill badge created acute visual clutter: the pill container severed the inner arc's bottom perimeter (tangent collision), narrow wire gauges (3.5dp–4.5dp) felt like a cold clinical speedometer or battery complication, and deficit math (`-8d`) induced anxiety rather than calm mindfulness.
+- **Evidence:** `ZenOrbitTrackRenderer.kt`, `widget_zen_orbit_2x2.xml`, `prototype_rhythm_orbit_widget.html`
+- **Why it recurs:** Designers and developers instinctively add concentric tracks and boxed pill badges for secondary metrics without accounting for visual tangent collisions and the cold emotional tone of hairline gauges on glanceable home-screen widgets.
+- **The rule:** In circular glanceable widgets, unify the visual path into a single generous orbit track (8dp-proportional gauge) with the cadence milestone nestled directly on the track. Strip container backgrounds and borders from secondary milestone labels, rendering them as quiet, unboxed whispers without negative deficit math.
 
 ## Project-specific implementation rules
 

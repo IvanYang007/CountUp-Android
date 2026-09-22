@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Preview asset for the 2x2 Zen Orbit widget in the launcher widget picker.
+     Features single 8dp warm jade orbit, central numeral, and unboxed whisper text. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="140dp"
+    android:height="140dp"
+    android:viewportWidth="140"
+    android:viewportHeight="140">
+
+    <!-- Card Background (20dp corner radius) -->
+    <path
+        android:fillColor="#FAF5EE"
+        android:pathData="M24,4 h92 a20,20 0 0 1 20,20 v92 a20,20 0 0 1 -20,20 h-92 a20,20 0 0 1 -20,-20 v-92 a20,20 0 0 1 20,-20 z" />
+    <path
+        android:fillColor="#102C2416"
+        android:pathData="M24,4 h92 a20,20 0 0 1 20,20 v92 a20,20 0 0 1 -20,20 h-92 a20,20 0 0 1 -20,-20 v-92 a20,20 0 0 1 20,-20 z" />
+
+    <!-- 360° Quiet Groove (R=53, Stroke=6) -->
+    <path
+        android:strokeColor="#202C2416"
+        android:strokeWidth="6"
+        android:pathData="M 70,17 A 53,53 0 1,1 69.9,17 Z" />
+
+    <!-- Living Current Sweep Arc (R=53, 8dp Stroke=7.8, Bamboo Jade) -->
+    <path
+        android:strokeColor="#46664B"
+        android:strokeWidth="7.8"
+        android:strokeLineCap="round"
+        android:pathData="M 70,17 A 53,53 0 1,1 39,113" />
+
+    <!-- Historical Cadence Anchor Pebble nestled on track (R=3.8) -->
+    <path
+        android:fillColor="#9C8360"
+        android:pathData="M 17,70 m -3.8,0 a 3.8,3.8 0 1,0 7.6,0 a 3.8,3.8 0 1,0 -7.6,0" />
+
+    <!-- Tag ("SOBRIETY") -->
+    <path
+        android:fillColor="#8C7E70"
+        android:pathData="M54,42 h32 v4 h-32 z" />
+
+    <!-- Big Numeral ("24") -->
+    <!-- "2" -->
+    <path
+        android:fillColor="#2C2416"
+        android:pathData="M55,54 c4,0 7,2.5 7,6 c0,3.5 -2.5,5.5 -5,8.5 l-4,4 h9 v3.5 h-16 v-3.5 l6.5,-6.5 c2,-2 3.5,-3.5 3.5,-5.5 c0,-2.5 -1.5,-4 -4,-4 c-2.5,0 -4,1.5 -4,3.5 h-3.5 c0,-4.5 3.5,-7.5 8,-7.5 z" />
+    <!-- "4" -->
+    <path
+        android:fillColor="#2C2416"
+        android:pathData="M78,54 h5 v15 h3.5 v3.5 h-3.5 v5 h-5 v-5 h-10 v-3.5 l9.5,-15 z M73,69 h5 v-8 l-5,8 z" />
+
+    <!-- Unit Label ("DAYS") -->
+    <path
+        android:fillColor="#8C7E70"
+        android:pathData="M57,84 h26 v3.5 h-26 z" />
+
+    <!-- Rhythm Milestone Whisper ("AVG 28d" - Unboxed, no pill container) -->
+    <path
+        android:fillColor="#9C8360"
+        android:pathData="M58,95 h24 v3 h-24 z" />
+
+</vector>

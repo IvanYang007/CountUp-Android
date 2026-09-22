@@ -10,6 +10,7 @@
 -keep class com.countup.app.WidgetResetRecord { *; }
 -keep class com.countup.app.ResetSnapshot { *; }
 -keep class com.countup.app.BackupValidationResult* { *; }
+-keep class com.countup.app.ZenOrbitViewState { *; }
 
 # Keep Enum values and valueOf methods for reflection/serialization
 -keepclassmembers enum * {

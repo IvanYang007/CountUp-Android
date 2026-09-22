@@ -47,6 +47,7 @@ class WidgetContractInvariantsTest {
             "zen_horizon_widget_info.xml" to "ZenHorizonConfigureActivity",
             "solar_rhythm_widget_info.xml" to "SolarRhythmConfigureActivity",
             "hero_widget_info.xml" to "HeroWidgetConfigureActivity",
+            "zen_orbit_widget_info.xml" to "ZenOrbitConfigureActivity",
         )
 
         for ((xmlName, activityName) in widgetXmls) {
@@ -215,6 +216,7 @@ class WidgetContractInvariantsTest {
             Triple("solar_rhythm_widget_info.xml", "widget_solar_rhythm_4x2", "solar_rhythm_widget_preview"),
             Triple("hero_widget_info.xml", "countup_hero_widget_2x1", "hero_widget_preview"),
             Triple("haircut_widget_info.xml", "widget_preview_overview_4x2", "haircut_widget_preview"),
+            Triple("zen_orbit_widget_info.xml", "widget_zen_orbit_2x2", "zen_orbit_widget_preview"),
         )
 
         for ((xmlName, layoutName, previewDrawableName) in widgetXmls) {

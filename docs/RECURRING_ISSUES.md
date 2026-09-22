@@ -246,11 +246,12 @@ When an item is deleted in the app, home-screen widgets configured to track that
 Deleting an item from `CountUpStore` previously modified `items_v1` without traversing the widget preference map to remove references to the deleted UUID.
 
 ### Hard Invariants
-In `CountUpStore.deleteItem(itemId)`, always execute `purgeWidgetBindingsForItem(itemId)` across all 4 configurable widget families:
+In `CountUpStore.deleteItem(itemId)`, always execute `purgeWidgetBindingsForItem(itemId)` across all 5 configurable widget families:
 - `HeroWidget` (`hero_widget_item_<id>`)
 - `ZenHorizonWidget` (`zen_horizon_widget_item_<id>`)
 - `SolarRhythmWidget` (`solar_rhythm_widget_item_<id>`)
 - `ZenPebbleWidget` (`zen_pebble_widget_item_<id>`)
+- `ZenOrbitWidget` (`zen_orbit_widget_item_<id>`)
 
 ---
 
@@ -273,6 +274,28 @@ If layouts only specify `tools:text` (which are stripped at build time) and omit
 3. **Include static preview tracks in layout XMLs**:
    - Reference `preview_zen_horizon_track` and `preview_solar_timeline_track` in layout XMLs so progress bars and milestone indicators display authentic visual structure in pickers before runtime Kotlin rendering takes over.
 4. **Enforced by `WidgetContractInvariantsTest.allWidgetsDeclareValidPreviewLayoutAndPreviewImage`**.
+
+---
+
+## 12. Circular Dial Widget Tactile Warmth vs. Tangent Clutter (Single 8dp Orbit & Unboxed Typography)
+
+### Symptom
+When rendering dual-ring circular widgets (e.g. Zen Orbit / 律动之环), attempting to display both current days and historical average cadence via two concentric tracks alongside a boxed pill badge (`widget_solar_badge_bg`) created:
+1. **Tangent Collision**: The boxed pill badge severed and overlapped the inner bronze arc.
+2. **Clinical Coldness**: Narrow stroke widths (3.5dp–4.5dp) felt like a cold speedometer or battery complication rather than a peaceful milestone companion.
+3. **Deficit Anxiety**: Displaying minus numbers (`-8d`) framed time as debt rather than living progress.
+
+### Architectural Root Cause
+Over-complicating circular glanceable surfaces with multiple concentric scales and bordered container wrappers forces visual elements into optical conflict within tight 140dp–160dp widget boundaries.
+
+### Hard Invariants
+1. **Single Unified Orbit with 8dp Gauge**:
+   - Merge active streak and cadence milestone into a single orbit track (`rOrbit = safeSize * 0.38f`).
+   - Set stroke gauge proportional to 8dp (`strokeOrbit = maxOf(3f, safeSize * 0.056f)`), giving the perimeter physical mass, presence, and tactile warmth (*温润玉环*).
+2. **Nestled Cadence Pebble**:
+   - Place the cadence anchor pebble directly on the single 8dp orbit path ($r \approx 0.50 \times \text{strokeOrbit}$) rather than carving out a second competing concentric ring.
+3. **Unboxed Tranquil Whisper**:
+   - Strictly omit container backgrounds (`android:background="@null"`) and borders on secondary milestone labels (`zen_orbit_rhythm_pill`). Render as quiet, unboxed text without deficit math.
 
 ---
 

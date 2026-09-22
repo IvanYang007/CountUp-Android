@@ -3,11 +3,11 @@
   "repository": "CountUp-Android",
   "scope": "repository",
   "generated_from": {
-    "head": "ddee9c5a0bdfc3add66e00f3f708a24d6591a8f7",
-    "commits_analyzed": 190,
+    "head": "952afc3c6f6004b77f9859f518e38d1656bdf16a",
+    "commits_analyzed": 199,
     "date_range": [
       "2026-08-20",
-      "2026-09-20"
+      "2026-09-21"
     ]
   },
   "rules": [
@@ -286,6 +286,19 @@
         "app/src/main/java/com/countup/app/CountUpDialogs.kt",
         "app/src/main/java/com/countup/app/CountUpContent.kt",
         "app/src/main/res/drawable/ic_widget_off.xml"
+      ],
+      "phase": "conventions"
+    },
+    {
+      "id": "PL-022",
+      "text": "In circular glanceable widgets, unify the visual path into a single generous orbit track (8dp-proportional gauge) with the cadence milestone nestled directly on the track. Strip container backgrounds and borders from secondary milestone labels, rendering them as quiet, unboxed whispers without negative deficit math.",
+      "grade": "observed",
+      "evidence": [
+        "working-tree"
+      ],
+      "paths": [
+        "app/src/main/java/com/countup/app/ZenOrbitTrackRenderer.kt",
+        "app/src/main/res/layout/widget_zen_orbit_2x2.xml"
       ],
       "phase": "conventions"
     }

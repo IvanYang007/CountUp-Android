@@ -55,9 +55,17 @@ class WidgetMemoryBudgetGateTest {
     }
 
     @Test
+    fun zenOrbitPayloadStrictlyUnder40KB() {
+        val estimate = WidgetMemoryBudgetGate.estimateZenOrbitPayload()
+        assertTrue(estimate.isWithinBudget)
+        assertTrue("Expected < 40KB but was ${estimate.estimatedBytes}", estimate.estimatedBytes < WidgetMemoryBudgetGate.ZEN_ORBIT_MAX_BYTES)
+        assertEquals(WidgetMemoryBudgetGate.ZEN_ORBIT_MAX_BYTES, estimate.maxAllowedBytes)
+    }
+
+    @Test
     fun assertAllWithinBudgetCumulativeGatePasses() {
         val estimates = WidgetMemoryBudgetGate.assertAllWithinBudget()
-        assertEquals(5, estimates.size)
+        assertEquals(6, estimates.size)
         for (estimate in estimates) {
             assertTrue("${estimate.widgetType} must be within budget", estimate.isWithinBudget)
         }

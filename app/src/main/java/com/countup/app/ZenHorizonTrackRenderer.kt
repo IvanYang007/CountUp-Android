@@ -17,9 +17,9 @@ object ZenHorizonTrackRenderer {
 
     /** Clamps requested bitmap dimensions so IPC allocation strictly respects [maxBytes]. */
     fun computeSafeDimensions(widthPx: Int, heightPx: Int, maxBytes: Int = MAX_BITMAP_BYTES): Pair<Int, Int> {
-        val rawBytes = widthPx * heightPx * 4
+        val rawBytes = widthPx.toLong() * heightPx.toLong() * 4L
         return if (rawBytes > maxBytes) {
-            val scale = kotlin.math.sqrt(maxBytes.toDouble() / rawBytes)
+            val scale = kotlin.math.sqrt(maxBytes.toDouble() / rawBytes.toDouble())
             val w = (widthPx * scale).toInt().coerceAtLeast(10)
             val h = (heightPx * scale).toInt().coerceAtLeast(4)
             Pair(w, h)

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Static preview dial track for Zen Orbit widget (Single 8dp Warm Jade Orbit) in launcher pickers -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="140dp"
+    android:height="140dp"
+    android:viewportWidth="140"
+    android:viewportHeight="140">
+
+    <!-- 360° Quiet Background Groove (R=53, Stroke=6) -->
+    <path
+        android:strokeColor="#18000000"
+        android:strokeWidth="6"
+        android:pathData="M 70,17 A 53,53 0 1,1 69.9,17 Z" />
+
+    <!-- Living Current Sweep Arc (R=53, 8dp Stroke=7.8, Bamboo Jade) -->
+    <path
+        android:strokeColor="#46664B"
+        android:strokeWidth="7.8"
+        android:strokeLineCap="round"
+        android:pathData="M 70,17 A 53,53 0 1,1 39,113" />
+
+    <!-- Historical Cadence Anchor Pebble nestled on track (R=4) -->
+    <path
+        android:fillColor="#9C8360"
+        android:pathData="M 17,70 m -4,0 a 4,4 0 1,0 8,0 a 4,4 0 1,0 -8,0" />
+
+</vector>

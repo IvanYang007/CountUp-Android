@@ -224,4 +224,62 @@ object ZenWidgetReducer {
             isFuture = isFuture,
         )
     }
+
+    /**
+     * Transforms a [CountUpItem] into an immutable [ZenOrbitViewState] for the double-ring concentric dial.
+     */
+    fun resolveZenOrbitState(
+        item: CountUpItem,
+        today: LocalDate,
+        isDarkMode: Boolean = false,
+        customTag: String? = null,
+    ): ZenOrbitViewState {
+        val anchorDate = LocalDate.ofEpochDay(item.epochDay)
+        val rawDays = java.time.temporal.ChronoUnit.DAYS.between(anchorDate, today)
+        val isFuture = rawDays < 0
+        val days = abs(rawDays)
+        val avgDays = item.averageResetDays
+        val resets = item.resetCount
+        val hasHistory = resets > 0 && avgDays > 0
+        val isHarmonic = hasHistory && days == avgDays.toLong()
+        val isTranscended = hasHistory && days > avgDays.toLong()
+        val deltaDays = if (hasHistory) abs(days - avgDays.toLong()) else 0L
+        val palette = WidgetThemeTokens.resolveWithItem(item, isDarkMode = isDarkMode)
+        val tag = item.resolveOneWordLabel(customTag)
+
+        return ZenOrbitViewState(
+            itemId = item.id,
+            title = item.name,
+            oneWordLabel = tag,
+            daysCount = days,
+            averageDays = avgDays,
+            resetCount = resets,
+            hasHistory = hasHistory,
+            isHarmonic = isHarmonic,
+            isTranscended = isTranscended,
+            deltaDays = deltaDays,
+            palette = palette,
+            isFuture = isFuture,
+        )
+    }
 }
+
+/**
+ * Immutable view state for the Zen Orbit (双环律动) concentric widget dial.
+ */
+@Immutable
+data class ZenOrbitViewState(
+    val itemId: String,
+    val title: String,
+    val oneWordLabel: String,
+    val daysCount: Long,
+    val averageDays: Int,
+    val resetCount: Int,
+    val hasHistory: Boolean,
+    val isHarmonic: Boolean,
+    val isTranscended: Boolean,
+    val deltaDays: Long,
+    val palette: WidgetColorPalette,
+    val isFuture: Boolean = false,
+)
+
