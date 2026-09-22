@@ -226,7 +226,7 @@ object ZenWidgetReducer {
     }
 
     /**
-     * Transforms a [CountUpItem] into an immutable [ZenOrbitViewState] for the double-ring concentric dial.
+     * Transforms a [CountUpItem] into an immutable [ZenOrbitViewState] for the single 8dp warm jade orbit dial.
      */
     fun resolveZenOrbitState(
         item: CountUpItem,
@@ -265,7 +265,7 @@ object ZenWidgetReducer {
 }
 
 /**
- * Immutable view state for the Zen Orbit (双环律动) concentric widget dial.
+ * Immutable view state for the Zen Orbit (律动之环 · 温润玉环) widget dial.
  */
 @Immutable
 data class ZenOrbitViewState(

@@ -9,8 +9,8 @@ import android.widget.RemoteViews
 import java.time.LocalDate
 
 /**
- * The Zen Orbit (双环律动) Widget provider.
- * Concentric dual-ring dial harmonizing active current count
+ * The Zen Orbit (律动之环 · 温润玉环) Widget provider.
+ * Single 8dp warm jade orbit dial harmonizing active current count
  * with the counter's historical average cadence.
  */
 class ZenOrbitWidgetReceiver : AppWidgetProvider() {

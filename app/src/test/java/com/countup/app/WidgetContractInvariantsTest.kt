@@ -267,6 +267,7 @@ class WidgetContractInvariantsTest {
             "zen_horizon_widget_info.xml",
             "solar_rhythm_widget_info.xml",
             "hero_widget_info.xml",
+            "zen_orbit_widget_info.xml",
         )
         for (xmlName in configurableWidgets) {
             val candidates = listOf(
@@ -350,6 +351,7 @@ class WidgetContractInvariantsTest {
             ".ZenHorizonConfigureActivity",
             ".SolarRhythmConfigureActivity",
             ".HeroWidgetConfigureActivity",
+            ".ZenOrbitConfigureActivity",
         )
         for (activityName in configureActivities) {
             assertTrue(
@@ -464,6 +466,7 @@ class WidgetContractInvariantsTest {
             "ZenHorizonConfigureActivity.kt",
             "SolarRhythmConfigureActivity.kt",
             "HeroWidgetConfigureActivity.kt",
+            "ZenOrbitConfigureActivity.kt",
         )
 
         for (filename in configureActivities) {
@@ -533,6 +536,7 @@ class WidgetContractInvariantsTest {
             "SolarRhythmWidget.kt",
             "ZenPebbleWidgetReceiver.kt",
             "CountUpWidget.kt",
+            "ZenOrbitWidgetReceiver.kt",
         )
 
         for (filename in receiverFiles) {
@@ -580,6 +584,7 @@ class WidgetContractInvariantsTest {
             "preview_grid_item_4",
             "preview_grid_item_5",
             "preview_grid_item_6",
+            "preview_zen_orbit_pill",
         )
 
         for (dir in localeDirs) {

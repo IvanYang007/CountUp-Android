@@ -3,8 +3,8 @@
   "repository": "CountUp-Android",
   "scope": "repository",
   "generated_from": {
-    "head": "952afc3c6f6004b77f9859f518e38d1656bdf16a",
-    "commits_analyzed": 199,
+    "head": "776560dcb9e1114ac1296498d92b4ec90a444259",
+    "commits_analyzed": 201,
     "date_range": [
       "2026-08-20",
       "2026-09-21"
@@ -280,7 +280,7 @@
       "text": "Default modal option toggles to calm OFF (showInWidget = true / isHiddenFromWidget = false) for exclusion overrides, mirroring the active override with quiet micro-indicators (ic_widget_off, 11dp, 50-55% alpha) on compact card surfaces.",
       "grade": "observed",
       "evidence": [
-        "working-tree"
+        "908bbb3"
       ],
       "paths": [
         "app/src/main/java/com/countup/app/CountUpDialogs.kt",
@@ -294,11 +294,25 @@
       "text": "In circular glanceable widgets, unify the visual path into a single generous orbit track (8dp-proportional gauge) with the cadence milestone nestled directly on the track. Strip container backgrounds and borders from secondary milestone labels, rendering them as quiet, unboxed whispers without negative deficit math.",
       "grade": "observed",
       "evidence": [
-        "working-tree"
+        "9d41839"
       ],
       "paths": [
         "app/src/main/java/com/countup/app/ZenOrbitTrackRenderer.kt",
         "app/src/main/res/layout/widget_zen_orbit_2x2.xml"
+      ],
+      "phase": "conventions"
+    },
+    {
+      "id": "PL-023",
+      "text": "Always reuse the canonical ItemCard composable in widget configure activities with no-op delete/reset handlers and TextHandleMove haptics instead of introducing bespoke card selection rows.",
+      "grade": "observed",
+      "evidence": [
+        "776560d"
+      ],
+      "paths": [
+        "app/src/main/java/com/countup/app/ZenOrbitConfigureActivity.kt",
+        "app/src/main/java/com/countup/app/HeroWidgetConfigureActivity.kt",
+        "app/src/main/java/com/countup/app/ZenHorizonConfigureActivity.kt"
       ],
       "phase": "conventions"
     }

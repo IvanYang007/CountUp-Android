@@ -299,6 +299,21 @@ Over-complicating circular glanceable surfaces with multiple concentric scales a
 
 ---
 
+## 13. Canonical ItemCard Reuse in Widget Configurators (Avoid Bespoke Picker Rows)
+
+### Symptom
+Introducing a custom row component (e.g. `ZenOrbitCardChoiceRow`) in a widget configure activity drops user customization (card palette colors, icons, odometer numbers, patina borders), alters haptic sensations (`LongPress` instead of standard `TextHandleMove`), strips spring scale press physics (`.pressScale(Level1Card)`), and creates duplicate maintenance burdens.
+
+### Architectural Root Cause
+Assuming each new widget provider requires a specialized selection row, instead of recognizing that the configure activity is choosing the existing milestone counter whose full identity should be previewed accurately.
+
+### Hard Invariants
+1. **Reuse `ItemCard`**: Every widget configure screen (`Hero`, `ZenHorizon`, `SolarRhythm`, `ZenPebble`, `ZenOrbit`) must reuse `ItemCard(item, onClick = { ... }, onDelete = {}, onReset = {}, today = today, reduceMotion = true)`.
+2. **Standardized Haptics & Background**: Always perform `HapticFeedbackType.TextHandleMove` on item selection and set background to `LocalZenColors.current.paperBackground`.
+3. **Enforced by `WidgetContractInvariantsTest.allConfigureActivitiesEnforceIntentSecurityContracts`**.
+
+---
+
 ## Quick Reference Checklist for New Widgets or Refactoring
 
 Before committing any widget changes or releasing a new version:
