@@ -1,7 +1,6 @@
 package com.countup.app
 
 import java.time.LocalDate
-import java.util.UUID
 
 /**
  * In-memory fake implementation of [CountUpRepository] for fast, hermetic unit tests.

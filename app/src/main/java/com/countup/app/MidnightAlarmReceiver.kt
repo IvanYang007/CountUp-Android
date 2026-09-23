@@ -66,14 +66,11 @@ class MidnightAlarmReceiver : BroadcastReceiver() {
 
                 val targetMillis = calculateNextMidnightMillis(ZonedDateTime.now())
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    if (alarmManager.canScheduleExactAlarms()) {
-                        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, targetMillis, pendingIntent)
-                    } else {
-                        alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, targetMillis, pendingIntent)
-                    }
-                } else {
+                val canExact = Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()
+                if (canExact) {
                     alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, targetMillis, pendingIntent)
+                } else {
+                    alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, targetMillis, pendingIntent)
                 }
             } catch (_: Throwable) {
                 // Defensive fallback: must never crash app
@@ -89,6 +86,9 @@ class MidnightAlarmReceiver : BroadcastReceiver() {
                     SolarRhythmWidgetReceiver::class.java,
                     ZenPebbleWidgetReceiver::class.java,
                     CountUpWidgetReceiver::class.java,
+                    ZenOrbitWidgetReceiver::class.java,
+                    TsukimiWidgetReceiver::class.java,
+                    ShuinWidgetReceiver::class.java,
                 )
                 providers.any { manager.getAppWidgetIds(android.content.ComponentName(context, it)).isNotEmpty() }
             } catch (_: Throwable) {

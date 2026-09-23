@@ -51,7 +51,6 @@
     <string name="delete">刪除</string>
     <string name="reset">重置</string>
     <string name="widget_hide">在微件中隱藏</string>
-    <string name="widget_show">在微件中顯示</string>
 
     <!-- Item editor -->
     <string name="add_title">新建事項</string>
@@ -63,9 +62,7 @@
     <string name="anchor_date">起始日期</string>
     <string name="pin_to_top">置頂記錄</string>
     <string name="pin_to_top_subtitle">固定在列表最上方</string>
-    <string name="show_in_widget_subtitle">在桌面小組件中展示</string>
     <string name="cd_pin_to_top">將此記錄置頂顯示在列表最前</string>
-    <string name="cd_show_in_widget">在桌面小組件中展示此計數器</string>
     <string name="cd_expand_customization">展開樣式與圖示自訂選項</string>
     <string name="cd_collapse_customization">收起樣式與圖示自訂選項</string>
     <string name="customization_tab_color">卡片配色</string>
@@ -369,7 +366,6 @@
     <string name="zen_orbit_widget_description">雙同心環靜美錶盤，直觀呈現當前計數與歷史週期平均節奏的流轉與交匯。</string>
     <string name="zen_orbit_configure_title">雙環律動</string>
     <string name="zen_orbit_configure_subtitle">選擇一個卡片在此雙環錶盤中記錄節律。</string>
-    <string name="zen_orbit_empty">輕觸以選擇卡片</string>
     <string name="zen_orbit_avg_badge">均值 %1$d天</string>
     <string name="zen_orbit_first_cycle">首個週期</string>
     <string name="zen_orbit_harmonic_badge">交匯共振</string>

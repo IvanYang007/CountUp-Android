@@ -13,7 +13,9 @@ enum class WidgetFamily(val launchOffset: Int) {
     ZEN_HORIZON(150),
     SOLAR_RHYTHM(202),
     ZEN_PEBBLE(303),
-    ZEN_ORBIT(404);
+    ZEN_ORBIT(404),
+    TSUKIMI(505),
+    SHUIN(506);
 }
 
 /**

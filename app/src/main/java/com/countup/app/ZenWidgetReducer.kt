@@ -98,27 +98,14 @@ object ZenWidgetReducer {
     /**
      * Resolves the nearest upcoming milestone goal strictly greater than [count].
      */
-    fun resolveNextMilestone(count: Long): Long {
-        if (count < 0) return 0L
-        for (m in STANDARD_MILESTONES) {
-            if (count < m) return m
-        }
-        val thousands = (count / 1000L) + 1L
-        return thousands * 1000L
-    }
+    fun resolveNextMilestone(count: Long): Long =
+        if (count < 0) 0L else STANDARD_MILESTONES.firstOrNull { count < it } ?: (((count / 1000L) + 1L) * 1000L)
 
     /**
      * Resolves the previous landmark milestone base at or below [count].
      */
-    fun resolvePreviousMilestone(count: Long): Long {
-        if (count <= 7L) return 0L
-        for (i in STANDARD_MILESTONES.indices.reversed()) {
-            if (count >= STANDARD_MILESTONES[i]) {
-                return STANDARD_MILESTONES[i]
-            }
-        }
-        return (count / 1000L) * 1000L
-    }
+    fun resolvePreviousMilestone(count: Long): Long =
+        if (count <= 7L) 0L else STANDARD_MILESTONES.lastOrNull { count >= it } ?: ((count / 1000L) * 1000L)
 
     /**
      * Formats large day counts into compact 3-4 glyph strings (e.g. 412 -> "412", 1200 -> "1.2k", 12500 -> "12k").
@@ -183,10 +170,10 @@ object ZenWidgetReducer {
         sinceTemplate: String? = null,
         untilTemplate: String? = null,
     ): ZenWidgetViewState {
-        val anchorDate = LocalDate.ofEpochDay(item.epochDay)
-        val rawDays = java.time.temporal.ChronoUnit.DAYS.between(anchorDate, today)
+        val rawDays = today.toEpochDay() - item.epochDay
         val isFuture = rawDays < 0
         val days = abs(rawDays)
+        val anchorDate = LocalDate.ofEpochDay(item.epochDay)
 
         val (valueText, unitLabel) = decomposeUnit(days, unit, isFuture = isFuture)
         val compactText = formatCompactNumber(days)
@@ -234,8 +221,7 @@ object ZenWidgetReducer {
         isDarkMode: Boolean = false,
         customTag: String? = null,
     ): ZenOrbitViewState {
-        val anchorDate = LocalDate.ofEpochDay(item.epochDay)
-        val rawDays = java.time.temporal.ChronoUnit.DAYS.between(anchorDate, today)
+        val rawDays = today.toEpochDay() - item.epochDay
         val isFuture = rawDays < 0
         val days = abs(rawDays)
         val avgDays = item.averageResetDays
@@ -262,6 +248,62 @@ object ZenWidgetReducer {
             isFuture = isFuture,
         )
     }
+
+    /**
+     * Resolves the immutable view state for the Tsukimi (月相之镜 · 2x2) widget.
+     */
+    fun resolveTsukimiState(
+        item: CountUpItem,
+        today: LocalDate,
+        isDarkMode: Boolean = false,
+        customTag: String? = null,
+    ): TsukimiViewState {
+        val rawDays = today.toEpochDay() - item.epochDay
+        val isFuture = rawDays < 0
+        val days = abs(rawDays)
+        val palette = WidgetThemeTokens.resolveWithItem(item, isDarkMode = isDarkMode)
+        val tag = item.resolveOneWordLabel(customTag)
+        val lunarState = TsukimiMoonCalculator.calculate(today)
+        val phaseVerse = TsukimiMoonCalculator.formatBilingualVerse(lunarState)
+
+        return TsukimiViewState(
+            itemId = item.id,
+            title = item.name,
+            oneWordLabel = tag,
+            daysCount = days,
+            lunarState = lunarState,
+            phaseVerse = phaseVerse,
+            palette = palette,
+            isFuture = isFuture,
+        )
+    }
+
+    /**
+     * Resolves the immutable view state for the Shuin (金石朱印 · 1x1) cinnabar seal widget.
+     */
+    fun resolveShuinState(
+        item: CountUpItem,
+        today: LocalDate,
+        isDarkMode: Boolean = false,
+        customTag: String? = null,
+    ): ShuinViewState {
+        val rawDays = today.toEpochDay() - item.epochDay
+        val isFuture = rawDays < 0
+        val days = abs(rawDays)
+        val palette = WidgetThemeTokens.resolveWithItem(item, isDarkMode = isDarkMode)
+        val tag = item.resolveOneWordLabel(customTag)
+        val compactText = formatCompactNumber(days)
+
+        return ShuinViewState(
+            itemId = item.id,
+            title = item.name,
+            oneWordLabel = tag,
+            daysCount = days,
+            compactNumberText = compactText,
+            palette = palette,
+            isFuture = isFuture,
+        )
+    }
 }
 
 /**
@@ -282,4 +324,34 @@ data class ZenOrbitViewState(
     val palette: WidgetColorPalette,
     val isFuture: Boolean = false,
 )
+
+/**
+ * Immutable view state for the Tsukimi (月相之镜 · 2x2) synodic moon widget.
+ */
+@Immutable
+data class TsukimiViewState(
+    val itemId: String,
+    val title: String,
+    val oneWordLabel: String,
+    val daysCount: Long,
+    val lunarState: TsukimiMoonCalculator.LunarState,
+    val phaseVerse: String,
+    val palette: WidgetColorPalette,
+    val isFuture: Boolean = false,
+)
+
+/**
+ * Immutable view state for the Shuin (金石朱印 · 1x1) cinnabar seal widget.
+ */
+@Immutable
+data class ShuinViewState(
+    val itemId: String,
+    val title: String,
+    val oneWordLabel: String,
+    val daysCount: Long,
+    val compactNumberText: String,
+    val palette: WidgetColorPalette,
+    val isFuture: Boolean = false,
+)
+
 

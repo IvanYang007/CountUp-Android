@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- resizeMode="none" ensures 1x1 seal drops precisely onto desired cell without forced snap to slot 0; reconfigurable allows subsequent editing -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="40dp"
+    android:minHeight="40dp"
+    android:minResizeWidth="40dp"
+    android:minResizeHeight="40dp"
+    android:targetCellWidth="1"
+    android:targetCellHeight="1"
+    android:updatePeriodMillis="1800000"
+    android:initialLayout="@layout/widget_shuin_1x1"
+    android:previewImage="@drawable/preview_shuin_seal"
+    android:previewLayout="@layout/widget_shuin_1x1"
+    android:description="@string/shuin_widget_description"
+    android:widgetCategory="home_screen"
+    android:resizeMode="none"
+    android:widgetFeatures="reconfigurable"
+    android:configure="com.countup.app.ShuinConfigureActivity"
+    android:label="@string/shuin_widget_label" />

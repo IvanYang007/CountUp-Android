@@ -1,13 +1,13 @@
 # Project Lessons — CountUp-Android
 
-> Derived from git history. Last analyzed commit: `776560dcb9e1114ac1296498d92b4ec90a444259` (2026-09-21T21:27:20-04:00).
-> Range: `32f6f36211113906d4bc4f8c03e519b711b198e1` .. `776560dcb9e1114ac1296498d92b4ec90a444259` (201 commits, 2026-08-20 .. 2026-09-21).
+> Derived from git history. Last analyzed commit: `d8a5df1f909887ddb1e424105cd72902106f6ceb` (2026-09-22T19:46:24-04:00).
+> Range: `32f6f36211113906d4bc4f8c03e519b711b198e1` .. `d8a5df1f909887ddb1e424105cd72902106f6ceb` (203 commits, 2026-08-20 .. 2026-09-22).
 > Grades: `[observed]` stated in a commit/PR, `[inferred]` deduced from diffs,
 > `[weak]` one data point or ambiguous.
 
 ## Executive summary
 
-CountUp-Android is a zero-permission, offline-first milestone count-up app built with Jetpack Compose Material 3 and six RemoteViews home-screen widget providers. Developed over four weeks across 190 commits, its history is dominated by widget configuration contracts, release minification traps, and data integrity safeguards. The highest-risk module is `app/src/main/res/xml/zen_pebble_widget_info.xml` alongside `app/src/main/java/com/countup/app/CountUpStore.kt`. The project repeatedly struggled with 1x1 widget launcher placement, oscillating between resize modes and configuration flags before locking hard invariants. The single most important constraint is the zero-permission model: no runtime permissions, no WorkManager, and no background services are permitted.
+CountUp-Android is a zero-permission, offline-first milestone count-up app built with Jetpack Compose Material 3 and eight RemoteViews home-screen widget providers (Overview Grid, Hero 2x1, Zen Horizon 4x1, Solar Rhythm 4x2, Zen Pebble 1x1, Zen Orbit 2x2, Tsukimi Moon 2x2, and Shuin Seal 1x1). Developed over four weeks across 203 commits, its history is dominated by widget configuration contracts, release minification traps, and data integrity safeguards. The highest-risk module is `app/src/main/res/xml/zen_pebble_widget_info.xml` alongside `app/src/main/java/com/countup/app/CountUpStore.kt`. The project repeatedly struggled with 1x1 widget launcher placement, oscillating between resize modes and configuration flags before locking hard invariants. The single most important constraint is the zero-permission model: no runtime permissions, no WorkManager, and no background services are permitted.
 
 **Read this first if you are about to touch:** `app/src/main/res/xml/zen_pebble_widget_info.xml` (see Known risk areas).
 
@@ -173,6 +173,27 @@ CountUp-Android is a zero-permission, offline-first milestone count-up app built
 - **Evidence:** `776560d` refactor(widget): harmonize ZenOrbitConfigureActivity to use canonical ItemCard; `HeroWidgetConfigureActivity.kt`, `ZenHorizonConfigureActivity.kt`, `SolarRhythmConfigureActivity.kt`, `ZenPebbleConfigureActivity.kt`.
 - **Why it recurs:** Developers creating a new widget configure activity instinctively assume each widget family requires its own specialized card row rather than reusing the app's canonical `ItemCard`.
 - **The rule:** Always reuse canonical `ItemCard` across all widget configure screens with no-op `onDelete` and `onReset` handlers. Standardize haptics to `HapticFeedbackType.TextHandleMove` and background to `LocalZenColors.current.paperBackground`.
+
+### L24. Specify explicit target textSize and autoSizeMax on wrap_content RemoteViews TextViews — [observed]
+
+- **What happened:** Setting `android:autoSizeTextType="uniform"` on a `TextView` inside a `RemoteViews` `wrap_content` container without an explicit initial `android:textSize` caused Android's internal `TextView.measure()` pass to default its measurement baseline to the platform standard (~15sp). The auto-sizer constrained itself to that tiny baseline, freezing single- and double-digit milestone numbers at tiny dimensions (43px visual height) and leaving over 63% of the single-cell widget as empty dead margin space.
+- **Evidence:** `c94856d` docs(lessons): update invariants test; `widget_zen_pebble_1x1.xml`, `zen_pebble_widget_preview.xml`.
+- **Why it recurs:** Standard desktop Compose and view previewers display mock sizes, whereas RemoteViews measure passes on physical launchers interpret omitted `textSize` attributes as a strict constraint boundary during uniform auto-sizing.
+- **The rule:** In `RemoteViews` layouts utilizing `android:autoSizeTextType="uniform"`, always define explicit baseline attributes: `android:textSize="36sp"`, `android:autoSizeMaxTextSize="36sp"`, and `android:autoSizeMinTextSize="12sp"`.
+
+### L25. Adopt tall scholar's seal 1:1.18 aspect ratio with programmatic 24KB allocation clamping — [observed]
+
+- **What happened:** 1x1 widgets rendered as strict 1:1 squares suffered severe vertical letterboxing and excessive lateral margin on modern 20:9 vertical launcher cells (average cell aspect ratio 1:1.33). Furthermore, procedural bitmaps pushed to RemoteViews must stay strictly within Binder IPC transaction limits (<24 KB for 1x1, <32 KB for 2x2).
+- **Evidence:** `d8a5df1` chore(release): bump versionCode to 65 (v3.2.0) with Zen Orbit 2x2 widget; `ShuinSealRenderer.kt`, `TsukimiMoonRenderer.kt`, `ShuinWidgetTest.kt`, `TsukimiWidgetTest.kt`.
+- **Why it recurs:** Developers assume launcher cells are square and push unconstrained high-density bitmaps that cause `TransactionTooLargeException` under concurrent multi-widget broadcasts.
+- **The rule:** Adopt an authentic 1:1.18 tall seal aspect ratio (`ASPECT_RATIO = 1.18f`) for 1x1 widget canvases, drop canvas padding to 1.8%, and clamp procedural bitmap allocations via `computeSafeDimensions(width, aspectRatio, maxBytes)` where $W \times H \times 4 \le 24\text{ KB}$.
+
+### L26. Synchronize vector preview drawables with live typography and letter-spacing baselines — [observed]
+
+- **What happened:** Updating live widget layouts without synchronizing their `android:previewImage` vector drawables caused launcher widget pickers (and system search surfaces) to display stale, shrunken previews with vast dead margins, confusing users prior to widget placement.
+- **Evidence:** `c94856d` docs(lessons): update invariants test; `preview_shuin_seal.xml`, `preview_tsukimi_moon.xml`, `zen_pebble_widget_preview.xml`.
+- **Why it recurs:** Previews reside in separate drawable XML files from the layout XMLs and are easily forgotten when tuning typography in layout files.
+- **The rule:** Whenever adjusting typography baselines, dash widths, or letter spacing in widget layout XMLs, immediately synchronize the corresponding `android:previewImage` vector drawable and verify in the launcher picker.
 
 ## Project-specific implementation rules
 

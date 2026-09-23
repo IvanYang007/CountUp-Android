@@ -104,7 +104,6 @@
     <string name="delete">删除</string>
     <string name="reset">重置</string>
     <string name="widget_hide">在微件中隐藏</string>
-    <string name="widget_show">在微件中显示</string>
 
     <!-- Item editor -->
     <string name="add_title">新建事项</string>
@@ -116,10 +115,8 @@
     <string name="anchor_date">起始日期</string>
     <string name="pin_to_top">置顶记录</string>
     <string name="pin_to_top_subtitle">固定在列表最上方</string>
-    <string name="show_in_widget_subtitle">在桌面小组件中展示</string>
     <string name="hide_from_widget_subtitle">不在桌面小组件中展示</string>
     <string name="cd_pin_to_top">将此记录置顶显示在列表最前</string>
-    <string name="cd_show_in_widget">在桌面小组件中展示此计数器</string>
     <string name="cd_hide_from_widget">在桌面小组件中隐藏此计数器</string>
     <string name="cd_pinned">已置顶</string>
     <string name="cd_widget_excluded">已在微件中隐藏</string>
@@ -507,7 +504,6 @@
     <string name="zen_orbit_widget_description">双同心环静美表盘，直观呈现当前计数与历史周期平均节奏的流转与交汇。</string>
     <string name="zen_orbit_configure_title">双环律动</string>
     <string name="zen_orbit_configure_subtitle">选择一个卡片在此双环表盘中记录节律。</string>
-    <string name="zen_orbit_empty">轻触以选择卡片</string>
     <string name="zen_orbit_avg_badge">均值 %1$d天</string>
     <string name="zen_orbit_first_cycle">首个周期</string>
     <string name="zen_orbit_harmonic_badge">交汇共振</string>

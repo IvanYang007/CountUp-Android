@@ -32,14 +32,15 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <!-- Bold Serene Numeral — auto-sizes from 18sp down to 10sp to fit any cell width -->
+        <!-- Bold Serene Numeral — starts at 36sp, auto-sizes down to 12sp for multi-digit counts -->
         <TextView
             android:id="@+id/zen_pebble_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textSize="36sp"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="10sp"
-            android:autoSizeMaxTextSize="18sp"
+            android:autoSizeMinTextSize="12sp"
+            android:autoSizeMaxTextSize="36sp"
             android:autoSizeStepGranularity="1sp"
             android:textStyle="bold"
             android:textColor="#2C2416"
@@ -55,21 +56,22 @@
             android:id="@+id/zen_pebble_unit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="7sp"
+            android:layout_marginTop="2dp"
+            android:textSize="10sp"
             android:textStyle="bold"
-            android:letterSpacing="0.06"
+            android:letterSpacing="0.08"
             android:textColor="#8C7E70"
             android:singleLine="true"
             android:text="@string/unit_days"
             tools:text="DAYS" />
 
-        <!-- Hairline Ink Dash — compact -->
+        <!-- Hairline Ink Dash — prominent and peaceful -->
         <ImageView
             android:id="@+id/zen_pebble_dash"
-            android:layout_width="12dp"
+            android:layout_width="28dp"
             android:layout_height="1dp"
-            android:layout_marginTop="1dp"
-            android:layout_marginBottom="1dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="6dp"
             android:background="#6B5D4F"
             android:contentDescription="@null" />
 
@@ -78,12 +80,13 @@
             android:id="@+id/zen_pebble_tag"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="7sp"
+            android:textSize="10sp"
             android:textStyle="bold"
-            android:letterSpacing="0.04"
+            android:letterSpacing="0.06"
             android:textColor="#46664B"
             android:singleLine="true"
             android:ellipsize="end"
+            android:maxWidth="80dp"
             android:text="@string/preview_item_tag"
             tools:text="SOBRIETY" />
     </LinearLayout>

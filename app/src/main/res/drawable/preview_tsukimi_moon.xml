@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Preview asset for Tsukimi Moon Disc in widget picker -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="82dp"
+    android:height="82dp"
+    android:viewportWidth="82"
+    android:viewportHeight="82">
+
+    <!-- Twilight Sumi Dark Base Disc (Radius 36, Center 41, 41) -->
+    <path
+        android:fillColor="#201D1A"
+        android:pathData="M 41,5 A 36,36 0 1,1 40.9,5 Z" />
+
+    <!-- Illuminated Washi Waxing First Quarter Moon -->
+    <path
+        android:fillColor="#F4F1EA"
+        android:pathData="M 41,5 A 36,36 0 0,1 41,77 A 0,36 0 0,1 41,5 Z" />
+
+    <!-- Golden Filament Rim -->
+    <path
+        android:strokeColor="#70DEB285"
+        android:strokeWidth="1.4"
+        android:pathData="M 41,5 A 36,36 0 1,1 40.9,5 Z" />
+
+    <!-- Subtle Golden Outer Halo Ring -->
+    <path
+        android:strokeColor="#20DEB285"
+        android:strokeWidth="0.8"
+        android:pathData="M 41,3 A 38,38 0 1,1 40.9,3 Z" />
+
+</vector>

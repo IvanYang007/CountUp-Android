@@ -16,6 +16,7 @@ import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.net.toUri
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -141,7 +142,7 @@ fun pushWidgetUpdate(context: Context) {
 }
 
 /**
- * Imperatively updates all 5 widget families and synchronizes the midnight alarm.
+ * Imperatively updates all 8 widget families and synchronizes the midnight alarm.
  */
 internal suspend fun updateAllWidgets(context: Context) {
     val appContext = context.applicationContext
@@ -151,6 +152,8 @@ internal suspend fun updateAllWidgets(context: Context) {
     runCatching { pushAllSolarRhythmWidgetsUpdate(appContext) }
     runCatching { pushAllZenPebbleWidgetsUpdate(appContext) }
     runCatching { pushAllZenOrbitWidgetsUpdate(appContext) }
+    runCatching { pushAllTsukimiWidgetsUpdate(appContext) }
+    runCatching { pushAllShuinWidgetsUpdate(appContext) }
     runCatching { MidnightAlarmReceiver.scheduleMidnightAlarm(appContext) }
 }
 
@@ -256,7 +259,7 @@ internal fun buildBaseViews(
         val cycleIntent = Intent(context, CountUpWidgetReceiver::class.java).apply {
             action = ACTION_CYCLE_OVERVIEW_FILTER
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
-            data = android.net.Uri.parse("countup://widget/cycle/$appWidgetId")
+            data = "countup://widget/cycle/$appWidgetId".toUri()
         }
         val cyclePendingIntent = PendingIntent.getBroadcast(
             context,
@@ -324,7 +327,7 @@ internal fun buildBaseViews(
     val serviceIntent = Intent(context, CountUpWidgetService::class.java).apply {
         putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
         if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
-            data = android.net.Uri.parse("countup://widget/overview/$appWidgetId")
+            data = "countup://widget/overview/$appWidgetId".toUri()
         }
     }
     views.setRemoteAdapter(R.id.widget_grid, serviceIntent)
@@ -363,12 +366,7 @@ class ResetCountReceiver : BroadcastReceiver() {
                     timestampMillis = System.currentTimeMillis(),
                 )
                 if (store.resetWithUndo(id, today, record)) {
-                    pushWidgetUpdate(appContext)
-                    pushAllHeroWidgetsUpdate(appContext)
-                    pushAllZenHorizonWidgetsUpdate(appContext)
-                    pushAllSolarRhythmWidgetsUpdate(appContext)
-                    pushAllZenPebbleWidgetsUpdate(appContext)
-                    pushAllZenOrbitWidgetsUpdate(appContext)
+                    updateAllWidgets(appContext)
                 }
             } else {
                 // First tap: arm this cell and re-render grid widget to show "Tap again" / "0?"

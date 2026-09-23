@@ -1,0 +1,51 @@
+{
+  "project": "CountUp-Android",
+  "updatedAt": "2026-09-22T20:38:00Z",
+  "tasks": [
+    {
+      "id": "task-001",
+      "title": "Update Tsukimi 2x2 Layout & Typography to Match Prototype",
+      "description": "Remove the bottom phase text label, place item name at the bottom, enlarge the moon disc to 96dp, and tighten card margins/padding to match prototype aesthetics.",
+      "status": "COMPLETED",
+      "dependsOn": [],
+      "acceptanceCriteria": [
+        "widget_tsukimi_2x2.xml has moon at upper center (96dp), numeral+unit, and item name at bottom",
+        "Phase text label removed from bottom of widget",
+        "Padding reduced to remove excessive margin space to the edge"
+      ]
+    },
+    {
+      "id": "task-002",
+      "title": "Enhance Tsukimi Moon Disc Ambient Depth & Binder Budget",
+      "description": "Refine TsukimiMoonRenderer with subtle ambient shadow/elevation and crisp terminator arcs adhering to <=32 KB IPC budget.",
+      "status": "COMPLETED",
+      "dependsOn": ["task-001"],
+      "acceptanceCriteria": [
+        "TsukimiMoonRenderer draws soft ambient shadow behind disc",
+        "Safe size clamps to <= 32 KB IPC allocation"
+      ]
+    },
+    {
+      "id": "task-003",
+      "title": "Update Tsukimi Widget Receiver & Invariant Tests",
+      "description": "Wire item name to the bottom TextView, clean up phase label binding, and verify all unit tests pass.",
+      "status": "COMPLETED",
+      "dependsOn": ["task-002"],
+      "acceptanceCriteria": [
+        "./gradlew testDebugUnitTest exits with code 0",
+        "WidgetContractInvariantsTest and TsukimiWidgetTest pass cleanly"
+      ]
+    },
+    {
+      "id": "task-004",
+      "title": "Deploy to Emulator & Verify Live Appearance",
+      "description": "Install on emulator-5554, capture high-resolution screenshot of updated Tsukimi widget on home screen, and verify visual alignment with prototype.",
+      "status": "COMPLETED",
+      "dependsOn": ["task-003"],
+      "acceptanceCriteria": [
+        "Emulator displays updated Tsukimi with large moon, numeral, and bottom item title",
+        "Excessive margin space to card edge eliminated"
+      ]
+    }
+  ]
+}

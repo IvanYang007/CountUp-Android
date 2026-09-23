@@ -3,11 +3,11 @@
   "repository": "CountUp-Android",
   "scope": "repository",
   "generated_from": {
-    "head": "776560dcb9e1114ac1296498d92b4ec90a444259",
-    "commits_analyzed": 201,
+    "head": "d8a5df1f909887ddb1e424105cd72902106f6ceb",
+    "commits_analyzed": 203,
     "date_range": [
       "2026-08-20",
-      "2026-09-21"
+      "2026-09-22"
     ]
   },
   "rules": [
@@ -313,6 +313,47 @@
         "app/src/main/java/com/countup/app/ZenOrbitConfigureActivity.kt",
         "app/src/main/java/com/countup/app/HeroWidgetConfigureActivity.kt",
         "app/src/main/java/com/countup/app/ZenHorizonConfigureActivity.kt"
+      ],
+      "phase": "conventions"
+    },
+    {
+      "id": "PL-024",
+      "text": "In RemoteViews layouts utilizing autoSizeTextType=\"uniform\", always define explicit baseline attributes: android:textSize=\"36sp\", autoSizeMaxTextSize=\"36sp\", and autoSizeMinTextSize=\"12sp\" to prevent measure collapse.",
+      "grade": "observed",
+      "evidence": [
+        "c94856d"
+      ],
+      "paths": [
+        "app/src/main/res/layout/widget_zen_pebble_1x1.xml",
+        "app/src/main/res/drawable/zen_pebble_widget_preview.xml"
+      ],
+      "phase": "recurrence"
+    },
+    {
+      "id": "PL-025",
+      "text": "Adopt authentic 1:1.18 tall seal aspect ratio (ASPECT_RATIO = 1.18f) for 1x1 widget canvases and clamp procedural bitmap allocations via computeSafeDimensions where W x H x 4 <= 24KB.",
+      "grade": "observed",
+      "evidence": [
+        "c94856d"
+      ],
+      "paths": [
+        "app/src/main/java/com/countup/app/ShuinSealRenderer.kt",
+        "app/src/main/java/com/countup/app/TsukimiMoonRenderer.kt",
+        "app/src/main/res/layout/widget_shuin_1x1.xml"
+      ],
+      "phase": "conventions"
+    },
+    {
+      "id": "PL-026",
+      "text": "Whenever adjusting typography baselines, dash widths, or letter spacing in widget layout XMLs, immediately synchronize the corresponding android:previewImage vector drawable.",
+      "grade": "observed",
+      "evidence": [
+        "c94856d"
+      ],
+      "paths": [
+        "app/src/main/res/drawable/preview_shuin_seal.xml",
+        "app/src/main/res/drawable/preview_tsukimi_moon.xml",
+        "app/src/main/res/drawable/zen_pebble_widget_preview.xml"
       ],
       "phase": "conventions"
     }

@@ -273,6 +273,14 @@ class CountUpStore(context: Context) {
                             editor.remove(key)
                             purgedCount++
                         }
+                        key.startsWith(PREFIX_TSUKIMI_BINDING) -> {
+                            editor.remove(key)
+                            purgedCount++
+                        }
+                        key.startsWith(PREFIX_SHUIN_BINDING) -> {
+                            editor.remove(key)
+                            purgedCount++
+                        }
                     }
                 }
             }
@@ -595,6 +603,44 @@ class CountUpStore(context: Context) {
             .commit()
     }
 
+    /** Retrieves the bound item ID for a Tsukimi Widget instance, falling back to null. */
+    fun getTsukimiBinding(appWidgetId: Int): String? {
+        return prefs.getString(PREFIX_TSUKIMI_BINDING + appWidgetId, null)
+    }
+
+    /** Binds a specific [itemId] to a Tsukimi Widget instance. */
+    fun setTsukimiBinding(appWidgetId: Int, itemId: String): Boolean {
+        return prefs.edit()
+            .putString(PREFIX_TSUKIMI_BINDING + appWidgetId, itemId)
+            .commit()
+    }
+
+    /** Removes the binding for a deleted Tsukimi Widget instance. */
+    fun removeTsukimiBinding(appWidgetId: Int): Boolean {
+        return prefs.edit()
+            .remove(PREFIX_TSUKIMI_BINDING + appWidgetId)
+            .commit()
+    }
+
+    /** Retrieves the bound item ID for a Shuin Widget instance, falling back to null. */
+    fun getShuinBinding(appWidgetId: Int): String? {
+        return prefs.getString(PREFIX_SHUIN_BINDING + appWidgetId, null)
+    }
+
+    /** Binds a specific [itemId] to a Shuin Widget instance. */
+    fun setShuinBinding(appWidgetId: Int, itemId: String): Boolean {
+        return prefs.edit()
+            .putString(PREFIX_SHUIN_BINDING + appWidgetId, itemId)
+            .commit()
+    }
+
+    /** Removes the binding for a deleted Shuin Widget instance. */
+    fun removeShuinBinding(appWidgetId: Int): Boolean {
+        return prefs.edit()
+            .remove(PREFIX_SHUIN_BINDING + appWidgetId)
+            .commit()
+    }
+
     /** Removes the binding for a deleted Hero Widget instance. */
     fun removeHeroWidgetBinding(appWidgetId: Int): Boolean {
         return prefs.edit()
@@ -754,15 +800,8 @@ class CountUpStore(context: Context) {
                 }
                 RestoreStrategy.MERGE_KEEP_EXISTING -> {
                     val currentItems = items().toMutableList()
-                    val existingIds = currentItems.map { it.id }.toMutableSet()
-
-                    val itemsToAdd = mutableListOf<CountUpItem>()
-                    for (item in payload.items) {
-                        if (item.id !in existingIds) {
-                            itemsToAdd.add(item)
-                            existingIds.add(item.id)
-                        }
-                    }
+                    val existingIds = currentItems.map { it.id }.toSet()
+                    val itemsToAdd = payload.items.filter { it.id !in existingIds }
                     currentItems.addAll(itemsToAdd)
                     persist(currentItems)
                 }
@@ -777,21 +816,11 @@ class CountUpStore(context: Context) {
      */
     fun sanitizeOrphanedWidgetBindings(activeWidgetIds: Set<Int>): Int {
         return synchronized(globalStoreLock) {
-            val bindingPrefixes = listOf(
-                PREFIX_HERO_BINDING,
-                PREFIX_HERO_DISPLAY_MODE,
-                PREFIX_ZEN_HORIZON_BINDING,
-                PREFIX_ZEN_HORIZON_UNIT,
-                PREFIX_ZEN_PEBBLE_BINDING,
-                PREFIX_ZEN_PEBBLE_TAG,
-                PREFIX_SOLAR_RHYTHM_BINDING,
-                PREFIX_OVERVIEW_STYLE_FILTER,
-            )
             val editor = prefs.edit()
             var purgedCount = 0
 
             for (key in prefs.all.keys) {
-                for (prefix in bindingPrefixes) {
+                for (prefix in WIDGET_BINDING_PREFIXES) {
                     if (key.startsWith(prefix)) {
                         val id = key.removePrefix(prefix).toIntOrNull()
                         if (id != null && id !in activeWidgetIds) {
@@ -817,17 +846,6 @@ class CountUpStore(context: Context) {
     fun remapWidgetBindings(oldWidgetIds: IntArray, newWidgetIds: IntArray): Int {
         if (oldWidgetIds.isEmpty() || oldWidgetIds.size != newWidgetIds.size) return 0
         return synchronized(globalStoreLock) {
-            val bindingPrefixes = listOf(
-                PREFIX_HERO_BINDING,
-                PREFIX_HERO_DISPLAY_MODE,
-                PREFIX_ZEN_HORIZON_BINDING,
-                PREFIX_ZEN_HORIZON_UNIT,
-                PREFIX_ZEN_PEBBLE_BINDING,
-                PREFIX_ZEN_PEBBLE_TAG,
-                PREFIX_SOLAR_RHYTHM_BINDING,
-                PREFIX_ZEN_ORBIT_BINDING,
-                PREFIX_OVERVIEW_STYLE_FILTER,
-            )
             val editor = prefs.edit()
             var remappedCount = 0
 
@@ -836,7 +854,7 @@ class CountUpStore(context: Context) {
                 val newId = newWidgetIds[i]
                 if (oldId == newId) continue
 
-                for (prefix in bindingPrefixes) {
+                for (prefix in WIDGET_BINDING_PREFIXES) {
                     val oldKey = "$prefix$oldId"
                     val newKey = "$prefix$newId"
                     if (prefs.contains(oldKey)) {
@@ -1093,7 +1111,22 @@ class CountUpStore(context: Context) {
         private const val PREFIX_ZEN_PEBBLE_TAG = "zen_pebble_tag_"
         private const val PREFIX_SOLAR_RHYTHM_BINDING = "solar_rhythm_binding_"
         private const val PREFIX_ZEN_ORBIT_BINDING = "zen_orbit_binding_"
+        private const val PREFIX_TSUKIMI_BINDING = "tsukimi_widget_binding_"
+        private const val PREFIX_SHUIN_BINDING = "widget_shuin_binding_"
         private const val PREFIX_OVERVIEW_STYLE_FILTER = "overview_style_filter_"
+        val WIDGET_BINDING_PREFIXES = listOf(
+            PREFIX_HERO_BINDING,
+            PREFIX_HERO_DISPLAY_MODE,
+            PREFIX_ZEN_HORIZON_BINDING,
+            PREFIX_ZEN_HORIZON_UNIT,
+            PREFIX_ZEN_PEBBLE_BINDING,
+            PREFIX_ZEN_PEBBLE_TAG,
+            PREFIX_SOLAR_RHYTHM_BINDING,
+            PREFIX_ZEN_ORBIT_BINDING,
+            PREFIX_TSUKIMI_BINDING,
+            PREFIX_SHUIN_BINDING,
+            PREFIX_OVERVIEW_STYLE_FILTER,
+        )
         const val OVERVIEW_FILTER_ALL = "all"
         private const val MAX_QUARANTINE_ENTRIES = 3
         private const val KEY_PENDING_WIDGET_RESETS = "pending_widget_resets_v1"

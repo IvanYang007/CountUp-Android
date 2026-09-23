@@ -41,6 +41,34 @@ class WidgetContractInvariantsTest {
     }
 
     @Test
+    fun shuinWidgetEnforcesResizeModeNoneAndReconfigurable() {
+        val candidates = listOf(
+            File("app/src/main/res/xml/shuin_widget_info.xml"),
+            File("src/main/res/xml/shuin_widget_info.xml"),
+        )
+        val xmlFile = candidates.firstOrNull { it.exists() }
+        assertNotNull("shuin_widget_info.xml must exist", xmlFile)
+        val xmlContent = xmlFile!!.readText(Charsets.UTF_8)
+
+        assertTrue(
+            "shuin_widget_info.xml MUST specify android:resizeMode=\"none\" to prevent snapping to slot 0 on physical OEM launchers",
+            xmlContent.contains("android:resizeMode=\"none\"")
+        )
+        assertTrue(
+            "shuin_widget_info.xml MUST include reconfigurable",
+            xmlContent.contains("reconfigurable")
+        )
+        assertTrue(
+            "shuin_widget_info.xml MUST NOT include configuration_optional because it suppresses auto-launch of configure activity on drop",
+            !xmlContent.contains("configuration_optional")
+        )
+        assertTrue(
+            "shuin_widget_info.xml MUST specify ShuinConfigureActivity",
+            xmlContent.contains("android:configure=\"com.countup.app.ShuinConfigureActivity\"")
+        )
+    }
+
+    @Test
     fun allConfigurableWidgetsDeclareConfigureActivity() {
         val widgetXmls = listOf(
             "zen_pebble_widget_info.xml" to "ZenPebbleConfigureActivity",
@@ -48,6 +76,8 @@ class WidgetContractInvariantsTest {
             "solar_rhythm_widget_info.xml" to "SolarRhythmConfigureActivity",
             "hero_widget_info.xml" to "HeroWidgetConfigureActivity",
             "zen_orbit_widget_info.xml" to "ZenOrbitConfigureActivity",
+            "tsukimi_widget_info.xml" to "TsukimiConfigureActivity",
+            "shuin_widget_info.xml" to "ShuinConfigureActivity",
         )
 
         for ((xmlName, activityName) in widgetXmls) {
@@ -217,6 +247,8 @@ class WidgetContractInvariantsTest {
             Triple("hero_widget_info.xml", "countup_hero_widget_2x1", "hero_widget_preview"),
             Triple("haircut_widget_info.xml", "widget_preview_overview_4x2", "haircut_widget_preview"),
             Triple("zen_orbit_widget_info.xml", "widget_zen_orbit_2x2", "zen_orbit_widget_preview"),
+            Triple("tsukimi_widget_info.xml", "widget_tsukimi_2x2", "preview_tsukimi_moon"),
+            Triple("shuin_widget_info.xml", "widget_shuin_1x1", "preview_shuin_seal"),
         )
 
         for ((xmlName, layoutName, previewDrawableName) in widgetXmls) {
@@ -268,6 +300,8 @@ class WidgetContractInvariantsTest {
             "solar_rhythm_widget_info.xml",
             "hero_widget_info.xml",
             "zen_orbit_widget_info.xml",
+            "tsukimi_widget_info.xml",
+            "shuin_widget_info.xml",
         )
         for (xmlName in configurableWidgets) {
             val candidates = listOf(
@@ -352,6 +386,8 @@ class WidgetContractInvariantsTest {
             ".SolarRhythmConfigureActivity",
             ".HeroWidgetConfigureActivity",
             ".ZenOrbitConfigureActivity",
+            ".TsukimiConfigureActivity",
+            ".ShuinConfigureActivity",
         )
         for (activityName in configureActivities) {
             assertTrue(
@@ -467,6 +503,8 @@ class WidgetContractInvariantsTest {
             "SolarRhythmConfigureActivity.kt",
             "HeroWidgetConfigureActivity.kt",
             "ZenOrbitConfigureActivity.kt",
+            "TsukimiConfigureActivity.kt",
+            "ShuinConfigureActivity.kt",
         )
 
         for (filename in configureActivities) {
@@ -537,6 +575,8 @@ class WidgetContractInvariantsTest {
             "ZenPebbleWidgetReceiver.kt",
             "CountUpWidget.kt",
             "ZenOrbitWidgetReceiver.kt",
+            "TsukimiWidgetReceiver.kt",
+            "ShuinWidgetReceiver.kt",
         )
 
         for (filename in receiverFiles) {

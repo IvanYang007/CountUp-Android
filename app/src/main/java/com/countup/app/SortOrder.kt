@@ -73,12 +73,13 @@ fun sortItems(
     today: LocalDate = LocalDate.now(),
 ): List<CountUpItem> {
     if (items.size <= 1) return items
+    val todayEpoch = today.toEpochDay()
 
     val orderComparator = when (sortOrder) {
-        SortOrder.DAYS_DESC -> compareByDescending<CountUpItem> { daysSince(LocalDate.ofEpochDay(it.epochDay), today) }
+        SortOrder.DAYS_DESC -> compareByDescending<CountUpItem> { todayEpoch - it.epochDay }
             .thenBy { it.name.lowercase() }
             .thenBy { it.id }
-        SortOrder.DAYS_ASC -> compareBy<CountUpItem> { daysSince(LocalDate.ofEpochDay(it.epochDay), today) }
+        SortOrder.DAYS_ASC -> compareBy<CountUpItem> { todayEpoch - it.epochDay }
             .thenBy { it.name.lowercase() }
             .thenBy { it.id }
         SortOrder.DATE_DESC -> compareByDescending<CountUpItem> { it.epochDay }
@@ -88,10 +89,10 @@ fun sortItems(
             .thenBy { it.name.lowercase() }
             .thenBy { it.id }
         SortOrder.NAME_ASC -> compareBy<CountUpItem> { it.name.lowercase() }
-            .thenByDescending { daysSince(LocalDate.ofEpochDay(it.epochDay), today) }
+            .thenByDescending { todayEpoch - it.epochDay }
             .thenBy { it.id }
         SortOrder.NAME_DESC -> compareByDescending<CountUpItem> { it.name.lowercase() }
-            .thenByDescending { daysSince(LocalDate.ofEpochDay(it.epochDay), today) }
+            .thenByDescending { todayEpoch - it.epochDay }
             .thenBy { it.id }
     }
 

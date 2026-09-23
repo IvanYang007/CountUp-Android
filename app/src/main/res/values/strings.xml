@@ -104,7 +104,6 @@
     <string name="delete">Delete</string>
     <string name="reset">Reset</string>
     <string name="widget_hide">Hide from widget</string>
-    <string name="widget_show">Show in widget</string>
 
     <!-- Item editor -->
     <string name="add_title">New item</string>
@@ -116,10 +115,8 @@
     <string name="anchor_date">Anchor date</string>
     <string name="pin_to_top">Pin to top</string>
     <string name="pin_to_top_subtitle">Keep at top of list</string>
-    <string name="show_in_widget_subtitle">Display in home screen widgets</string>
     <string name="hide_from_widget_subtitle">Do not show in home screen widgets</string>
     <string name="cd_pin_to_top">Pin this counter to the top of the list</string>
-    <string name="cd_show_in_widget">Show this counter in home screen widgets</string>
     <string name="cd_hide_from_widget">Hide this counter from home screen widgets</string>
     <string name="cd_pinned">Pinned to top</string>
     <string name="cd_widget_excluded">Excluded from widget</string>
@@ -510,12 +507,24 @@
     <string name="zen_orbit_widget_description">Concentric rhythm rings tracking current count against your historical average cadence.</string>
     <string name="zen_orbit_configure_title">Zen Orbit</string>
     <string name="zen_orbit_configure_subtitle">Select a counter to honor on this concentric orbit.</string>
-    <string name="zen_orbit_empty">Tap to select a counter</string>
     <string name="zen_orbit_avg_badge">AVG %1$dd</string>
     <string name="zen_orbit_first_cycle">FIRST CYCLE</string>
     <string name="zen_orbit_harmonic_badge">HARMONIC</string>
     <string name="zen_orbit_beyond_badge">+%1$dd AVG</string>
     <string name="preview_zen_orbit_pill">AVG 28d</string>
+
+    <!-- Tsukimi Moon Widget (2x2) -->
+    <string name="tsukimi_widget_label">Tsukimi Moon</string>
+    <string name="tsukimi_widget_description">Synodic lunar mirror harmonizing milestone count with celestial moon phases.</string>
+    <string name="tsukimi_configure_title">Tsukimi Moon</string>
+    <string name="tsukimi_configure_subtitle">Select a counter to mirror with celestial moon phases.</string>
+    <string name="tsukimi_empty">Tap to select a counter</string>
+
+    <!-- Shuin Cinnabar Seal Widget (1x1) -->
+    <string name="shuin_widget_label">Shuin Seal</string>
+    <string name="shuin_widget_description">Unboxed 1x1 cinnabar seal floating directly on your wallpaper like an organic red stamp.</string>
+    <string name="shuin_configure_title">Shuin Seal</string>
+    <string name="shuin_configure_subtitle">Select a counter to mark with this cinnabar seal.</string>
 
     <!-- Data Backup & Migration -->
     <string name="backup_action_export">Export Backup</string>

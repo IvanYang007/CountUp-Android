@@ -14,28 +14,28 @@
         android:fillColor="#152C2416"
         android:pathData="M16,4 h48 a12,12 0 0 1 12,12 v48 a12,12 0 0 1 -12,12 h-48 a12,12 0 0 1 -12,-12 v-48 a12,12 0 0 1 12,-12 z" />
 
-    <!-- Bold Count Numeral ("42") — compact 18sp equivalent -->
+    <!-- Bold Count Numeral ("42") — prominent 36sp equivalent -->
     <!-- "4" -->
     <path
         android:fillColor="#2C2416"
-        android:pathData="M31,22 h4 v12 h3 v3 h-3 v4 h-4 v-4 h-8 v-3 l7,-12 z M28,33 h3 v-6 l-3,6 z" />
+        android:pathData="M31,16 h4.5 v14 h3.5 v3.5 h-3.5 v5 h-4.5 v-5 h-9.5 v-3.5 l8,-14 z M27.5,29 h3.5 v-7 l-3.5,7 z" />
     <!-- "2" -->
     <path
         android:fillColor="#2C2416"
-        android:pathData="M43,22 c4,0 6,2 6,5 c0,3 -2,4 -4,7 l-3,3 h7 v3 h-13 v-3 l5,-5 c2,-2 3,-3 3,-4 c0,-2 -1,-3 -3,-3 c-2,0 -3,1 -3,3 h-3 c0,-4 3,-6 6,-6 z" />
+        android:pathData="M44,16 c4.5,0 7,2.5 7,6 c0,3.5 -2.5,5 -4.5,8 l-3.5,3.5 h8 v3.5 h-15 v-3.5 l6,-6 c2.5,-2.5 3.5,-3.5 3.5,-4.5 c0,-2.5 -1,-3.5 -3.5,-3.5 c-2.5,0 -3.5,1 -3.5,3.5 h-3.5 c0,-4.5 3.5,-7 7,-7 z" />
 
-    <!-- Micro-Unit Label ("DAYS") — 7sp equivalent -->
+    <!-- Micro-Unit Label ("DAYS") — 9sp equivalent -->
     <path
         android:fillColor="#8C7E70"
-        android:pathData="M28,47 h24 v2.5 h-24 z" />
+        android:pathData="M26,45 h28 v3 h-28 z" />
 
-    <!-- Hairline Ink Dash — 12dp equivalent -->
+    <!-- Hairline Ink Dash — prominent 22dp equivalent -->
     <path
         android:fillColor="#6B5D4F"
-        android:pathData="M34,52 h12 v1 h-12 z" />
+        android:pathData="M29,53 h22 v1.2 h-22 z" />
 
-    <!-- One-Word Tag Label — 7sp equivalent -->
+    <!-- One-Word Tag Label — 9sp equivalent -->
     <path
         android:fillColor="#46664B"
-        android:pathData="M26,56 h28 v3 h-28 z" />
+        android:pathData="M24,59 h32 v3.5 h-32 z" />
 </vector>

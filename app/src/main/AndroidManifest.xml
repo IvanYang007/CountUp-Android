@@ -194,6 +194,52 @@
             </intent-filter>
         </activity>
 
+        <!-- Tsukimi (月相之镜 · 2x2) Widget -->
+        <receiver
+            android:name=".TsukimiWidgetReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.appwidget.action.APPWIDGET_DELETED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/tsukimi_widget_info" />
+        </receiver>
+
+        <!-- Configuration Activity for Tsukimi Widget -->
+        <activity
+            android:name=".TsukimiConfigureActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+        <!-- Shuin (金石朱印 · 1x1) Cinnabar Seal Widget -->
+        <receiver
+            android:name=".ShuinWidgetReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.appwidget.action.APPWIDGET_DELETED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/shuin_widget_info" />
+        </receiver>
+
+        <!-- Configuration Activity for Shuin Widget -->
+        <activity
+            android:name=".ShuinConfigureActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
         <!-- Serves the widget grid's cell views to the launcher. Exported=false
              is safe: only the system can hold BIND_REMOTEVIEWS. -->
         <service

@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CountUp — Kyoto Trio: Zen Widget Evolution Prototype (月相 · 朱印 · 枯山水)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Noto+Serif+SC:wght@300;400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Theme: Zen Washi Paper (Light) */
+      --bg-page: #F4EFE6;
+      --bg-panel: #FFFFFF;
+      --bg-panel-subtle: #FAF7F0;
+      --text-main: #2C2416;
+      --text-muted: #7A6F62;
+      --text-faint: #A89F94;
+      --border-subtle: rgba(44, 36, 22, 0.08);
+      --border-strong: rgba(44, 36, 22, 0.16);
+      --card-shadow: 0 12px 36px -4px rgba(44, 36, 22, 0.08), 0 2px 8px -1px rgba(0, 0, 0, 0.04);
+
+      /* Widget Colors - Light */
+      --w-washi-bg: #FFFFFF;
+      --w-sumi-dark: #1E1B18;
+      --w-cinnabar: #B93826;
+      --w-cinnabar-deep: #962817;
+      --w-cinnabar-soft: rgba(185, 56, 38, 0.12);
+      --w-gold: #DEB285;
+      --w-gold-glow: rgba(222, 178, 133, 0.35);
+      --w-jade: #3B5B41;
+      --w-sand-line: #D8CEBE;
+      --w-sand-boulder: #4A4742;
+
+      /* Launcher Shell */
+      --phone-width: 390px;
+      --phone-height: 800px;
+      --phone-border: #2A2723;
+    }
+
+    [data-theme="dark"] {
+      /* Theme: Twilight Sumi Stone (Dark) */
+      --bg-page: #12110F;
+      --bg-panel: #1A1815;
+      --bg-panel-subtle: #22201C;
+      --text-main: #F4EFE6;
+      --text-muted: #ABA494;
+      --text-faint: #6E685E;
+      --border-subtle: rgba(244, 239, 230, 0.08);
+      --border-strong: rgba(244, 239, 230, 0.18);
+      --card-shadow: 0 16px 48px -8px rgba(0, 0, 0, 0.7);
+
+      /* Widget Colors - Dark */
+      --w-washi-bg: #22201C;
+      --w-sumi-dark: #141311;
+      --w-cinnabar: #A82E1E;
+      --w-cinnabar-deep: #7D1F13;
+      --w-cinnabar-soft: rgba(168, 46, 30, 0.18);
+      --w-gold: #E5BF92;
+      --w-gold-glow: rgba(229, 191, 146, 0.45);
+      --w-jade: #628769;
+      --w-sand-line: #3D3933;
+      --w-sand-boulder: #68645D;
+
+      --phone-border: #0A0908;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      background: var(--bg-page);
+      color: var(--text-main);
+      padding: 32px 20px 120px;
+      transition: background 0.3s ease, color 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1240px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* Top Bar */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .title-group h1 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .badge-symposium {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(185, 56, 38, 0.12);
+      color: var(--w-cinnabar);
+      border: 1px solid rgba(185, 56, 38, 0.2);
+    }
+
+    .title-group p {
+      margin-top: 6px;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-toggle {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-strong);
+      color: var(--text-main);
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      transition: all 0.2s ease;
+    }
+
+    .btn-toggle:hover {
+      border-color: var(--text-main);
+      transform: translateY(-1px);
+    }
+
+    /* Wallpaper Selector */
+    .wallpaper-pills {
+      display: flex;
+      gap: 6px;
+      background: var(--bg-panel);
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .wall-pill {
+      border: none;
+      background: transparent;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .wall-pill.active {
+      background: var(--text-main);
+      color: var(--bg-page);
+    }
+
+    /* Layout Main Grid */
+    .main-workspace {
+      display: grid;
+      grid-template-columns: var(--phone-width) 1fr;
+      gap: 36px;
+      align-items: start;
+    }
+
+    @media (max-width: 960px) {
+      .main-workspace {
+        grid-template-columns: 1fr;
+        justify-items: center;
+      }
+    }
+
+    /* Phone Shell Simulator */
+    .phone-stage {
+      position: sticky;
+      top: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .phone-frame {
+      width: var(--phone-width);
+      height: var(--phone-height);
+      background: #000;
+      border-radius: 48px;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.4), 0 0 0 10px var(--phone-border);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    /* Wallpapers */
+    .phone-screen {
+      position: absolute;
+      inset: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: none;
+      display: flex;
+      flex-direction: column;
+      transition: background 0.4s ease;
+    }
+    .phone-screen::-webkit-scrollbar { display: none; }
+
+    /* Wallpaper Presets */
+    .wall-washi {
+      background: #EFE9DF url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
+    }
+    .wall-sumi {
+      background: radial-gradient(circle at 50% 20%, #292622 0%, #161513 100%);
+    }
+    .wall-kyoto {
+      background: linear-gradient(175deg, #2E2938 0%, #4D3945 35%, #7D514D 70%, #9B6C55 100%);
+    }
+    .wall-bamboo {
+      background: linear-gradient(160deg, #1C2B22 0%, #273D30 45%, #18231C 100%);
+    }
+    .wall-mist {
+      background: linear-gradient(135deg, #CFD6DF 0%, #E2E6E9 50%, #BFC7CF 100%);
+    }
+
+    /* Android Status Bar */
+    .status-bar {
+      height: 42px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 24px;
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.9);
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+      z-index: 10;
+    }
+    .wall-washi .status-bar, .wall-mist .status-bar {
+      color: #2C2416;
+      text-shadow: none;
+    }
+
+    .camera-cutout {
+      width: 14px;
+      height: 14px;
+      background: #000;
+      border-radius: 50%;
+    }
+
+    /* Launcher Content Grid */
+    .launcher-content {
+      padding: 16px 20px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .launcher-header-clock {
+      padding: 8px 4px 14px;
+      color: rgba(255, 255, 255, 0.95);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+    .wall-washi .launcher-header-clock, .wall-mist .launcher-header-clock {
+      color: #2C2416;
+      text-shadow: none;
+    }
+    .launcher-date {
+      font-size: 13px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 600;
+      opacity: 0.8;
+    }
+    .launcher-clock-digits {
+      font-size: 54px;
+      font-weight: 300;
+      font-family: 'Space Grotesk', sans-serif;
+      line-height: 1;
+      margin-top: 4px;
+      letter-spacing: -0.04em;
+    }
+
+    /* ========================================================= */
+    /* WIDGET STYLES                                             */
+    /* ========================================================= */
+
+    .widget-container {
+      position: relative;
+      cursor: pointer;
+      transition: transform 0.18s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.18s ease;
+    }
+    .widget-container:active {
+      transform: scale(0.975);
+    }
+
+    /* 1. TSUKIMI (2x2) Moon Phase Mirror */
+    .widget-tsukimi {
+      width: 168px;
+      height: 168px;
+      background: var(--w-washi-bg);
+      border-radius: 32px;
+      box-shadow: 0 8px 24px -4px rgba(0,0,0,0.18), 0 2px 6px rgba(0,0,0,0.06);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .tsukimi-disc-wrap {
+      width: 82px;
+      height: 82px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 4px;
+    }
+
+    .tsukimi-moon-svg {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    }
+
+    .tsukimi-numeral {
+      font-family: 'Noto Serif SC', 'Cinzel', serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1;
+      letter-spacing: -0.02em;
+      margin-top: 2px;
+    }
+
+    .tsukimi-sub-wrap {
+      text-align: center;
+      width: 100%;
+    }
+
+    .tsukimi-title {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tsukimi-phase-label {
+      font-size: 8.5px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--w-gold);
+      margin-top: 2px;
+      text-transform: uppercase;
+    }
+
+    /* 2. SHUIN (1x1) Cinnabar Seal Stamp */
+    .widget-shuin {
+      width: 80px;
+      height: 80px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* Zero container box - organic seal floating on wallpaper */
+    }
+
+    /* Eroded wabi-sabi stone border */
+    .shuin-seal-body {
+      width: 74px;
+      height: 74px;
+      background: radial-gradient(circle at 35% 30%, #C43D28 0%, #A22818 75%, #881E10 100%);
+      border-radius: 20px 18px 22px 19px; /* subtle organic asymmetry */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 
+        0 6px 16px -2px rgba(185, 56, 38, 0.45),
+        0 2px 4px rgba(0,0,0,0.2),
+        inset 0 0 0 1.5px rgba(255, 255, 255, 0.18),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.35);
+      position: relative;
+      padding: 6px;
+      border: 1.5px solid rgba(44, 36, 22, 0.25);
+    }
+
+    .shuin-inner-rim {
+      position: absolute;
+      inset: 4px;
+      border: 1px dashed rgba(255, 255, 255, 0.35);
+      border-radius: 15px 14px 17px 14px;
+      pointer-events: none;
+    }
+
+    .shuin-text-kanji {
+      font-family: 'Noto Serif SC', serif;
+      font-weight: 700;
+      color: #FAF4EE;
+      font-size: 17px;
+      line-height: 1.1;
+      text-align: center;
+      letter-spacing: 0.04em;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    }
+
+    .shuin-text-latin {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      color: #FAF4EE;
+      font-size: 26px;
+      line-height: 0.9;
+      text-align: center;
+      letter-spacing: -0.04em;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+    }
+
+    .shuin-sub-label {
+      font-size: 7.5px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(250, 244, 238, 0.75);
+      margin-top: 2px;
+    }
+
+    /* 3. KARESANSUI (4x1) Raked Sand Dry-Garden */
+    .widget-karesansui {
+      width: 100%;
+      height: 72px;
+      background: var(--w-washi-bg);
+      border-radius: 22px;
+      box-shadow: 0 8px 24px -4px rgba(0,0,0,0.18), 0 2px 6px rgba(0,0,0,0.06);
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      position: relative;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .karesansui-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      z-index: 2;
+    }
+
+    .karesansui-title {
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .karesansui-stone-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--w-jade);
+    }
+
+    .karesansui-stats {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    .karesansui-sand-canvas {
+      width: 100%;
+      height: 38px;
+      position: relative;
+      margin-top: 2px;
+    }
+
+    .karesansui-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+
+    /* 2x2 Grid Row on Launcher */
+    .launcher-row-split {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .widget-col-secondary {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+    }
+
+    /* Dummy App Icons to complete Android Launcher feel */
+    .app-icon-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 14px;
+      padding: 0 6px;
+    }
+
+    .app-icon-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .app-icon-squircle {
+      width: 52px;
+      height: 52px;
+      border-radius: 17px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .wall-washi .app-icon-squircle, .wall-mist .app-icon-squircle {
+      background: #FFFFFF;
+      border-color: rgba(44,36,22,0.1);
+    }
+
+    .app-icon-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.95);
+      text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    }
+    .wall-washi .app-icon-label, .wall-mist .app-icon-label {
+      color: #2C2416;
+      text-shadow: none;
+    }
+
+    /* Launcher Bottom Hotseat Dock */
+    .launcher-dock {
+      position: absolute;
+      bottom: 14px;
+      left: 20px;
+      right: 20px;
+      height: 64px;
+      background: rgba(255, 255, 255, 0.22);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 12px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .wall-sumi .launcher-dock, .wall-bamboo .launcher-dock {
+      background: rgba(0, 0, 0, 0.35);
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .dock-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* ========================================================= */
+    /* WORKBENCH & INTERACTIVE CONTROLS                          */
+    /* ========================================================= */
+
+    .workbench-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .card-section {
+      background: var(--bg-panel);
+      border-radius: 20px;
+      padding: 24px;
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--card-shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-rank {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.04em;
+    }
+    .badge-rank-1 { background: #FEF3C7; color: #92400E; }
+    .badge-rank-2 { background: #FEE2E2; color: #991B1B; }
+    .badge-rank-3 { background: #DCFCE7; color: #166534; }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .control-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .control-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .slider-styled {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 4px;
+      background: var(--border-strong);
+      outline: none;
+    }
+    .slider-styled::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--text-main);
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      transition: transform 0.1s ease;
+    }
+    .slider-styled::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
+
+    .input-text-styled {
+      background: var(--bg-panel-subtle);
+      border: 1px solid var(--border-strong);
+      color: var(--text-main);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      outline: none;
+      font-family: inherit;
+    }
+    .input-text-styled:focus {
+      border-color: var(--text-main);
+    }
+
+    .btn-group-pills {
+      display: flex;
+      gap: 6px;
+      background: var(--bg-panel-subtle);
+      padding: 3px;
+      border-radius: 9px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .pill-btn {
+      flex: 1;
+      border: none;
+      background: transparent;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: center;
+    }
+    .pill-btn.active {
+      background: var(--text-main);
+      color: var(--bg-page);
+    }
+
+    /* Master Designer Quotes & Architecture */
+    .quotes-drawer {
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 600px) {
+      .quotes-drawer { grid-template-columns: 1fr; }
+    }
+
+    .quote-box {
+      font-size: 12px;
+      line-height: 1.5;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: var(--bg-panel-subtle);
+      border-left: 3px solid var(--border-strong);
+    }
+    .quote-box strong {
+      color: var(--text-main);
+      font-weight: 600;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    /* ========================================================= */
+    /* FLOATING BOTTOM SWITCHER BAR (prototype skill requirement)*/
+    /* ========================================================= */
+    .floating-switcher {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--text-main);
+      color: var(--bg-page);
+      border-radius: 999px;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+      z-index: 1000;
+      user-select: none;
+      backdrop-filter: blur(12px);
+    }
+
+    .switcher-arrow {
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      color: inherit;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      transition: background 0.15s ease;
+    }
+    .switcher-arrow:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    .switcher-label {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      min-width: 210px;
+      text-align: center;
+    }
+
+    .switcher-shortcut {
+      font-size: 10px;
+      opacity: 0.7;
+      font-weight: 500;
+      margin-left: 4px;
+    }
+
+    /* Focus Mode Highlight on Phone */
+    .phone-screen.focus-tsukimi .widget-container:not(.widget-tsukimi),
+    .phone-screen.focus-tsukimi .launcher-row-split .widget-col-secondary,
+    .phone-screen.focus-tsukimi .widget-karesansui {
+      opacity: 0.2;
+      filter: grayscale(0.5);
+      transition: opacity 0.3s ease;
+    }
+
+    .phone-screen.focus-shuin .widget-tsukimi,
+    .phone-screen.focus-shuin .widget-karesansui {
+      opacity: 0.2;
+      filter: grayscale(0.5);
+      transition: opacity 0.3s ease;
+    }
+
+    .phone-screen.focus-karesansui .widget-tsukimi,
+    .phone-screen.focus-karesansui .widget-col-secondary {
+      opacity: 0.2;
+      filter: grayscale(0.5);
+      transition: opacity 0.3s ease;
+    }
+
+    /* Stamp Press Animation */
+    @keyframes stampImpact {
+      0% { transform: scale(1); }
+      40% { transform: scale(0.92) rotate(-1deg); }
+      70% { transform: scale(1.05) rotate(0.5deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+    .stamping-active {
+      animation: stampImpact 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+  </style>
+</head>
+<body data-theme="light">
+
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <div class="title-group">
+        <h1>
+          CountUp · The Kyoto Trio
+          <span class="badge-symposium">Kyoto Symposium Top 3</span>
+        </h1>
+        <p>Interactive Prototype for Moon Phase (Tsukimi 2x2), Cinnabar Stamp (Shuin 1x1), and Raked Sand Garden (Karesansui 4x1).</p>
+      </div>
+
+      <div class="header-actions">
+        <!-- Wallpaper Switcher -->
+        <div class="wallpaper-pills">
+          <button class="wall-pill active" onclick="setWallpaper('wall-washi', this)">Washi</button>
+          <button class="wall-pill" onclick="setWallpaper('wall-sumi', this)">Sumi</button>
+          <button class="wall-pill" onclick="setWallpaper('wall-kyoto', this)">Kyoto Dawn</button>
+          <button class="wall-pill" onclick="setWallpaper('wall-bamboo', this)">Bamboo</button>
+          <button class="wall-pill" onclick="setWallpaper('wall-mist', this)">Mist</button>
+        </div>
+
+        <!-- Light / Dark Toggle -->
+        <button class="btn-toggle" onclick="toggleTheme()">
+          <span id="themeIcon">🌙</span> <span id="themeLabel">Dark Sumi</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main 2-Column Workspace -->
+    <div class="main-workspace">
+
+      <!-- LEFT: Android 16 Home Screen Shell -->
+      <div class="phone-stage">
+        <div class="phone-frame">
+          <div class="phone-screen wall-washi" id="phoneScreen">
+            
+            <!-- Android Status Bar -->
+            <div class="status-bar">
+              <span>09:41</span>
+              <div class="camera-cutout"></div>
+              <span>5G 98%</span>
+            </div>
+
+            <!-- Home Screen Content -->
+            <div class="launcher-content">
+              <div class="launcher-header-clock">
+                <div class="launcher-date" id="liveDate">Tue, Sep 22 · Kyoto</div>
+                <div class="launcher-clock-digits">09:41</div>
+              </div>
+
+              <!-- Top Row: Tsukimi 2x2 + Shuin 1x1 & Pebble Stack -->
+              <div class="launcher-row-split">
+                <!-- 🥇 1. Tsukimi (2x2) Moon Phase -->
+                <div class="widget-container widget-tsukimi" id="widgetTsukimi" onclick="selectVariant('A')">
+                  <div class="tsukimi-sub-wrap">
+                    <div class="tsukimi-title" id="tsukimiTitleDisplay">SOBER & SERENE</div>
+                  </div>
+
+                  <div class="tsukimi-disc-wrap">
+                    <svg class="tsukimi-moon-svg" id="moonSvg" viewBox="0 0 100 100"></svg>
+                  </div>
+
+                  <div class="tsukimi-numeral" id="tsukimiNumeralDisplay">108</div>
+
+                  <div class="tsukimi-sub-wrap">
+                    <div class="tsukimi-phase-label" id="tsukimiPhaseDisplay">· 望月 FULL MOON ·</div>
+                  </div>
+                </div>
+
+                <!-- 🥈 2. Shuin (1x1) Seal Stamp + Complement Pebble -->
+                <div class="widget-col-secondary">
+                  <!-- Shuin 1x1 -->
+                  <div class="widget-container widget-shuin" id="widgetShuin" onclick="triggerSealStamp(); selectVariant('B');">
+                    <div class="shuin-seal-body" id="shuinSealBody">
+                      <div class="shuin-inner-rim"></div>
+                      <div id="shuinGlyphContainer">
+                        <div class="shuin-text-kanji" id="shuinKanjiDisplay">肆拾<br>贰日</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 1x1 Companion App or Zen Pebble -->
+                  <div class="widget-container" style="width:76px; height:76px; border-radius:24px; background:var(--w-washi-bg); border:1px solid var(--border-subtle); display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow: 0 4px 12px rgba(0,0,0,0.06);" onclick="selectVariant('All')">
+                    <span style="font-size:10px; font-weight:700; color:var(--text-muted); letter-spacing:0.06em;">PEBBLE</span>
+                    <span style="font-size:20px; font-weight:700; font-family:'Noto Serif SC',serif; color:var(--text-main);">42</span>
+                    <span style="font-size:8px; font-weight:600; color:var(--w-jade);">DAYS</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 🥉 3. Karesansui (4x1) Sand Garden Ribbon -->
+              <div class="widget-container widget-karesansui" id="widgetKaresansui" onclick="selectVariant('C')">
+                <div class="karesansui-header">
+                  <div class="karesansui-title">
+                    <div class="karesansui-stone-dot" id="karesansuiDot"></div>
+                    <span id="karesansuiTitleDisplay">PILGRIMAGE TO KYOTO</span>
+                  </div>
+                  <div class="karesansui-stats" id="karesansuiStatsDisplay">180 / 365 DAYS · 49.3%</div>
+                </div>
+
+                <!-- Sand Canvas -->
+                <div class="karesansui-sand-canvas">
+                  <svg class="karesansui-svg" id="sandSvg" viewBox="0 0 300 36" preserveAspectRatio="none"></svg>
+                </div>
+              </div>
+
+              <!-- Android App Icons Row -->
+              <div class="app-icon-row">
+                <div class="app-icon-item">
+                  <div class="app-icon-squircle">🍵</div>
+                  <div class="app-icon-label">CountUp</div>
+                </div>
+                <div class="app-icon-item">
+                  <div class="app-icon-squircle">📔</div>
+                  <div class="app-icon-label">Journal</div>
+                </div>
+                <div class="app-icon-item">
+                  <div class="app-icon-squircle">🧘</div>
+                  <div class="app-icon-label">Breathe</div>
+                </div>
+                <div class="app-icon-item">
+                  <div class="app-icon-squircle">⚙️</div>
+                  <div class="app-icon-label">Settings</div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Bottom Dock -->
+            <div class="launcher-dock">
+              <div class="dock-icon">📞</div>
+              <div class="dock-icon">💬</div>
+              <div class="dock-icon">📷</div>
+              <div class="dock-icon">🌐</div>
+            </div>
+
+          </div>
+        </div>
+        <span style="font-size:12px; color:var(--text-muted); font-weight:500;">Click any widget to inspect & interact</span>
+      </div>
+
+      <!-- RIGHT: Master Workbench & Granular Controls -->
+      <div class="workbench-panel">
+
+        <!-- 🥇 SECTION 1: TSUKIMI (月相之镜 · 2x2) -->
+        <div class="card-section" id="sectionTsukimi">
+          <div class="card-header">
+            <div class="card-title">
+              🥇 Tsukimi · 月相之镜 (2x2)
+              <span class="badge-rank badge-rank-1">Podium #1</span>
+            </div>
+            <span style="font-size:12px; color:var(--text-muted); font-weight:600;">158 × 158 dp · 88dp Disc</span>
+          </div>
+
+          <p style="font-size:13px; color:var(--text-muted); line-height:1.5;">
+            Celestial synodic rhythm mapped to human milestones. Uses precise astronomical Meeus lunation geometry. The terminator curve smoothly shifts from New Moon (朔) to Full Moon (望) and back.
+          </p>
+
+          <div class="control-grid">
+            <div class="control-item">
+              <label class="control-label">
+                <span>Lunar Age (0.0 to 29.5 days)</span>
+                <strong id="lunarAgeVal">14.8 d</strong>
+              </label>
+              <input type="range" class="slider-styled" id="lunarSlider" min="0" max="29.5" step="0.1" value="14.8" oninput="updateLunarPhase(this.value)">
+            </div>
+
+            <div class="control-item">
+              <label class="control-label">Milestone Day Count</label>
+              <input type="number" class="input-text-styled" id="tsukimiCountInput" value="108" oninput="updateTsukimiDays(this.value)">
+            </div>
+
+            <div class="control-item">
+              <label class="control-label">Counter Title</label>
+              <input type="text" class="input-text-styled" id="tsukimiTitleInput" value="Sober & Serene" oninput="updateTsukimiTitle(this.value)">
+            </div>
+
+            <div class="control-item">
+              <label class="control-label">Quick Lunar Presets</label>
+              <div class="btn-group-pills">
+                <button class="pill-btn" onclick="setMoonPreset(0)">New (朔)</button>
+                <button class="pill-btn" onclick="setMoonPreset(7.4)">Waxing (弦)</button>
+                <button class="pill-btn active" onclick="setMoonPreset(14.8)">Full (望)</button>
+                <button class="pill-btn" onclick="setMoonPreset(22.1)">Waning (魄)</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="quotes-drawer">
+            <div class="quote-box">
+              <strong>Kenya Hara (原研哉)</strong>
+              "The moon is humanity’s original clock. Replacing a garish gauge with the quiet celestial orb lets time breathe as natural rhythm."
+            </div>
+            <div class="quote-box">
+              <strong>Google UI Principal</strong>
+              "Zero background wake lock required. Updated once daily on midnight broadcast. RemoteViews payload is under 12KB with pre-rendered SVG canvas."
+            </div>
+          </div>
+        </div>
+
+        <!-- 🥈 SECTION 2: SHUIN (金石朱印 · 1x1) -->
+        <div class="card-section" id="sectionShuin">
+          <div class="card-header">
+            <div class="card-title">
+              🥈 Shuin · 金石朱印 (1x1)
+              <span class="badge-rank badge-rank-2">Podium #2</span>
+            </div>
+            <span style="font-size:12px; color:var(--text-muted); font-weight:600;">76 × 76 dp · Unboxed Seal</span>
+          </div>
+
+          <p style="font-size:13px; color:var(--text-muted); line-height:1.5;">
+            Zero-frame unboxed cinnabar stone stamp (朱砂印章). Wabi-sabi eroded perimeter with micro-haptic stamp impression. Blends effortlessly into any Android launcher wallpaper.
+          </p>
+
+          <div class="control-grid">
+            <div class="control-item">
+              <label class="control-label">Typography Style</label>
+              <div class="btn-group-pills">
+                <button class="pill-btn active" id="btnGlyphKanji" onclick="setShuinGlyphMode('kanji')">Seal Script (汉字)</button>
+                <button class="pill-btn" id="btnGlyphLatin" onclick="setShuinGlyphMode('latin')">Western (42)</button>
+              </div>
+            </div>
+
+            <div class="control-item">
+              <label class="control-label">Stone Seal Contour</label>
+              <div class="btn-group-pills">
+                <button class="pill-btn active" onclick="setSealShape('organic')">Eroded Stone</button>
+                <button class="pill-btn" onclick="setSealShape('oval')">River Oval</button>
+                <button class="pill-btn" onclick="setSealShape('square')">Antique Square</button>
+              </div>
+            </div>
+
+            <div class="control-item">
+              <label class="control-label">Days Value</label>
+              <input type="number" class="input-text-styled" id="shuinDaysInput" value="42" oninput="updateShuinValue(this.value)">
+            </div>
+
+            <div class="control-item">
+              <label class="control-label">Micro-Interaction</label>
+              <button class="btn-toggle" style="justify-content:center;" onclick="triggerSealStamp()">
+                <span>💮</span> Press Physical Seal Stamp
+              </button>
+            </div>
+          </div>
+
+          <div class="quotes-drawer">
+            <div class="quote-box">
+              <strong>Naoto Fukasawa (深泽直人)</strong>
+              "Without Thought: A seal represents authorial permanence. It is not an app card — it is an imprint made upon the user's home screen."
+            </div>
+            <div class="quote-box">
+              <strong>Dieter Rams</strong>
+              "Unobtrusive, honest, pure. Strips away the container card entirely. Only the numeral and its medium remain."
+            </div>
+          </div>
+        </div>
+
+        <!-- 🥉 SECTION 3: KARESANSUI (枯山水 · 4x1) -->
+        <div class="card-section" id="sectionKaresansui">
+          <div class="card-header">
+            <div class="card-title">
+              🥉 Karesansui · 砂纹石庭 (4x1)
+              <span class="badge-rank badge-rank-3">Podium #3</span>
+            </div>
+            <span style="font-size:12px; color:var(--text-muted); font-weight:600;">328 × 68 dp · Dynamic Sand Rake</span>
+          </div>
+
+          <p style="font-size:13px; color:var(--text-muted); line-height:1.5;">
+            Architectural dry-landscape sand garden. 5 linear raked sand grooves dynamically bend and part around a river-smoothed milestone boulder as your cycle progresses.
+          </p>
+
+          <div class="control-grid">
+            <div class="control-item" style="grid-column: 1 / -1;">
+              <label class="control-label">
+                <span>Milestone Progression (Boulder Position)</span>
+                <strong id="karesansuiProgVal">49.3% (180 / 365 Days)</strong>
+              </label>
+              <input type="range" class="slider-styled" id="sandProgressSlider" min="0" max="100" step="0.5" value="49.3" oninput="updateKaresansuiProgress(this.value)">
+            </div>
+
+            <div class="control-item">
+              <label class="control-label">Stone Mineral</label>
+              <div class="btn-group-pills">
+                <button class="pill-btn active" onclick="setStoneMineral('jade')">Bamboo Jade</button>
+                <button class="pill-btn" onclick="setStoneMineral('basalt')">River Basalt</button>
+                <button class="pill-btn" onclick="setStoneMineral('quartz')">White Quartz</button>
+              </div>
+            </div>
+
+            <div class="control-item">
+              <label class="control-label">Garden Milestone Title</label>
+              <input type="text" class="input-text-styled" id="karesansuiTitleInput" value="Pilgrimage to Kyoto" oninput="updateKaresansuiTitle(this.value)">
+            </div>
+
+            <div class="control-item">
+              <label class="control-label">Total Milestone Target</label>
+              <input type="number" class="input-text-styled" id="karesansuiTargetInput" value="365" oninput="updateKaresansuiTarget(this.value)">
+            </div>
+          </div>
+
+          <div class="quotes-drawer">
+            <div class="quote-box">
+              <strong>Kenya Hara (原研哉)</strong>
+              "In the stone gardens of Ryoan-ji, the sand does not represent water; it IS stillness. The milestone rock curves the sand ripples without noise."
+            </div>
+            <div class="quote-box">
+              <strong>Google UI Principal</strong>
+              "Spline geometry generates in &lt;1.2ms via Android Path cubicTo. Fits comfortably within RemoteViews bitmap draw cache."
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING BOTTOM SWITCHER BAR (prototype skill requirement) -->
+  <div class="floating-switcher" id="floatingSwitcher">
+    <button class="switcher-arrow" onclick="cycleVariant(-1)" title="Previous Variant (←)">←</button>
+    <div class="switcher-label">
+      <span id="variantKeyDisplay">All</span>: <span id="variantNameDisplay">Full Home Screen Grid</span>
+      <span class="switcher-shortcut">[← / →]</span>
+    </div>
+    <button class="switcher-arrow" onclick="cycleVariant(1)" title="Next Variant (→)">→</button>
+  </div>
+
+  <script>
+    /* ================================================================= */
+    /* STATE MODEL & PROTOTYPE ROUTING                                   */
+    /* ================================================================= */
+    const VARIANTS = [
+      { id: 'All', name: 'Full Launcher Suite' },
+      { id: 'A', name: 'Tsukimi (月相之镜 2x2)' },
+      { id: 'B', name: 'Shuin (金石朱印 1x1)' },
+      { id: 'C', name: 'Karesansui (枯山水 4x1)' }
+    ];
+
+    let currentVariantIdx = 0;
+
+    // Tsukimi Moon Phase state
+    let lunarAge = 14.8; // 0 to 29.53 days
+    let tsukimiDays = 108;
+    let tsukimiTitle = "Sober & Serene";
+
+    // Shuin Seal state
+    let shuinValue = 42;
+    let shuinGlyphMode = 'kanji'; // 'kanji' or 'latin'
+    let shuinShape = 'organic';
+
+    // Karesansui state
+    let karesansuiProgress = 49.3; // 0 to 100%
+    let karesansuiTarget = 365;
+    let karesansuiTitle = "Pilgrimage to Kyoto";
+    let stoneMineral = 'jade';
+
+    /* ================================================================= */
+    /* INIT & URL SEARCH PARAMS ROUTING                                 */
+    /* ================================================================= */
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const vParam = urlParams.get('variant');
+      if (vParam) {
+        const found = VARIANTS.findIndex(v => v.id.toLowerCase() === vParam.toLowerCase());
+        if (found !== -1) currentVariantIdx = found;
+      }
+      applyVariantUI();
+      renderMoon(lunarAge);
+      renderSandGarden(karesansuiProgress);
+    });
+
+    // Keyboard navigation (← and →)
+    window.addEventListener('keydown', (e) => {
+      if (['input', 'textarea'].includes(document.activeElement.tagName.toLowerCase())) return;
+      if (e.key === 'ArrowLeft') cycleVariant(-1);
+      if (e.key === 'ArrowRight') cycleVariant(1);
+    });
+
+    function cycleVariant(direction) {
+      currentVariantIdx = (currentVariantIdx + direction + VARIANTS.length) % VARIANTS.length;
+      updateVariantUrl();
+      applyVariantUI();
+    }
+
+    function selectVariant(id) {
+      const idx = VARIANTS.findIndex(v => v.id.toLowerCase() === id.toLowerCase());
+      if (idx !== -1) {
+        currentVariantIdx = idx;
+        updateVariantUrl();
+        applyVariantUI();
+      }
+    }
+
+    function updateVariantUrl() {
+      const v = VARIANTS[currentVariantIdx];
+      const url = new URL(window.location);
+      url.searchParams.set('variant', v.id);
+      window.history.replaceState({}, '', url);
+    }
+
+    function applyVariantUI() {
+      const v = VARIANTS[currentVariantIdx];
+      document.getElementById('variantKeyDisplay').textContent = v.id;
+      document.getElementById('variantNameDisplay').textContent = v.name;
+
+      const screen = document.getElementById('phoneScreen');
+      screen.className = screen.className.replace(/\bfocus-\w+\b/g, '').trim();
+
+      if (v.id === 'A') {
+        screen.classList.add('focus-tsukimi');
+        document.getElementById('sectionTsukimi').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else if (v.id === 'B') {
+        screen.classList.add('focus-shuin');
+        document.getElementById('sectionShuin').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else if (v.id === 'C') {
+        screen.classList.add('focus-karesansui');
+        document.getElementById('sectionKaresansui').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    /* ================================================================= */
+    /* THEME & WALLPAPER                                                 */
+    /* ================================================================= */
+    function toggleTheme() {
+      const body = document.body;
+      const isDark = body.getAttribute('data-theme') === 'dark';
+      const newTheme = isDark ? 'light' : 'dark';
+      body.setAttribute('data-theme', newTheme);
+      document.getElementById('themeIcon').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+      document.getElementById('themeLabel').textContent = newTheme === 'dark' ? 'Washi Light' : 'Dark Sumi';
+      renderSandGarden(karesansuiProgress);
+    }
+
+    function setWallpaper(wallClass, btn) {
+      const screen = document.getElementById('phoneScreen');
+      screen.classList.remove('wall-washi', 'wall-sumi', 'wall-kyoto', 'wall-bamboo', 'wall-mist');
+      screen.classList.add(wallClass);
+      
+      document.querySelectorAll('.wall-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    /* ================================================================= */
+    /* 1. TSUKIMI MOON RENDERER (Astronomical Meeus Geometry)            */
+    /* ================================================================= */
+    function updateLunarPhase(val) {
+      lunarAge = parseFloat(val);
+      document.getElementById('lunarAgeVal').textContent = `${lunarAge.toFixed(1)} d`;
+      renderMoon(lunarAge);
+    }
+
+    function setMoonPreset(age) {
+      document.getElementById('lunarSlider').value = age;
+      updateLunarPhase(age);
+    }
+
+    function updateTsukimiDays(val) {
+      tsukimiDays = parseInt(val) || 0;
+      document.getElementById('tsukimiNumeralDisplay').textContent = tsukimiDays;
+    }
+
+    function updateTsukimiTitle(val) {
+      tsukimiTitle = val.trim() || 'MILESTONE';
+      document.getElementById('tsukimiTitleDisplay').textContent = tsukimiTitle.toUpperCase();
+    }
+
+    function renderMoon(age) {
+      const synodic = 29.53059;
+      const normalized = (age % synodic) / synodic; // 0.0 to 1.0
+      const phaseAngle = normalized * 2 * Math.PI;
+      const illumFraction = (1 - Math.cos(phaseAngle)) / 2; // 0.0 to 1.0
+
+      // Poetic labels
+      let label = "";
+      if (normalized < 0.04 || normalized > 0.96) label = "· 朔月 NEW MOON ·";
+      else if (normalized < 0.22) label = "· 娥眉月 WAXING CRESCENT ·";
+      else if (normalized < 0.28) label = "· 上弦月 FIRST QUARTER ·";
+      else if (normalized < 0.46) label = "· 盈凸月 WAXING GIBBOUS ·";
+      else if (normalized < 0.54) label = "· 望月 FULL MOON ·";
+      else if (normalized < 0.72) label = "· 亏凸月 WANING GIBBOUS ·";
+      else if (normalized < 0.78) label = "· 下弦月 LAST QUARTER ·";
+      else label = "· 残月 WANING CRESCENT ·";
+
+      document.getElementById('tsukimiPhaseDisplay').textContent = label;
+
+      // SVG Moon Geometry: 100x100
+      const r = 46;
+      const cx = 50;
+      const cy = 50;
+      const isWaxing = normalized <= 0.5;
+
+      // Illuminated hemisphere x-radius:
+      // at new moon (0), rx = r, arc goes into dark
+      // at quarter (0.25), rx = 0
+      // at full moon (0.5), rx = r, arc fills bright
+      const rx = Math.abs(r * Math.cos(phaseAngle));
+
+      const svg = document.getElementById('moonSvg');
+      svg.innerHTML = '';
+
+      // Defs: Filters and Gradients
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      defs.innerHTML = `
+        <radialGradient id="sumiNightGrad" cx="40%" cy="35%" r="70%">
+          <stop offset="0%" stop-color="#2D2924" />
+          <stop offset="85%" stop-color="#181614" />
+          <stop offset="100%" stop-color="#0E0D0C" />
+        </radialGradient>
+        <radialGradient id="washiMoonGrad" cx="45%" cy="40%" r="65%">
+          <stop offset="0%" stop-color="#FFFDF9" />
+          <stop offset="60%" stop-color="#FAF4EB" />
+          <stop offset="100%" stop-color="#EBE2D3" />
+        </radialGradient>
+        <filter id="moonGlow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="3.5" result="blur" />
+          <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
+      `;
+      svg.appendChild(defs);
+
+      // 1. Dark Moon Base Disc (Sumi Night Sky)
+      const baseDisc = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      baseDisc.setAttribute('cx', cx);
+      baseDisc.setAttribute('cy', cy);
+      baseDisc.setAttribute('r', r);
+      baseDisc.setAttribute('fill', 'url(#sumiNightGrad)');
+      svg.appendChild(baseDisc);
+
+      // Subtle celestial crater noise / patina
+      const crater = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      crater.setAttribute('cx', '62');
+      crater.setAttribute('cy', '42');
+      crater.setAttribute('r', '14');
+      crater.setAttribute('fill', 'rgba(255,255,255,0.025)');
+      svg.appendChild(crater);
+
+      // 2. Light Crescent Path (Waxing vs Waning Meeus Terminator)
+      if (illumFraction > 0.01) {
+        let pathD = "";
+        const topY = cy - r;
+        const botY = cy + r;
+
+        if (isWaxing) {
+          // Waxing: right side is lit
+          // Outer circular arc on the right: from (cx, topY) to (cx, botY)
+          const outerArc = `M ${cx} ${topY} A ${r} ${r} 0 0 1 ${cx} ${botY}`;
+          // Terminator arc returning to top:
+          if (normalized < 0.25) {
+            // Crescent: terminator bows inward (convex to right, sweep-flag 0)
+            pathD = `${outerArc} A ${rx} ${r} 0 0 0 ${cx} ${topY} Z`;
+          } else {
+            // Gibbous: terminator bows outward into left (sweep-flag 1)
+            pathD = `${outerArc} A ${rx} ${r} 0 0 1 ${cx} ${topY} Z`;
+          }
+        } else {
+          // Waning: left side is lit
+          // Outer circular arc on the left: from (cx, topY) to (cx, botY)
+          const outerArc = `M ${cx} ${topY} A ${r} ${r} 0 0 0 ${cx} ${botY}`;
+          // Terminator arc returning to top:
+          if (normalized < 0.75) {
+            // Gibbous: terminator bows into right (sweep-flag 0)
+            pathD = `${outerArc} A ${rx} ${r} 0 0 0 ${cx} ${topY} Z`;
+          } else {
+            // Crescent: terminator bows inward (sweep-flag 1)
+            pathD = `${outerArc} A ${rx} ${r} 0 0 1 ${cx} ${topY} Z`;
+          }
+        }
+
+        const moonPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        moonPath.setAttribute('d', pathD);
+        moonPath.setAttribute('fill', 'url(#washiMoonGrad)');
+        svg.appendChild(moonPath);
+      }
+
+      // Outer rim filament gold accent
+      const outerRim = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      outerRim.setAttribute('cx', cx);
+      outerRim.setAttribute('cy', cy);
+      outerRim.setAttribute('r', r);
+      outerRim.setAttribute('fill', 'none');
+      outerRim.setAttribute('stroke', illumFraction > 0.4 ? 'rgba(222, 178, 133, 0.45)' : 'rgba(255, 255, 255, 0.12)');
+      outerRim.setAttribute('stroke-width', '1');
+      svg.appendChild(outerRim);
+    }
+
+    /* ================================================================= */
+    /* 2. SHUIN SEAL STAMP RENDERER                                      */
+    /* ================================================================= */
+    const CHINESE_NUMS = ["零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖"];
+    
+    function toChineseSealNumeral(num) {
+      if (num < 10) return `第${CHINESE_NUMS[num]}日`;
+      if (num === 42) return "肆拾<br>贰日";
+      if (num === 100) return "壹佰<br>日吉";
+      if (num === 365) return "叁佰<br>陆拾";
+      
+      const tens = Math.floor(num / 10);
+      const units = num % 10;
+      const tStr = tens > 1 ? CHINESE_NUMS[tens] : "";
+      const uStr = units !== 0 ? CHINESE_NUMS[units] : "";
+      return `${tStr}拾<br>${uStr}日`;
+    }
+
+    function updateShuinValue(val) {
+      shuinValue = parseInt(val) || 0;
+      refreshShuinContent();
+    }
+
+    function setShuinGlyphMode(mode) {
+      shuinGlyphMode = mode;
+      document.getElementById('btnGlyphKanji').classList.toggle('active', mode === 'kanji');
+      document.getElementById('btnGlyphLatin').classList.toggle('active', mode === 'latin');
+      refreshShuinContent();
+    }
+
+    function setSealShape(shape) {
+      shuinShape = shape;
+      const seal = document.getElementById('shuinSealBody');
+      if (shape === 'organic') {
+        seal.style.borderRadius = '20px 18px 22px 19px';
+      } else if (shape === 'oval') {
+        seal.style.borderRadius = '32px';
+      } else {
+        seal.style.borderRadius = '12px';
+      }
+    }
+
+    function refreshShuinContent() {
+      const container = document.getElementById('shuinGlyphContainer');
+      if (shuinGlyphMode === 'kanji') {
+        container.innerHTML = `
+          <div class="shuin-text-kanji">${toChineseSealNumeral(shuinValue)}</div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div class="shuin-text-latin">${shuinValue}</div>
+          <div class="shuin-sub-label">DAYS</div>
+        `;
+      }
+    }
+
+    function triggerSealStamp() {
+      const seal = document.getElementById('shuinSealBody');
+      seal.classList.remove('stamping-active');
+      void seal.offsetWidth; // trigger reflow
+      seal.classList.add('stamping-active');
+    }
+
+    /* ================================================================= */
+    /* 3. KARESANSUI SAND GARDEN RENDERER (Dynamic Bezier Flow)         */
+    /* ================================================================= */
+    function updateKaresansuiProgress(val) {
+      karesansuiProgress = parseFloat(val);
+      const currDays = Math.round((karesansuiProgress / 100) * karesansuiTarget);
+      document.getElementById('karesansuiProgVal').textContent = `${karesansuiProgress.toFixed(1)}% (${currDays} / ${karesansuiTarget} Days)`;
+      document.getElementById('karesansuiStatsDisplay').textContent = `${currDays} / ${karesansuiTarget} DAYS · ${karesansuiProgress.toFixed(1)}%`;
+      renderSandGarden(karesansuiProgress);
+    }
+
+    function updateKaresansuiTitle(val) {
+      karesansuiTitle = val.trim() || 'GARDEN MILESTONE';
+      document.getElementById('karesansuiTitleDisplay').textContent = karesansuiTitle.toUpperCase();
+    }
+
+    function updateKaresansuiTarget(val) {
+      karesansuiTarget = parseInt(val) || 365;
+      updateKaresansuiProgress(karesansuiProgress);
+    }
+
+    function setStoneMineral(mineral) {
+      stoneMineral = mineral;
+      const dot = document.getElementById('karesansuiDot');
+      if (mineral === 'jade') dot.style.background = 'var(--w-jade)';
+      else if (mineral === 'basalt') dot.style.background = '#4A4742';
+      else dot.style.background = '#C9C0B3';
+      renderSandGarden(karesansuiProgress);
+    }
+
+    function renderSandGarden(progressPct) {
+      const svg = document.getElementById('sandSvg');
+      svg.innerHTML = '';
+
+      const width = 300;
+      const height = 36;
+      const isDark = document.body.getAttribute('data-theme') === 'dark';
+
+      const strokeColor = isDark ? 'rgba(244, 239, 230, 0.16)' : 'rgba(44, 36, 22, 0.14)';
+      const accentStroke = isDark ? 'rgba(229, 191, 146, 0.4)' : 'rgba(59, 91, 65, 0.35)';
+
+      // Boulder horizontal mapping: 25px (0%) to 275px (100%)
+      const boulderX = 25 + (progressPct / 100) * (width - 50);
+      const boulderY = 18;
+      const boulderRx = 10;
+      const boulderRy = 7.5;
+
+      // 5 Sand Ripple Tracks
+      const trackOffsets = [-12, -6, 0, 6, 12];
+
+      trackOffsets.forEach((offset, idx) => {
+        const lineY = boulderY + offset;
+        const distFromCenter = Math.abs(offset); // 0, 6, 12
+        
+        // Dynamic ripple diversion around boulder
+        // If line intersects or approaches boulder, curve around it
+        let d = "";
+        const arcRadiusX = 22 + distFromCenter * 1.2;
+        const arcSpreadY = offset >= 0 ? (boulderRy + 4 - offset * 0.15) : -(boulderRy + 4 - distFromCenter * 0.15);
+
+        const leftX = Math.max(0, boulderX - arcRadiusX);
+        const rightX = Math.min(width, boulderX + arcRadiusX);
+
+        if (leftX > 0 && rightX < width) {
+          // Continuous smooth curve using cubic Bezier
+          const cp1x = boulderX - arcRadiusX * 0.55;
+          const cp1y = lineY + arcSpreadY * 0.85;
+          const midX = boulderX;
+          const midY = lineY + arcSpreadY;
+          const cp2x = boulderX + arcRadiusX * 0.55;
+          const cp2y = lineY + arcSpreadY * 0.85;
+
+          d = `M 0 ${lineY} L ${leftX} ${lineY} C ${cp1x} ${cp1y}, ${cp1x + 6} ${midY}, ${midX} ${midY} C ${cp2x - 6} ${midY}, ${cp2x} ${cp2y}, ${rightX} ${lineY} L ${width} ${lineY}`;
+        } else {
+          d = `M 0 ${lineY} L ${width} ${lineY}`;
+        }
+
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', d);
+        path.setAttribute('fill', 'none');
+        path.setAttribute('stroke', idx === 2 ? accentStroke : strokeColor);
+        path.setAttribute('stroke-width', idx === 2 ? '1.5' : '1.1');
+        path.setAttribute('stroke-linecap', 'round');
+        svg.appendChild(path);
+      });
+
+      // Render the River-smoothed Milestone Boulder
+      const boulder = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+      boulder.setAttribute('cx', boulderX);
+      boulder.setAttribute('cy', boulderY);
+      boulder.setAttribute('rx', boulderRx);
+      boulder.setAttribute('ry', boulderRy);
+
+      if (stoneMineral === 'jade') {
+        boulder.setAttribute('fill', isDark ? '#5C8263' : '#3B5B41');
+        boulder.setAttribute('stroke', isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)');
+      } else if (stoneMineral === 'basalt') {
+        boulder.setAttribute('fill', isDark ? '#4F4C47' : '#3A3834');
+        boulder.setAttribute('stroke', isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.25)');
+      } else {
+        boulder.setAttribute('fill', isDark ? '#8A857D' : '#D6CEC2');
+        boulder.setAttribute('stroke', isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.12)');
+      }
+      boulder.setAttribute('stroke-width', '1.2');
+      boulder.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))';
+      svg.appendChild(boulder);
+
+      // Boulder top reflection highlight
+      const highlight = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
+      highlight.setAttribute('cx', boulderX - 2.5);
+      highlight.setAttribute('cy', boulderY - 2.2);
+      highlight.setAttribute('rx', 4);
+      highlight.setAttribute('ry', 2);
+      highlight.setAttribute('fill', 'rgba(255, 255, 255, 0.28)');
+      svg.appendChild(highlight);
+    }
+  </script>
+</body>
+</html>

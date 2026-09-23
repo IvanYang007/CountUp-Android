@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Preview asset for Shuin (金石朱印 · 1x1) Cinnabar Seal Widget in launcher widget picker.
+     Containerless organic wabi-sabi cinnabar seal with bone-white typography. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="76dp"
+    android:height="88dp"
+    android:viewportWidth="76"
+    android:viewportHeight="88">
+
+    <!-- Soft Ambient Ground Shadow -->
+    <path
+        android:fillColor="#30000000"
+        android:pathData="M 18,5 h 40 c 12,0 16,6 16,19 v 44 c 0,13 -5,19 -17,19 h -38 c -12,0 -17,-6 -17,-19 v -44 c 0,-13 4,-19 16,-19 z" />
+
+    <!-- Cinnabar Stone Seal Body (Matte Terracotta/Cinnabar, Wabi-Sabi Asymmetry) -->
+    <path
+        android:fillColor="#A22818"
+        android:pathData="M 18,3 h 40 c 12,0 16,6 16,19 v 44 c 0,13 -5,19 -17,19 h -38 c -12,0 -17,-6 -17,-19 v -44 c 0,-13 4,-19 16,-19 z" />
+
+    <!-- Inner Eroded Hairline Rim (Crisp, delicate dashed stone edge) -->
+    <path
+        android:strokeColor="#55FAF4EE"
+        android:strokeWidth="1.2"
+        android:pathData="M 20,7 h 36 c 9,0 13,5 13,15 v 40 c 0,10 -4,15 -13,15 h -36 c -9,0 -13,-5 -13,-15 v -40 c 0,-10 4,-15 13,-15 z" />
+
+</vector>
