@@ -3,8 +3,8 @@
   "repository": "CountUp-Android",
   "scope": "repository",
   "generated_from": {
-    "head": "d8a5df1f909887ddb1e424105cd72902106f6ceb",
-    "commits_analyzed": 203,
+    "head": "f902d51c68548d424c9dd869af6d69a9bcdbe591",
+    "commits_analyzed": 205,
     "date_range": [
       "2026-08-20",
       "2026-09-22"
@@ -13,16 +13,18 @@
   "rules": [
     {
       "id": "PL-001",
-      "text": "In zen_pebble_widget_info.xml, declare android:resizeMode=\"none\" and android:widgetFeatures=\"reconfigurable\"; never set resize modes or add configuration_optional.",
+      "text": "In single-cell widget info XMLs, declare android:resizeMode=\"none\" and android:widgetFeatures=\"reconfigurable\"; never set resize modes or add configuration_optional. Enforce all widget metadata contracts, ampersand escaping, and 2-line wrapping through automated JVM tests (WidgetContractInvariantsTest.kt).",
       "grade": "observed",
       "evidence": [
         "1cd6e29d1",
         "433f1d47b",
         "b6b4ce0ba",
-        "471e4cc69"
+        "e60f514",
+        "f902d51"
       ],
       "paths": [
-        "app/src/main/res/xml/zen_pebble_widget_info.xml"
+        "app/src/main/res/xml/zen_pebble_widget_info.xml",
+        "app/src/test/java/com/countup/app/WidgetContractInvariantsTest.kt"
       ],
       "phase": "recurrence"
     },
@@ -55,25 +57,25 @@
     },
     {
       "id": "PL-004",
-      "text": "Quarantine corrupted raw payloads to items_v1_quarantine and abort backup overwriting whenever item decoding fails.",
+      "text": "Wrap all persistence mutations in synchronized(globalStoreLock). Write disk backups via temporary file replacement (Files.move with REPLACE_EXISTING), and quarantine unparseable payloads in items_v1_quarantine rather than overwriting valid backups.",
       "grade": "observed",
       "evidence": [
         "c678dd3fd",
+        "625f2c387",
         "92262bb43"
       ],
       "paths": [
-        "app/src/main/java/com/countup/app/CountUpItem.kt",
         "app/src/main/java/com/countup/app/CountUpStore.kt"
       ],
-      "phase": "recurrence"
+      "phase": "conventions"
     },
     {
       "id": "PL-005",
-      "text": "Wrap all persistence mutations in synchronized(globalStoreLock) and write disk backups via temporary file replacement.",
+      "text": "Invoke purgeWidgetBindingsForItem(itemId) across all configurable widget families inside CountUpStore.deleteItem().",
       "grade": "observed",
       "evidence": [
-        "c678dd3fd",
-        "625f2c387"
+        "92262bb43",
+        "2c00bcb"
       ],
       "paths": [
         "app/src/main/java/com/countup/app/CountUpStore.kt"
@@ -82,43 +84,40 @@
     },
     {
       "id": "PL-006",
-      "text": "Invoke purgeWidgetBindingsForItem(itemId) across all four configurable widget families inside CountUpStore.deleteItem().",
-      "grade": "observed",
-      "evidence": [
-        "92262bb43"
-      ],
-      "paths": [
-        "app/src/main/java/com/countup/app/CountUpStore.kt"
-      ],
-      "phase": "recurrence"
-    },
-    {
-      "id": "PL-007",
-      "text": "Verify that serialized RemoteViews parcels stay strictly under 40KB via WidgetMemoryBudgetGateTest.",
+      "text": "Verify serialized RemoteViews parcels stay strictly under 40KB via WidgetMemoryBudgetGateTest. Clamp procedural bitmaps using computeSafeDimensions or computeSafeSize (W x H x 4 <= 24 KB for 1x1, <= 32 KB for 2x2) and adopt the 1:1.18 tall seal aspect ratio on vertical launcher grids.",
       "grade": "observed",
       "evidence": [
         "227b2f372",
-        "82e9024d7"
+        "82e9024d7",
+        "d8a5df1",
+        "2c00bcb"
       ],
       "paths": [
-        "app/src/main/java/com/countup/app/WidgetMemoryBudgetGate.kt"
+        "app/src/main/java/com/countup/app/ShuinSealRenderer.kt",
+        "app/src/main/java/com/countup/app/TsukimiMoonRenderer.kt",
+        "app/src/test/java/com/countup/app/WidgetMemoryBudgetGateTest.kt"
+      ],
+      "phase": "conventions"
+    },
+    {
+      "id": "PL-007",
+      "text": "Always reuse canonical ItemCard across all widget configure screens with no-op handlers. Standardize haptics to TextHandleMove, use explicit size(26.dp) or size(30.dp) on compact action clusters, and apply clipping exclusively to outer card containers.",
+      "grade": "observed",
+      "evidence": [
+        "92262bb43",
+        "776560d",
+        "2c00bcb"
+      ],
+      "paths": [
+        "app/src/main/java/com/countup/app/CountUpContent.kt",
+        "app/src/main/java/com/countup/app/TsukimiConfigureActivity.kt",
+        "app/src/main/java/com/countup/app/ShuinConfigureActivity.kt",
+        "app/src/main/java/com/countup/app/ZenOrbitConfigureActivity.kt"
       ],
       "phase": "conventions"
     },
     {
       "id": "PL-008",
-      "text": "Use explicit size(26.dp) or size(30.dp) on action clusters and apply clip() exclusively to outer card containers.",
-      "grade": "observed",
-      "evidence": [
-        "92262bb43"
-      ],
-      "paths": [
-        "app/src/main/java/com/countup/app/CountUpContent.kt"
-      ],
-      "phase": "conventions"
-    },
-    {
-      "id": "PL-009",
       "text": "Maintain <queries> for RecognitionService and RECOGNIZE_SPEECH and delegate audio capture out-of-process via RecognizerIntent.",
       "grade": "observed",
       "evidence": [
@@ -126,38 +125,44 @@
         "966928a"
       ],
       "paths": [
-        "app/src/main/AndroidManifest.xml"
+        "app/src/main/AndroidManifest.xml",
+        "app/src/main/java/com/countup/app/MainActivity.kt"
       ],
-      "phase": "removals"
+      "phase": "conventions"
     },
     {
-      "id": "PL-010",
-      "text": "Validate appWidgetId != INVALID_APPWIDGET_ID, verify caller identity, and return results containing only EXTRA_APPWIDGET_ID.",
+      "id": "PL-009",
+      "text": "Validate appWidgetId != INVALID_APPWIDGET_ID, verify caller identity against package ownership, and return results containing only EXTRA_APPWIDGET_ID.",
       "grade": "observed",
       "evidence": [
-        "92262bb43"
+        "92262bb43",
+        "2c00bcb"
       ],
       "paths": [
-        "app/src/main/java/com/countup/app/HeroWidgetConfigureActivity.kt",
+        "app/src/main/java/com/countup/app/TsukimiConfigureActivity.kt",
+        "app/src/main/java/com/countup/app/ShuinConfigureActivity.kt",
+        "app/src/main/java/com/countup/app/ZenOrbitConfigureActivity.kt",
         "app/src/main/java/com/countup/app/ZenPebbleConfigureActivity.kt"
       ],
       "phase": "conventions"
     },
     {
-      "id": "PL-011",
-      "text": "Invoke MidnightAlarmReceiver.scheduleMidnightAlarm(context) with RTC_WAKEUP inside widget onUpdate() and onEnabled().",
+      "id": "PL-010",
+      "text": "Compute next midnight using now.toLocalDate().plusDays(1).atStartOfDay(now.zone).plusSeconds(1).toInstant().toEpochMilli(). Re-register via RTC_WAKEUP in widget onUpdate() / onEnabled(), and listen for ACTION_MY_PACKAGE_REPLACED in the manifest to restore rollover alarms across app updates.",
       "grade": "observed",
       "evidence": [
         "625f2c387",
+        "5fa0136",
         "92262bb43"
       ],
       "paths": [
+        "app/src/main/AndroidManifest.xml",
         "app/src/main/java/com/countup/app/MidnightAlarmReceiver.kt"
       ],
       "phase": "conventions"
     },
     {
-      "id": "PL-012",
+      "id": "PL-011",
       "text": "Never run an aggressive orphaned-binding purge on app startup. Implement onRestored(oldIds, newIds) on all AppWidgetProvider classes delegating to CountUpStore.remapWidgetBindings, and restrict deletion to onDeleted() or deleteItem().",
       "grade": "observed",
       "evidence": [
@@ -165,26 +170,12 @@
         "92262bb"
       ],
       "paths": [
-        "app/src/main/java/com/countup/app/CountUpWidget.kt",
         "app/src/main/java/com/countup/app/CountUpStore.kt"
       ],
-      "phase": "recurrence"
+      "phase": "conventions"
     },
     {
-      "id": "PL-013",
-      "text": "Compute next midnight using now.toLocalDate().plusDays(1).atStartOfDay(now.zone).plusSeconds(1).toInstant().toEpochMilli() to safely cross DST boundaries, and register ACTION_MY_PACKAGE_REPLACED.",
-      "grade": "observed",
-      "evidence": [
-        "5fa0136",
-        "92262bb"
-      ],
-      "paths": [
-        "app/src/main/java/com/countup/app/MidnightAlarmReceiver.kt"
-      ],
-      "phase": "recurrence"
-    },
-    {
-      "id": "PL-014",
+      "id": "PL-012",
       "text": "Use FileOutputStream.fd.sync() paired with java.nio.file.Files.move(tempPath, targetPath, StandardCopyOption.REPLACE_EXISTING) for robust atomic file snapshots across both Android and desktop unit test environments.",
       "grade": "observed",
       "evidence": [
@@ -194,11 +185,11 @@
       "paths": [
         "app/src/main/java/com/countup/app/CountUpStore.kt"
       ],
-      "phase": "recurrence"
+      "phase": "conventions"
     },
     {
-      "id": "PL-015",
-      "text": "In centered responsive layouts, apply .widthIn(max = 640.dp) before .fillMaxWidth().fillMaxHeight() to ensure constraints scale correctly on foldables and tablets.",
+      "id": "PL-013",
+      "text": "In centered responsive layouts, apply .widthIn(max = 640.dp) before .fillMaxWidth().fillMaxHeight().",
       "grade": "observed",
       "evidence": [
         "6395b8f"
@@ -209,38 +200,36 @@
       "phase": "conventions"
     },
     {
-      "id": "PL-016",
-      "text": "Declare both previewLayout and previewImage, populating layout XMLs with default localized strings and preview tracks to deliver authentic living dual-locale (EN/ZH) previews in pickers.",
+      "id": "PL-014",
+      "text": "When using android:previewLayout, always populate layout XMLs with default localized @string/... text and static preview tracks across all 7 locale files. Whenever adjusting typography baselines, dash widths, or letter spacing in live widget layouts, immediately synchronize the corresponding android:previewImage vector drawable.",
       "grade": "observed",
       "evidence": [
         "d99a22f",
         "6395b8f",
-        "f21a203"
+        "f21a203",
+        "c94856d"
       ],
       "paths": [
-        "app/src/main/res/xml/zen_pebble_widget_info.xml",
-        "app/src/main/res/xml/zen_horizon_widget_info.xml",
-        "app/src/main/res/xml/solar_rhythm_widget_info.xml",
-        "app/src/main/res/xml/hero_widget_info.xml",
-        "app/src/main/res/xml/haircut_widget_info.xml"
+        "app/src/main/res/drawable/preview_shuin_seal.xml",
+        "app/src/main/res/drawable/preview_tsukimi_moon.xml",
+        "app/src/main/res/drawable/zen_pebble_widget_preview.xml"
       ],
-      "phase": "recurrence"
+      "phase": "conventions"
     },
     {
-      "id": "PL-017",
-      "text": "Never call window.setStatusBarColor() or window.setNavigationBarColor(); set layoutInDisplayCutoutMode = ALWAYS on API 28+, isNavigationBarContrastEnforced = false on API 29+, and manage bar contrast dynamically via WindowCompat.getInsetsController for Android 15 edge-to-edge compliance.",
+      "id": "PL-015",
+      "text": "Never call window.setStatusBarColor() or window.setNavigationBarColor(). Set layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS on API 28+, isNavigationBarContrastEnforced = false on API 29+, and manage icon contrast via WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars.",
       "grade": "observed",
       "evidence": [
         "fcbddc8"
       ],
       "paths": [
-        "app/src/main/java/com/countup/app/EdgeToEdge.kt",
-        "app/src/main/java/com/countup/app/ZenTheme.kt"
+        "app/src/main/java/com/countup/app/MainActivity.kt"
       ],
       "phase": "conventions"
     },
     {
-      "id": "PL-018",
+      "id": "PL-016",
       "text": "Always set a unique data URI (intent.data = Uri.parse(\"countup://widget/overview/$appWidgetId\")) on any service intent passed to views.setRemoteAdapter() when multiple widget instances display instance-specific collections.",
       "grade": "observed",
       "evidence": [
@@ -249,35 +238,23 @@
       "paths": [
         "app/src/main/java/com/countup/app/CountUpWidget.kt"
       ],
-      "phase": "recurrence"
-    },
-    {
-      "id": "PL-019",
-      "text": "Write automated contract invariant tests (WidgetContractInvariantsTest.kt) that parse and validate XML files directly, turning written guidelines into executable red/green assertions in CI.",
-      "grade": "observed",
-      "evidence": [
-        "e60f514"
-      ],
-      "paths": [
-        "app/src/test/java/com/countup/app/WidgetContractInvariantsTest.kt"
-      ],
       "phase": "conventions"
     },
     {
-      "id": "PL-020",
-      "text": "Use defensive bounds checking (rows.getOrNull(position)) in RemoteViewsFactory to avoid IndexOutOfBoundsException during asynchronous launcher scroll races.",
+      "id": "PL-017",
+      "text": "In all RemoteViewsFactory implementations, always use defensive bounds checking (rows.getOrNull(position) ?: return RemoteViews(...) and rows.getOrNull(position)?.id?.hashCode()?.toLong() ?: position.toLong()) instead of raw array indexing.",
       "grade": "observed",
       "evidence": [
         "ddee9c5"
       ],
       "paths": [
-        "app/src/main/java/com/countup/app/CountUpWidget.kt"
+        "app/src/main/java/com/countup/app/CountUpWidgetService.kt"
       ],
-      "phase": "recurrence"
+      "phase": "conventions"
     },
     {
-      "id": "PL-021",
-      "text": "Default modal option toggles to calm OFF (showInWidget = true / isHiddenFromWidget = false) for exclusion overrides, mirroring the active override with quiet micro-indicators (ic_widget_off, 11dp, 50-55% alpha) on compact card surfaces.",
+      "id": "PL-018",
+      "text": "Default modal option toggles to calm OFF (在微件中隐藏 = false) for exclusion or suppression overrides. Mirror the active override state with subtle, subdued micro-symbols (ic_widget_off, 11dp, 50-55% alpha) on compact card surfaces beside status pins.",
       "grade": "observed",
       "evidence": [
         "908bbb3"
@@ -290,11 +267,12 @@
       "phase": "conventions"
     },
     {
-      "id": "PL-022",
+      "id": "PL-019",
       "text": "In circular glanceable widgets, unify the visual path into a single generous orbit track (8dp-proportional gauge) with the cadence milestone nestled directly on the track. Strip container backgrounds and borders from secondary milestone labels, rendering them as quiet, unboxed whispers without negative deficit math.",
       "grade": "observed",
       "evidence": [
-        "9d41839"
+        "9d41839",
+        "d8a5df1"
       ],
       "paths": [
         "app/src/main/java/com/countup/app/ZenOrbitTrackRenderer.kt",
@@ -303,57 +281,19 @@
       "phase": "conventions"
     },
     {
-      "id": "PL-023",
-      "text": "Always reuse the canonical ItemCard composable in widget configure activities with no-op delete/reset handlers and TextHandleMove haptics instead of introducing bespoke card selection rows.",
+      "id": "PL-020",
+      "text": "In compact RemoteViews (1x1 and 2x2), replace fixed heights with proportional layout_weight (layout_weight=\"1.2\" moon disc, layout_weight=\"1.0\" pedestal). Bound numeral auto-sizing (12-24sp on 1x1, 14-30sp on 2x2), configure 2-line auto-sizing tags (maxLines=\"2\", autoSizeTextType=\"uniform\", 6.5-9sp), and dynamically hide decorative hairline dashes in the receiver when tags wrap or exceed 10 chars.",
       "grade": "observed",
       "evidence": [
-        "776560d"
+        "c94856d",
+        "f902d51"
       ],
       "paths": [
-        "app/src/main/java/com/countup/app/ZenOrbitConfigureActivity.kt",
-        "app/src/main/java/com/countup/app/HeroWidgetConfigureActivity.kt",
-        "app/src/main/java/com/countup/app/ZenHorizonConfigureActivity.kt"
-      ],
-      "phase": "conventions"
-    },
-    {
-      "id": "PL-024",
-      "text": "In RemoteViews layouts utilizing autoSizeTextType=\"uniform\", always define explicit baseline attributes: android:textSize=\"36sp\", autoSizeMaxTextSize=\"36sp\", and autoSizeMinTextSize=\"12sp\" to prevent measure collapse.",
-      "grade": "observed",
-      "evidence": [
-        "c94856d"
-      ],
-      "paths": [
+        "app/src/main/res/layout/widget_tsukimi_2x2.xml",
         "app/src/main/res/layout/widget_zen_pebble_1x1.xml",
-        "app/src/main/res/drawable/zen_pebble_widget_preview.xml"
-      ],
-      "phase": "recurrence"
-    },
-    {
-      "id": "PL-025",
-      "text": "Adopt authentic 1:1.18 tall seal aspect ratio (ASPECT_RATIO = 1.18f) for 1x1 widget canvases and clamp procedural bitmap allocations via computeSafeDimensions where W x H x 4 <= 24KB.",
-      "grade": "observed",
-      "evidence": [
-        "c94856d"
-      ],
-      "paths": [
-        "app/src/main/java/com/countup/app/ShuinSealRenderer.kt",
-        "app/src/main/java/com/countup/app/TsukimiMoonRenderer.kt",
-        "app/src/main/res/layout/widget_shuin_1x1.xml"
-      ],
-      "phase": "conventions"
-    },
-    {
-      "id": "PL-026",
-      "text": "Whenever adjusting typography baselines, dash widths, or letter spacing in widget layout XMLs, immediately synchronize the corresponding android:previewImage vector drawable.",
-      "grade": "observed",
-      "evidence": [
-        "c94856d"
-      ],
-      "paths": [
-        "app/src/main/res/drawable/preview_shuin_seal.xml",
-        "app/src/main/res/drawable/preview_tsukimi_moon.xml",
-        "app/src/main/res/drawable/zen_pebble_widget_preview.xml"
+        "app/src/main/res/layout/widget_shuin_1x1.xml",
+        "app/src/main/res/layout/widget_zen_orbit_2x2.xml",
+        "app/src/main/java/com/countup/app/ZenPebbleWidgetReceiver.kt"
       ],
       "phase": "conventions"
     }
@@ -362,7 +302,7 @@
     {
       "path": "app/build.gradle.kts",
       "score": 233.0,
-      "why": "Central build and signing configuration; frequent version bumps and multi-tier credential resolution.",
+      "why": "Build configuration, dependency updates, and packaging options.",
       "evidence": [
         "7b1c9c36a",
         "662675d61",
@@ -372,7 +312,7 @@
     {
       "path": "app/src/main/java/com/countup/app/CountUpContent.kt",
       "score": 223.8,
-      "why": "Primary Compose UI screen containing action clusters, dialog triggers, and responsive layout scaling.",
+      "why": "Core Compose UI rendering, touch targets, and card interactions.",
       "evidence": [
         "45dd6e198",
         "5522dec24",
@@ -382,7 +322,7 @@
     {
       "path": "app/src/main/java/com/countup/app/CountUpStore.kt",
       "score": 134.2,
-      "why": "Storage engine handling concurrent shared preferences, atomic backup files, and corrupted payload quarantine.",
+      "why": "Persistence, JSON backup decoding, and widget binding lifecycle.",
       "evidence": [
         "c678dd3fd",
         "625f2c387",
@@ -392,7 +332,7 @@
     {
       "path": "app/src/main/java/com/countup/app/HeroWidgetReceiver.kt",
       "score": 131.6,
-      "why": "Primary widget broadcast receiver handling daily midnight rollovers and interactive counter resets.",
+      "why": "RemoteViews broadcast receiver, intent wiring, and theme dispatch.",
       "evidence": [
         "58618f707",
         "20cd2677f",
@@ -402,7 +342,7 @@
     {
       "path": "app/src/main/res/xml/zen_pebble_widget_info.xml",
       "score": 91.0,
-      "why": "1x1 widget XML descriptor subject to OEM slot-0 snapping and configuration_optional suppression traps.",
+      "why": "Single-cell widget launcher placement and auto-launch configure contracts.",
       "evidence": [
         "b6b4ce0ba",
         "1cd6e29d1",
@@ -412,7 +352,7 @@
     {
       "path": "app/src/main/AndroidManifest.xml",
       "score": 115.6,
-      "why": "Application manifest enforcing zero permissions via tools:node=\"remove\" and package queries.",
+      "why": "Component export security, zero-permission manifest, and startup stripper.",
       "evidence": [
         "3c8663262",
         "625f2c387",
@@ -423,50 +363,50 @@
   "couplings": [
     {
       "pair": [
-        "app/src/main/java/com/countup/app/CountUpContent.kt",
-        "app/src/main/java/com/countup/app/CountUpViewModel.kt"
+        "CountUpContent.kt",
+        "CountUpViewModel.kt"
       ],
       "count": 18
     },
     {
       "pair": [
-        "app/src/main/java/com/countup/app/CountUpContent.kt",
-        "app/src/main/java/com/countup/app/CountUpDialogs.kt"
+        "CountUpContent.kt",
+        "CountUpDialogs.kt"
       ],
       "count": 17
     },
     {
       "pair": [
-        "app/src/main/java/com/countup/app/CountUpContract.kt",
-        "app/src/main/java/com/countup/app/CountUpViewModel.kt"
+        "CountUpContract.kt",
+        "CountUpViewModel.kt"
       ],
       "count": 15
     },
     {
       "pair": [
-        "app/src/main/java/com/countup/app/CountUpContent.kt",
-        "app/src/main/java/com/countup/app/CountUpStore.kt"
+        "CountUpContent.kt",
+        "CountUpStore.kt"
       ],
       "count": 14
     },
     {
       "pair": [
-        "app/src/main/java/com/countup/app/HeroWidgetReceiver.kt",
-        "app/src/main/java/com/countup/app/ZenHorizonWidgetReceiver.kt"
+        "HeroWidgetReceiver.kt",
+        "ZenHorizonWidgetReceiver.kt"
       ],
       "count": 12
     },
     {
       "pair": [
-        "app/src/main/java/com/countup/app/CountUpItem.kt",
-        "app/src/main/java/com/countup/app/CountUpStore.kt"
+        "CountUpItem.kt",
+        "CountUpStore.kt"
       ],
       "count": 10
     },
     {
       "pair": [
-        "app/src/main/java/com/countup/app/HeroWidgetReceiver.kt",
-        "app/src/main/java/com/countup/app/ZenPebbleWidgetReceiver.kt"
+        "HeroWidgetReceiver.kt",
+        "ZenPebbleWidgetReceiver.kt"
       ],
       "count": 10
     }
@@ -474,31 +414,31 @@
   "checklist": [
     {
       "id": "PL-C1",
-      "text": "Run ./gradlew testDebugUnitTest to verify all 445 existing unit and contract tests pass.",
+      "text": "Run ./gradlew testDebugUnitTest to verify all existing unit and contract tests pass.",
       "evidence": [
-        "92262bb43"
+        "e60f514"
       ]
     },
     {
       "id": "PL-C2",
       "text": "Confirm the tree is clean: git status --porcelain.",
       "evidence": [
-        "32f6f3621"
+        "e60f514"
       ]
     },
     {
       "id": "PL-C3",
       "text": "Read docs/RECURRING_ISSUES.md before touching any widget provider or XML layout.",
       "evidence": [
-        "433f1d47b"
+        "e60f514"
       ]
     },
     {
       "id": "PL-C4",
       "text": "Maintain zero runtime permissions; never add RECORD_AUDIO or RECEIVE_BOOT_COMPLETED to AndroidManifest.xml.",
       "evidence": [
-        "625f2c387",
-        "6d9fe4f"
+        "6d9fe4f",
+        "625f2c387"
       ]
     },
     {
@@ -511,13 +451,28 @@
     },
     {
       "id": "PL-C6",
+      "text": "Ensure all widget info XMLs declare both previewImage and previewLayout with populated localized @string/... default text.",
+      "evidence": [
+        "6395b8f",
+        "c94856d"
+      ]
+    },
+    {
+      "id": "PL-C7",
+      "text": "Set unique data URIs (intent.data = Uri.parse(...)) on collection service intents to avoid RemoteViews adapter factory cache collisions.",
+      "evidence": [
+        "e60f514"
+      ]
+    },
+    {
+      "id": "PL-C8",
       "text": "Omit Modifier.minimumInteractiveComponentSize() from 26dp subheader and 30dp card action button clusters.",
       "evidence": [
         "92262bb43"
       ]
     },
     {
-      "id": "PL-C7",
+      "id": "PL-C9",
       "text": "Wrap all CountUpStore mutations in synchronized(globalStoreLock) and invoke purgeWidgetBindingsForItem(itemId) on deletion.",
       "evidence": [
         "625f2c387",
@@ -525,17 +480,24 @@
       ]
     },
     {
-      "id": "PL-C8",
+      "id": "PL-C10",
+      "text": "In compact RemoteViews, use weighted layout heights and auto-sizing 2-line tags to prevent OEM cell clipping.",
+      "evidence": [
+        "f902d51"
+      ]
+    },
+    {
+      "id": "PL-C11",
       "text": "Run ./gradlew assembleRelease to confirm R8 rules preserve all data models, enums, and widget providers.",
       "evidence": [
-        "3c8663262",
         "92262bb43"
       ]
     },
     {
-      "id": "PL-C9",
+      "id": "PL-C12",
       "text": "Verify widget RemoteViews payload remains below 40KB via WidgetMemoryBudgetGateTest.",
       "evidence": [
+        "227b2f372",
         "82e9024d7"
       ]
     }
