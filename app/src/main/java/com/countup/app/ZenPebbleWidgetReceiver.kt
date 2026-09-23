@@ -105,7 +105,8 @@ private fun buildZenPebbleRemoteViews(
         today = today,
         isDarkMode = isDark,
     )
-    val oneWordLabel = item.resolveOneWordLabel(customTag)
+    val displayName = customTag?.takeIf { it.isNotBlank() }?.trim() ?: item.name.trim()
+    val isLongTag = displayName.length > 10 || displayName.contains("\n")
 
     // Set tranquil background with adaptive pebble corners (16dp / system radius on v31)
     views.setInt(R.id.zen_pebble_bg, "setColorFilter", widgetState.palette.canvasBg)
@@ -133,11 +134,16 @@ private fun buildZenPebbleRemoteViews(
     views.setTextViewText(R.id.zen_pebble_unit, unitDays)
     views.setTextColor(R.id.zen_pebble_unit, widgetState.palette.secondaryInk)
 
-    // Hairline ink dash using semantic theme token
-    views.setInt(R.id.zen_pebble_dash, "setBackgroundColor", widgetState.palette.microDivider)
+    // Hairline ink dash (hidden when tag wraps to 2 lines to preserve vertical breathing room)
+    if (isLongTag) {
+        views.setViewVisibility(R.id.zen_pebble_dash, View.GONE)
+    } else {
+        views.setViewVisibility(R.id.zen_pebble_dash, View.VISIBLE)
+        views.setInt(R.id.zen_pebble_dash, "setBackgroundColor", widgetState.palette.microDivider)
+    }
 
-    // Subtle 1-word tag
-    views.setTextViewText(R.id.zen_pebble_tag, oneWordLabel)
+    // Event tag — supports 2-line auto-sizing wrap
+    views.setTextViewText(R.id.zen_pebble_tag, displayName)
     views.setTextColor(R.id.zen_pebble_tag, widgetState.palette.accentPrimary)
 
     // Tap anywhere on pebble opens specific event in CountUp

@@ -32,14 +32,14 @@
         android:orientation="vertical"
         android:padding="2dp">
 
-        <!-- Bold Bone-White Milestone Numeral (Auto-sizing 26sp down to 12sp with text-shadow) -->
+        <!-- Bold Bone-White Milestone Numeral (Auto-sizing 24sp down to 11sp with text-shadow) -->
         <TextView
             android:id="@+id/shuin_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:autoSizeTextType="uniform"
-            android:autoSizeMinTextSize="12sp"
-            android:autoSizeMaxTextSize="26sp"
+            android:autoSizeMinTextSize="11sp"
+            android:autoSizeMaxTextSize="24sp"
             android:autoSizeStepGranularity="1sp"
             android:textStyle="bold"
             android:textColor="#FAF4EE"
@@ -59,7 +59,7 @@
             android:id="@+id/shuin_unit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="1dp"
+            android:layout_marginTop="0.5dp"
             android:textSize="6.5sp"
             android:textStyle="bold"
             android:letterSpacing="0.08"
@@ -68,17 +68,24 @@
             android:shadowDx="0"
             android:shadowDy="1"
             android:shadowRadius="2"
+            android:includeFontPadding="false"
             android:singleLine="true"
             android:text="@string/unit_days"
             tools:text="DAYS" />
 
-        <!-- Item Name at the bottom -->
+        <!-- Item Name at the bottom — supports 2 lines with auto-sizing and ellipsize -->
         <TextView
             android:id="@+id/shuin_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:textSize="7sp"
+            android:layout_marginTop="1.5dp"
+            android:paddingStart="3dp"
+            android:paddingEnd="3dp"
+            android:textSize="7.5sp"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="5.5sp"
+            android:autoSizeMaxTextSize="8sp"
+            android:autoSizeStepGranularity="0.5sp"
             android:textStyle="bold"
             android:letterSpacing="0.05"
             android:textColor="#E8FAF4EE"
@@ -86,10 +93,11 @@
             android:shadowDx="0"
             android:shadowDy="1"
             android:shadowRadius="2"
-            android:singleLine="true"
-            android:ellipsize="end"
+            android:lineSpacingMultiplier="0.9"
+            android:includeFontPadding="false"
             android:gravity="center"
-            android:maxLines="1"
+            android:maxLines="2"
+            android:ellipsize="end"
             android:text="@string/preview_item_title"
             tools:text="SOBRIETY" />
 

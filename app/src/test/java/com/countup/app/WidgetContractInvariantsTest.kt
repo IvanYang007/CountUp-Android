@@ -167,9 +167,34 @@ class WidgetContractInvariantsTest {
             content.contains("android:autoSizeTextType=\"uniform\"")
         )
         assertTrue(
-            "Pebble tag must use singleLine and ellipsize to prevent overflow on tight cells",
-            content.contains("android:ellipsize=\"end\"") && content.contains("android:singleLine=\"true\"")
+            "Pebble tag must use maxLines=2 and ellipsize with autoSizeTextType to support 2-line wrapping",
+            content.contains("android:ellipsize=\"end\"") &&
+                content.contains("android:maxLines=\"2\"") &&
+                content.contains("android:autoSizeTextType=\"uniform\"")
         )
+    }
+
+    @Test
+    fun allCompactWidgetsSupportTwoLineWrapping() {
+        val widgetLayouts = listOf(
+            "widget_zen_pebble_1x1.xml",
+            "widget_shuin_1x1.xml",
+            "widget_tsukimi_2x2.xml",
+            "widget_zen_orbit_2x2.xml",
+        )
+        for (layoutName in widgetLayouts) {
+            val candidates = listOf(
+                File("app/src/main/res/layout/$layoutName"),
+                File("src/main/res/layout/$layoutName"),
+            )
+            val file = candidates.firstOrNull { it.exists() }
+            assertNotNull("$layoutName must exist", file)
+            val content = file!!.readText(Charsets.UTF_8)
+            assertTrue(
+                "$layoutName must support 2-line wrapping with maxLines=\"2\"",
+                content.contains("android:maxLines=\"2\"")
+            )
+        }
     }
 
     @Test

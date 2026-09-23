@@ -33,30 +33,44 @@
             android:gravity="center"
             android:orientation="vertical">
 
-            <!-- Event Tag -->
+            <!-- Event Tag — supports 2 lines with auto-sizing -->
             <TextView
                 android:id="@+id/zen_orbit_tag"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="9sp"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="6.5sp"
+                android:autoSizeMaxTextSize="9sp"
+                android:autoSizeStepGranularity="0.5sp"
                 android:textStyle="bold"
-                android:letterSpacing="0.10"
+                android:letterSpacing="0.08"
                 android:textColor="#7A6F62"
-                android:singleLine="true"
+                android:lineSpacingMultiplier="0.92"
+                android:includeFontPadding="false"
+                android:gravity="center"
+                android:maxLines="2"
                 android:ellipsize="end"
-                android:maxWidth="72dp"
+                android:maxWidth="86dp"
                 android:text="@string/preview_item_tag"
-                tools:text="SOBRIETY" />
+                tools:text="SOBER &amp;&#10;SERENE" />
 
             <!-- Big Numeral -->
             <TextView
                 android:id="@+id/zen_orbit_number"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="32sp"
+                android:textSize="30sp"
+                android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="14sp"
+                android:autoSizeMaxTextSize="30sp"
+                android:autoSizeStepGranularity="1sp"
                 android:textStyle="bold"
                 android:includeFontPadding="false"
                 android:textColor="#2C2416"
+                android:gravity="center"
+                android:maxLines="1"
+                android:singleLine="true"
                 android:text="24"
                 tools:text="24" />
 

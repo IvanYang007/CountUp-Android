@@ -118,8 +118,9 @@ private fun buildZenOrbitRemoteViews(
         views.setImageViewBitmap(R.id.zen_orbit_dial, dialBitmap)
     }
 
-    // Event Tag
-    views.setTextViewText(R.id.zen_orbit_tag, state.oneWordLabel)
+    // Event Tag — supports 2-line auto-sizing wrap
+    val tagText = state.title.ifBlank { state.oneWordLabel }
+    views.setTextViewText(R.id.zen_orbit_tag, tagText)
     views.setTextColor(R.id.zen_orbit_tag, state.palette.secondaryInk)
 
     // Main Numeral

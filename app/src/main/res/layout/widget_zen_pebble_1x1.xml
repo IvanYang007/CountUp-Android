@@ -32,15 +32,15 @@
         android:gravity="center"
         android:orientation="vertical">
 
-        <!-- Bold Serene Numeral — starts at 36sp, auto-sizes down to 12sp for multi-digit counts -->
+        <!-- Bold Serene Numeral — auto-sizes between 12sp and 24sp for guaranteed cell fit -->
         <TextView
             android:id="@+id/zen_pebble_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="36sp"
+            android:textSize="24sp"
             android:autoSizeTextType="uniform"
             android:autoSizeMinTextSize="12sp"
-            android:autoSizeMaxTextSize="36sp"
+            android:autoSizeMaxTextSize="24sp"
             android:autoSizeStepGranularity="1sp"
             android:textStyle="bold"
             android:textColor="#2C2416"
@@ -56,39 +56,48 @@
             android:id="@+id/zen_pebble_unit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:textSize="10sp"
+            android:layout_marginTop="1dp"
+            android:textSize="8sp"
             android:textStyle="bold"
             android:letterSpacing="0.08"
             android:textColor="#8C7E70"
+            android:includeFontPadding="false"
             android:singleLine="true"
             android:text="@string/unit_days"
             tools:text="DAYS" />
 
-        <!-- Hairline Ink Dash — prominent and peaceful -->
+        <!-- Hairline Ink Dash — prominent and peaceful; dynamically hidden when tag is 2 lines -->
         <ImageView
             android:id="@+id/zen_pebble_dash"
-            android:layout_width="28dp"
+            android:layout_width="20dp"
             android:layout_height="1dp"
-            android:layout_marginTop="6dp"
-            android:layout_marginBottom="6dp"
+            android:layout_marginTop="3dp"
+            android:layout_marginBottom="3dp"
             android:background="#6B5D4F"
             android:contentDescription="@null" />
 
-        <!-- Subtle One-Word Tag — single-line with ellipsize to fit any cell width -->
+        <!-- Subtle Tag — supports 2 lines with auto-sizing and ellipsize to fit any cell width/height -->
         <TextView
             android:id="@+id/zen_pebble_tag"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="10sp"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:textSize="9sp"
+            android:autoSizeTextType="uniform"
+            android:autoSizeMinTextSize="6.5sp"
+            android:autoSizeMaxTextSize="9sp"
+            android:autoSizeStepGranularity="0.5sp"
             android:textStyle="bold"
             android:letterSpacing="0.06"
             android:textColor="#46664B"
-            android:singleLine="true"
+            android:lineSpacingMultiplier="0.9"
+            android:includeFontPadding="false"
+            android:gravity="center"
+            android:maxLines="2"
             android:ellipsize="end"
-            android:maxWidth="80dp"
             android:text="@string/preview_item_tag"
-            tools:text="SOBRIETY" />
+            tools:text="SOBER &amp;&#10;SERENE" />
     </LinearLayout>
 
     <!-- Empty State Overlay -->
